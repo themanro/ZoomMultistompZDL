@@ -90,9 +90,10 @@ Next ToTape9 work:
    ignored while any mute-capable slot is empty, because reload can expose
    zeroed params before an edit interaction materializes the host table. The
    incomplete-reload `ctx[6]` writeback experiment did not fix the pedal
-   report, so the current build instead uses a small object-defined init shim
-   that invokes the descriptor-selected on/off and all nine edit handlers on
-   load/reload.
+   report. A follow-up object-defined init shim that invoked the
+   descriptor-selected on/off and all nine edit handlers crashed the pedal on
+   boot, so release ToTape9 is back to a NOP init while the init-call ABI is
+   investigated separately.
 2. Test whether saved presets and preset switches preserve edited values with
    the read-only fallback path.
 3. Add a desktop comparison harness before calling ToTape9 source-equivalent.

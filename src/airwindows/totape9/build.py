@@ -61,7 +61,6 @@ def main() -> None:
         audio_nop=manifest.get("audio_nop", False),
         # Input/Tilt use LineSel's stock handlers. Shape and pages 2/3 use
         # LineSel-cloned handlers with patched knob ids/param offsets.
-        use_object_init_handler=True,
         use_object_edit_handlers=False,
         synthesize_linesel_edit_handlers=True,
         synth_edit_start_index=2,

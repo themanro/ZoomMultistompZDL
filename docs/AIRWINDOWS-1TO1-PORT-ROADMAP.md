@@ -133,8 +133,9 @@ inactive unless the host rate is ever proven different.
 ## Immediate Work Items
 
 1. Verify the page-granular read-only parameter fallback, critical-control
-   cache, tolerant on/off gate, and object-defined init shim, then document
-   whether first-touch Bias/Output and zero-output startup are fixed.
+   cache, and tolerant on/off gate, then document whether first-touch
+   Bias/Output and zero-output startup are fixed. Keep init materialization in
+   isolated probes; the first ToTape9 object-defined init shim crashed on boot.
 2. Test ToTape9 saved preset and preset-switch behavior with the read-only
    fallback path.
 3. Build an isolated tiny-DSP page 2/3 parameter probe using synthesized

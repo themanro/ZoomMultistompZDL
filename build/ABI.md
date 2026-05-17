@@ -385,11 +385,12 @@ each parameter into the runtime by invoking the per-param handlers.
 For Exciter, init at `.text+0x5c0` (per `Fx_FLT_Exciter_init` symbol)
 should follow the same pattern — invoke onf, then each edit handler.
 
-Current linker support: `LinkerConfig(use_object_init_handler=True)` uses an
+Current linker support: `LinkerConfig(use_object_init_handler=True)` can use an
 object-defined `<audio_func>_init` symbol when present and resolves calls from
 that shim to the exact on/off/edit handler VAs selected for the descriptor.
-ToTape9 uses this experimentally to test whether load/reload must materialize
-page 2/3 parameters by running the edit path once.
+Hardware caution: the ToTape9 experiment that invoked on/off plus all nine edit
+handlers from init crashed the pedal on boot, so release builds currently keep a
+NOP init until the init-call ABI is understood.
 
 ### 5.3.b Parameter table layout [hardware-confirmed through 9 params]
 

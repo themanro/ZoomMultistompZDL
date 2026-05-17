@@ -149,55 +149,7 @@ static inline float zoom_tanf(float x)
 #define TOTAPE9_DO_PRAGMA(x) _Pragma(#x)
 #define TOTAPE9_EXPAND_PRAGMA(x) TOTAPE9_DO_PRAGMA(x)
 #define TOTAPE9_CODE_SECTION(func) TOTAPE9_EXPAND_PRAGMA(CODE_SECTION(func, ".audio"))
-#define TOTAPE9_STRINGIFY_1(x) #x
-#define TOTAPE9_STRINGIFY(x) TOTAPE9_STRINGIFY_1(x)
 TOTAPE9_CODE_SECTION(TOTAPE9_AUDIO_FUNC)
-
-/*
- * Load/reload parameter materialization shim.
- *
- * Stock init handlers appear to invoke the on/off and per-knob edit handlers
- * once so the runtime parameter table is populated before audio starts. The
- * pedal currently recovers from ToTape9 reload mutes only after touching Bias
- * or Output, so this shim asks the host to run the same edit path for all nine
- * controls during init. The linker resolves these refs to the stock/cloned
- * handlers it also writes into the descriptor table.
- */
-asm("        .sect \".text\"");
-asm("        .global " TOTAPE9_STRINGIFY(TOTAPE9_AUDIO_FUNC) "_init");
-asm("        .ref " TOTAPE9_STRINGIFY(TOTAPE9_AUDIO_FUNC) "_onf");
-asm("        .ref " TOTAPE9_STRINGIFY(TOTAPE9_AUDIO_FUNC) "_Input_edit");
-asm("        .ref " TOTAPE9_STRINGIFY(TOTAPE9_AUDIO_FUNC) "_Tilt_edit");
-asm("        .ref " TOTAPE9_STRINGIFY(TOTAPE9_AUDIO_FUNC) "_Shape_edit");
-asm("        .ref " TOTAPE9_STRINGIFY(TOTAPE9_AUDIO_FUNC) "_Flutter_edit");
-asm("        .ref " TOTAPE9_STRINGIFY(TOTAPE9_AUDIO_FUNC) "_FlutSpd_edit");
-asm("        .ref " TOTAPE9_STRINGIFY(TOTAPE9_AUDIO_FUNC) "_Bias_edit");
-asm("        .ref " TOTAPE9_STRINGIFY(TOTAPE9_AUDIO_FUNC) "_HeadBmp_edit");
-asm("        .ref " TOTAPE9_STRINGIFY(TOTAPE9_AUDIO_FUNC) "_HeadFrq_edit");
-asm("        .ref " TOTAPE9_STRINGIFY(TOTAPE9_AUDIO_FUNC) "_Output_edit");
-asm(TOTAPE9_STRINGIFY(TOTAPE9_AUDIO_FUNC) "_init:");
-asm("        STW.D2T2      B3,*B15--[2]");
-asm("        STW.D2T1      A4,*B15--[2]");
-#define TOTAPE9_INIT_CALL(sym) \
-asm("        LDW.D2T1      *+B15[2],A4"); \
-asm("        NOP           4"); \
-asm("        CALLP.S2      " TOTAPE9_STRINGIFY(TOTAPE9_AUDIO_FUNC) "_" sym ",B3"); \
-asm("        NOP           5")
-TOTAPE9_INIT_CALL("onf");
-TOTAPE9_INIT_CALL("Input_edit");
-TOTAPE9_INIT_CALL("Tilt_edit");
-TOTAPE9_INIT_CALL("Shape_edit");
-TOTAPE9_INIT_CALL("Flutter_edit");
-TOTAPE9_INIT_CALL("FlutSpd_edit");
-TOTAPE9_INIT_CALL("Bias_edit");
-TOTAPE9_INIT_CALL("HeadBmp_edit");
-TOTAPE9_INIT_CALL("HeadFrq_edit");
-TOTAPE9_INIT_CALL("Output_edit");
-#undef TOTAPE9_INIT_CALL
-asm("        LDW.D2T1      *++B15[2],A4");
-asm("        LDW.D2T2      *++B15[2],B3");
-asm("        NOP           4");
-asm("        BNOP.S2       B3,5");
 
 /*
  * On the TI C674x (32-bit target) sizeof(unsigned int) == sizeof(void*) == 4,
