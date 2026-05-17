@@ -50,13 +50,13 @@ probes have now proven enough per-instance space in `ctx[3]`; use that arena
 for large state and keep `.fardata` tiny. Record the exact source parameter laws
 in the manifest and document any math substitutions.
 
-`ToTape9` is the current warning case: the full `ctx[3]` kernel builds with
-`.fardata: 0 bytes`, and `T9InitOnly` proves lazy ctx[3] init is safe. The
-current source removes runtime `__c6xabi_divf` from the derived-parameter,
-`computeHDB`, and sample-loop paths; it still needs hardware retest. Before
-deepening another 9-parameter or helper-heavy port, prove the final
+`ToTape9` is the current warning case and success case: the full `ctx[3]`
+kernel builds with `.fardata: 0 bytes`, `T9InitOnly` proves lazy ctx[3] init is
+safe, and the no-divide release build now loads and runs on the test MS-70CDR.
+Before deepening another 9-parameter or helper-heavy port, prove the final
 UI/descriptor/edit-handler shape with audio-NOP and tiny DSP builds, then add
-DSP helpers only in isolated increments.
+DSP helpers only in isolated increments. For ToTape9 specifically, keep
+watching parameter-default and preset lifecycle behavior.
 
 Any beta core that is not source DSP is only for ABI probing. It must not be
 described as a finished Airwindows port unless it runs the source algorithm.

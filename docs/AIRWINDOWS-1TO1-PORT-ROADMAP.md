@@ -7,11 +7,9 @@ Airwindows ports.
 
 Current status update: `ctx[3]` is no longer just a lead. Hardware probes, the
 working `StereoChorus` release, and `T9InitOnly` show it is a usable
-per-instance descriptor arena for large state. The next blocker is more
-specific: `ToTape9` reached the post-init DSP path, then crashed in the
-helper-heavy derived-parameter/`computeHDB` math before the 8-sample loop. The
-current source removes runtime `__c6xabi_divf` from that path and needs hardware
-retest.
+per-instance descriptor arena for large state. The no-divide full `ToTape9`
+kernel now loads and runs on the test MS-70CDR. The next blockers are
+parameter/default lifecycle behavior and source-equivalence measurement.
 
 ## What the TI PDFs Tell Us
 
@@ -134,15 +132,17 @@ inactive unless the host rate is ever proven different.
 
 ## Immediate Work Items
 
-1. Hardware-test the current no-divide `ToTape9.ZDL`, then use the rebuilt
-   no-divide `T9DspNoLoop.ZDL` only if the full build still freezes.
-2. Build an isolated tiny-DSP page 2/3 parameter probe using synthesized
+1. Verify the Drive-category `ToTape9.ZDL` after default seeding and document
+   whether first-touch knob jumps are fixed.
+2. Test ToTape9 saved preset and preset-switch behavior so the default seed does
+   not become a hidden value-reset bug.
+3. Build an isolated tiny-DSP page 2/3 parameter probe using synthesized
    LineSel-cloned edit handlers, so `params[7..13]` updates are proven
    separately from the ToTape9 kernel.
-3. Add a desktop equivalence harness before calling ToTape9 1:1.
-4. Continue mapping `ctx[2]`, `ctx[13]`, and `ctx[14]` from stock delay,
+4. Add a desktop equivalence harness before calling ToTape9 1:1.
+5. Continue mapping `ctx[2]`, `ctx[13]`, and `ctx[14]` from stock delay,
    modulation, and tape effects.
-5. Record every hardware result in `docs/STATE-ABI-PROGRESS.md` before moving
+6. Record every hardware result in `docs/STATE-ABI-PROGRESS.md` before moving
    the claim into release docs.
 
 ## Stop Conditions

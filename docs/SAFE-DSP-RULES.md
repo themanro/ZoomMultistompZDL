@@ -56,10 +56,10 @@ experiment, not a port.
 * Small statics compiled into `.bss` or B14/SBR-relative addressing.
 * New external `__c6xabi_*` helpers beyond the tiny set already handled by
   the linker.
-* Helper-heavy DSP paths in the first executable build. The previous `ToTape9`
-  cleared ctx[3] lazy init but froze in the derived-parameter/`computeHDB` path
-  before the 8-sample loop; the current no-divide build is awaiting hardware
-  retest.
+* Helper-heavy DSP paths in the first executable build. `ToTape9` cleared
+  ctx[3] lazy init but froze in the old derived-parameter/`computeHDB` path
+  before the 8-sample loop; the no-divide full build is the version that
+  hardware-reported as running.
 * Object-defined C/asm `ZOOM_EDIT_HANDLER` symbols for multi-page UIs.
   `T9NoAudio` loads with the DSP NOPed, then freezes on knob/page interaction.
 * Stock edit-handler blobs whose internal references were not cloned or

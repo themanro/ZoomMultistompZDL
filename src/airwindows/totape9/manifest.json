@@ -1,11 +1,11 @@
 {
   "effect_name": "ToTape9",
-  "comment": "EXPERIMENTAL ctx[3]-backed Airwindows ToTape9 full-kernel probe. Persistent state is host-allocated, but math-helper and float32 differences still need hardware and numerical validation.",
+  "comment": "Hardware-loading ctx[3]-backed Airwindows ToTape9 full-kernel probe. Persistent state is host-allocated; float32/helper approximations and numerical validation still need work.",
 
-  "audio_func_name": "Fx_FLT_ToTape9",
+  "audio_func_name": "Fx_DRV_ToTape9",
 
-  "gid": 2,
-  "gid_comment": "0x02 = Filter category. Same bucket as the other Airwindows test ports.",
+  "gid": 3,
+  "gid_comment": "0x03 = Drive category. ToTape9 is a tape/drive effect and now hardware-loads cleanly.",
 
   "fxid": 403,
   "fxid_comment": "0x0193, adjacent to GAIN/PurestDr/TapeHack.",

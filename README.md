@@ -61,9 +61,9 @@ effect directory conventions are summarized in
 
 - Only the Zoom MS-70CDR firmware 2.10 has been tested seriously so far.
 - Experimental builds can freeze or crash the pedal until it is power-cycled.
-- `ToTape9.ZDL` is still experimental. The latest source removes runtime
-  `__c6xabi_divf` from the full DSP path after the previous hardware split
-  cleared ctx[3] lazy init as the crash cause.
+- `ToTape9.ZDL` now loads and runs on the test MS-70CDR after removing runtime
+  `__c6xabi_divf` from the full DSP path. It is still under validation for
+  parameter initialization, preset behavior, and source-equivalent exactness.
 - Parameter scaling is part of the porting work. A port should not be called
   source-equivalent until its raw knob ranges have been confirmed on hardware.
 - These are `.ZDL` builds, not `.ZD2` builds.
@@ -139,10 +139,10 @@ The core pieces are:
 | [stock_zdls/](stock_zdls/) | Tracked 830-file stock ZDL corpus used for comparison. |
 
 The important recent finding is that custom effects can use the host-managed
-large state descriptor at `ctx[3]`. That is what made the stateful
-`StereoChorus` port possible, and `T9InitOnly` confirms the same lazy-init
-pattern for ToTape9. `ToTape9` is now testing the next boundary: making a much
-larger tape kernel run without fragile runtime helper or edit-handler paths.
+large state descriptor at `ctx[3]`. That made the stateful `StereoChorus` port
+possible, and the no-divide `ToTape9` full-kernel build now also loads and runs
+on the test MS-70CDR. The next ToTape9 work is parameter/default lifecycle
+validation and source-equivalence testing.
 
 Known runtime map for custom ZDLs:
 

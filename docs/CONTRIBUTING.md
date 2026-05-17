@@ -2,11 +2,10 @@
 
 ## What this repo most needs (in priority order)
 
-1. **ToTape9 no-divide hardware results.** The previous full-kernel
-   `ToTape9.ZDL` crashed on load on the test MS-70CDR, but `T9InitOnly` proves
-   ctx[3] lazy init is safe and `T9NoState` proves a simple DSP path can run.
-   The current build removes runtime `__c6xabi_divf`; the most useful report is
-   whether it now loads, and if not, whether the rebuilt `T9DspNoLoop` loads.
+1. **ToTape9 lifecycle reports.** The no-divide full-kernel `ToTape9.ZDL` now
+   loads and runs on the test MS-70CDR. The most useful reports are whether the
+   initial knob/value jumps are fixed, whether edited values survive preset
+   switching, and whether any parameter still behaves with the wrong range.
 
 2. **Hardware results for page 2/3 parameter handlers.** The linker can now
    synthesize LineSel-cloned edit handlers for knobs 3..9, but this area still

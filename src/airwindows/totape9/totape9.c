@@ -50,7 +50,6 @@
 /* #include <math.h>  -- replaced with inline implementations below */
 #include <stdint.h>
 
-#include "../common/zoom_edit_handlers.h"
 #include "../common/zoom_params.h"
 #include "totape9_params.h"
 
@@ -60,18 +59,8 @@
 #endif
 
 #ifndef TOTAPE9_AUDIO_FUNC
-#define TOTAPE9_AUDIO_FUNC Fx_FLT_ToTape9
+#define TOTAPE9_AUDIO_FUNC Fx_DRV_ToTape9
 #endif
-
-ZOOM_EDIT_HANDLER(Fx_FLT_ToTape9_Input_edit,   2, 20);
-ZOOM_EDIT_HANDLER(Fx_FLT_ToTape9_Tilt_edit,    3, 24);
-ZOOM_EDIT_HANDLER(Fx_FLT_ToTape9_Shape_edit,   4, 28);
-ZOOM_EDIT_HANDLER(Fx_FLT_ToTape9_Flutter_edit, 5, 32);
-ZOOM_EDIT_HANDLER(Fx_FLT_ToTape9_FlutSpd_edit, 6, 36);
-ZOOM_EDIT_HANDLER(Fx_FLT_ToTape9_Bias_edit,    7, 40);
-ZOOM_EDIT_HANDLER(Fx_FLT_ToTape9_HeadBmp_edit, 8, 44);
-ZOOM_EDIT_HANDLER(Fx_FLT_ToTape9_HeadFrq_edit, 9, 48);
-ZOOM_EDIT_HANDLER(Fx_FLT_ToTape9_Output_edit, 10, 52);
 
 #if TOTAPE9_FULL_DSP
 /* =========================================================================
@@ -181,7 +170,7 @@ TOTAPE9_CODE_SECTION(TOTAPE9_AUDIO_FUNC)
 #define KNOB_NORM    (1.0f / 0.14f)
 
 #define TOTAPE9_MAGIC 0x54395039u
-#define TOTAPE9_VERSION 1u
+#define TOTAPE9_VERSION 2u
 
 /* -------------------------------------------------------------------------
  * gslew layout: 9 stages × 3 words = [prevL, prevR, threshold]  (27 words)
@@ -215,6 +204,7 @@ typedef struct ToTape9State {
     uint32_t version;
     uint32_t initialized;
     uint32_t clearIndex;
+    uint32_t paramsInitialized;
 
     float iirEncL, iirEncR;
     float compEncL, compEncR;
@@ -275,12 +265,13 @@ static inline void start_lazy_init(ToTape9State *st)
     st->magic = TOTAPE9_MAGIC;
     st->version = TOTAPE9_VERSION;
     st->initialized = 0u;
-    st->clearIndex = 16u;  /* skip the four header words just written */
+    st->clearIndex = 20u;  /* skip the five header words just written */
+    st->paramsInitialized = 0u;
 }
 
 static inline void clear_state_chunk(ToTape9State *st)
 {
-    /* Word-aligned stores. clearIndex starts at 16 and advances by
+    /* Word-aligned stores. clearIndex starts after the header words and advances by
      * TOTAPE9_CLEAR_STEP (both multiples of 4), so the cast is safe.
      * Stock effects use word stores, and cl6x emits cleaner pipelined
      * STW for this form than for byte-clearing a large state struct. */
@@ -305,8 +296,30 @@ static inline void clear_state_chunk(ToTape9State *st)
         st->nextmaxR = 0.5f;
         st->fpdL = 0x1234567u;
         st->fpdR = 0x89ABCDFu;
+        st->paramsInitialized = 0u;
         st->initialized = 1u;
     }
+}
+
+static inline void seed_totape9_param_defaults(float *params, ToTape9State *st)
+{
+    if (st->paramsInitialized) return;
+
+    /* The linker currently gives custom effects a NOP init handler, so the
+     * descriptor defaults can be visible in the UI before params[5..13] have
+     * useful audio-side values. Seed source defaults once, after ctx[3] state
+     * init, then let edit handlers own these slots. */
+    params[4] = 0.01f;
+    params[TOTAPE9_INPUT_SLOT]   = TOTAPE9_INPUT_DEFAULT_NORM;
+    params[TOTAPE9_TILT_SLOT]    = TOTAPE9_TILT_DEFAULT_NORM;
+    params[TOTAPE9_SHAPE_SLOT]   = TOTAPE9_SHAPE_DEFAULT_NORM;
+    params[TOTAPE9_FLUTTER_SLOT] = TOTAPE9_FLUTTER_DEFAULT_NORM;
+    params[TOTAPE9_FLUTSPD_SLOT] = TOTAPE9_FLUTSPD_DEFAULT_NORM;
+    params[TOTAPE9_BIAS_SLOT]    = TOTAPE9_BIAS_DEFAULT_NORM;
+    params[TOTAPE9_HEADBMP_SLOT] = TOTAPE9_HEADBMP_DEFAULT_NORM;
+    params[TOTAPE9_HEADFRQ_SLOT] = TOTAPE9_HEADFRQ_DEFAULT_NORM;
+    params[TOTAPE9_OUTPUT_SLOT]  = TOTAPE9_OUTPUT_DEFAULT_NORM;
+    st->paramsInitialized = 1u;
 }
 
 #define iirEncL (st->iirEncL)
@@ -559,6 +572,8 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
      * the freeze is in the DSP body, not the lazy clear. */
     return;
 #endif
+
+    seed_totape9_param_defaults(params, st);
 
     float pInput   = totape9_param_norm(params[TOTAPE9_INPUT_SLOT],   TOTAPE9_INPUT_DEFAULT_NORM);
     float pTilt    = totape9_param_norm(params[TOTAPE9_TILT_SLOT],    TOTAPE9_TILT_DEFAULT_NORM);

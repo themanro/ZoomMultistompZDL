@@ -28,7 +28,7 @@ Required files:
 - `manifest.json`: effect name, category, fxid, version, and 1-9 params.
 - `build.py`: compiles the C file with TI `cl6x`, then calls
   `build/linker.py`.
-- `<effect>.c`: exports `Fx_FLT_<Name>` in `.audio`.
+- `<effect>.c`: exports the manifest's `audio_func_name` in `.audio`.
 
 Manifest params can describe more than plain `0..100` knobs:
 
@@ -77,7 +77,7 @@ those controls to a full kernel.
 Keep writable `.fardata` tiny. The linker rejects large writable images by
 default because big static state has frozen real pedals during load. For large
 stateful ports, use the proven `ctx[3]` descriptor arena and validate the
-descriptor before touching memory. `StereoChorus` and `T9InitOnly` prove this
-can work. `ToTape9` is now a no-divide full-kernel retest candidate, so new
-full-kernel ports still need the same load-safety ladder: audio-NOP with the
-final UI shape, tiny pass-through DSP, then helper-free DSP increments.
+descriptor before touching memory. `StereoChorus`, `T9InitOnly`, and the
+current no-divide `ToTape9` build prove this can work. New full-kernel ports
+still need the same load-safety ladder: audio-NOP with the final UI shape, tiny
+pass-through DSP, then helper-free DSP increments.

@@ -89,10 +89,9 @@ uses a `ToTape9State` struct in `ctx[3]` instead of the old stateless
 approximation, keeps `.fardata` at 0 bytes, and exposes all 9 Airwindows
 parameters.
 
-Hardware result: the previous `dist/ToTape9.ZDL` crashed on load on the test
-MS-70CDR. The split is now narrower: `T9InitOnly` proves the ctx[3] lazy state
-init completes cleanly, the old `T9DspNoLoop` froze before the 8-sample loop,
-and `T9NoState` loads with a simple approximation. The current source rewrites
-the helper-heavy math to remove runtime `__c6xabi_divf`, but it still needs a
-fresh hardware retest before `ToTape9` can be described as anything more than a
-full-kernel probe.
+Hardware result: the no-divide `dist/ToTape9.ZDL` now loads and runs on the
+test MS-70CDR. Earlier splits still matter: `T9InitOnly` proved ctx[3] lazy
+state init, old helper-heavy `T9DspNoLoop` froze before the 8-sample loop, and
+`T9NoState` proved a helper-light DSP path could run. The current open work is
+parameter/default lifecycle validation, preset behavior, and a desktop
+equivalence harness before describing ToTape9 as source-equivalent.

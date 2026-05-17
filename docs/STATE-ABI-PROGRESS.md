@@ -19,11 +19,10 @@ probe-by-probe chronology is preserved in git history through commit
 * `StereoChorus` is the best state reference: it uses `ctx[3]`, lazy clears its
   large buffers, and the current release was reported to sound like Airwindows
   `StereoChorus`.
-* ToTape9's load crash is not a ctx[3] lazy-init failure. `T9InitOnly`
-  clears/finalizes the default state and loads cleanly. The previous blocker
-  was helper-heavy DSP math before the 8-sample processing loop; the current
-  source removes runtime `__c6xabi_divf` from that path and needs hardware
-  retest.
+* ToTape9's load crash was not a ctx[3] lazy-init failure. `T9InitOnly`
+  clears/finalizes the default state and loads cleanly. Removing runtime
+  `__c6xabi_divf` from the full DSP path produced a hardware-reported working
+  `dist/ToTape9.ZDL`; current follow-up is parameter/default lifecycle testing.
 * The C/asm `ZOOM_EDIT_HANDLER` macro is not a safe release path for multi-page
   controls. `T9NoAudio` loads with DSP NOPed, then freezes on knob/page
   interaction.
@@ -61,6 +60,7 @@ Audio buffers are float32. The observed stock/custom-safe pattern processes
 | `StChorus` | Large stateful Airwindows-style effect can run from `ctx[3]`. |
 | `T9InitOnly` | ToTape9-sized lazy state init/clear is load-safe. |
 | `T9NoState` | A simple ToTape9-shaped DSP path can run; Input audibly changes gain. |
+| `ToTape9` | No-divide full DSP loads and runs on the test MS-70CDR. |
 
 ## ToTape9 Split Status
 
@@ -71,17 +71,20 @@ Audio buffers are float32. The observed stock/custom-safe pattern processes
 | `T9NoHand` | freezes on load | full DSP path is unsafe. |
 | `T9NoInit` | loads | returning before state init is safe, but DSP never enters. |
 | `T9InitOnly` | loads | lazy ctx[3] init/clear/finalization is safe. |
-| `T9DspNoLoop` | old build froze; current no-divide build untested | parameter derivation / `computeHDB` now builds without `__c6xabi_divf`. |
+| `T9DspNoLoop` | old build froze; current no-divide split no longer the priority | parameter derivation / `computeHDB` builds without `__c6xabi_divf`. |
 | `T9NoState` | loads | helper-light scalar DSP path is viable. |
+| `ToTape9` | loads and runs | full ctx[3]-backed no-divide DSP is viable enough for listening/exactness work. |
 
 Next ToTape9 work:
 
-1. Hardware-test the current no-divide `dist/ToTape9.ZDL`.
-2. If the full build still freezes, flash the rebuilt no-divide
-   `T9DspNoLoop.ZDL` to separate remaining derived-param/`computeHDB` risk from
-   the 8-sample loop.
-3. Separately build a tiny-DSP page 2/3 parameter probe using synthesized
-   LineSel-cloned handlers to prove `params[7..13]` updates.
+1. Verify the Drive-category `dist/ToTape9.ZDL` after the one-shot parameter
+   default seeding change.
+2. Test whether saved presets and preset switches preserve edited values or get
+   overwritten by the audio-side default seed.
+3. Add a desktop comparison harness before calling ToTape9 source-equivalent.
+4. Separately build a tiny-DSP page 2/3 parameter probe using synthesized
+   LineSel-cloned handlers to prove `params[7..13]` updates independently from
+   the tape kernel.
 
 ## Edit-Handler ABI Status
 
