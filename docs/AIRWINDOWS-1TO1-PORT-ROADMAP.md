@@ -8,8 +8,10 @@ Airwindows ports.
 Current status update: `ctx[3]` is no longer just a lead. Hardware probes, the
 working `StereoChorus` release, and `T9InitOnly` show it is a usable
 per-instance descriptor arena for large state. The no-divide full `ToTape9`
-kernel now loads and runs on the test MS-70CDR. The next blockers are
-parameter/default lifecycle behavior and source-equivalence measurement.
+kernel now loads and runs on the test MS-70CDR. `VerbTiny` is now the first
+reverb-sized candidate built on the same strategy. The next blockers are
+parameter/default lifecycle behavior, hardware reload behavior, and
+source-equivalence measurement.
 
 ## What the TI PDFs Tell Us
 
@@ -142,9 +144,11 @@ inactive unless the host rate is ever proven different.
    LineSel-cloned edit handlers, so `params[7..13]` updates are proven
    separately from the ToTape9 kernel.
 4. Add a desktop equivalence harness before calling ToTape9 1:1.
-5. Continue mapping `ctx[2]`, `ctx[13]`, and `ctx[14]` from stock delay,
+5. Hardware-test `VerbTiny.ZDL` for load, unbypass, page 2 controls, reload,
+   and duplicate-instance state isolation.
+6. Continue mapping `ctx[2]`, `ctx[13]`, and `ctx[14]` from stock delay,
    modulation, and tape effects.
-6. Record every hardware result in `docs/STATE-ABI-PROGRESS.md` before moving
+7. Record every hardware result in `docs/STATE-ABI-PROGRESS.md` before moving
    the claim into release docs.
 
 ## Stop Conditions

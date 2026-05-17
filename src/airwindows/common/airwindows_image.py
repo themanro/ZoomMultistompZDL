@@ -127,3 +127,37 @@ def make_airwindows_totape_screen() -> bytes:
     c.hline(92, 118, 42)
 
     return encode_zoom_rle(c)
+
+
+def make_airwindows_reverb_screen(name: str = "VerbTiny") -> bytes:
+    """Shared Airwindows reverb bitmap with three visible paged knob wells."""
+    c = Canvas()
+
+    c.rect(0, 0, 127, 63)
+    c.draw_text("VERB", 6, 5, scale=2, spacing=1)
+    c.draw_text("TINY", 53, 5, scale=2, spacing=1)
+    c.draw_text("AIRWINDOWS", 84, 7, scale=1, spacing=1)
+
+    c.hline(5, 122, 21)
+    for x in range(9, 119, 11):
+        c.vline(x, 25, 35)
+        c.px(x + 1, 24)
+        c.px(x + 2, 23)
+        c.px(x + 3, 24)
+        c.px(x + 4, 25)
+    _draw_wave(c, 8, 119, 31, 4.0, 3.25, 0.0)
+    _draw_wave(c, 8, 119, 32, 2.0, 5.0, 1.57079632679)
+
+    c.draw_text(name[:8].upper(), 40, 24, scale=1, spacing=1)
+    c.draw_text("REPL", 11, 38, scale=1, spacing=1)
+    c.draw_text("DEREZ", 52, 38, scale=1, spacing=1)
+    c.draw_text("FILT", 96, 38, scale=1, spacing=1)
+
+    c.rect(7, 45, 39, 61)
+    c.rect(48, 45, 80, 61)
+    c.rect(89, 45, 121, 61)
+    c.hline(10, 36, 42)
+    c.hline(51, 77, 42)
+    c.hline(92, 118, 42)
+
+    return encode_zoom_rle(c)

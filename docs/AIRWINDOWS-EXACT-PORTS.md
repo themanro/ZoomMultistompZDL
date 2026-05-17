@@ -95,3 +95,16 @@ state init, old helper-heavy `T9DspNoLoop` froze before the 8-sample loop, and
 `T9NoState` proved a helper-light DSP path could run. The current open work is
 parameter/default lifecycle validation, preset behavior, and a desktop
 equivalence harness before describing ToTape9 as source-equivalent.
+
+## VerbTiny Specific Finding
+
+`VerbTiny` is the first reverb candidate in this repo. The current source uses
+the Airwindows `VerbTiny` delay constants, five source parameters, matrix
+feedback topology, and bezier reconstruction/filter stages, with state stored
+in `ctx[3]` instead of source C++ member arrays. To keep the C674x build
+load-safe, the float dither tail is omitted and the delay memory is laid out as
+larger rectangular arrays rather than many individually sized arrays.
+
+Hardware result: pending. Do not describe `VerbTiny.ZDL` as source-equivalent
+until it has survived load/unbypass/parameter/reload tests and a desktop
+comparison harness exists.

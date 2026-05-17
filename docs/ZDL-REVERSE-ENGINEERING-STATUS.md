@@ -26,6 +26,8 @@ What is still experimental:
 * `dist/ToTape9.ZDL` is not a finished port, but the no-divide full DSP now
   loads and runs on the test MS-70CDR. Current validation work is parameter
   initialization, preset behavior, and source-equivalence testing.
+* `dist/VerbTiny.ZDL` is the first reverb candidate. It builds with `ctx[3]`
+  state, no `.fardata`, and no object relocations; hardware result is pending.
 * Multi-page parameter editing is not a clean SDK contract yet. Stock LineSel
   handlers are useful for the first two knobs; object-defined
   `ZOOM_EDIT_HANDLER` freezes on interaction in `T9NoAudio`; synthesized
@@ -115,7 +117,8 @@ A build is not a 1:1 Airwindows port until all of these are true:
 
 `StereoChorus` is the best current reference. `ToTape9` shows the next boundary:
 state and helper-light DSP can run, but source-equivalent claims still need
-parameter lifecycle tests and a desktop comparison harness.
+parameter lifecycle tests and a desktop comparison harness. `VerbTiny` starts
+the same process for reverb-sized state.
 
 ## Highest-Priority Open Questions
 
@@ -123,6 +126,8 @@ parameter lifecycle tests and a desktop comparison harness.
   critical controls, and tolerant on/off gate stop first-touch Bias/Output and
   zero-output startup issues? The first object-defined init shim crashed on
   boot, so init materialization needs a smaller isolated probe.
+* Does the new `VerbTiny` reverb candidate load and pass audio on the test
+  MS-70CDR, and do synthesized page 2 controls survive interaction?
 * Do synthesized LineSel-cloned page 2/3 edit handlers update `params[7..13]`
   correctly in an isolated tiny-DSP probe?
 * What declares stock-style stereo routing for custom effects?

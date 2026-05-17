@@ -23,6 +23,8 @@ probe-by-probe chronology is preserved in git history through commit
   clears/finalizes the default state and loads cleanly. Removing runtime
   `__c6xabi_divf` from the full DSP path produced a hardware-reported working
   `dist/ToTape9.ZDL`; current follow-up is parameter/default lifecycle testing.
+  Known unresolved bug: reloading/browsing back to ToTape9 can mute audio until
+  Bias or Output is touched.
 * The C/asm `ZOOM_EDIT_HANDLER` macro is not a safe release path for multi-page
   controls. `T9NoAudio` loads with DSP NOPed, then freezes on knob/page
   interaction.
@@ -64,6 +66,7 @@ Audio buffers are float32. The observed stock/custom-safe pattern processes
 | `T9InitOnly` | ToTape9-sized lazy state init/clear is load-safe. |
 | `T9NoState` | A simple ToTape9-shaped DSP path can run; Input audibly changes gain. |
 | `ToTape9` | No-divide full DSP loads and runs on the test MS-70CDR. |
+| `VerbTiny` | First Airwindows reverb candidate; builds with ctx[3] state, no `.fardata`, and no object relocations. Hardware result pending. |
 
 ## ToTape9 Split Status
 
@@ -100,6 +103,20 @@ Next ToTape9 work:
 4. Separately build a tiny-DSP page 2/3 parameter probe using synthesized
    LineSel-cloned handlers to prove `params[7..13]` updates independently from
    the tape kernel.
+
+## VerbTiny Reverb Port Status
+
+`VerbTiny` was chosen as the first reverb target because its Airwindows delay
+network is much smaller than the older `Reverb`/plate families. The current
+Zoom port keeps the VerbTiny delay constants, five source parameters, matrix
+feedback structure, and bezier undersampling/filter reconstruction, but stores
+the network in a rectangular `ctx[3]` state layout rather than source C++
+member arrays. The Airwindows float dither tail is omitted like the other Zoom
+ports.
+
+Hardware status: untested. First test should be basic load, unbypass, page 2
+parameter interaction (`Wider`, `DryWet`), reload, and duplicate-instance
+behavior.
 
 ## Edit-Handler ABI Status
 
