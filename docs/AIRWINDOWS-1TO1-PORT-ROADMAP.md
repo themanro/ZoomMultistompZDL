@@ -133,8 +133,8 @@ inactive unless the host rate is ever proven different.
 ## Immediate Work Items
 
 1. Verify the page-granular read-only parameter fallback, critical-control
-   cache, and tolerant on/off gate, then document whether first-touch
-   Bias/Output and zero-output startup are fixed.
+   cache, tolerant on/off gate, and incomplete-reload `ctx[6]` writeback, then
+   document whether first-touch Bias/Output and zero-output startup are fixed.
 2. Test ToTape9 saved preset and preset-switch behavior with the read-only
    fallback path.
 3. Build an isolated tiny-DSP page 2/3 parameter probe using synthesized

@@ -88,7 +88,10 @@ Next ToTape9 work:
    update those caches; empty/zero reload reads use the cached/default value so
    an unmaterialized slot cannot mute the effect. The audio on/off gate is also
    ignored while any mute-capable slot is empty, because reload can expose
-   zeroed params before an edit interaction materializes the host table.
+   zeroed params before an edit interaction materializes the host table. While
+   that same incomplete-reload condition is present, ToTape9 also adds the
+   processed block to `ctx[6]` to test whether the host has not reconnected the
+   normal in-place `ctx[5]` route yet.
 2. Test whether saved presets and preset switches preserve edited values with
    the read-only fallback path.
 3. Add a desktop comparison harness before calling ToTape9 source-equivalent.

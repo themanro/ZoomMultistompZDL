@@ -120,8 +120,8 @@ parameter lifecycle tests and a desktop comparison harness.
 ## Highest-Priority Open Questions
 
 * Does the current ToTape9 page-granular read-only parameter fallback, cached
-  critical controls, and tolerant on/off gate stop first-touch Bias/Output and
-  zero-output startup issues without fighting saved pedal values?
+  critical controls, tolerant on/off gate, and incomplete-reload `ctx[6]`
+  writeback stop first-touch Bias/Output and zero-output startup issues?
 * Do synthesized LineSel-cloned page 2/3 edit handlers update `params[7..13]`
   correctly in an isolated tiny-DSP probe?
 * What declares stock-style stereo routing for custom effects?

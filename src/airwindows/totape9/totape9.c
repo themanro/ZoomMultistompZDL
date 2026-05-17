@@ -539,6 +539,7 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
     /* --- Decode context structure --- */
     float *params = ZDL_PTR(float *, ctx[1]);
     float *fxBuf = ZDL_PTR(float *, ctx[5]);  /* L:[0..7] R:[8..15] */
+    float *outBuf = ZDL_PTR(float *, ctx[6]);
 
     /* Magic pass-through (bookkeeping value the firmware expects) */
     unsigned int *magicDst = ZDL_PTR(unsigned int *, *(unsigned int *)ZDL_PTR(unsigned int *, ctx[11]));
@@ -1008,6 +1009,10 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
          * ============================================================= */
         fxL[i] = sL;
         fxR[i] = sR;
+        if (criticalEmpty) {
+            outBuf[i] += sL;
+            outBuf[i + 8] += sR;
+        }
     }
     /* (no return value; jump to B3 handled by compiler epilogue) */
 #endif
