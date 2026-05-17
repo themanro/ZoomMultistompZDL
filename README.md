@@ -76,7 +76,7 @@ Start here if you want more than the download folder:
 |---|---|
 | [docs/INSTALLING-ZDLS.md](docs/INSTALLING-ZDLS.md) | Step-by-step Zoom Effect Manager folder install. |
 | [docs/ZDL-REVERSE-ENGINEERING-STATUS.md](docs/ZDL-REVERSE-ENGINEERING-STATUS.md) | Current map of the ZDL wrapper, runtime ABI, and known state fields. |
-| [docs/STATE-ABI-PROGRESS.md](docs/STATE-ABI-PROGRESS.md) | Hardware probe log and findings we do not want to lose. |
+| [docs/STATE-ABI-PROGRESS.md](docs/STATE-ABI-PROGRESS.md) | Compact current map of hardware-proven state/edit-handler findings. |
 | [docs/AIRWINDOWS-1TO1-PORT-ROADMAP.md](docs/AIRWINDOWS-1TO1-PORT-ROADMAP.md) | Roadmap for making honest source-equivalent Airwindows ports. |
 | [docs/AIRWINDOWS-EXACT-PORTS.md](docs/AIRWINDOWS-EXACT-PORTS.md) | Rules for what can and cannot be called a 1:1 Airwindows port. |
 | [docs/SAFE-DSP-RULES.md](docs/SAFE-DSP-RULES.md) | Pedal-safe DSP/linking constraints learned from hardware failures. |
@@ -168,7 +168,7 @@ parameter scaling was confirmed.
 ZoomMultistompZDL/
 ├── README.md
 ├── build/                 linker, ELF/ZDL helpers, stock-derived handler blobs
-├── docs/                  install notes, ABI status, hardware probe logs
+├── docs/                  install notes, ABI status, and porting guidance
 ├── dist/                  release ZDLs to load in Zoom Effect Manager
 ├── src/hardware_probes/       diagnostic ZDLs for runtime ABI experiments
 ├── src/airwindows/        effect sources, manifests, and build scripts
