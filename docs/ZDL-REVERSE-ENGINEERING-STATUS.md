@@ -31,6 +31,10 @@ What is still experimental:
 * `dist/Galactic.ZDL` is a larger reverb candidate. It builds with about
   528 KB of `ctx[3]` state, no `.fardata`, and no object relocations; hardware
   result is pending.
+* `dist/TapeEcho4.ZDL` is a custom Airwindows-inspired Delay-category tape
+  echo. It builds with a bounded `ctx[3]` stereo delay line, no `.fardata`, no
+  object relocations, and a BPM+division tempo workflow. Hardware result is
+  pending; true host tap-tempo plumbing for custom ZDLs is still unresolved.
 * `src/airwindows/tovinyl4/` is a source-only ToVinyl4 candidate. It builds
   manually or via `build_all.py tovinyl4`, but is not in release `dist/` until
   hardware testing says it should be.
@@ -141,6 +145,8 @@ parameter lifecycle tests and a desktop comparison harness. `VerbTiny` and
 * Do synthesized LineSel-cloned page 2/3 edit handlers update `params[7..13]`
   correctly in an isolated tiny-DSP probe?
 * What declares stock-style stereo routing for custom effects?
+* Do stock tempo/tap-tempo descriptor flags work for custom effects beyond UI
+  presentation?
 * What are the lifecycle rules for ctx state during bypass, preset switch,
   reload, and duplicate instances?
 * What exactly are `ctx[11]` and `ctx[12]`, and how dangerous is skipping the

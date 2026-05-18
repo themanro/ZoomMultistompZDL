@@ -72,6 +72,11 @@ effect directory conventions are summarized in
 - `Galactic.ZDL` is a larger Airwindows reverb candidate. It builds cleanly
   with about 528 KB of `ctx[3]` state and no object relocations, but it has not
   been hardware-tested yet.
+- `TapeEcho4.ZDL` is a custom Airwindows-inspired tape echo, not a 1:1
+  Airwindows port. It builds as a Delay-category effect with `ctx[3]` delay
+  memory, TapeHack-style saturation, feedback bandwidth limiting, wow/flutter,
+  and a BPM+division tempo workflow. Hardware result is pending; true host tap
+  tempo for custom ZDLs is still unproven.
 - On MS-70CDR, Drive-category custom effects may not appear in the on-device FX
   browser unless at least one stock Drive effect is also installed. `ToTape9`
   is intentionally categorized as Drive, so install a stock Drive effect too if
@@ -124,6 +129,7 @@ Build one effect:
 
 ```bash
 python3 -B build_all.py stereochorus
+python3 -B build_all.py tapeecho4
 python3 -B build_all.py totape9
 python3 -B build_all.py verbtiny
 ```
@@ -155,7 +161,8 @@ The important recent finding is that custom effects can use the host-managed
 large state descriptor at `ctx[3]`. That made the stateful `StereoChorus` port
 possible, and the no-divide `ToTape9` full-kernel build now also loads and runs
 on the test MS-70CDR. `VerbTiny` and `Galactic` are reverb candidates using the
-same large-state strategy. The next ToTape9 work is parameter/default lifecycle
+same large-state strategy. `TapeEcho4` uses that same safe state pattern for a
+custom tape-delay design. The next ToTape9 work is parameter/default lifecycle
 validation and source-equivalence testing.
 
 Known runtime map for custom ZDLs:

@@ -26,6 +26,7 @@ RELEASE_PLUGINS = [
     ("gain",        PLUGIN_DIR / "gain"        / "build.py"),
     ("purestdrive", PLUGIN_DIR / "purestdrive" / "build.py"),
     ("tapehack",    PLUGIN_DIR / "tapehack"    / "build.py"),
+    ("tapeecho4",   PLUGIN_DIR / "tapeecho4"   / "build.py"),
     ("totape9",     PLUGIN_DIR / "totape9"     / "build.py"),
     ("stereochorus", PLUGIN_DIR / "stereochorus" / "build.py"),
     ("verbtiny",    PLUGIN_DIR / "verbtiny"    / "build.py"),

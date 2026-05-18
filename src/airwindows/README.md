@@ -15,6 +15,10 @@ manifest and comments. `StChorus` is now the first hardware-confirmed
 `ctx[3]`-backed `StereoChorus` port; keep documenting remaining numerical
 differences before calling it bit-for-bit equivalent.
 
+Custom Airwindows-inspired designs are allowed when they are labelled as such.
+`tapeecho4/` follows this path: it is a new tape echo using Airwindows tape
+techniques, not a source-equivalent Airwindows plugin port.
+
 Hardware-only ABI probes live in [../hardware_probes/](../hardware_probes/),
 not in this Airwindows source tree. Their findings belong in
 [../../docs/STATE-ABI-PROGRESS.md](../../docs/STATE-ABI-PROGRESS.md) before
@@ -79,6 +83,7 @@ default because big static state has frozen real pedals during load. For large
 stateful ports, use the proven `ctx[3]` descriptor arena and validate the
 descriptor before touching memory. `StereoChorus`, `T9InitOnly`, and the
 current no-divide `ToTape9` build prove this can work; `VerbTiny` and
-`Galactic` are reverb-sized candidates using the same strategy. New full-kernel ports still
-need the same load-safety ladder: audio-NOP with the final UI shape, tiny
+`Galactic` are reverb-sized candidates using the same strategy. `TapeEcho4`
+uses the same pattern for a 64k-sample stereo delay line. New full-kernel ports
+still need the same load-safety ladder: audio-NOP with the final UI shape, tiny
 pass-through DSP, then helper-free DSP increments.

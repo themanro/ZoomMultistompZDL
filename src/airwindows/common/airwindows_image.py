@@ -129,6 +129,39 @@ def make_airwindows_totape_screen() -> bytes:
     return encode_zoom_rle(c)
 
 
+def make_airwindows_tape_echo_screen() -> bytes:
+    """TapeEcho4 bitmap: tape transport plus delay repeats and paged knobs."""
+    c = Canvas()
+
+    c.rect(0, 0, 127, 63)
+    c.draw_text("TAPE", 6, 5, scale=2, spacing=1)
+    c.draw_text("ECHO4", 52, 5, scale=2, spacing=1)
+    c.draw_text("AIRWINDOWS", 84, 7, scale=1, spacing=1)
+
+    c.hline(5, 122, 21)
+    _draw_reel(c, 17, 30, 6)
+    _draw_reel(c, 41, 30, 6)
+    c.rect(27, 26, 31, 34)
+    c.hline(24, 34, 36)
+    c.hline(24, 34, 38)
+
+    for x0, amp in ((61, 5.0), (76, 3.0), (91, 2.0), (106, 1.0)):
+        _draw_wave(c, x0, min(122, x0 + 18), 31, amp, 0.7, 0.0)
+
+    c.draw_text("TEMPO", 10, 38, scale=1, spacing=1)
+    c.draw_text("DIV", 58, 38, scale=1, spacing=1)
+    c.draw_text("FEED", 95, 38, scale=1, spacing=1)
+
+    c.rect(7, 45, 39, 61)
+    c.rect(48, 45, 80, 61)
+    c.rect(89, 45, 121, 61)
+    c.hline(10, 36, 42)
+    c.hline(51, 77, 42)
+    c.hline(92, 118, 42)
+
+    return encode_zoom_rle(c)
+
+
 def make_airwindows_vinyl_screen() -> bytes:
     """ToVinyl4 bitmap: spinning record on the left, three paged knob wells."""
     c = Canvas()

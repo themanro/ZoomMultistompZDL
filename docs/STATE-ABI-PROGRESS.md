@@ -74,6 +74,7 @@ Audio buffers are float32. The observed stock/custom-safe pattern processes
 | `ToTape9` | No-divide full DSP loads and runs on the test MS-70CDR. |
 | `VerbTiny` | First Airwindows reverb candidate; builds with ctx[3] state, no `.fardata`, and no object relocations. Hardware result pending. |
 | `Galactic` | Larger Airwindows reverb candidate; builds with about 528 KB of ctx[3] state, no `.fardata`, and no object relocations. Hardware result pending. |
+| `TapeEcho4` | Custom Airwindows-inspired tape echo; builds with about 512 KB of ctx[3] delay state, no `.fardata`, no `.text`, and no object relocations. Tempo control is BPM+division with stock tempo descriptor flags; true host tap-tempo behavior is pending. |
 | `InitProbe` | Object-defined init setup call loads; init-time cloned edit-handler call freezes on boot. |
 
 ## Init And Edit-Handler ABI Status
@@ -145,9 +146,23 @@ Hardware status: both are untested. First tests should be basic load,
 unbypass, page 2 parameter interaction, reload, and duplicate-instance
 behavior.
 
+## Custom Tape Echo Status
+
+`TapeEcho4` is intentionally a custom effect rather than an exact Airwindows
+port. It combines safe Airwindows-derived tape techniques: TapeHack-style soft
+clipping, TapeDelay/TapeDelay2-inspired feedback filtering and modulation, and
+a bounded stereo delay line in `ctx[3]`. The state size is below the proven
+descriptor lower bound, and the first build has `.audio` only, no `.fardata`,
+and no object relocations. Hardware testing still needs load, unbypass,
+parameter paging, reload, and duplicate-instance checks. The `Tempo` descriptor
+uses the stock tempo flag pattern, but custom-ZDL access to the pedal's global
+tap tempo is still unresolved.
+
 ## Open Questions
 
 * What declares or toggles stock stereo routing for custom ZDLs?
+* Can stock tempo/tap-tempo descriptor flags feed meaningful host tempo values
+  into custom ZDL parameters, or do custom effects need their own BPM control?
 * What exactly do `ctx[13]` and `ctx[14]` represent in stock modulation effects?
 * What are the lifecycle rules for ctx state during bypass, preset switch,
   reload, and duplicate instances beyond the cases already tested?
