@@ -134,8 +134,8 @@ inactive unless the host rate is ever proven different.
 
 ## Immediate Work Items
 
-1. Verify the page-granular read-only parameter fallback, critical-control
-   cache, and tolerant on/off gate, then document whether first-touch
+1. Verify the zero-as-unmaterialized read-only parameter fallback and corrected
+   LineSel raw `0..0.14` scaling, then document whether first-touch
    Bias/Output and zero-output startup are fixed. Keep init materialization in
    isolated probes; the first ToTape9 object-defined init shim crashed on boot.
 2. Test ToTape9 saved preset and preset-switch behavior with the read-only

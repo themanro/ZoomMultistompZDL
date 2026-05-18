@@ -22,9 +22,9 @@ probe-by-probe chronology is preserved in git history through commit
 * ToTape9's load crash was not a ctx[3] lazy-init failure. `T9InitOnly`
   clears/finalizes the default state and loads cleanly. Removing runtime
   `__c6xabi_divf` from the full DSP path produced a hardware-reported working
-  `dist/ToTape9.ZDL`; current follow-up is parameter/default lifecycle testing.
-  Known unresolved bug: reloading/browsing back to ToTape9 can mute audio until
-  Bias or Output is touched.
+  `dist/ToTape9.ZDL`. The reload mute bug was addressed in the next build by
+  treating zero user slots as unmaterialized defaults and by scaling the
+  LineSel raw `0..0.14` handler range before caching critical controls.
 * The C/asm `ZOOM_EDIT_HANDLER` macro is not a safe release path for multi-page
   controls. `T9NoAudio` loads with DSP NOPed, then freezes on knob/page
   interaction.
@@ -112,20 +112,12 @@ Known unsafe:
 
 Next ToTape9 work:
 
-1. Verify the parameter fallback change. Audio-side writes to `params[5..13]`
-   were removed because the pedal can remember values across browsing/loading;
-   ToTape9 now treats the host parameter table as read-only. Fallback is
-   page-granular for the three visible UI pages, plus `ctx[3]` caches for the
-   mute-capable controls (`Input`, `Bias`, `Output`). Valid nonzero host reads
-   update those caches; empty/zero reload reads use the cached/default value so
-   an unmaterialized slot cannot mute the effect. The audio on/off gate is also
-   ignored while any mute-capable slot is empty, because reload can expose
-   zeroed params before an edit interaction materializes the host table. The
-   incomplete-reload `ctx[6]` writeback experiment did not fix the pedal
-   report. A follow-up object-defined init shim that invoked the
-   descriptor-selected on/off and all nine edit handlers crashed the pedal on
-   boot, so release ToTape9 is back to a NOP init while the init-call ABI is
-   investigated separately.
+1. Verify the zero-as-unmaterialized parameter fallback. ToTape9 still treats
+   the host parameter table as read-only. Nonzero values in the LineSel
+   `0..0.14` raw range are normalized before use/cache; zero/NaN values fall
+   back to manifest defaults because reload can expose zeroed params before an
+   edit interaction materializes the host table. This means true knob-at-zero
+   cannot currently be distinguished from "not materialized yet".
 2. Test whether saved presets and preset switches preserve edited values with
    the read-only fallback path.
 3. Add a desktop comparison harness before calling ToTape9 source-equivalent.

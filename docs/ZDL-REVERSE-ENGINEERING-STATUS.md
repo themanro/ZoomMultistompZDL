@@ -128,11 +128,11 @@ the same process for reverb-sized state.
 
 ## Highest-Priority Open Questions
 
-* Does the current ToTape9 page-granular read-only parameter fallback, cached
-  critical controls, and tolerant on/off gate stop first-touch Bias/Output and
-  zero-output startup issues? The first edit-calling object-defined init shim
-  crashed on boot; setup-only `InitProbe` is safe, so the next step is mapping
-  the missing edit-handler init context.
+* Does the current ToTape9 zero-as-unmaterialized fallback and corrected
+  `0..0.14` raw handler scaling stop first-touch Bias/Output and zero-output
+  startup issues? The first edit-calling object-defined init shim crashed on
+  boot; setup-only `InitProbe` is safe, so the next step is mapping the missing
+  edit-handler init context.
 * Does the new `VerbTiny` reverb candidate load and pass audio on the test
   MS-70CDR, and do synthesized page 2 controls survive interaction?
 * Do synthesized LineSel-cloned page 2/3 edit handlers update `params[7..13]`
