@@ -168,8 +168,16 @@ def make_airwindows_reverb_screen(name: str = "VerbTiny") -> bytes:
     c = Canvas()
 
     c.rect(0, 0, 127, 63)
-    c.draw_text("VERB", 6, 5, scale=2, spacing=1)
-    c.draw_text("TINY", 53, 5, scale=2, spacing=1)
+    title = name.upper()
+    if title == "VERBTINY":
+        left, right = "VERB", "TINY"
+    elif title == "GALACTIC":
+        left, right = "GAL", "ACTIC"
+    else:
+        left, right = title[:4], title[4:9]
+    c.draw_text(left, 6, 5, scale=2, spacing=1)
+    if right:
+        c.draw_text(right, 53, 5, scale=2, spacing=1)
     c.draw_text("AIRWINDOWS", 84, 7, scale=1, spacing=1)
 
     c.hline(5, 122, 21)

@@ -28,6 +28,9 @@ What is still experimental:
   initialization, preset behavior, and source-equivalence testing.
 * `dist/VerbTiny.ZDL` is the first reverb candidate. It builds with `ctx[3]`
   state, no `.fardata`, and no object relocations; hardware result is pending.
+* `dist/Galactic.ZDL` is a larger reverb candidate. It builds with about
+  528 KB of `ctx[3]` state, no `.fardata`, and no object relocations; hardware
+  result is pending.
 * `src/airwindows/tovinyl4/` is a source-only ToVinyl4 candidate. It builds
   manually or via `build_all.py tovinyl4`, but is not in release `dist/` until
   hardware testing says it should be.
@@ -123,8 +126,8 @@ A build is not a 1:1 Airwindows port until all of these are true:
 
 `StereoChorus` is the best current reference. `ToTape9` shows the next boundary:
 state and helper-light DSP can run, but source-equivalent claims still need
-parameter lifecycle tests and a desktop comparison harness. `VerbTiny` starts
-the same process for reverb-sized state.
+parameter lifecycle tests and a desktop comparison harness. `VerbTiny` and
+`Galactic` start the same process for reverb-sized state.
 
 ## Highest-Priority Open Questions
 
@@ -133,8 +136,8 @@ the same process for reverb-sized state.
   startup issues? The first edit-calling object-defined init shim crashed on
   boot; setup-only `InitProbe` is safe, so the next step is mapping the missing
   edit-handler init context.
-* Does the new `VerbTiny` reverb candidate load and pass audio on the test
-  MS-70CDR, and do synthesized page 2 controls survive interaction?
+* Do the new `VerbTiny` and `Galactic` reverb candidates load and pass audio on
+  the test MS-70CDR, and do synthesized page 2 controls survive interaction?
 * Do synthesized LineSel-cloned page 2/3 edit handlers update `params[7..13]`
   correctly in an isolated tiny-DSP probe?
 * What declares stock-style stereo routing for custom effects?

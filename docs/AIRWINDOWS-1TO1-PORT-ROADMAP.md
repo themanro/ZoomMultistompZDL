@@ -1,6 +1,6 @@
 # Airwindows 1:1 Port Roadmap
 
-Last updated: 2026-05-17
+Last updated: 2026-05-18
 
 This is the practical plan for getting from safe ABI probes to real 1:1
 Airwindows ports.
@@ -8,8 +8,8 @@ Airwindows ports.
 Current status update: `ctx[3]` is no longer just a lead. Hardware probes, the
 working `StereoChorus` release, and `T9InitOnly` show it is a usable
 per-instance descriptor arena for large state. The no-divide full `ToTape9`
-kernel now loads and runs on the test MS-70CDR. `VerbTiny` is now the first
-reverb-sized candidate built on the same strategy. The next blockers are
+kernel now loads and runs on the test MS-70CDR. `VerbTiny` and `Galactic` are
+now reverb candidates built on the same strategy. The next blockers are
 parameter/default lifecycle behavior, hardware reload behavior, and
 source-equivalence measurement.
 
@@ -144,8 +144,8 @@ inactive unless the host rate is ever proven different.
    LineSel-cloned edit handlers, so `params[7..13]` updates are proven
    separately from the ToTape9 kernel.
 4. Add a desktop equivalence harness before calling ToTape9 1:1.
-5. Hardware-test `VerbTiny.ZDL` for load, unbypass, page 2 controls, reload,
-   and duplicate-instance state isolation.
+5. Hardware-test `VerbTiny.ZDL` and `Galactic.ZDL` for load, unbypass, page 2
+   controls, reload, and duplicate-instance state isolation.
 6. Continue mapping `ctx[2]`, `ctx[13]`, and `ctx[14]` from stock delay,
    modulation, and tape effects.
 7. Record every hardware result in `docs/STATE-ABI-PROGRESS.md` before moving

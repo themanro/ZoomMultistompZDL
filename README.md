@@ -64,12 +64,14 @@ effect directory conventions are summarized in
 - `ToTape9.ZDL` now loads and runs on the test MS-70CDR after removing runtime
   `__c6xabi_divf` from the full DSP path. It is still under validation for
   parameter initialization, preset behavior, and source-equivalent exactness.
-  Current known bug: after reloading/browsing back to the effect, audio can
-  stay muted until Bias or Output is touched. A `ctx[6]` writeback experiment
-  did not fix it, and calling all edit handlers from `_init` crashed on boot.
+  The latest build treats zeroed parameter slots as unmaterialized defaults to
+  address the reload mute report; this still needs hardware confirmation.
 - `VerbTiny.ZDL` is a new Airwindows reverb port candidate. It builds cleanly
   with `ctx[3]` state and no object relocations, but it has not been
   hardware-tested yet.
+- `Galactic.ZDL` is a larger Airwindows reverb candidate. It builds cleanly
+  with about 528 KB of `ctx[3]` state and no object relocations, but it has not
+  been hardware-tested yet.
 - On MS-70CDR, Drive-category custom effects may not appear in the on-device FX
   browser unless at least one stock Drive effect is also installed. `ToTape9`
   is intentionally categorized as Drive, so install a stock Drive effect too if
@@ -152,8 +154,8 @@ The core pieces are:
 The important recent finding is that custom effects can use the host-managed
 large state descriptor at `ctx[3]`. That made the stateful `StereoChorus` port
 possible, and the no-divide `ToTape9` full-kernel build now also loads and runs
-on the test MS-70CDR. `VerbTiny` is the first reverb candidate using the same
-large-state strategy. The next ToTape9 work is parameter/default lifecycle
+on the test MS-70CDR. `VerbTiny` and `Galactic` are reverb candidates using the
+same large-state strategy. The next ToTape9 work is parameter/default lifecycle
 validation and source-equivalence testing.
 
 Known runtime map for custom ZDLs:

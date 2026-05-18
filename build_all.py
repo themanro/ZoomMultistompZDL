@@ -29,6 +29,7 @@ RELEASE_PLUGINS = [
     ("totape9",     PLUGIN_DIR / "totape9"     / "build.py"),
     ("stereochorus", PLUGIN_DIR / "stereochorus" / "build.py"),
     ("verbtiny",    PLUGIN_DIR / "verbtiny"    / "build.py"),
+    ("galactic",    PLUGIN_DIR / "galactic"    / "build.py"),
 ]
 
 DIAGNOSTIC_PLUGINS = [

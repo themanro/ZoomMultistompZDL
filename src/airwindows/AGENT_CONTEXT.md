@@ -53,6 +53,7 @@ in the manifest and document any math substitutions.
 `ToTape9` is the current warning case and success case: the full `ctx[3]`
 kernel builds with `.fardata: 0 bytes`, `T9InitOnly` proves lazy ctx[3] init is
 safe, and the no-divide release build now loads and runs on the test MS-70CDR.
+`VerbTiny` and `Galactic` extend the same approach into reverb-sized state.
 Before deepening another 9-parameter or helper-heavy port, prove the final
 UI/descriptor/edit-handler shape with audio-NOP and tiny DSP builds, then add
 DSP helpers only in isolated increments. For ToTape9 specifically, keep

@@ -73,6 +73,7 @@ Audio buffers are float32. The observed stock/custom-safe pattern processes
 | `T9NoState` | A simple ToTape9-shaped DSP path can run; Input audibly changes gain. |
 | `ToTape9` | No-divide full DSP loads and runs on the test MS-70CDR. |
 | `VerbTiny` | First Airwindows reverb candidate; builds with ctx[3] state, no `.fardata`, and no object relocations. Hardware result pending. |
+| `Galactic` | Larger Airwindows reverb candidate; builds with about 528 KB of ctx[3] state, no `.fardata`, and no object relocations. Hardware result pending. |
 | `InitProbe` | Object-defined init setup call loads; init-time cloned edit-handler call freezes on boot. |
 
 ## Init And Edit-Handler ABI Status
@@ -125,7 +126,7 @@ Next ToTape9 work:
    LineSel-cloned handlers to prove `params[7..13]` updates independently from
    the tape kernel.
 
-## VerbTiny Reverb Port Status
+## Reverb Port Status
 
 `VerbTiny` was chosen as the first reverb target because its Airwindows delay
 network is much smaller than the older `Reverb`/plate families. The current
@@ -135,8 +136,13 @@ the network in a rectangular `ctx[3]` state layout rather than source C++
 member arrays. The Airwindows float dither tail is omitted like the other Zoom
 ports.
 
-Hardware status: untested. First test should be basic load, unbypass, page 2
-parameter interaction (`Wider`, `DryWet`), reload, and duplicate-instance
+`Galactic` is the next reverb candidate. It uses the original Galactic delay
+network converted from double to float32 in `ctx[3]`, with about 528 KB of
+delay/scalar state. The build assumes 44.1 kHz (`cycleEnd = 1`) and omits the
+Airwindows dither tail.
+
+Hardware status: both are untested. First tests should be basic load,
+unbypass, page 2 parameter interaction, reload, and duplicate-instance
 behavior.
 
 ## Open Questions

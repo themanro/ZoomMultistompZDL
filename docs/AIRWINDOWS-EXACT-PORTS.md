@@ -108,3 +108,17 @@ larger rectangular arrays rather than many individually sized arrays.
 Hardware result: pending. Do not describe `VerbTiny.ZDL` as source-equivalent
 until it has survived load/unbypass/parameter/reload tests and a desktop
 comparison harness exists.
+
+## Galactic Specific Finding
+
+`Galactic` is the first large Airwindows reverb candidate in this repo. The
+current Zoom source keeps the original thirteen delay lines per side, feedback
+topology, five source parameters, and predelay vibrato, with the source double
+arrays converted to float32 in `ctx[3]`. The delay state is about 528 KB, below
+the descriptor size proven by the hardware probes. The Airwindows float dither
+tail is omitted, and the build assumes the pedal runs at 44.1 kHz
+(`cycleEnd = 1`).
+
+Hardware result: pending. Do not describe `Galactic.ZDL` as source-equivalent
+until it has survived load/unbypass/parameter/reload tests and a desktop
+comparison harness exists.
