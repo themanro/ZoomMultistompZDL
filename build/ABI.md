@@ -417,6 +417,23 @@ LineSel edit handlers use a second layer of callbacks:
 | `state[31]` | callback pointer used by on/off and knob edit handlers first | partial |
 | `state + 136` | setup callback pointer used by stock init for coefficient-table registration | hardware-safe in `InitProbe` stage 2 |
 
+`build/analyze_stock_init_handlers.py` generalizes this across stock ZDLs. A
+sample scan of LineSel, Exciter, OptComp, ZNR, BottomB, Air, Delay, StereoCho,
+TapeEcho, Hall, AutoPan, and Phaser shows the same broad shape:
+
+* Init functions first call one or more setup callbacks through
+  `__c6xabi_call_stub`, usually from `state + 136` and `state + 140`.
+* Init functions then call each stock edit handler with the original
+  host-provided state pointer.
+* Most knob edit handlers read `state[31]`; value/output-style handlers often
+  also read `state[21]`; on/off or time/rate-style handlers often tail through
+  `state[7]`.
+
+This makes the parameter bug look like a general host-materialization ABI
+problem, not a ToTape9-specific DSP issue. Custom builds can copy stock handler
+bytes, but they cannot safely call those handlers during custom init until the
+complete init-time callback environment is understood.
+
 Firmware static RE gives this a nearby loader-state lead. In
 `firmware/extracted/main_os.dis`, the ZDL/ELF load path around `c00a5406`
 allocates 164 bytes, initializes words 0, 1, 15..31, and initializes byte

@@ -126,6 +126,23 @@ Current LineSel init/edit state map:
 | `state[31]` | first callback pointer used by on/off and knob edit handlers | partial |
 | `state + 136` | setup callback pointer for coefficient-table registration | hardware-safe in `InitProbe` stage 2 |
 
+Stock-sample scan:
+
+`build/analyze_stock_init_handlers.py` now checks this pattern mechanically
+against stock disassembly. A sample across LineSel, Exciter, OptComp, ZNR,
+BottomB, Air, Delay, StereoCho, TapeEcho, Hall, AutoPan, and Phaser found:
+
+| Pattern | Sample result |
+|---|---|
+| Init setup callbacks | `state + 136` appears everywhere checked; most multi-param effects also use `state + 140`. |
+| Init edit calls | Stock init calls the effect's own edit handlers after setup. |
+| Edit callback fields | `state[31]` is common; output/value handlers often also use `state[21]`; on/off and some time/rate handlers use `state[7]`. |
+
+This turns the ToTape9 first-touch/reload parameter bug into a general ABI
+gap: we can run DSP safely, and we can let stock handlers run from normal UI
+interaction, but we do not yet know how to recreate the full stock init-time
+edit-handler callback environment for custom init.
+
 ## ToTape9 Split Status
 
 | Variant | Result | Meaning |
