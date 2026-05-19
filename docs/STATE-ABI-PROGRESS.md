@@ -173,6 +173,27 @@ the allocation-time sentinel layout because it shows actual late-bound
 function-pointer dispatch. Next static target: connect these lists to ZDL
 descriptor records or embedded symbol pointers.
 
+Descriptor/list lead:
+
+The loader parser at `c00a61b8..c00a62e0` walks packed 8-byte records from a
+table rooted at its `state[19]`. Record type `13` takes a special path after a
+shared validator call and copies three unaligned record payload values into the
+runtime object reached through `state[27]`:
+
+| Destination | Source path | Current read |
+|---:|---|---|
+| `word21` | `LDNW *record[1]` | list/template pointer candidate |
+| `word20` | `LDNW *record[1]` after the type-13 branch target advances | paired table/callback candidate |
+| `word22` | `LDNW *+record[1]` from the paired record | count/flag candidate |
+
+Several lifecycle paths then pass `word20`/`word21` into `c00c0014`. That
+function is only a wrapper around `c00bff60` with `A8=1`; the underlying helper
+walks 16-byte records, compares byte strings/templates, and may write a matched
+record's second word through an output pointer. This makes the `word20/21/22`
+triple look like descriptor-derived list/matcher state, not simply "call these
+three pointers." The useful next step is to identify which ZDL record family
+emits type `13` and whether it corresponds to init/edit materialization records.
+
 ## ToTape9 Split Status
 
 | Variant | Result | Meaning |

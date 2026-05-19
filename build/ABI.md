@@ -494,6 +494,28 @@ to connect these dispatch lists to the embedded ZDL symbols or descriptor
 records so we know whether they are init handlers, edit handlers, or host
 cleanup/materialization callbacks.
 
+The first concrete descriptor/list connection is the parser at
+`c00a61b8..c00a62e0`. It walks packed 8-byte records from a table rooted at
+`state[19]`; record types `12`, `13`, `14..23`, `25..27`, `29`, `32`, and `33`
+all have explicit branches. Type `13` is special for the current parameter
+bug: after the shared validator accepts the record, the firmware copies three
+unaligned payload values into the runtime object at `state[27]`:
+
+```
+state[27]->word21 = type-13 payload value
+state[27]->word20 = paired/advanced payload value
+state[27]->word22 = paired/advanced payload value
+```
+
+Those same `word20`/`word21` values are later passed to `c00c0014` from
+multiple lifecycle paths (`c00a65e4`, `c00a6a2c`, `c00a6c64`, `c00a6d70`).
+`c00c0014` is a thin wrapper around `c00bff60` with `A8=1`; the helper walks
+16-byte records, compares byte templates/strings, and can write the matched
+record's second word through an output pointer. So the best current hypothesis
+is descriptor-derived list/matcher state, not a raw three-function callback
+table. To make this actionable, the next reverse-engineering step is mapping
+the packed type-13 record back to the ZDL record family that emits it.
+
 For Exciter, init at `.text+0x5c0` (per `Fx_FLT_Exciter_init` symbol)
 should follow the same pattern — invoke onf, then each edit handler.
 
