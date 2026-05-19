@@ -1,6 +1,6 @@
 # State ABI Progress
 
-Last updated: 2026-05-18
+Last updated: 2026-05-19
 
 This is the compact current-state map for the hardware probes. The older
 probe-by-probe chronology is preserved in git history through commit
@@ -34,6 +34,16 @@ probe-by-probe chronology is preserved in git history through commit
   correctly. Stage 3, calling a cloned LineSel edit handler from that init
   context, froze on boot. The likely missing ABI detail is the init-time host
   state/callback table expected by stock edit handlers.
+* Static LineSel RE now identifies the first important fields in that
+  init/edit state object. Stock LineSel init uses `state + 136` as a setup
+  callback pointer, passes `state[1]`, `_Fx_FLT_LineSel_Coe`, and the
+  coefficient-table byte size, then calls the edit handlers. Those edit
+  handlers also dereference `state[31]`, `state[21]`, and tail-call
+  `state[7]`. Firmware near `c00a5406` allocates/initializes a 164-byte
+  structure immediately before the ELF magic check. That block starts with
+  `word31 = 1`, so it is not proven to be the exact handler state object, but
+  it is an important loader-adjacent lead and reinforces that stock handlers
+  expect a host-prepared callback environment.
 * Category visibility is partly host/browser state. On the MS-70CDR test
   pedal, Drive-category `ToTape9` could flash but stayed hidden until at least
   one stock Drive effect was also installed.
@@ -104,6 +114,17 @@ Known unsafe:
   3 froze on boot after setup plus one edit-handler call.
 * The object-defined `ZOOM_EDIT_HANDLER` macro path for multi-page UI builds.
   It pulls in `__c6xabi_call_stub` and freezes on interaction in `T9NoAudio`.
+
+Current LineSel init/edit state map:
+
+| Field | Observed use | Confidence |
+|---:|---|---|
+| `state[0]` | passed as `A4` to the first stock on/off/edit callback | partial |
+| `state[1]` | loaded by init setup and handlers; likely parameter/materialization base | partial |
+| `state[7]` | tail-call target after stock handler callback setup | partial |
+| `state[21]` | second callback pointer used by knob edit handlers | partial |
+| `state[31]` | first callback pointer used by on/off and knob edit handlers | partial |
+| `state + 136` | setup callback pointer for coefficient-table registration | hardware-safe in `InitProbe` stage 2 |
 
 ## ToTape9 Split Status
 

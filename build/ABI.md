@@ -384,10 +384,50 @@ large descriptor arena of at least 705536 bytes.
 ### 5.3 Init `Fx_FLT_<Name>_init`
 
 CH_2.md observed for LineSel: init calls `_onf`, `_edit_efx`, `_edit_out`
-in sequence, all with a fixed magic state-pointer
-(`0x80000378` for LineSel). That suggests init is called *once* with
-some host-provided state, and its job is to push initial values for
-each parameter into the runtime by invoking the per-param handlers.
+in sequence. Current disassembly corrects one older assumption:
+`0x80000378` is not the host state pointer; it is `_Fx_FLT_LineSel_Coe`, the
+effect-local coefficient table passed to a setup callback. Init is called with
+a host-provided state pointer in `A4`, registers the coefficient table, then
+invokes the per-param handlers to push initial values into the runtime.
+
+LineSel's stock init sequence is:
+
+```
+A4 = state
+A0/A10/A5 = state
+A4 = state + 136
+A0 = *(state + 136)          ; host setup callback
+B4 = _Fx_FLT_LineSel_Coe     ; 28-byte coefficient table
+A4 = state[1]                ; parameter table / materialized value area
+A6 = 28
+B31 = A0
+CALLP __c6xabi_call_stub
+CALLP Fx_FLT_LineSel_EfxLvl_edit with A4 = state
+CALLP Fx_FLT_LineSel_OutLvl_edit with A4 = state
+```
+
+LineSel edit handlers use a second layer of callbacks:
+
+| State field | Observed use in LineSel handlers | Status |
+|---:|---|---|
+| `state[0]` | passed as `A4` into the first edit/onf callback | partial |
+| `state[1]` | base pointer used by handlers and init setup | partial |
+| `state[7]` | tail-called after materialization callback setup | partial |
+| `state[21]` | callback pointer used by knob edit handlers after the first callback | partial |
+| `state[31]` | callback pointer used by on/off and knob edit handlers first | partial |
+| `state + 136` | setup callback pointer used by stock init for coefficient-table registration | hardware-safe in `InitProbe` stage 2 |
+
+Firmware static RE gives this a nearby loader-state lead. In
+`firmware/extracted/main_os.dis`, the ZDL/ELF load path around `c00a5406`
+allocates 164 bytes, initializes words 0, 1, 15..31, and initializes byte
+offsets 128..156 before checking the ELF magic at `c00a54b8`. It sets word 31
+to `1` initially and later code near `c00a63e4` tests/clears word 31 while
+adjusting a size/allocation field. Because LineSel's edit handler later treats
+`state[31]` as a callable pointer, this 164-byte block is not proven to be the
+exact handler state passed to stock init; it may be adjacent loader bookkeeping
+or a pre-patched form. It is still a strong lead that stock edit handlers
+expect a host-prepared state/callback environment, not just the bare audio
+`ctx`.
 
 For Exciter, init at `.text+0x5c0` (per `Fx_FLT_Exciter_init` symbol)
 should follow the same pattern — invoke onf, then each edit handler.
@@ -399,7 +439,10 @@ Hardware caution: `InitProbe` stage 2 showed that a custom init shim can safely
 perform the stock-style coefficient setup call through `__c6xabi_call_stub`.
 The next stage, which called a cloned LineSel edit handler from init after that
 setup, froze the pedal on boot. Release builds currently keep a NOP init until
-the edit-handler init context is understood.
+the edit-handler init context is understood. The current best explanation is
+that setup uses only `state + 136`, while edit handlers additionally require
+valid `state[31]`, `state[21]`, and `state[7]` callback fields for that exact
+init phase.
 
 Relocation caution: object-file `PCR_S21` relocations do not all use the same
 addend interpretation. For section-local calls, cl6x's placeholder displacement
