@@ -21,5 +21,6 @@ src/hardware_probes/*/*_params.h
 tools/measure/out/
 *.id0
 *.id1
+*.id2
 *.nam
 *.til

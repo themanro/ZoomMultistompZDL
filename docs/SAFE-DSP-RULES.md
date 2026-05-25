@@ -49,6 +49,9 @@ experiment, not a port.
 * Treat source plugin parameter scaling and source plugin DSP as separate
   tasks. The manifest can record exact source ranges before the full DSP is
   safe to run, but that does not make the effect a real port.
+* Use release ZDL filenames with unique basenames of 8 characters or less.
+  Zoom tooling/device code can truncate longer basenames, and duplicate
+  post-trim names have been reported to freeze the pedal when loading.
 
 ## Known Freeze Patterns
 
@@ -69,6 +72,9 @@ experiment, not a port.
   patched for this plugin.
 * Category/SONAME mismatch, for example `gid=3` with `ZDL_MOD_...` or
   `gid=6` with `ZDL_DRV_...`.
+* Duplicate effect filenames after 8-character basename truncation. For
+  example, `TapeEcho4.ZDL` can become `TapeEcho.ZDL` and collide with a stock
+  or custom `TapeEcho` install.
 
 ## Practical Porting Shape
 

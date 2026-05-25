@@ -99,7 +99,7 @@ Audio buffers are float32. The observed stock/custom-safe pattern processes
 | `ToTape9` | No-divide full DSP loads and runs on the test MS-70CDR. |
 | `VerbTiny` | First Airwindows reverb candidate; builds with ctx[3] state, no `.fardata`, and no object relocations. Hardware result pending. |
 | `Galactic` | Larger Airwindows reverb candidate; builds with about 528 KB of ctx[3] state, no `.fardata`, and no object relocations. Hardware result pending. |
-| `TapeEcho4` | Custom Airwindows-inspired tape echo; builds with about 512 KB of ctx[3] delay state, no `.fardata`, no `.text`, and no object relocations. Tempo control is BPM+division with stock tempo descriptor flags; true host tap-tempo behavior is pending. |
+| `TEcho4` / `TapeEcho4` | Custom Airwindows-inspired tape echo; builds with about 512 KB of ctx[3] delay state, no `.fardata`, no `.text`, and no object relocations. Tempo control is BPM+division with stock tempo descriptor flags; true host tap-tempo behavior is pending. |
 | `OTT` | Custom Dynamics-category OTT-style compressor; builds with small ctx[3] state, no `.fardata`, no `.text`, and no object relocations. Hardware result pending. |
 | `InitProbe` | Object-defined init setup call loads; init-time cloned edit-handler call freezes on boot. |
 | `SyncProbe` | One-byte patch of `linesel_handlers.bin` (`state[31]→state[24]`) plus a `pedal_flags=0x28, max=15` descriptor entry; loads, unbypass passes audio, knob interaction does not freeze, tap tempo (left-knob click) does not freeze. Returned value is static under tap tempo with `B4=2`, so `state[24]` is reachable but the call protocol is still wrong. Confirms the descriptor + handler shape for Pattern B sync slots is load-safe on custom ZDLs. |
@@ -383,15 +383,17 @@ behavior.
 
 ## Custom Tape Echo Status
 
-`TapeEcho4` is intentionally a custom effect rather than an exact Airwindows
-port. It combines safe Airwindows-derived tape techniques: TapeHack-style soft
-clipping, TapeDelay/TapeDelay2-inspired feedback filtering and modulation, and
-a bounded stereo delay line in `ctx[3]`. The state size is below the proven
-descriptor lower bound, and the first build has `.audio` only, no `.fardata`,
-and no object relocations. Hardware testing still needs load, unbypass,
-parameter paging, reload, and duplicate-instance checks. The `Tempo` descriptor
-uses the stock tempo flag pattern, but custom-ZDL access to the pedal's global
-tap tempo is still unresolved.
+`TEcho4` / `TapeEcho4` is intentionally a custom effect rather than an exact
+Airwindows port. It combines safe Airwindows-derived tape techniques:
+TapeHack-style soft clipping, TapeDelay/TapeDelay2-inspired feedback filtering
+and modulation, and a bounded stereo delay line in `ctx[3]`. The state size is
+below the proven descriptor lower bound, and the first build has `.audio` only,
+no `.fardata`, and no object relocations. Hardware testing still needs load,
+unbypass, page 2 parameter interaction, reload, and duplicate-instance checks.
+The `Tempo` descriptor uses the stock tempo flag pattern, but custom-ZDL access
+to the pedal's global tap tempo is still unresolved. The release file is named
+`TEcho4.ZDL` because Zoom tooling/device behavior can truncate basenames longer
+than 8 characters; `TapeEcho4.ZDL` can collide with `TapeEcho.ZDL`.
 
 `OTT` is another custom effect, not a port. It confirms that small `ctx[3]`
 state is practical for non-delay DSP history too: crossover memories, band

@@ -54,6 +54,34 @@ DIAGNOSTIC_PLUGINS = [
 PLUGINS = RELEASE_PLUGINS + DIAGNOSTIC_PLUGINS
 
 
+def check_dist_filenames() -> int:
+    """Reject release names that can collide after Zoom's 8-char truncation."""
+    by_trimmed: dict[str, list[Path]] = {}
+    too_long: list[Path] = []
+    for zdl in sorted(DIST.glob("*.ZDL")):
+        stem = zdl.stem
+        if len(stem) > 8:
+            too_long.append(zdl)
+        by_trimmed.setdefault(stem[:8].upper(), []).append(zdl)
+
+    rc = 0
+    if too_long:
+        rc = 1
+        print("\nUnsafe ZDL basenames (>8 chars; Zoom may truncate these):", file=sys.stderr)
+        for zdl in too_long:
+            print(f"  {zdl.name}", file=sys.stderr)
+
+    collisions = {k: v for k, v in by_trimmed.items() if len(v) > 1}
+    if collisions:
+        rc = 1
+        print("\nUnsafe ZDL basename collisions after 8-char truncation:", file=sys.stderr)
+        for key, paths in sorted(collisions.items()):
+            names = ", ".join(p.name for p in paths)
+            print(f"  {key}: {names}", file=sys.stderr)
+
+    return rc
+
+
 def main(argv: list[str]) -> int:
     DIST.mkdir(exist_ok=True)
     args = argv[1:]
@@ -87,10 +115,13 @@ def main(argv: list[str]) -> int:
     print(f"output dir: {DIST}")
     for f in sorted(DIST.glob("*.ZDL")):
         print(f"  {f.name:<20} {f.stat().st_size:>6} bytes")
+    name_check_rc = 0
+    if selected is None:
+        name_check_rc = check_dist_filenames()
     if failures:
         print(f"\nFAILED: {failures}")
         return 1
-    return 0
+    return name_check_rc
 
 
 if __name__ == "__main__":

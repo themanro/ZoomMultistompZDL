@@ -34,10 +34,10 @@ Experimental builds are useful only to isolate ABI/linker/runtime behavior.
 They should have comments and documentation that make the substitution obvious.
 
 Custom product- or Airwindows-inspired effects can also live in this repo, but
-they must be named and documented as custom designs. `TapeEcho4` is in this
-category: it uses Airwindows tape-delay/saturation techniques, but it is not a
-source equivalence target. `OTT` is also custom: it aims at an OTT-style
-multiband dynamics sound, but it is not an Ableton port.
+they must be named and documented as custom designs. `TEcho4` / `TapeEcho4` is
+in this category: it uses Airwindows tape-delay/saturation techniques, but it
+is not a source equivalence target. `OTT` is also custom: it aims at an
+OTT-style multiband dynamics sound, but it is not an Ableton port.
 
 ## Resolved Size Blocker
 

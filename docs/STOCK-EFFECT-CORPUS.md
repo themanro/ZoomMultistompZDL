@@ -141,6 +141,12 @@ in `.audio`. Both layouts load on hardware (LineSel, Galactic, OTT have
 all built with `.audio`). The corpus tells us **`.audio` is optional**;
 it is not a contract the firmware relies on for placement.
 
+The ZD2-side hand decode of `Fx_SFX_LineSel` points the same way: code
+placement differs from the ZDL LineSel build, but the audio semantics still
+match the same coefficient-table split between effect buffer and pedal output
+accumulator. The loader contract appears to be the descriptor/symbol/runtime
+ABI, not the section name that happens to hold the audio body.
+
 ## 5. `.fardata` size distribution
 
 `.fardata` exists in 821/825 parseable effects, and almost all of them
@@ -284,6 +290,10 @@ effect imports. The Top 20 (excluding C6x runtime helpers
   parameter-materialization story is different for these — there is
   no edit-handler dispatch involved. Worth a separate look if the
   open-source platform wants to support amp-model-style effects.
+* **DWARF-labeled data tables.** The ZNR `ZNR_gate_depth_tbl` sample shows
+  that some labels emitted as `DW_TAG_subprogram` are actually raw data tables
+  (`1.0`, `0.95`, `0.9`, ...). Corpus tooling should not assume every
+  function-like DWARF label is executable code.
 
 ## 10. How to extend this
 

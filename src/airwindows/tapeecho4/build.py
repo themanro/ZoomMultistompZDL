@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build TapeEcho4.ZDL from tapeecho4.c + manifest.json."""
+"""Build TEcho4.ZDL from tapeecho4.c + manifest.json."""
 
 from __future__ import annotations
 
@@ -36,7 +36,13 @@ def main() -> None:
 
     src_c = HERE / "tapeecho4.c"
     obj = HERE / "tapeecho4.obj"
-    out_zdl = ROOT / "dist" / f"{manifest['effect_name']}.ZDL"
+    output_basename = manifest.get("output_basename", manifest["effect_name"])
+    if len(output_basename) > 8:
+        raise ValueError(
+            f"output_basename {output_basename!r} is longer than 8 characters; "
+            "Zoom tooling may truncate and collide"
+        )
+    out_zdl = ROOT / "dist" / f"{output_basename}.ZDL"
     out_zdl.parent.mkdir(exist_ok=True)
 
     print(f"[tapeecho4] compiling {src_c.name} -> {obj.name}")

@@ -1,5 +1,6 @@
 {
   "effect_name": "TapeEcho4",
+  "output_basename": "TEcho4",
   "comment": "Airwindows-inspired custom tape echo for Zoom Multistomp. Uses ctx[3] for a bounded stereo delay line, TapeHack-style soft clipping, tape-bandwidth filtering, flutter/wow modulation, and a BPM+division tempo workflow. Hardware untested.",
 
   "audio_func_name": "Fx_DLY_TapeEcho4",

@@ -72,11 +72,16 @@ effect directory conventions are summarized in
 - `Galactic.ZDL` is a larger Airwindows reverb candidate. It builds cleanly
   with about 528 KB of `ctx[3]` state and no object relocations, but it has not
   been hardware-tested yet.
-- `TapeEcho4.ZDL` is a custom Airwindows-inspired tape echo, not a 1:1
+- `TEcho4.ZDL` is a custom Airwindows-inspired tape echo, not a 1:1
   Airwindows port. It builds as a Delay-category effect with `ctx[3]` delay
   memory, TapeHack-style saturation, feedback bandwidth limiting, wow/flutter,
   and a BPM+division tempo workflow. Hardware result is pending; true host tap
   tempo for custom ZDLs is still unproven.
+- ZDL filenames should have unique basenames of 8 characters or less. Zoom
+  tooling/device code can truncate longer basenames, so collisions like
+  `TapeEcho4.ZDL` -> `TapeEcho.ZDL` can create duplicate effect identities and
+  freeze the pedal when loading. This repo now ships that effect as
+  `TEcho4.ZDL`.
 - `OTT.ZDL` is a custom Dynamics-category OTT-style multiband compressor, not
   an Ableton port. It exposes `DryWet`, `Time`, `Output`, and `SplitFrq`, and
   builds cleanly with small `ctx[3]` state, no `.fardata`, no `.text`, and no
@@ -167,7 +172,7 @@ The important recent finding is that custom effects can use the host-managed
 large state descriptor at `ctx[3]`. That made the stateful `StereoChorus` port
 possible, and the no-divide `ToTape9` full-kernel build now also loads and runs
 on the test MS-70CDR. `VerbTiny` and `Galactic` are reverb candidates using the
-same large-state strategy. `TapeEcho4` uses that same safe state pattern for a
+same large-state strategy. `TEcho4` / `TapeEcho4` uses that same safe state pattern for a
 custom tape-delay design, and `OTT` uses a small `ctx[3]` state block for
 multiband envelope/gain history. The next ToTape9 work is parameter/default
 lifecycle validation and source-equivalence testing.

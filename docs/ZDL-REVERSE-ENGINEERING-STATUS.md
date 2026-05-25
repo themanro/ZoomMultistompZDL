@@ -31,7 +31,7 @@ What is still experimental:
 * `dist/Galactic.ZDL` is a larger reverb candidate. It builds with about
   528 KB of `ctx[3]` state, no `.fardata`, and no object relocations; hardware
   result is pending.
-* `dist/TapeEcho4.ZDL` is a custom Airwindows-inspired Delay-category tape
+* `dist/TEcho4.ZDL` is a custom Airwindows-inspired Delay-category tape
   echo. It builds with a bounded `ctx[3]` stereo delay line, no `.fardata`, no
   object relocations, and a BPM+division tempo workflow. Hardware result is
   pending; true host tap-tempo plumbing for custom ZDLs is still unresolved.
