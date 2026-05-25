@@ -16,6 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 DIST = ROOT / "dist"
+PROBE_OUT = ROOT / "build" / "probes"
 
 PLUGIN_DIR = ROOT / "src" / "airwindows"
 CUSTOM_DIR = ROOT / "src" / "custom"
@@ -104,17 +105,34 @@ def main(argv: list[str]) -> int:
         for zdl in DIST.glob("*.ZDL"):
             zdl.unlink()
 
+    release_names = {name for name, _ in RELEASE_PLUGINS}
     failures: list[str] = []
+    moved_probes: list[Path] = []
     for name, build_py in plugins:
         print(f"\n========== {name} ==========")
+        before = {p.name: p.stat().st_mtime_ns for p in DIST.glob("*.ZDL")}
         rc = subprocess.run([sys.executable, "-B", str(build_py)]).returncode
         if rc != 0:
             failures.append(name)
+            continue
+        if name not in release_names:
+            PROBE_OUT.mkdir(parents=True, exist_ok=True)
+            for zdl in sorted(DIST.glob("*.ZDL")):
+                old_mtime = before.get(zdl.name)
+                if old_mtime is not None and old_mtime == zdl.stat().st_mtime_ns:
+                    continue
+                target = PROBE_OUT / zdl.name
+                zdl.replace(target)
+                moved_probes.append(target)
 
     print("\n========== summary ==========")
     print(f"output dir: {DIST}")
     for f in sorted(DIST.glob("*.ZDL")):
         print(f"  {f.name:<20} {f.stat().st_size:>6} bytes")
+    if moved_probes:
+        print(f"\nprobe output dir: {PROBE_OUT}")
+        for f in moved_probes:
+            print(f"  {f.name:<20} {f.stat().st_size:>6} bytes")
     name_check_rc = 0
     if selected is None:
         name_check_rc = check_dist_filenames()

@@ -19,6 +19,7 @@ src/hardware_probes/*/*.obj
 src/hardware_probes/*/*_params.h
 *.wav
 tools/measure/out/
+build/probes/
 *.id0
 *.id1
 *.id2

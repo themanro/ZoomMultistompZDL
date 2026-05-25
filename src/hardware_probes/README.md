@@ -18,6 +18,9 @@ Build release effects plus every probe:
 python3 -B build_all.py --all
 ```
 
+Probe artifacts built through `build_all.py` are moved to `build/probes/`.
+Keep `dist/` for working release effects only.
+
 Each probe keeps its own `manifest.json`, `build.py`, and DSP source. Probe
 build scripts reuse the shared linker and helper code from `build/` and
 `src/airwindows/common/`.

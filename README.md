@@ -151,8 +151,8 @@ python3 -B build_all.py --all
 ```
 
 The default build intentionally keeps [dist/](dist/) clean and release-focused.
-Diagnostic ZDLs are useful for development, but should not be mixed into the
-download folder.
+Diagnostic ZDLs are useful for development, but are moved to `build/probes/`
+and should not be mixed into the download folder.
 
 ## Technical Notes
 
@@ -165,7 +165,7 @@ The core pieces are:
 | [src/airwindows/](src/airwindows/) | Effect sources, manifests, images, and per-effect build scripts. |
 | [src/custom/](src/custom/) | Original non-Airwindows effects built with the same linker/safety rules. |
 | [src/hardware_probes/](src/hardware_probes/) | Diagnostic ZDLs used to map the pedal runtime ABI. |
-| [dist/](dist/) | Release `.ZDL` files for users. |
+| [dist/](dist/) | Release `.ZDL` files for users; never probes. |
 | [stock_zdls/](stock_zdls/) | Tracked 830-file stock ZDL corpus used for comparison. |
 
 The important recent finding is that custom effects can use the host-managed
