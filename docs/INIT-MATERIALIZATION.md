@@ -176,7 +176,122 @@ The asm must be written with care:
   only. Once MatProbe v1 works, ToTape9 (9 knobs across 3 pages) is the
   next milestone — its `_init` will need to call all 9 handlers.
 
-## 7. Where this changes other docs
+## 7. Firmware-side observations (when does `_init` get called?)
+
+A static-RE pass through `firmware/extracted/main_os.dis` pinned down
+three load-bearing facts about the dispatch path for `_init`. The
+exact call site that invokes `_init` is not yet identified — the
+firmware path runs through several layers of indirection — but the
+shape of that call is now constrained enough that the recipe in §2
+is the right thing to try first.
+
+### 7.1 The generic dispatcher explicitly skips `entry_index = 1`
+
+The generic handler dispatcher (entry around `c00bb288`, main body
+`c00bb420..c00bb47c`) is what fires `_onf` and `_<param>_edit` when
+the user interacts with the UI. It calls `get_entry(slot, entry_index)`,
+loads `entry[7]` (= `func_ptr` at `+0x1C`), then branches to it with
+`A4 = state ptr`. **But before doing that it checks
+`entry_index == 1` and skips the dispatch entirely:**
+
+```
+c00bb420   MV A12, B0            ; B0 = entry_index
+c00bb422   CMPEQ 1, B0, B0       ; B0 = (entry_index == 1)
+c00bb424   [B0] BNOP 0xc00bb480  ; if entry_index == 1, jump past dispatch to return
+```
+
+So `_init` is **not** called through this path. It has its own
+firmware dispatch route — which is consistent with `_init` being
+called at slot-load time (one-shot, part of the load sequence) rather
+than in response to UI interaction.
+
+### 7.2 The template writer runs before `_init`
+
+The 53-word handler-state template writer at `c00c8ac0..c00c8e64`
+(documented in
+[STATE-ABI-PROGRESS.md §"Per-slot state template"](STATE-ABI-PROGRESS.md))
+has exactly one caller in the firmware: `c00ab614`. That call lives in
+the big slot-initialization sequence at `c00ab610..c00ab6e0`:
+
+```
+c00ab610   CALLP 0xc00cc698        ; setup
+c00ab614   CALLP 0xc00c8ac0        ; *** template writer ***
+c00ab618   CALLP 0xc00ba7b0        ; buffer comparison
+c00ab620   CALLP 0xc00d1410
+c00ab624   CALLP 0xc00c6ccc
+c00ab628   CALLP 0xc00c518c
+c00ab62c   CALLP 0xc00ccda4
+c00ab630   CALLP 0xc00c9da0        ; with B14[194], B4=10
+c00ab63c   CALLP 0xc00c9da0        ; with B14[185], B4=7
+c00ab648   CALLP 0xc00d6008
+c00ab64c   CALLP 0xc00c9da0        ; with B14[169], B4=6
+c00ab660   CALLP 0xc00cbf40
+c00ab668   CALLP 0xc00dee20        ; with B14[164]
+c00ab674   CALLP 0xc00ab540
+c00ab678   CALLP 0xc00b93a8
+c00ab688   CALLP 0xc00b8e64
+c00ab68c   CALLP 0xc00b93b0
+c00ab694   CALLP 0xc00b8e64
+c00ab6a0   CALLP 0xc00ce4c4
+c00ab6b8   CALLP 0xc00c8320        ; A12 = 1 here — likely the entry-1 walker
+```
+
+Since the template writer is what installs `state[7]`, `state[21]`,
+`state[24]`, `state[30]`, `state[31]`, `state[34]`, `state[35]`
+template values into the slot's 212-byte runtime block, and it is
+called early in this setup sequence, **the slot's state-callback
+table is fully populated before any user-effect code (`_init` or
+`_onf` or `_<param>_edit`) runs.** That is why the SyncProbe state[24]
+patch worked from edit-handler context: by the time the user-effect
+gets control, `state[24]` already holds `0xc00d4b40` or whatever the
+firmware put there.
+
+### 7.3 One of the later CALLPs invokes `_init`
+
+`c00c8320` is called at `c00ab6b8` with `A12 = 1`. The function is a
+small wrapper that calls `c00c82e0` then `c00bbeb8` and returns —
+`A12 = 1` survives across both calls, so whichever of those callees
+checks `A12` is the one that ultimately invokes `_init`. `c00bbeb8`
+is large and writes to a UI screen buffer (lots of `STH` of pixel-ish
+values); the actual init entry may live in `c00c82e0` or one of the
+many CALLPs `c00ab620..c00ab690` makes.
+
+Pinning down the exact call site needs another pass and probably a
+hardware breakpoint setup (out of scope here). For now, the safe
+operating assumption is:
+
+* `_init` is invoked at slot-load time by firmware code that runs
+  **after** the template writer at `c00ab614`.
+* The firmware enters `_init` with `A4 = state ptr` and `B3 = return
+  address`, matching the generic handler convention even though
+  the generic dispatcher itself does not handle entry_index=1.
+* `state[1]` (the per-slot RAM-table value used as the params-table
+  base) is initialized somewhere in the
+  `c00ab620..c00ab690` setup chain before `_init` runs — otherwise
+  LineSel's `LDW *A5[1],A4` followed by `state[34]` call would
+  store its 28-byte Coe data into garbage RAM.
+
+### 7.4 What this means for MatProbe
+
+The recipe in §2 is consistent with what the firmware does:
+
+* `_init` runs after the template writer, so all `state[7..35]`
+  callbacks are available.
+* `state[1]` is populated by the time `_init` runs, so `LDW *A5[1],A4`
+  is safe.
+* `_init` is called with `A4 = state ptr`, `B3 = return address` —
+  same convention as user-interaction handlers — so the LineSel-style
+  body (push_rts, save state in A10, do the setup call, materialize via
+  edit handlers, pop_rts) is the right shape.
+
+The remaining unknown (exact firmware call site) does not change the
+recipe; it only affects how we would debug a freeze. If MatProbe v1
+freezes, the next probe should isolate whether the freeze is in the
+setup call or in the edit-handler call, not in the firmware entry
+sequence (which we now know runs cleanly through to `_init` for the
+NOP-stub init that SyncProbe ships).
+
+## 8. Where this changes other docs
 
 * [docs/STATE-ABI-PROGRESS.md](STATE-ABI-PROGRESS.md) §"Init And
   Edit-Handler ABI Status": the "calling a cloned LineSel edit handler
