@@ -448,6 +448,74 @@ values to zero or a constant near zero. A correct sync probe needs to
 bypass state[7] entirely, or supply state[7] with a value already in
 the post-SHL range it expects (`< ~0.14` raw).
 
+#### state[7] → c00cc8c8 → the audio↔UI postbox at 0x11f03b00
+
+Tracing state[7]'s call chain past the float-normalize phase lands at
+`c00cc8c8`, which is a **postbox-style IPC writer** between the
+audio-context handler and the UI-context updater. The postbox lives
+at `0x11f03b00..0x11f03b1f` — a shared region, not per-slot — and
+the template writer points **`state[11]`** at it for every slot
+(template value `0x11f03b08`, same for all slots).
+
+`c00cc8c8`'s actual work:
+
+```
+*(0x11f03b04) = 0x11f03b18      ; next-message link?
+*(0x11f03b0c) = caller's A6     ; the param-slot offset/value
+*(0x11f03b14) = caller's A4     ; the params address being updated
+*(0x11f03b1c) = 1               ; sentinel: "message pending"
+CALLP c00cebc0                  ; wake UI / yield
+loop: while (*(0x11f03b1c) != 0) CALLP c00cebc0  ; spin until UI processes
+```
+
+So when the LineSel edit handler tail-calls state[7], the firmware:
+
+1. Normalizes the float value (denormal/clamp/scale).
+2. Posts a message in the UI postbox describing which param slot was
+   touched and what value.
+3. **Synchronously waits** for the UI thread to ack the message before
+   returning.
+
+That's why a borrowed-handler probe like SyncProbe v1 sees its return
+value silently dropped: even when the patched LDW reads `state[24]`
+instead of `state[31]`, the value still flows through state[7]'s
+sanitize-then-postbox path, which expects post-SHL-22 raw knob values
+(`< ~0.14`). Larger or oddly-shaped uint32 returns from `state[24]`
+get clamped to zero before they reach the params array.
+
+A "bypass-state[7]" probe writes the raw `state[24]` return value
+**directly** to `params[5]` from the custom handler (no SHL, no tail
+call). The trade-off: the UI postbox is not updated, so the displayed
+knob position is wrong. For diagnostic purposes that is fine.
+
+#### LineSel coefficient population — the full chain
+
+Cross-referencing the LineSel edit handlers, onf, and state[34]
+copy/init routine establishes the complete K-coefficient update path:
+
+| coefficient | populated by | through |
+|-------------|--------------|---------|
+| K0 (`params[0]`) | `Fx_FLT_LineSel_onf`, on bypass-toggle | calls state[7] with `B4 = 0.0f` (off) or `B4 = 1.0f` (on); state[7] normalizes and posts to UI |
+| K4 (`params[4]`) | `state[34]`'s post-copy normalizer at `c00dde40+` | copies 28 zeros from `_Fx_FLT_LineSel_Coe`, then the post-copy block at `c00dde40+` reshapes/defaults the floats (likely K4 = 1.0) |
+| K5 (`params[5]`) | `Fx_FLT_LineSel_EfxLvl_edit`, on knob turn | sets `A4 = params + 20` and tail-calls state[7] with the new knob value as `B4` |
+| K6 (`params[6]`) | `Fx_FLT_LineSel_OutLvl_edit`, on knob turn | sets `A4 = params + 24` and tail-calls state[7] with the new knob value as `B4` |
+
+`state[34]` (= template value `0xc00ddda0`) is the load-bearing piece.
+The first part of `c00ddda0..c00dde38` does a byte-level `memcpy` from
+`B4` (source) to `A5` (= `A4` = `state[1]` = params base) of size `A6`
+bytes. For LineSel that's 28 zero bytes. The block at
+`c00dde40..c00dded4` then runs additional work on the destination —
+loading a 0x3FE constant, comparing exponents, conditional shifts
+that look like a single-precision range normalization. This is
+probably where K4 gets its non-zero default; without it, the audio
+formula collapses to zero (`pedal_bus = (1-K0) × sample × 0 × K6 = 0`).
+
+The full normalizer hasn't been hand-decoded yet, but the practical
+takeaway is: **the `_Coe` table on disk does not need real
+coefficient values — `state[34]` does the work to make them safe
+defaults.** A custom plugin that calls `state[34]` from its `_init`
+gets the same treatment, even when the `_Coe` table is all zeros.
+
 The audio loop processes **8 samples per channel × 2 channels = 16
 floats per call**, channel-interleaved as `LLLLLLLL RRRRRRRR`.
 Implementations use a 2-iteration outer loop over channels (`MVK 2,B0`)

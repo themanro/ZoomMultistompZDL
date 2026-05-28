@@ -1,0 +1,32 @@
+{
+  "effect_name": "SyncPrV2",
+  "comment": "Hardware probe: bypass state[7]. The v1 / v1.5 SyncProbe family invoked state[24] successfully but the SHL-22 plus state[7] normalize-and-postbox chain dropped every return to a constant near zero. This v2 patches the same LineSel-cloned knob1 blob TWICE: state[31] -> state[24] at +0x65 (same as v1), and at +0x80..+0xab the SHL/state[7] tail-call is REPLACED with a direct STW.D1T1 A4,*+A0[5] that writes state[24]'s raw uint32 return into params[5], then pops B3 and returns. No UI postbox sync, no float normalization, no SHL. params[5] is whatever state[24] hands back.\n\nWhat to watch on hardware:\n  1. Load: does the unbypassed audio pass through?\n  2. Edit-mode open: does the knob view stay alive?\n  3. Turn the Sync knob: does the audio gain change at all?\n  4. Press the left knob (tap tempo) at a steady ~120 BPM with Sync at any non-OFF value:\n     does the gain pulse / change as the BPM changes?\n\nThe audio body maps the bottom 8 bits of params[5] (interpreted as a uint32 bit\npattern, NOT a float) to a 0..2 linear gain. So:\n  state[24] return = 0       -> silent\n  state[24] return small     -> quiet\n  state[24] return large     -> loud, plus 256-step periodic wrap-around\nA value that tracks BPM should be audible as a continuously varying gain.",
+
+  "audio_func_name": "Fx_FLT_SyncPrV2",
+
+  "gid": 2,
+  "gid_comment": "0x02 = Filter category. Same as the v1 SyncProbe family.",
+
+  "fxid": 414,
+  "fxid_comment": "0x019E. New FXID so it sits next to SyncPrB4 / SyncPrB6 / SyncPrBA in the browser.",
+
+  "fxid_version": "1.00",
+  "flags_byte": 1,
+
+  "params": [
+    {
+      "name": "Sync",
+      "type": "knob",
+      "max": 15,
+      "default": 0,
+      "flags": 40,
+      "flags_comment": "0x28 — same Pattern B tempo-sync bit as the v1 SyncProbes.",
+      "audio_min": 0.0,
+      "audio_max": 1.0,
+      "audio_default": 0.0,
+      "comment": "Single Sync slot. The bypass-state[7] handler writes state[24]'s raw uint32 return directly here."
+    }
+  ],
+
+  "audio_nop": false
+}
