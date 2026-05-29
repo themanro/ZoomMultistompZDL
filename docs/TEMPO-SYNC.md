@@ -1,6 +1,6 @@
 # Tempo Sync
 
-Last updated: 2026-05-19
+Last updated: 2026-05-30
 
 This file documents how Zoom's stock delay effects receive the host tempo
 (BPM) and convert it to delay-time samples. It is reconstructed by static
@@ -10,8 +10,19 @@ plus the `GetString_StompDelaySync` formatter). Older delays
 (`DELAY`, `ANLGDLY`, `TAPEECHO`) follow the same pattern with different
 naming.
 
-This is a static doc. Hardware verification is the obvious next step; see
-"Open" at the bottom for what still needs a probe.
+## TL;DR — what we actually do for custom effects (2026-05-30)
+
+After two rounds of blind-scan BpmHunt probes (v1..v4) found no
+BPM-tracking firmware address near `0xc009c1a0`, the static trace
+through TapeEcho3 reveals **why we never found it**: TapeEcho3 never
+reads BPM directly. The host firmware owns BPM internally and exposes
+only "compute a sync-adjusted delay value for this slot" via the
+state callbacks.
+
+**Practical rule:** stop hunting for a global BPM address. To add
+sync to a custom effect, replicate TapeEcho3's `DLY_EP3_Calc_DelayTime`
+call pattern exactly and use the value the host returns. Details
+below in §4.
 
 ## 1. Reference effect: TAPEECH3
 
@@ -102,53 +113,160 @@ For custom code, the practical rule is:
 * Other `B4` values may return useful per-slot data, but each one
   needs verification before use.
 
-**BPM is not in this table.** The table is per-slot and the BPM is a
-global. So `state[31]` is *not* a BPM source — finding BPM needs a
-different lead. Likely candidates: a separate firmware global near
-`0xc009xxxx`, a slot of `ctx[N]` we haven't decoded, or a stored value
-that the tap-tempo handler updates. Tracked as the open question
-this file was previously chasing.
+**BPM is not in this table** (and not anywhere a custom effect can
+reach by direct read — see §4). The state[31] table is per-slot and
+BPM is a host-internal global. `state[31]` is *not* a BPM source,
+but with the `B4=0x0f3c` trick it does reach a **secondary firmware
+table at `0xc009fe90`** that the host uses internally for tempo-sync
+computation. See §4 for the full algorithm.
 
-## 4. The TAPEECH3 sync algorithm
+### Update: BpmHunt scan results (closed 2026-05-30)
 
-`Fx_DLY_TapeEcho3_time_edit` and its helper `DLY_EP3_Calc_DelayTime`
-together implement:
+A series of `src/hardware_probes/bpmhunt/` probes used the audio
+function as a memory inspector to search for any firmware-RAM word
+that varied with tap-tempo:
+
+| ver | window | step | gain mapping | result |
+|---:|---|---:|---|---|
+| v1 | `0xc009c1a0..0xc009c1dc` | 4 B | low byte | no tap-tempo correlation |
+| v2 | `0xc009c000..0xc009ffff` | 1024 B | byte-sum | no correlation; mechanism confirmed working |
+| v3 | `0xc009c000..0xc009c1e0` (pre-state[31]-table gap) | 32 B | byte-sum | weak hit at `0xc009c080` (louder at BPM 75 and 250) |
+| v4 | `0xc009c080..0xc009c08c` (4 words around v3 hit), per-byte isolation | byte index | per-byte | no clear single byte tracking BPM |
+
+The v3 weak hit at `0xc009c080` does not survive v4's per-byte
+narrowing, suggesting `0xc009c080` is a host scratch word that
+indirectly correlates with BPM (perhaps a phase accumulator updated
+by the tempo task) rather than the BPM value itself. **No probe
+found a firmware-RAM address that holds BPM as a directly-readable
+value.** This is consistent with the §4 finding: the host never
+exposes BPM as a global to ZDL code — it folds tempo into
+state[24]'s output and into the `0xc009fe90` secondary table.
+
+Conclusion: stop looking for a BPM address. Use the algorithm in §4.
+
+## 4. The TAPEECH3 sync algorithm (re-traced 2026-05-30)
+
+After the v3 BpmHunt result confirmed BPM is **not** at any 32-byte
+granularity in `0xc009c000..0xc009c1e0`, a re-trace of the actual
+TapeEcho3 disassembly (`/tmp/zoom-zdl-dis/TapeEcho3.ZDL.asm` lines
+553-704) shows the algorithm is more abstract than the earlier
+pseudocode implied. The host firmware owns BPM; the effect just
+asks the host for "the right delay value for my current SYNC setting".
+
+### The handler call pattern (verbatim from the asm)
 
 ```c
-void time_edit(state) {
-    int raw_param   = state[2];                  // per-slot host value
-    int delay_calc  = DLY_EP3_Calc_DelayTime();  // see below
-    int division    = state[30](state[0]);       // 4 == free; else index
-    int param_base  = state[1] + 0x158;          // params + 344 (offset table)
+int DLY_EP3_Calc_DelayTime(ctx) {
+    // First state[31] call — read the SYNC knob value
+    int sync_value = state[31](
+        A4 = ctx[0],         // slot index
+        B4 = 6               // command 6 = "read SYNC slot"
+    );  // returns 0..15 (0 = OFF, 1..15 = division index)
 
-    if (division == 4) {
-        // Free time: state[31] with B4=2 reads raw knob
-        delay_samples = compute_from_raw_knob();
+    if (sync_value == 0) {
+        // Free-time path — read raw TIME knob and add 10
+        int raw = state[31](
+            A4 = ctx[0],     // slot
+            B4 = 4           // command 4 = "read TIME slot"
+        );
+        return raw + 10;
     } else {
-        // Sync mode: compute (sample_rate * 60 / BPM) * division / 10
-        // 185 << 8 = 0xb900 is the sample-rate constant for 44.1kHz
-        int bpm        = state[24](command=10);
-        int delay      = (47360 * bpm) / 10;
-        int q13_delay  = delay << 13;            // Q13 fixed-point conversion
-        params[10] = q13_delay;
-        params[18] = q13_delay;
-    }
-}
-
-int DLY_EP3_Calc_DelayTime(state) {
-    int sync_on = state[31](command=6);          // is sync on?
-    if (sync_on) {
-        int raw = state[31](command=4);          // get raw time index
-        return state[24](command=raw + 1);       // BPM→samples for this division
-    } else {
-        return state[31](command=4) + 10;        // free-time path with offset
+        // Sync-on path — two consecutive host calls, weird arg shapes
+        int byte = (ctx[0] - 1) & 0xff;
+        int x = state[31](
+            A4 = byte,
+            B4 = 0x0f3c      // = 3900; reads 0xc009fe90 + 44*byte
+        );                   // = secondary firmware table, NOT the per-slot table
+        int y = state[24](
+            A4 = x,
+            B4 = 100         // explicit MVK B4,0x0064 in B-branch delay slot
+        );
+        return y / 100;      // integer divide via __divu
     }
 }
 ```
 
-Two locations in the params table receive the computed delay:
-`params[10]` and `params[18]`. The audio function (`Fx_DLY_TapeEcho3`)
-reads those, not the raw knob value.
+### Why the second `state[31]` call uses `B4 = 0x0f3c`
+
+`state[31]`'s body (5 instructions at `c00b820c`) computes:
+
+```
+target = 0xc009c1a0 + 44 * A4 + 4 * B4
+```
+
+With `B4 = 0x0f3c`, the term `4 * B4 = 0x3cf0`, so:
+
+```
+target = 0xc009c1a0 + 0x3cf0 + 44 * byte
+       = 0xc009fe90 + 44 * byte
+```
+
+This is a **second 44-byte-stride table at `0xc009fe90`**, not the
+per-slot table at `0xc009c1a0`. Same arithmetic, different base.
+Each row appears to hold pre-computed sync-division constants that
+state[24] turns into a delay value with the current BPM folded in.
+
+### Why state[24] works as "BPM-aware math" here despite being float-shaped
+
+Reading `c00d4b40` (state[24]'s template value) shows ATAN2-like
+float math. With this call's `A4 = x` (some int from the secondary
+table) and `B4 = 100` (the explicit `MVK B4,0x0064` in the
+`B A1` delay slot at `0x7a8`), the function does its float math
+on whatever the table value happens to be. The host-built table at
+`0xc009fe90` evidently contains values pre-arranged so that
+state[24]'s math + the `/100` post-step yields a tempo-tracked
+delay in the effect's expected fixed-point format.
+
+That's the key insight: **we don't have to understand the math —
+we just have to call it the same way TapeEcho3 does**. The host
+arranged the table and the function to be self-consistent.
+
+### What time_edit does with the returned delay
+
+```c
+void time_edit(ctx) {
+    ctx_local = ctx;                              // A10
+    params    = ctx[1];                           // A11
+    int v2    = ctx[2];                           // A12
+    int delay = DLY_EP3_Calc_DelayTime(ctx);
+
+    // Stash delay value at params + 0x1FC (= params[127])
+    *((int *)(params + 0x158 + 164)) = delay;     // params[127] = delay
+
+    int sync_mode = state[30](ctx);
+    if (sync_mode == 0) goto L4;                  // no-sync path
+
+    v2 += 0x230;                                  // A12 += 560
+
+    if (state[30](ctx) != 4) {                    // sync_mode != "free time"
+        // Re-check SYNC slot via state[31]; if non-zero, goto L4
+        if (state[31](ctx[0], 6) != 0) goto L4;
+    }
+
+    // L3: tape-mute close, then store delay-derived value
+    tapmuteClose(ctx);
+    int delay_q13 = ((441 * params[127]) / 10) << 13;  // Q13 fixed-point
+    params[(0x158/4) + 10] = delay_q13;                // params + 0x180
+    ctx[18]                = delay_q13;
+    // ... downstream uses ctx[18] in audio function
+}
+```
+
+### Practical recipe for a custom sync-aware effect
+
+In a TapeEcho4-style custom effect:
+
+1. **Declare a SYNC knob slot** with `max=15`, `pedal_flags=0x28`.
+   (Same as TapeEcho3's `SYNC` param, same as `SyncProbe v1` did.)
+2. **In the SYNC knob's edit handler**, replicate `DLY_EP3_Calc_DelayTime`
+   verbatim — the two `state[31]` calls plus the conditional
+   `state[24]` call. Use the returned value as your delay-in-samples.
+3. **Store the result** at a fixed `params[N]` slot. The audio function
+   reads from there each block.
+
+There is no BPM number passed to the effect at any point. The
+host's tempo state is folded into the value returned by `state[24]`
+in the sync-on path.
 
 ## 5. `GetString_StompDelaySync` — the division label formatter
 
