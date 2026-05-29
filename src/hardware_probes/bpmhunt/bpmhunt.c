@@ -1,23 +1,20 @@
 /*
- * bpmhunt.c
+ * bpmhunt.c — v3 (narrow scan on the 0xc009c0xx..0xc009c1xx gap)
  *
- * Memory-inspector probe. The Addr knob selects a 4-byte offset into the
- * firmware RAM region around 0xc009c1a0 (the base of state[31]'s per-slot
- * table). The audio function dereferences the chosen address and turns
- * the low 8 bits of the read value into a 0..2 audible gain.
+ * v1 covered 64 B at 4-byte step around 0xc009c1a0 (the state[31] table
+ * base): no tap-tempo correlation. v2 widened to 16 KB at 1024-byte step
+ * covering 0xc009c000..0xc009ffff: still no correlation, but the
+ * positions louder/quieter pattern confirms the direct read mechanism
+ * works. v2 sampled 0xc009c000 then jumped to 0xc009c400, leaving the
+ * 0xc009c004..0xc009c19c region (≈410 bytes immediately BEFORE the
+ * state[31] table) completely unscanned. Firmware globals tend to
+ * cluster adjacent to related per-slot tables, so that gap is the
+ * highest-probability remaining region.
  *
- * If a specific knob setting produces audio whose gain CHANGES when the
- * user taps the tempo button at different BPMs, that knob's address
- * points at BPM-related firmware memory.
- *
- * Risks:
- *   - Reading arbitrary firmware addresses from the audio context may
- *     fault if the address is outside the audio-context's read view.
- *     We restrict the scan window to known-valid firmware-RAM addresses
- *     in the 0xc009c1a0..0xc009c1dc range (used by stock effects via
- *     state[31]).
- *   - The state[31] postbox is preserved (the LineSel handler is
- *     unpatched), so user-interaction freeze risk is minimal.
+ * v3 narrows back down: 16 positions × 32-byte step covers
+ * 0xc009c000..0xc009c1e0 — i.e. ALL of the previously-unscanned gap
+ * plus the first 64 bytes of the state[31] table (re-tested as a
+ * cross-check against v1).
  */
 
 #include <stdint.h>
@@ -28,9 +25,8 @@
 
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
-/* Base of state[31]'s per-slot table — also the start of the firmware
- * RAM globals we want to scan. */
-#define FIRMWARE_RAM_BASE  0xc009c1a0u
+#define FIRMWARE_RAM_BASE  0xc009c000u
+#define FIRMWARE_RAM_STEP  32u
 
 void Fx_FLT_BpmHunt(unsigned int *ctx)
 {
@@ -54,13 +50,21 @@ void Fx_FLT_BpmHunt(unsigned int *ctx)
     if (idx < 0) idx = 0;
     if (idx > 15) idx = 15;
 
-    /* Read the firmware-RAM word at base + 4*idx. The address is in
-     * the same range stock effects access via state[31]. */
-    volatile unsigned int *target = (volatile unsigned int *)(FIRMWARE_RAM_BASE + ((unsigned int)idx << 2));
+    /* Read the firmware-RAM word at base + step*idx. */
+    volatile unsigned int *target = (volatile unsigned int *)(FIRMWARE_RAM_BASE + (unsigned int)idx * FIRMWARE_RAM_STEP);
     unsigned int value = *target;
 
-    /* Bottom 8 bits of the read value -> 0..2 gain. */
-    float gain = (float)(value & 0xFFu) * (2.0f / 255.0f);
+    /* Sum all four bytes -> 0..1020. Sensitive to changes in ANY byte
+     * position, so BPM stored as float, big-endian int, little-endian
+     * int, packed half-words, etc. all produce visible gain swings.
+     * Mapped to 0..2 by dividing by 510. */
+    unsigned int byte_sum =
+        ((value >> 24) & 0xFFu) +
+        ((value >> 16) & 0xFFu) +
+        ((value >>  8) & 0xFFu) +
+        ( value        & 0xFFu);
+    float gain = (float)byte_sum * (1.0f / 510.0f);
+    if (gain > 2.0f) gain = 2.0f;
 
     int i;
     for (i = 0; i < 16; i++) {
