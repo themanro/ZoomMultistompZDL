@@ -1,63 +1,63 @@
-# BpmHunt — memory-inspector probe (v3, narrowed onto pre-table gap)
+# BpmHunt — memory-inspector probe (v4, per-byte isolation around the hit)
 
 A diagnostic probe that turns the audio function into a memory
-inspector. The single `Addr` knob (0..15) selects one of 16 firmware-RAM
-words across a **512-byte window** starting at `0xc009c000`. The audio
-function reads `*(0xc009c000 + 32 * knob_index)` directly and turns
-the **sum of all four bytes** of the read value into a 0..2 audible
-gain.
+inspector. The single `Addr` knob (0..15) selects a (word, byte)
+combination across 4 candidate words near `0xc009c080` and routes
+ONE isolated byte into a 0..2 audible gain.
 
 **v1 result (64-byte window at 4-byte step, low-byte gain):** no
 tap-tempo correlation at any of 16 positions in `0xc009c1a0..0xc009c1dc`.
-**v2 result (16 KB window at 1024-byte step, byte-sum gain):** still
-no tap-tempo correlation across `0xc009c000..0xc009ffff`. User reported
-positions 2 (`0xc009c800`), 8 (`0xc009e000`), 12 (`0xc009f000`), 13
-(`0xc009f400`) read louder but none changed with BPM — confirming
-the read mechanism works and that those positions land in code or
-pointer-shaped data.
+**v2 result (16 KB window at 1024-byte step, byte-sum gain):** no
+correlation across `0xc009c000..0xc009ffff`, but positions 2, 8, 12,
+13 read louder confirming the mechanism works.
+**v3 result (512-byte window at 32-byte step covering the pre-table
+gap):** **HIT** at knob 4 = `0xc009c080` — byte-sum varies with tap
+tempo. At BPM 75 and BPM 250 the gain reads "a bit louder" than at
+other BPMs. The non-monotonic 75/250 response suggests the byte-sum
+is sensing a 32-bit value where different bytes dominate at different
+BPM ranges (likely a period-in-samples or a fixed-point ratio).
 
-**The unscanned gap:** v2 sampled exactly one word at `0xc009c000`,
-then jumped 1 KB past the state[31] per-slot table to `0xc009c400`.
-That left `0xc009c004..0xc009c19c` (≈410 bytes immediately BEFORE the
-state[31] table) untouched. Global firmware data tends to cluster
-adjacent to related per-slot tables, so v3 focuses there.
-
-No handler patches — LineSel handler does its normal job (read knob,
-normalize, post to UI via state[7]), and the audio function does the
-inspection. The `Addr` slot's descriptor carries `pedal_flags = 0x28`
-to expose the **TAP UI** so we can drive BPM changes.
+v4 confirms-and-narrows: span 4 candidate words around the v3 hit
+and isolate ONE BYTE per knob position to identify which exact
+(word, byte) pair tracks BPM.
 
 ## Scan layout
 
-| knob | address | region |
-|---:|---|---|
-| 0 | `0xc009c000` | start of unexplored gap |
-| 1 | `0xc009c020` | |
-| 2 | `0xc009c040` | |
-| 3 | `0xc009c060` | |
-| 4 | `0xc009c080` | |
-| 5 | `0xc009c0a0` | |
-| 6 | `0xc009c0c0` | |
-| 7 | `0xc009c0e0` | |
-| 8 | `0xc009c100` | |
-| 9 | `0xc009c120` | |
-| 10 | `0xc009c140` | |
-| 11 | `0xc009c160` | |
-| 12 | `0xc009c180` | last 32 B before the state[31] table |
-| 13 | `0xc009c1a0` | state[31] table[0][0] (cross-check vs v1) |
-| 14 | `0xc009c1c0` | state[31] table inside slot 0/1 |
-| 15 | `0xc009c1e0` | state[31] table inside slot 1 |
+Each knob position reads ONE WORD and isolates ONE BYTE of it:
+
+| knob | word address | byte selected | bit range |
+|---:|---|---:|---|
+| 0 | `0xc009c080` | 0 | [ 7: 0] |
+| 1 | `0xc009c080` | 1 | [15: 8] |
+| 2 | `0xc009c080` | 2 | [23:16] |
+| 3 | `0xc009c080` | 3 | [31:24] |
+| 4 | `0xc009c084` | 0 | [ 7: 0] |
+| 5 | `0xc009c084` | 1 | [15: 8] |
+| 6 | `0xc009c084` | 2 | [23:16] |
+| 7 | `0xc009c084` | 3 | [31:24] |
+| 8 | `0xc009c088` | 0 | [ 7: 0] |
+| 9 | `0xc009c088` | 1 | [15: 8] |
+| 10 | `0xc009c088` | 2 | [23:16] |
+| 11 | `0xc009c088` | 3 | [31:24] |
+| 12 | `0xc009c08c` | 0 | [ 7: 0] |
+| 13 | `0xc009c08c` | 1 | [15: 8] |
+| 14 | `0xc009c08c` | 2 | [23:16] |
+| 15 | `0xc009c08c` | 3 | [31:24] |
+
+A byte that holds raw BPM (~40..240) will swing gain ~0.3..2.0
+between BPM 75 and BPM 250 — much louder than v3's byte-sum
+variation. A byte that holds a stable upper half of a pointer (e.g.,
+`0xc0`) will be saturated-constant. A byte that's all-zero will be
+silent.
 
 ## Audio interpretation
 
 ```c
-unsigned int value = *(volatile unsigned int *)(0xc009c000 + 32 * idx);
-unsigned int byte_sum =
-    ((value >> 24) & 0xFF) +
-    ((value >> 16) & 0xFF) +
-    ((value >>  8) & 0xFF) +
-    ( value        & 0xFF);
-float gain = (float)byte_sum / 510.0f;  /* clamped 0..2 */
+int word_idx = idx >> 2;     /* 0..3 -> 0xc009c080, +4, +8, +c */
+int byte_idx = idx & 3;      /* 0..3 -> low byte .. high byte */
+unsigned int value = *(volatile unsigned int *)(0xc009c080 + word_idx * 4);
+unsigned int byte = (value >> (byte_idx * 8)) & 0xFF;
+float gain = (float)byte * (2.0f / 255.0f);
 outBuf[i] += fxBuf[i] * gain;
 ```
 
@@ -85,26 +85,34 @@ So:
 
 ## Interpretation table
 
-After sweeping, record what you observed at each knob setting (v3 scan
-covers 512 B at 32-byte step starting from `0xc009c000`):
+After sweeping, record what you observed at each knob setting (each
+position isolates one byte of one of four candidate words):
 
-| knob | address | observed audio | tap-tempo response |
+| knob | (word, byte) | observed audio | tap-tempo response |
 |---:|---|---|---|
-| 0 | `0xc009c000` | | |
-| 1 | `0xc009c020` | | |
+| 0 | (0xc009c080, byte 0) | | |
+| 1 | (0xc009c080, byte 1) | | |
+| 2 | (0xc009c080, byte 2) | | |
+| 3 | (0xc009c080, byte 3) | | |
+| 4 | (0xc009c084, byte 0) | | |
 | ... | ... | | |
-| 15 | `0xc009c1e0` | | |
+| 15 | (0xc009c08c, byte 3) | | |
 
-If **no setting** shows tap-tempo response, BPM is stored outside
-both v1's 64-byte window AND this 512-byte gap — meaning it's not
-clustered with the state[31] table at all. Next probe should pivot to
-a completely different memory region (e.g., the per-slot handler state
-at `0x11f03000..0x11f037ff`, globals near `0xc00fxxxx`, or scan the
-DDR-ish region around `0xc00a0000..0xc00b0000`).
-
-If **a setting tracks BPM**, that address is within a 32-byte block; a
-follow-up probe narrows from 32-byte step to 4-byte step within that
-block to identify the exact word.
+Recommended test cadence:
+  1. Sweep through 0..15 at a baseline BPM (say 120). Note which
+     positions are silent (byte = 0), constant-loud (byte ≈ 0xc0..0xff
+     suggesting pointer high byte), or mid-range (byte 0x10..0x80,
+     candidate BPM byte).
+  2. At the candidate positions, tap BPM 75 → listen → tap BPM 250 →
+     listen. The position whose gain SWINGS dramatically between the
+     two BPMs is the BPM byte.
+  3. If exactly one knob position has the swing, that single (word,
+     byte) pair holds raw BPM. If two adjacent knob positions
+     (i.e., two bytes of the same word) both swing, BPM is stored as
+     a 16-bit value spanning those two bytes.
+  4. Once identified, the BPM source address is fixed and we can
+     design a sync handler that reads it directly without any of the
+     state[31] indirection.
 
 ## Risks
 

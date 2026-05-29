@@ -1,20 +1,36 @@
 /*
- * bpmhunt.c — v3 (narrow scan on the 0xc009c0xx..0xc009c1xx gap)
+ * bpmhunt.c — v4 (per-byte isolation around 0xc009c080)
  *
- * v1 covered 64 B at 4-byte step around 0xc009c1a0 (the state[31] table
- * base): no tap-tempo correlation. v2 widened to 16 KB at 1024-byte step
- * covering 0xc009c000..0xc009ffff: still no correlation, but the
- * positions louder/quieter pattern confirms the direct read mechanism
- * works. v2 sampled 0xc009c000 then jumped to 0xc009c400, leaving the
- * 0xc009c004..0xc009c19c region (≈410 bytes immediately BEFORE the
- * state[31] table) completely unscanned. Firmware globals tend to
- * cluster adjacent to related per-slot tables, so that gap is the
- * highest-probability remaining region.
+ * v3 found the hit: at base+0x80 (= 0xc009c080) the byte-sum changes
+ * with tap tempo — at BPM 75 and BPM 250 the gain reads "a bit louder"
+ * than at other BPMs. That's our first BPM-correlated word. The
+ * non-monotonic 75/250 response suggests the gain is sensing a 32-bit
+ * value (probably period-in-samples or a fixed-point ratio) where
+ * different BPM ranges activate different bytes.
  *
- * v3 narrows back down: 16 positions × 32-byte step covers
- * 0xc009c000..0xc009c1e0 — i.e. ALL of the previously-unscanned gap
- * plus the first 64 bytes of the state[31] table (re-tested as a
- * cross-check against v1).
+ * v4 confirms-and-narrows: the knob spans 4 candidate words around
+ * the hit (0xc009c080, 0xc009c084, 0xc009c088, 0xc009c08c) AND
+ * isolates ONE BYTE per knob position. So:
+ *
+ *   idx  byte_idx  word_base    field read
+ *   ---  --------  -----------  ----------
+ *    0   byte 0    0xc009c080   bits [ 7: 0]
+ *    1   byte 1    0xc009c080   bits [15: 8]
+ *    2   byte 2    0xc009c080   bits [23:16]
+ *    3   byte 3    0xc009c080   bits [31:24]
+ *    4   byte 0    0xc009c084   bits [ 7: 0]
+ *    5   byte 1    0xc009c084   bits [15: 8]
+ *    ...
+ *   15   byte 3    0xc009c08c   bits [31:24]
+ *
+ * Each knob position turns one isolated byte into a 0..2 gain. A byte
+ * that holds raw BPM (~40..240) will show a HUGE swing between BPM 75
+ * and BPM 250 (gain ~0.6 vs ~2.0). A byte that holds a stable upper
+ * half of a pointer (0xc0) will be saturated-constant. A byte from a
+ * fixed-point period will vary in some predictable way.
+ *
+ * After sweeping, the user reports which knob positions track BPM,
+ * and we identify the exact (word, byte) pair holding BPM info.
  */
 
 #include <stdint.h>
@@ -25,8 +41,7 @@
 
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
-#define FIRMWARE_RAM_BASE  0xc009c000u
-#define FIRMWARE_RAM_STEP  32u
+#define FIRMWARE_RAM_BASE  0xc009c080u
 
 void Fx_FLT_BpmHunt(unsigned int *ctx)
 {
@@ -39,10 +54,8 @@ void Fx_FLT_BpmHunt(unsigned int *ctx)
     unsigned int *magicDst = ZDL_PTR(unsigned int *, *(unsigned int *)ZDL_PTR(unsigned int *, ctx[11]));
     *magicDst = *magicSrc;
 
-    /* LineSel handler stores raw knob in roughly 0..0.14 float for a max=15
-     * slot (each unit of knob travel ≈ 0.009 in raw). Map to a 0..15 idx,
-     * clamping defensively in case the host adjusts the curve with the
-     * pedal_flags=0x28 sync-style slot. */
+    /* LineSel handler stores raw knob in roughly 0..0.14 float for a
+     * max=15 slot. Map to 0..15. */
     float raw = params[BPMHUNT_ADDR_SLOT];
     if (raw < 0.0f) raw = -raw;
     if (raw > 1.0f) raw = 1.0f;
@@ -50,21 +63,18 @@ void Fx_FLT_BpmHunt(unsigned int *ctx)
     if (idx < 0) idx = 0;
     if (idx > 15) idx = 15;
 
-    /* Read the firmware-RAM word at base + step*idx. */
-    volatile unsigned int *target = (volatile unsigned int *)(FIRMWARE_RAM_BASE + (unsigned int)idx * FIRMWARE_RAM_STEP);
-    unsigned int value = *target;
+    /* idx 0..15 → (word 0..3, byte 0..3). */
+    int word_idx = idx >> 2;       /* 0..3 -> 0xc009c080, +4, +8, +c */
+    int byte_idx = idx & 3;        /* 0..3 -> low byte .. high byte */
 
-    /* Sum all four bytes -> 0..1020. Sensitive to changes in ANY byte
-     * position, so BPM stored as float, big-endian int, little-endian
-     * int, packed half-words, etc. all produce visible gain swings.
-     * Mapped to 0..2 by dividing by 510. */
-    unsigned int byte_sum =
-        ((value >> 24) & 0xFFu) +
-        ((value >> 16) & 0xFFu) +
-        ((value >>  8) & 0xFFu) +
-        ( value        & 0xFFu);
-    float gain = (float)byte_sum * (1.0f / 510.0f);
-    if (gain > 2.0f) gain = 2.0f;
+    volatile unsigned int *target =
+        (volatile unsigned int *)(FIRMWARE_RAM_BASE + (unsigned int)word_idx * 4u);
+    unsigned int value = *target;
+    unsigned int byte = (value >> ((unsigned int)byte_idx * 8u)) & 0xFFu;
+
+    /* Single-byte gain: 0..255 → 0..2. A BPM-shaped byte (75..250)
+     * fills most of the range. */
+    float gain = (float)byte * (2.0f / 255.0f);
 
     int i;
     for (i = 0; i < 16; i++) {
