@@ -488,6 +488,24 @@ A "bypass-state[7]" probe writes the raw `state[24]` return value
 call). The trade-off: the UI postbox is not updated, so the displayed
 knob position is wrong. For diagnostic purposes that is fine.
 
+**Hardware finding (SyncPrV2, 2026-05-29):** bypassing state[7]
+**freezes the pedal** on knob interaction. The handler returns
+cleanly (load and unbypass are fine) but the very first knob touch
+hangs the pedal — the dispatcher or UI thread is blocking on the
+postbox sentinel at `0x11f03b1c` that the bypassed handler never
+sets. So state[7] is **not optional** for user-interaction handlers:
+the postbox IPC is part of the contract, not a sanitization
+convenience.
+
+The corrected design for a sync-aware probe is therefore: keep the
+state[7] tail-call intact, but **shape the value it receives** so it
+survives the `SHL.S1 A4, 0x16` + state[7] normalize chain. The
+simplest shaping is `A4 = state[24]_return & 0xFF` — mask to the
+0..255 raw-knob range state[7]'s normalizer expects. The resulting
+`params[5]` then carries a value in the LineSel `0..~0.14` float
+range that varies with the low 8 bits of state[24]'s output, while
+the UI postbox stays correctly synced.
+
 #### LineSel coefficient population — the full chain
 
 Cross-referencing the LineSel edit handlers, onf, and state[34]

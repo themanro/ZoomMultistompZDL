@@ -103,6 +103,7 @@ Audio buffers are float32. The observed stock/custom-safe pattern processes
 | `OTT` | Custom Dynamics-category OTT-style compressor; builds with small ctx[3] state, no `.fardata`, no `.text`, and no object relocations. Hardware result pending. |
 | `InitProbe` | Object-defined init setup call loads; init-time cloned edit-handler call freezes on boot. |
 | `SyncProbe` | One-byte patch of `linesel_handlers.bin` (`state[31]→state[24]`) plus a `pedal_flags=0x28, max=15` descriptor entry; loads, unbypass passes audio, knob interaction does not freeze, tap tempo (left-knob click) does not freeze. Returned value is static under tap tempo with `B4=2`, so `state[24]` is reachable but the call protocol is still wrong. Confirms the descriptor + handler shape for Pattern B sync slots is load-safe on custom ZDLs. |
+| `SyncPrV2` | Same `state[31]→state[24]` patch plus a second patch at handler `+0x80..+0xab` that REPLACES the SHL/state[7] tail-call with a direct `STW.D1T1 A4,*+A0[5]` (bypassing the UI postbox at `0x11f03b00`). Loads cleanly, unbypass is OK, but the pedal **freezes on knob interaction**. This proves the state[7] tail-call (and its postbox spin at `c00cc8c8`) is mandatory for user-interaction handlers — not just denormal sanitization. The dispatcher or UI thread blocks on the postbox signal that v2 never sends. So a working sync handler must invoke state[7] with a value in the range it expects (~0..255 raw → post-SHL `< 0.14` float), not bypass it. |
 
 ## Init And Edit-Handler ABI Status
 
