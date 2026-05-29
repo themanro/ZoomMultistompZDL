@@ -52,30 +52,62 @@ These join the previously documented callbacks:
 | `state[34]` (`state+136`) | coefficient-table setup callback |
 | `state[35]` (`state+140`) | second setup callback |
 
-## 3. `state[31]` is a multi-command query, not just "read knob"
+## 3. `state[31]` is a per-slot table lookup
 
-This is the most important reframing. The
-[EDIT-HANDLER-ABI.md](EDIT-HANDLER-ABI.md) LineSel knob1 shape uses
-`state[31]` with `B4 = knob_id` (`B4=2` for knob 1, `B4=3` for knob 2)
-and gets back a 0..255 raw knob value. TAPEECH3 calls `state[31]` with
-**different `B4` values to query different host data**:
+**Reading the firmware target `c00b820c` directly (2026-05-29)** shows
+`state[31]` is a much simpler primitive than the earlier "multi-command
+dispatcher" framing suggested. Its full body is 5 instructions plus
+return:
 
-| `B4` | observed return | meaning |
+```
+c00b820c: MV.L1X B4, A0              ; A0 = command code
+c00b820e: MVK.S1 44, A1               ; per-slot stride (= 11 entries × 4 bytes)
+c00b8210: MPY32 A1, A4, A1            ; A1 = 44 * slot_idx (A4 = slot index input)
+c00b8214: MVK.S2 0xffffc1a0, B0
+c00b8218: MVKH.S2 0xc0090000, B0      ; B0 = 0xc009c1a0 (table base, in RAM)
+c00b8220: SHL.S1 A0, 0x2, A0           ; A0 = command code * 4
+c00b8222: ADD.L1 A1, A0, A0            ; offset = 44*slot + 4*command
+c00b8224: ADD.L1X A0, B0, A4           ; address = base + offset
+c00b8226: LDW.D1T1 *A4[0], A4          ; A4 = *(table entry)
+c00b8228: BNOP.S2 B3, 5                ; return
+```
+
+So `state[31](slot, B4)` returns the 32-bit word at
+`0xc009c1a0 + 44*slot + 4*B4`. It's a fixed-shape per-slot table read
+— not a dispatcher with command-specific code paths.
+
+What the table holds, mapped from cross-references in stock effects:
+
+| `B4` | observed semantic | how mapped |
 |---:|---|---|
-| 2 | 0..255 raw knob value | knob 1 (params[5]) — LineSel pattern |
-| 3 | 0..255 raw knob value | knob 2 (params[6]) |
-| 4 | free-time raw value | used by `DLY_EP3_Calc_DelayTime` when sync is off |
-| 6 | boolean | "is the global sync flag on?" |
-| 7+ | undocumented; see open questions | other queries used by `Fx_DLY_TapeEcho3_Booster_onf` etc. |
+| 0  | pointer; `[!B0] BNOP` null-check pattern at `c00d2110` | likely the slot's audio function or per-slot context ptr |
+| 2  | 0..255 raw value (read by LineSel knob1 handler) | knob 1 / `params[5]` source |
+| 3  | 0..255 raw value (read by LineSel knob2 handler) | knob 2 / `params[6]` source |
+| 4  | unknown — TAPEECH3 calls with B4=4 ("get raw time") in `DLY_EP3_Calc_DelayTime` free-time path | candidate for sync-division index |
+| 6  | unknown — TAPEECH3 calls with B4=6 to choose sync-on/off branch | candidate for sync-mode flag |
+| 9  | used in DSP setup (read at `c00d217e`, fed to `c00ddda0` = state[34]) | possibly a setup pointer or size |
+| other | unmapped | reads return whatever's at the table position |
 
-`B4` is a command selector. The callback at `state[31]`'s template
-target `0xc00b820c` is the multi-command dispatcher in firmware. For
-custom code, the practical rule is:
+Out-of-range `B4` (> 10) reads past the slot's 44-byte row — TAPEECH3
+appears to call with `B4 = 0x0f3c` in `DLY_EP3_Calc_DelayTime`'s
+sync path, which would read at offset 15600 bytes from the slot
+base; that suggests either (a) the value was meant for the
+following `state[24]` call not `state[31]`, or (b) the table extends
+further than the per-slot 44 bytes for special-purpose entries. Not
+yet resolved.
 
-* For a plain knob, set `B4 = 2 + param_index_within_user_knobs` (matches
-  the LineSel byte tables in `build/linker.py`).
-* For a sync-mode query, set `B4 = 6` and check whether the return is
-  non-zero before going down the BPM-sync path.
+For custom code, the practical rule is:
+* `B4 = 2 + param_index_within_user_knobs` reads the current raw value
+  of knob N — matches the LineSel byte tables in `build/linker.py`.
+* Other `B4` values may return useful per-slot data, but each one
+  needs verification before use.
+
+**BPM is not in this table.** The table is per-slot and the BPM is a
+global. So `state[31]` is *not* a BPM source — finding BPM needs a
+different lead. Likely candidates: a separate firmware global near
+`0xc009xxxx`, a slot of `ctx[N]` we haven't decoded, or a stored value
+that the tap-tempo handler updates. Tracked as the open question
+this file was previously chasing.
 
 ## 4. The TAPEECH3 sync algorithm
 
