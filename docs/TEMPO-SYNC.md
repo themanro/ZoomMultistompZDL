@@ -39,7 +39,7 @@ tempo-aware effect:
 
 | field | template value | role observed in TAPEECH3 |
 |---:|---|---|
-| `state[24]` | firmware ptr (set by template writer at `c00c8ac0+`) | host BPM→samples helper. Called via `__c6xabi_call_stub` after `state[31]` says sync is on. |
+| `state[24]` | `c00d4b40` (set by template writer at `c00c8ac0+`) | **CORRECTION (2026-05-29):** previously assumed to be the host BPM→samples helper based on TAPEECH3's `DLY_EP3_Calc_DelayTime` call shape. Reading `c00d4b40` directly shows it is a **float-math utility** — opens with `ABSSP A4,A7; ABSSP B4,B7; CMPEQSP A4,0,A1; CMPEQSP B4,0,B1; OR B1,A1,B2; [B2] B B3` (early-returns if either arg is float 0.0), then runs `RCPSP`/`MPYSP` polynomial math with constants `0x3FC90000` (~π/2) and `0x3F860000`. This looks like ATAN2 / RCPSP-based division or a trig approximation — not BPM. SyncProbe v1/v1.5/v2 results are all consistent with this: A4 = state[0] = 0.0 triggered the early-exit and state[7] received zero. The actual BPM mechanism is somewhere else in the per-slot state or firmware globals; this table will be updated when it is located. |
 | `state[30]` | `0xc00c3a70` | sync-division/mode query. Return value `4` means "free time" (no sync); other values are division indices. |
 
 These join the previously documented callbacks:

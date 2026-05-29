@@ -506,6 +506,27 @@ simplest shaping is `A4 = state[24]_return & 0xFF` — mask to the
 range that varies with the low 8 bits of state[24]'s output, while
 the UI postbox stays correctly synced.
 
+**Second correction (2026-05-29):** the shape-the-value-before-state[7]
+design above is sound for getting through the normalize chain without
+freezing, but reading state[24]'s firmware target `c00d4b40` directly
+shows it is **not a BPM helper at all** — it is a float-math utility
+(ATAN2 / RCPSP / polynomial). Its opening early-exits on `A4 == 0.0`
+or `B4 == 0.0`, then runs trig-style polynomial math with constants
+`0x3FC90000` (~π/2) and `0x3F860000`. Every SyncProbe call that
+passed `A4 = state[0] = 0.0` hit the early-exit and returned zero.
+Even with a perfect `& 0xFF` mask before state[7], the input to mask
+is zero, so the mask gives zero, so params[5] gets zero.
+
+The takeaway: **TAPEECH3 uses state[24] as one math helper in a
+larger BPM-derivation chain**; the BPM value itself comes from
+state[31] called earlier with `B4=4` ("get raw time"), and state[24]
+is then used to normalize/divide it. A custom sync probe needs to
+follow the full TAPEECH3 chain (multiple state[31] calls then
+state[24] with proper float-shaped args), not patch a single LDW
+offset. v3 with `& 0xFF` mask was abandoned for this reason — see
+[TEMPO-SYNC.md §3](../docs/TEMPO-SYNC.md) for the corrected
+mental model.
+
 #### LineSel coefficient population — the full chain
 
 Cross-referencing the LineSel edit handlers, onf, and state[34]
