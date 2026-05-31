@@ -75,9 +75,10 @@ effect directory conventions are summarized in
 - `TEcho4.ZDL` is a custom Airwindows-inspired tape echo, not a 1:1
   Airwindows port. It builds as a Delay-category effect with `ctx[3]` delay
   memory, a compact FIR derived from a UAD Galaxy Tape Echo IR, TapeHack-style
-  saturation, adjustable wear filtering, measured wow/flutter, and a
-  BPM+division tempo workflow. Hardware result is pending; true host tap tempo
-  for custom ZDLs is still unproven.
+  saturation, adjustable wear filtering, measured wow/flutter, a compact mono
+  spring tank modeled from a separate Galaxy spring IR, and a BPM+division
+  tempo workflow. Hardware result is pending; true host tap tempo for custom
+  ZDLs is still unproven.
 - ZDL filenames should have unique basenames of 8 characters or less. Zoom
   tooling/device code can truncate longer basenames, so collisions like
   `TapeEcho4.ZDL` -> `TapeEcho.ZDL` can create duplicate effect identities and

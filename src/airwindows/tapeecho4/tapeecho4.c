@@ -5,8 +5,9 @@
  * from TapeDelay/TapeDelay2, TapeHack, FromTape, and ToTape9:
  *   - feedback-path delay memory in the proven ctx[3] host arena
  *   - TapeHack-style polynomial soft clipping in the record path
- *   - narrowed feedback bandwidth for tape/head frequency response
+ *   - Galaxy-derived tape/head FIR plus adjustable wear filtering
  *   - wow/flutter delay-time modulation
+ *   - compact mono spring tank modeled from a Galaxy spring IR
  *   - BPM + musical division delay timing without libm/runtime helpers
  *
  * The first parameter descriptor is marked with the stock tempo flag pattern.
@@ -31,7 +32,7 @@ TAPEECHO4_CODE_SECTION(TAPEECHO4_AUDIO_FUNC)
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
 #define TAPEECHO4_MAGIC 0x54453434u
-#define TAPEECHO4_VERSION 3u
+#define TAPEECHO4_VERSION 4u
 #define TAPEECHO4_CLEAR_STEP 1024u
 #define TAPEECHO4_DELAY_SAMPLES 65536u
 #define TAPEECHO4_DELAY_MASK (TAPEECHO4_DELAY_SAMPLES - 1u)
@@ -44,6 +45,8 @@ TAPEECHO4_CODE_SECTION(TAPEECHO4_AUDIO_FUNC)
 #define TAPEECHO4_RAW_MAX 0.14f
 #define TAPEECHO4_RAW_TO_NORM 7.1428571f
 #define TAPEECHO4_FIR_TAPS 64u
+#define TAPEECHO4_SPRING_SAMPLES 8192u
+#define TAPEECHO4_SPRING_MASK (TAPEECHO4_SPRING_SAMPLES - 1u)
 
 /* Short causal FIR derived from tools/measure/Tape/Tape_IR.wav. The source IR
  * was captured from UAD Galaxy Tape Echo at 48 kHz, resampled to the pedal's
@@ -89,6 +92,9 @@ typedef struct TapeEcho4State {
     float firL[TAPEECHO4_FIR_TAPS];
     float firR[TAPEECHO4_FIR_TAPS];
     uint32_t firIndex;
+    float springDelay[TAPEECHO4_SPRING_SAMPLES];
+    uint32_t springIndex;
+    float springDamp;
     float prevDelay;
     uint32_t fpdL;
     uint32_t fpdR;
@@ -194,6 +200,8 @@ static inline void te4_finish_init(TapeEcho4State *st)
     st->hpL = st->hpR = 0.0f;
     st->lpL = st->lpR = 0.0f;
     st->firIndex = 0u;
+    st->springIndex = 0u;
+    st->springDamp = 0.0f;
     st->prevDelay = 22050.0f;
     st->fpdL = 0x1234567u;
     st->fpdR = 0x89ABCDFu;
@@ -264,11 +272,33 @@ static inline float te4_galaxy_filter(float x, float *history, uint32_t index)
     return y;
 }
 
+TAPEECHO4_ALWAYS_INLINE(te4_spring_tank)
+static inline float te4_spring_tank(TapeEcho4State *st, float input)
+{
+    uint32_t index = st->springIndex;
+    float *delay = st->springDelay;
+
+    /* Compact mono tank fitted by ear around the measured Galaxy spring IR:
+     * identical L/R capture, useful decay past 1 s, and dense resonances
+     * concentrated around 0.5 .. 1.8 kHz. The incommensurate feedback taps
+     * create the characteristic metallic diffusion without a long FIR. */
+    float loop = delay[(index - 2111u) & TAPEECHO4_SPRING_MASK] * 0.68f;
+    loop += delay[(index - 3067u) & TAPEECHO4_SPRING_MASK] * 0.19f;
+    loop -= delay[(index - 4093u) & TAPEECHO4_SPRING_MASK] * 0.12f;
+    st->springDamp += (loop + input * 0.28f - st->springDamp) * 0.42f;
+    delay[index] = te4_clampf(st->springDamp, -1.4f, 1.4f);
+    st->springIndex = (index + 1u) & TAPEECHO4_SPRING_MASK;
+
+    return delay[(index - 1453u) & TAPEECHO4_SPRING_MASK] * 0.42f +
+           delay[(index - 2591u) & TAPEECHO4_SPRING_MASK] * 0.34f +
+           delay[(index - 3761u) & TAPEECHO4_SPRING_MASK] * 0.24f;
+}
+
 TAPEECHO4_ALWAYS_INLINE(te4_process_sample)
 static inline void te4_process_sample(TapeEcho4State *st, float *sampleL, float *sampleR,
                                       float baseDelay, float feedback, float flutter,
                                       float wow, float wear, float drive,
-                                      float spread, float mix)
+                                      float spring, float mix)
 {
     float inputL = *sampleL;
     float inputR = *sampleR;
@@ -297,7 +327,6 @@ static inline void te4_process_sample(TapeEcho4State *st, float *sampleL, float 
     float travelNorm = te4_clampf((baseDelay - 3043.0f) * 0.00005425f, 0.0f, 1.0f);
     float flutterDepth = flutter * flutter * (0.35f + te4_clampf(baseDelay, 0.0f, 21477.0f) * 0.000007f);
     float wowDepth = wow * wow * baseDelay * 0.00118f;
-    float spreadSamples = spread * 36.0f;
     float flutterA = sin_approx(st->flutterPhaseL);
     float flutterB = sin_approx(st->flutterPhaseR);
     float wowA = sin_approx(st->wowPhaseL);
@@ -305,13 +334,11 @@ static inline void te4_process_sample(TapeEcho4State *st, float *sampleL, float 
     float transportMod = (flutterA * 0.7f + flutterB * 0.3f) * flutterDepth;
     transportMod += (wowA * (0.35f + travelNorm * 0.65f) +
                      wowB * (0.75f - travelNorm * 0.55f)) * wowDepth;
-    float stereoMod = spread * (flutterB * flutterDepth * 0.4f +
-                                wowB * wowDepth * 0.08f);
-    float modL = transportMod - stereoMod;
-    float modR = transportMod + stereoMod;
+    float modL = transportMod;
+    float modR = transportMod;
 
-    float delayL = te4_clampf(baseDelay + modL - spreadSamples, TAPEECHO4_MIN_DELAY_F, TAPEECHO4_MAX_DELAY_F);
-    float delayR = te4_clampf(baseDelay + modR + spreadSamples, TAPEECHO4_MIN_DELAY_F, TAPEECHO4_MAX_DELAY_F);
+    float delayL = te4_clampf(baseDelay + modL, TAPEECHO4_MIN_DELAY_F, TAPEECHO4_MAX_DELAY_F);
+    float delayR = te4_clampf(baseDelay + modR, TAPEECHO4_MIN_DELAY_F, TAPEECHO4_MAX_DELAY_F);
     float wetL = te4_read_delay(st->delayL, st->writeIndex, delayL);
     float wetR = te4_read_delay(st->delayR, st->writeIndex, delayR);
 
@@ -335,8 +362,9 @@ static inline void te4_process_sample(TapeEcho4State *st, float *sampleL, float 
     st->delayR[st->writeIndex] = recR;
     st->writeIndex = (st->writeIndex + 1u) & TAPEECHO4_DELAY_MASK;
 
-    *sampleL = dryL * (1.0f - mix) + wetL * mix;
-    *sampleR = dryR * (1.0f - mix) + wetR * mix;
+    float springReturn = te4_spring_tank(st, (inputL + inputR) * spring);
+    *sampleL = dryL * (1.0f - mix) + (wetL + springReturn) * mix;
+    *sampleR = dryR * (1.0f - mix) + (wetR + springReturn) * mix;
 
     st->fpdL ^= st->fpdL << 13;
     st->fpdL ^= st->fpdL >> 17;
@@ -389,7 +417,7 @@ void TAPEECHO4_AUDIO_FUNC(unsigned int *ctx)
                       params[TAPEECHO4_WOW_SLOT] <= 0.0001f &&
                       params[TAPEECHO4_WEAR_SLOT] <= 0.0001f);
     int page3Empty = (params[TAPEECHO4_DRIVE_SLOT] <= 0.0001f &&
-                      params[TAPEECHO4_SPREAD_SLOT] <= 0.0001f &&
+                      params[TAPEECHO4_SPRING_SLOT] <= 0.0001f &&
                       params[TAPEECHO4_MIX_SLOT] <= 0.0001f);
 
     float tempoNorm = te4_param_norm(params[TAPEECHO4_TEMPO_SLOT], TAPEECHO4_TEMPO_DEFAULT_NORM, page1Empty);
@@ -399,7 +427,7 @@ void TAPEECHO4_AUDIO_FUNC(unsigned int *ctx)
     float wow = te4_param_norm(params[TAPEECHO4_WOW_SLOT], TAPEECHO4_WOW_DEFAULT_NORM, page2Empty);
     float wear = te4_param_norm(params[TAPEECHO4_WEAR_SLOT], TAPEECHO4_WEAR_DEFAULT_NORM, page2Empty);
     float drive = te4_param_norm(params[TAPEECHO4_DRIVE_SLOT], TAPEECHO4_DRIVE_DEFAULT_NORM, page3Empty);
-    float spread = te4_param_norm(params[TAPEECHO4_SPREAD_SLOT], TAPEECHO4_SPREAD_DEFAULT_NORM, page3Empty);
+    float spring = te4_param_norm(params[TAPEECHO4_SPRING_SLOT], TAPEECHO4_SPRING_DEFAULT_NORM, page3Empty);
     float mix = te4_param_norm(params[TAPEECHO4_MIX_SLOT], TAPEECHO4_MIX_DEFAULT_NORM, page3Empty);
 
     float bpm = 40.0f + tempoNorm * 160.0f;
@@ -412,7 +440,7 @@ void TAPEECHO4_AUDIO_FUNC(unsigned int *ctx)
     for (i = 0; i < 8; i++) {
         float sL = fxBuf[i];
         float sR = fxBuf[i + 8];
-        te4_process_sample(st, &sL, &sR, baseDelay, feedback, flutter, wow, wear, drive, spread, mix);
+        te4_process_sample(st, &sL, &sR, baseDelay, feedback, flutter, wow, wear, drive, spring, mix);
         fxBuf[i] = sL;
         fxBuf[i + 8] = sR;
     }

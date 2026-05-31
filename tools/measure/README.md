@@ -77,3 +77,8 @@ The script finds the peak, discards the pre-impulse samples, resamples the
 causal tail to the pedal rate, truncates it, and normalizes the kernel at
 1 kHz. The current 64-tap Galaxy-derived kernel tracks the full clean IR
 within roughly 0.34 dB RMS across 30 Hz to 18 kHz.
+
+`Tape/Tape Spring.wav` is intentionally not converted into a FIR: its useful
+decay extends beyond one second. `TapeEcho4` approximates that capture with a
+bounded mono resonant tank and exposes its parallel return as the `Spring`
+parameter.

@@ -388,15 +388,19 @@ behavior.
 Airwindows port. It combines safe Airwindows-derived tape techniques:
 TapeHack-style soft clipping, a compact 64-tap FIR derived from a clean UAD
 Galaxy Tape Echo IR, adjustable wear filtering, measured transport modulation,
-and a bounded stereo delay line in `ctx[3]`. The FIR is stored in a read-only
-`.const:*` subsection; the linker now packs and resolves named constant
-subsections. The state size remains below the proven descriptor lower bound,
-with no `.fardata`. Hardware testing still needs load, unbypass, page 2
-parameter interaction, reload, and duplicate-instance checks. The `Tempo`
-descriptor uses the stock tempo flag pattern, but custom-ZDL access to the
-pedal's global tap tempo is still unresolved. The release file is named
-`TEcho4.ZDL` because Zoom tooling/device behavior can truncate basenames longer
-than 8 characters; `TapeEcho4.ZDL` can collide with `TapeEcho.ZDL`.
+a compact mono spring tank modeled from a separate Galaxy spring IR, and a
+bounded stereo delay line in `ctx[3]`. The spring capture had identical left
+and right channels and useful decay past one second, so the release replaces
+the old `Spread` control with a parallel mono `Spring` return. The FIR is stored
+in a read-only `.const:*` subsection; the linker now packs and resolves named
+constant subsections. Total `ctx[3]` state is about 558 KB, below the proven
+descriptor lower bound, with no `.fardata`. Hardware testing still needs load,
+unbypass, page 2/3 parameter interaction, reload, and duplicate-instance
+checks. The `Tempo` descriptor uses the stock tempo flag pattern, but
+custom-ZDL access to the pedal's global tap tempo is still unresolved. The
+release file is named `TEcho4.ZDL` because Zoom tooling/device behavior can
+truncate basenames longer than 8 characters; `TapeEcho4.ZDL` can collide with
+`TapeEcho.ZDL`.
 
 `OTT` is another custom effect, not a port. It confirms that small `ctx[3]`
 state is practical for non-delay DSP history too: crossover memories, band
