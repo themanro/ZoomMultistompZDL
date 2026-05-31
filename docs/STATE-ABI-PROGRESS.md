@@ -386,13 +386,15 @@ behavior.
 
 `TEcho4` / `TapeEcho4` is intentionally a custom effect rather than an exact
 Airwindows port. It combines safe Airwindows-derived tape techniques:
-TapeHack-style soft clipping, TapeDelay/TapeDelay2-inspired feedback filtering
-and modulation, and a bounded stereo delay line in `ctx[3]`. The state size is
-below the proven descriptor lower bound, and the first build has `.audio` only,
-no `.fardata`, and no object relocations. Hardware testing still needs load,
-unbypass, page 2 parameter interaction, reload, and duplicate-instance checks.
-The `Tempo` descriptor uses the stock tempo flag pattern, but custom-ZDL access
-to the pedal's global tap tempo is still unresolved. The release file is named
+TapeHack-style soft clipping, a compact 64-tap FIR derived from a clean UAD
+Galaxy Tape Echo IR, adjustable wear filtering, measured transport modulation,
+and a bounded stereo delay line in `ctx[3]`. The FIR is stored in a read-only
+`.const:*` subsection; the linker now packs and resolves named constant
+subsections. The state size remains below the proven descriptor lower bound,
+with no `.fardata`. Hardware testing still needs load, unbypass, page 2
+parameter interaction, reload, and duplicate-instance checks. The `Tempo`
+descriptor uses the stock tempo flag pattern, but custom-ZDL access to the
+pedal's global tap tempo is still unresolved. The release file is named
 `TEcho4.ZDL` because Zoom tooling/device behavior can truncate basenames longer
 than 8 characters; `TapeEcho4.ZDL` can collide with `TapeEcho.ZDL`.
 

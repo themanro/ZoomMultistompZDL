@@ -32,9 +32,11 @@ What is still experimental:
   528 KB of `ctx[3]` state, no `.fardata`, and no object relocations; hardware
   result is pending.
 * `dist/TEcho4.ZDL` is a custom Airwindows-inspired Delay-category tape
-  echo. It builds with a bounded `ctx[3]` stereo delay line, no `.fardata`, no
-  object relocations, and a BPM+division tempo workflow. Hardware result is
-  pending; true host tap-tempo plumbing for custom ZDLs is still unresolved.
+  echo. It builds with a bounded `ctx[3]` stereo delay line, a compact
+  Galaxy-derived FIR in a read-only named `.const:*` subsection, measured
+  wow/flutter, no `.fardata`, and a BPM+division tempo workflow. Hardware
+  result is pending; true host tap-tempo plumbing for custom ZDLs is still
+  unresolved.
 * `dist/OTT.ZDL` is a custom Dynamics-category OTT-style 3-band compressor,
   not an Ableton port. It uses a small `ctx[3]` state block for crossover,
   envelope, and gain history, and builds with no `.fardata`, no `.text`, and no

@@ -115,6 +115,10 @@ shared output buffer; downstream effects still see input. This is what
 lets reverb/delay tails survive a switch-off later in the chain. See
 `CH_2.md` § "Adding Effect signal to the final output".
 
+Compiler-emitted read-only tables may appear as either `.const` or named
+subsections such as `.const:table_name`. The custom linker packs both forms
+into the final read-only `.const` segment and resolves references to them.
+
 ### UI hooks (the picture + knob layout)
 
 The "UI" is two things:

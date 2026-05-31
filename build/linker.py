@@ -1134,12 +1134,16 @@ def link(cfg: LinkerConfig) -> None:
 
     # Compute the final fardata address before writing imageInfo, because
     # imageInfo contains absolute relocations to _infoEffectTypeKnob_A_2.
-    obj_const_sec = obj.get_section('.const')
+    obj_const_secs = [
+        s for s in obj.sections
+        if s['name'] == '.const' or s['name'].startswith('.const:')
+    ]
     after_info = INFO_OFF_IN_CONST + 212
     coe_off_est = _align_up(after_info, 4)
     after_coe = coe_off_est + len(_DUMMY_COE)
-    if obj_const_sec and obj_const_sec['size'] > 0:
-        after_coe = _align_up(after_coe, max(obj_const_sec['align'], 4)) + obj_const_sec['size']
+    for sec in obj_const_secs:
+        if sec['size'] > 0:
+            after_coe = _align_up(after_coe, max(sec['align'], 4)) + sec['size']
     CONST_SIZE = _align_up(after_coe, 8)
     FARDATA_VA   = CONST_VA + CONST_SIZE
     KNOB_INFO_VA = FARDATA_VA
@@ -1164,11 +1168,14 @@ def link(cfg: LinkerConfig) -> None:
     # divisor tables, jump tables, etc.). Without this, any cross-section
     # MVKL/MVKH reference into .const links unresolved and the audio code
     # reads zero. TapeHack's Taylor coefficients hit this path.
-    obj_const_off_in_const = None
-    if obj_const_sec and obj_const_sec['size'] > 0:
-        obj_const_off_in_const = _align_up(len(const_data), max(obj_const_sec['align'], 4))
-        _pad_to(const_data, obj_const_off_in_const)
-        const_data.extend(obj_const_sec['data'])
+    obj_const_offsets: dict[int, int] = {}
+    for sec in obj_const_secs:
+        if sec['size'] <= 0:
+            continue
+        off = _align_up(len(const_data), max(sec['align'], 4))
+        _pad_to(const_data, off)
+        const_data.extend(sec['data'])
+        obj_const_offsets[sec['idx']] = off
 
     CONST_SIZE = _align_up(len(const_data), 8)
     _pad_to(const_data, CONST_SIZE)
@@ -1176,15 +1183,17 @@ def link(cfg: LinkerConfig) -> None:
     KNOB_INFO_VA = FARDATA_VA
     OUR_FARDATA_VA = FARDATA_VA + len(_KNOB_INFO)
 
-    if obj_const_sec and obj_const_off_in_const is not None:
-        section_va[obj_const_sec['idx']] = CONST_VA + obj_const_off_in_const
+    for sec_idx, off in obj_const_offsets.items():
+        section_va[sec_idx] = CONST_VA + off
 
     print(f"\n  .const layout:")
     print(f"    picture    @ 0x{0:04X}  ({pic_end})")
     print(f"    descriptor @ 0x{DESC_OFF_IN_CONST:04X}  ({len(desc_bytes)})")
     print(f"    imageInfo  @ 0x{INFO_OFF_IN_CONST:04X}  ({len(info_bytes)})")
-    if obj_const_sec and obj_const_off_in_const is not None:
-        print(f"    obj.const  @ 0x{obj_const_off_in_const:04X}  ({obj_const_sec['size']})")
+    for sec in obj_const_secs:
+        if sec['idx'] in obj_const_offsets:
+            off = obj_const_offsets[sec['idx']]
+            print(f"    {sec['name']:<12} @ 0x{off:04X}  ({sec['size']})")
     print(f"    total        0x{CONST_SIZE:X}")
     print(f"    .const VA    0x{CONST_VA:08X}")
     print(f"    .fardata VA  0x{FARDATA_VA:08X}")
