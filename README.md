@@ -118,6 +118,10 @@ Start here if you want more than the download folder:
 
 ## Build From Source
 
+Desktop listening previews are available before flashing hardware. See
+[tools/audio_preview/README.md](tools/audio_preview/README.md) for the
+manifest-driven WAV renderer and current adapter coverage.
+
 Building requires Python 3.10+ and TI C6000 Code Generation Tools. Installing
 prebuilt effects from [dist/](dist/) does not.
 

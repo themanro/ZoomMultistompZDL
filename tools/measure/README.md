@@ -81,4 +81,6 @@ within roughly 0.34 dB RMS across 30 Hz to 18 kHz.
 `Tape/Tape Spring.wav` is intentionally not converted into a FIR: its useful
 decay extends beyond one second. `TapeEcho4` approximates that capture with a
 bounded mono resonant tank and exposes its parallel return as the `Spring`
-parameter.
+parameter. The first tank approximation did not match the reference closely
+enough in desktop listening tests, so the release defaults `Spring` to zero
+while that model is revised.

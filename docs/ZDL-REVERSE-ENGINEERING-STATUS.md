@@ -35,8 +35,10 @@ What is still experimental:
   echo. It builds with a bounded `ctx[3]` stereo delay line, a compact
   Galaxy-derived FIR in a read-only named `.const:*` subsection, measured
   wow/flutter, a compact mono spring tank modeled from a separate Galaxy
-  spring IR, no `.fardata`, and a BPM+division tempo workflow. Hardware result
-  is pending; true host tap-tempo plumbing for custom ZDLs is still unresolved.
+  spring IR, no `.fardata`, and a BPM+division tempo workflow. Desktop listening
+  validated the echo path as promising, while the first spring approximation
+  remains experimental and now defaults to zero. Hardware result is pending;
+  true host tap-tempo plumbing for custom ZDLs is still unresolved.
 * `dist/OTT.ZDL` is a custom Dynamics-category OTT-style 3-band compressor,
   not an Ableton port. It uses a small `ctx[3]` state block for crossover,
   envelope, and gain history, and builds with no `.fardata`, no `.text`, and no
