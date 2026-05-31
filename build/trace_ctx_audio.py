@@ -2,9 +2,9 @@
 """Trace first-level ctx[] pointer use in a dis6x assembly listing.
 
 This is intentionally a lightweight text tracer, not a decompiler. It looks
-inside the .audio section, tracks direct aliases of the audio callback argument
-(`A4`), records loads from ctx[n], and reports later memory accesses through
-the loaded registers.
+inside the .audio section or an explicitly named function, tracks direct
+aliases of the audio callback argument (`A4`), records loads from ctx[n], and
+reports later memory accesses through the loaded registers.
 """
 
 from __future__ import annotations
@@ -29,26 +29,38 @@ class Access:
     text: str
 
 
-def audio_lines(text: str) -> list[tuple[int, str]]:
+FUNCTION_LABEL_RE = re.compile(
+    r"^[0-9a-fA-F]+\s+((?:Fx_|Dll_|GetString_|__)[A-Za-z0-9_]*):\s*$"
+)
+
+
+def audio_lines(text: str, symbol: str | None = None) -> list[tuple[int, str]]:
     out: list[tuple[int, str]] = []
     in_audio = False
     for line_no, line in enumerate(text.splitlines(), 1):
+        if symbol and re.search(rf"\b{re.escape(symbol)}:\s*$", line):
+            in_audio = True
+            out.append((line_no, line))
+            continue
         if "TEXT Section .audio" in line:
             in_audio = True
             continue
-        if in_audio and re.match(r"^(TEXT|DATA|BSS) Section ", line):
+        if in_audio and (
+            re.match(r"^(TEXT|DATA|BSS) Section ", line)
+            or (symbol and FUNCTION_LABEL_RE.match(line))
+        ):
             break
         if in_audio:
             out.append((line_no, line))
     return out
 
 
-def trace(text: str) -> dict[int, list[Access]]:
+def trace(text: str, symbol: str | None = None) -> dict[int, list[Access]]:
     ctx_aliases = {"A4"}
     reg_roots: dict[str, int] = {}
     uses: dict[int, list[Access]] = defaultdict(list)
 
-    for line_no, line in audio_lines(text):
+    for line_no, line in audio_lines(text, symbol):
         mv_arg = MV_ARG_RE.search(line)
         if mv_arg:
             ctx_aliases.add(mv_arg.group(1))
@@ -79,6 +91,7 @@ def trace(text: str) -> dict[int, list[Access]]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("asm", nargs="+", type=Path)
+    parser.add_argument("--symbol", help="trace one function instead of the .audio section")
     parser.add_argument("--slots", default="2,3,13,14", help="comma-separated ctx slots to print")
     parser.add_argument("--limit", type=int, default=40, help="max accesses per slot")
     args = parser.parse_args()
@@ -87,7 +100,7 @@ def main() -> None:
 
     for asm_path in args.asm:
         print(f"\n== {asm_path} ==")
-        traced = trace(asm_path.read_text(encoding="utf-8", errors="replace"))
+        traced = trace(asm_path.read_text(encoding="utf-8", errors="replace"), args.symbol)
         for slot in sorted(wanted):
             accesses = traced.get(slot, [])
             print(f"ctx[{slot}]: {len(accesses)} traced access(es)")

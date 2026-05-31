@@ -409,6 +409,17 @@ unresolved. The release file is named `TEcho4.ZDL` because Zoom tooling/device
 behavior can truncate basenames longer than 8 characters; `TapeEcho4.ZDL` can
 collide with `TapeEcho.ZDL`.
 
+A first pedal-safe spring experiment downsampled the selected long host
+reference by 16 and distributed its FIR work across callbacks. Desktop A/B
+listening rejected it: the decimation removed the spring character. Stock
+`SPRING`, `SPRING63`, and `PARTICLE` analysis points to the replacement
+strategy: full-rate algorithmic diffusion and irregular host-backed delay
+lines, not a long embedded IR. The older `SPRING` effect is the readable
+bridge: its `.const` data includes 16 irregular read addresses and 8 write
+addresses. `SPRING63` expands that into a dense `ctx[2]` pointer graph, while
+`PARTICLE` demonstrates a larger arena-based texture engine. The next spring
+prototype should follow that stock architecture.
+
 `OTT` is another custom effect, not a port. It confirms that small `ctx[3]`
 state is practical for non-delay DSP history too: crossover memories, band
 envelopes, and smoothed gains all live in the descriptor arena instead of

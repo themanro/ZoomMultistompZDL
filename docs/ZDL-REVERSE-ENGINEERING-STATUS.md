@@ -39,8 +39,11 @@ What is still experimental:
   promising and selected a closer Galaxy spring reference model: a 744 ms
   measured body, eight-line FDN, `0.92` feedback, `0.55` damping, and a 320 ms
   handoff. The pedal-safe implementation of that longer spring remains
-  pending, so the ZDL spring defaults to zero. Hardware result is pending; true
-  host tap-tempo plumbing for custom ZDLs is still unresolved.
+  pending, so the ZDL spring defaults to zero. A downsampled distributed-FIR
+  attempt was rejected by desktop A/B listening. Stock `SPRING`, `SPRING63`,
+  and `PARTICLE` instead point toward a full-rate algorithmic diffusion and
+  irregular-delay network. Hardware result is pending; true host tap-tempo
+  plumbing for custom ZDLs is still unresolved.
 * `dist/OTT.ZDL` is a custom Dynamics-category OTT-style 3-band compressor,
   not an Ableton port. It uses a small `ctx[3]` state block for crossover,
   envelope, and gain history, and builds with no `.fardata`, no `.text`, and no
