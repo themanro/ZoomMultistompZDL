@@ -1,7 +1,7 @@
 {
   "effect_name": "TapeEcho4",
   "output_basename": "TEcho4",
-  "comment": "Airwindows-inspired custom tape echo for Zoom Multistomp. Uses ctx[3] for a bounded stereo delay line and compact mono spring tank, a FIR derived from a UAD Galaxy Tape Echo IR, TapeHack-style soft clipping, adjustable wear filtering, measured flutter/wow modulation, and a BPM+division tempo workflow. Hardware untested.",
+  "comment": "Airwindows-inspired custom tape echo for Zoom Multistomp. Uses ctx[3] for a bounded stereo delay line and compact mono spring fallback, a FIR derived from a UAD Galaxy Tape Echo IR, TapeHack-style soft clipping, adjustable wear filtering, measured flutter/wow modulation, and a BPM+division tempo workflow. The closer desktop spring target still needs a bounded pedal-safe implementation. Hardware untested.",
 
   "audio_func_name": "Fx_DLY_TapeEcho4",
 

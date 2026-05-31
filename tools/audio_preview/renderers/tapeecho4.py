@@ -6,13 +6,22 @@ from pathlib import Path
 
 import numpy as np
 import soundfile as sf
-from scipy.signal import resample_poly
+from scipy.linalg import hadamard
+from scipy.signal import fftconvolve, resample_poly
 
 PEDAL_FS = 44100
 TWO_PI = 6.2831853
 PI = 3.1415927
 HALF_PI = 1.5707963
 CLIP_LIMIT = 2.305929
+SPRING_HANDOFF_SECONDS = 0.744
+SPRING_CROSSFADE_SECONDS = 0.320
+SPRING_FEEDBACK = 0.92
+SPRING_DAMPING = 0.55
+SPRING_DELAYS = np.array([1499, 1877, 2203, 2663, 3163, 3571, 4001, 4481])
+SPRING_INPUT = np.array([1, -1, 1, 1, -1, 1, -1, -1]) / np.sqrt(8.0)
+SPRING_OUTPUT = np.array([1, 1, -1, 1, -1, -1, 1, -1]) / np.sqrt(8.0)
+SPRING_MATRIX = hadamard(8).astype(np.float64) / np.sqrt(8.0)
 
 
 def _resample(audio: np.ndarray, source_fs: int, target_fs: int) -> np.ndarray:
@@ -33,6 +42,53 @@ def _load_galaxy_kernel(root: Path) -> np.ndarray:
     freqs = np.fft.rfftfreq(n_fft, d=1.0 / PEDAL_FS)
     magnitude = np.abs(np.fft.rfft(kernel, n=n_fft))
     kernel /= float(np.interp(1000.0, freqs, magnitude))
+    return kernel
+
+
+def _load_spring_kernel(root: Path, frames: int) -> np.ndarray:
+    path = root / "tools" / "measure" / "Tape" / "Tape Spring.wav"
+    ir, sample_rate = sf.read(str(path), always_2d=True, dtype="float64")
+    measured = ir.mean(axis=1)
+    measured = measured[int(np.argmax(np.abs(measured))):]
+    measured = _resample(measured, sample_rate, PEDAL_FS)
+    measured /= float(np.max(np.abs(measured)))
+
+    handoff = int(SPRING_HANDOFF_SECONDS * PEDAL_FS)
+    synthetic = np.zeros(frames)
+    buffers = [np.zeros(delay) for delay in SPRING_DELAYS]
+    positions = np.zeros(len(SPRING_DELAYS), dtype=np.int64)
+    damped = np.zeros(len(SPRING_DELAYS))
+
+    for frame in range(frames):
+        taps = np.array([
+            buffer[position]
+            for buffer, position in zip(buffers, positions)
+        ])
+        synthetic[frame] = float(SPRING_OUTPUT @ taps)
+        mixed = SPRING_MATRIX @ taps
+        damped += SPRING_DAMPING * (mixed - damped)
+        excitation = measured[frame] if frame < min(handoff, len(measured)) else 0.0
+        writes = SPRING_FEEDBACK * damped + SPRING_INPUT * excitation
+        for line, buffer in enumerate(buffers):
+            buffer[positions[line]] = writes[line]
+            positions[line] = (positions[line] + 1) % len(buffer)
+
+    match_start = max(0, handoff - int(0.160 * PEDAL_FS))
+    reference_rms = np.sqrt(np.mean(measured[match_start:handoff] ** 2))
+    synthetic_rms = np.sqrt(np.mean(synthetic[match_start:handoff] ** 2))
+    synthetic *= reference_rms / max(synthetic_rms, 1.0e-30)
+
+    kernel = np.zeros(frames)
+    copied = min(frames, len(measured))
+    kernel[:copied] = measured[:copied]
+    fade = int(SPRING_CROSSFADE_SECONDS * PEDAL_FS)
+    fade_end = min(frames, handoff + fade)
+    phase = np.linspace(0.0, 1.0, fade_end - handoff, endpoint=False)
+    kernel[handoff:fade_end] = (
+        np.cos(phase * HALF_PI) * kernel[handoff:fade_end] +
+        np.sin(phase * HALF_PI) * synthetic[handoff:fade_end]
+    )
+    kernel[fade_end:] = synthetic[fade_end:]
     return kernel
 
 
@@ -99,13 +155,10 @@ def render(audio: np.ndarray, sample_rate: int, params: dict[str, float],
     out = np.zeros((n_frames, 2), dtype=np.float64)
     delay = np.zeros((2, 65536), dtype=np.float64)
     fir = np.zeros((2, 64), dtype=np.float64)
-    spring_delay = np.zeros(8192, dtype=np.float64)
     hp = np.zeros(2)
     lp = np.zeros(2)
     write_index = 0
     fir_index = 0
-    spring_index = 0
-    spring_damp = 0.0
     flutter_l, flutter_r = 0.0, 2.0943951
     wow_l, wow_r = 0.0, 3.1415927
 
@@ -158,18 +211,16 @@ def render(audio: np.ndarray, sample_rate: int, params: dict[str, float],
         delay[:, write_index] = lp
         write_index = (write_index + 1) & 65535
 
-        spring_loop = spring_delay[(spring_index - 2111) & 8191] * 0.68
-        spring_loop += spring_delay[(spring_index - 3067) & 8191] * 0.19
-        spring_loop -= spring_delay[(spring_index - 4093) & 8191] * 0.12
-        spring_damp += (spring_loop + float(dry.sum()) * spring * 0.28 -
-                        spring_damp) * 0.42
-        spring_delay[spring_index] = np.clip(spring_damp, -1.4, 1.4)
-        spring_return = spring_delay[(spring_index - 1453) & 8191] * 0.42
-        spring_return += spring_delay[(spring_index - 2591) & 8191] * 0.34
-        spring_return += spring_delay[(spring_index - 3761) & 8191] * 0.24
-        spring_index = (spring_index + 1) & 8191
+        out[i] = dry * (1.0 - mix) + wet * mix
 
-        out[i] = dry * (1.0 - mix) + (wet + spring_return) * mix
+    if spring > 0.0:
+        # Desktop listening target. The pedal build still uses its compact
+        # fallback until a bounded long-convolution strategy is validated.
+        spring_kernel = _load_spring_kernel(root, n_frames)
+        mono = audio.mean(axis=1)
+        spring_return = fftconvolve(mono, spring_kernel)[:n_frames]
+        out[:, 0] += spring_return * spring * mix
+        out[:, 1] += spring_return * spring * mix
 
     peak = float(np.max(np.abs(out)))
     if peak > 0.99:

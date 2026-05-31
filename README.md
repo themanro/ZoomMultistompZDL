@@ -76,9 +76,11 @@ effect directory conventions are summarized in
   Airwindows port. It builds as a Delay-category effect with `ctx[3]` delay
   memory, a compact FIR derived from a UAD Galaxy Tape Echo IR, TapeHack-style
   saturation, adjustable wear filtering, measured wow/flutter, a compact mono
-  spring tank modeled from a separate Galaxy spring IR, and a BPM+division
-  tempo workflow. Hardware result is pending; true host tap tempo for custom
-  ZDLs is still unproven.
+  spring fallback, and a BPM+division tempo workflow. Desktop listening has
+  selected a closer Galaxy spring reference model: a 744 ms measured body plus
+  an eight-line FDN tail. Porting that longer spring model into the bounded
+  pedal runtime remains pending. Hardware result is pending; true host tap
+  tempo for custom ZDLs is still unproven.
 - ZDL filenames should have unique basenames of 8 characters or less. Zoom
   tooling/device code can truncate longer basenames, so collisions like
   `TapeEcho4.ZDL` -> `TapeEcho.ZDL` can create duplicate effect identities and

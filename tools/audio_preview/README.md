@@ -41,3 +41,9 @@ The CLI deliberately lists effects without adapters as `adapter needed`.
 Desktop renderers are listening tools, not substitutes for hardware tests:
 they do not exercise the ZDL loader, runtime ABI, edit handlers, or pedal CPU
 budget.
+
+TapeEcho4's desktop spring path is intentionally a listening target rather
+than a mirror of the current ZDL fallback. It combines the first 744 ms of the
+measured Galaxy spring capture with an eight-line FDN tail using `0.92`
+feedback, `0.55` damping, and a 320 ms equal-power handoff. The longer model
+still needs a bounded pedal-safe implementation.
