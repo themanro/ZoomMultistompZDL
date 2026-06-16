@@ -11,6 +11,26 @@ toolchain. Each effect has a full-quality **desktop preview** (Python, in
 > pedal until power-cycled — **back up your effect list and flash one at a
 > time.**
 
+## Pedal icons
+
+<table>
+<tr>
+<td align="center"><img src="graphics/microloom.svg" width="150" alt="Microloom"></td>
+<td align="center"><img src="graphics/flower.svg" width="150" alt="Flower"></td>
+<td align="center"><img src="graphics/shatter.svg" width="150" alt="Shatter"></td>
+<td align="center"><img src="graphics/arrakis.svg" width="150" alt="Arrakis"></td>
+</tr>
+<tr>
+<td align="center"><img src="graphics/corrupt.svg" width="150" alt="Corrupt"></td>
+<td align="center"><img src="graphics/klang.svg" width="150" alt="Klang"></td>
+<td align="center"><img src="graphics/genloss.svg" width="150" alt="GenLoss"></td>
+<td align="center"><img src="graphics/scorch.svg" width="150" alt="Scorch"></td>
+</tr>
+</table>
+
+(Zoom Effect Manager-style icons. They use the Press Start 2P pixel font; in
+GitHub's inline SVG preview the text may fall back to monospace.)
+
 ## The effects
 
 | Effect | `.ZDL` | Category | Pedal knobs | What it is |
