@@ -29,6 +29,24 @@ the desktop previews expose the full control set. Some features are deferred on
 the pedal (Klang's frequency-shifter modes, GenLoss dropouts, Scorch's full
 cab IR) — see each effect's `manifest.json` vs `manifest_pedal.json`.
 
+## Sound previews
+
+Rendered demos (click to play in GitHub's audio viewer). These are the
+**desktop** renders — full-quality, before the 2-knob pedal reduction.
+
+| Effect | Demo | Dry source |
+|---|---|---|
+| Microloom | [microloom.wav](previews/audio/microloom.wav) — lush shimmer wash | [chord](previews/audio/dry_chord.wav) |
+| Flower | [flower.wav](previews/audio/flower.wav) — Digital Bath random filter | [chord](previews/audio/dry_chord.wav) |
+| Shatter | [shatter.wav](previews/audio/shatter.wav) — machine-gun stutter | [drums](previews/audio/dry_drums.wav) |
+| Arrakis | [arrakis.wav](previews/audio/arrakis.wav) — −2 oct beating drone | [drone](previews/audio/dry_drone.wav) |
+| Corrupt | [corrupt.wav](previews/audio/corrupt.wav) — PLL square synth | [guitar](previews/audio/dry_guitar.wav) |
+| Klang | [klang.wav](previews/audio/klang.wav) — metallic ring mod | [chord](previews/audio/dry_chord.wav) |
+| GenLoss | [genloss.wav](previews/audio/genloss.wav) — wrecked tape | [chord](previews/audio/dry_chord.wav) |
+| Scorch | [scorch.wav](previews/audio/scorch.wav) — djent high-gain amp+cab | [riff](previews/audio/dry_riff.wav) |
+
+Regenerate or explore other presets with the preview tool below.
+
 ## Hearing them on desktop (no compiler, no pedal)
 
 The renderers mirror each effect's DSP so you can audition before flashing:

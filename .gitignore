@@ -18,6 +18,7 @@ src/custom/*/*_params.h
 src/hardware_probes/*/*.obj
 src/hardware_probes/*/*_params.h
 *.wav
+!previews/audio/*.wav
 tools/measure/out/
 build/probes/
 *.id0
