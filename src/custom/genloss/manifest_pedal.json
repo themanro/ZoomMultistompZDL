@@ -1,0 +1,21 @@
+{
+  "effect_name": "GenLoss",
+  "comment": "PEDAL BUILD manifest for GenLoss (2-knob v1). build.py reads THIS file; manifest.json is the 6-knob desktop-preview manifest. Drive, hiss, and mix (full wet) are baked; random dropouts deferred.",
+
+  "audio_func_name": "Fx_MOD_GenLoss",
+  "gid":  6,
+  "gid_comment": "0x06 = Modulation -> SONAME prefix ZDL_MOD_, matching Fx_MOD_GenLoss.",
+  "fxid": 456,
+  "fxid_comment": "0x01C8. Verify uniqueness before flashing.",
+
+  "fxid_version": "1.00",
+  "flags_byte":   1,
+
+  "params": [
+    { "name": "Wow",  "max": 100, "default": 45, "comment": "params[5]. Wow & flutter + pitch-instability depth." },
+    { "name": "Tone", "max": 100, "default": 40, "comment": "params[6]. Bandwidth / brightness (low-pass)." }
+  ],
+
+  "audio_nop": false,
+  "audio_nop_comment": "Set true for a UI-only smoke build before trusting the DSP."
+}

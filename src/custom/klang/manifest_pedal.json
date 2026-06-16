@@ -1,0 +1,21 @@
+{
+  "effect_name": "Klang",
+  "comment": "PEDAL BUILD manifest for Klang (2-knob, RING MOD only v1). build.py reads THIS file; manifest.json is the 5-knob desktop-preview manifest (which also has the frequency-shifter modes, deferred on pedal). Stereo spread is baked.",
+
+  "audio_func_name": "Fx_MOD_Klang",
+  "gid":  6,
+  "gid_comment": "0x06 = Modulation -> SONAME prefix ZDL_MOD_, matching Fx_MOD_Klang.",
+  "fxid": 455,
+  "fxid_comment": "0x01C7. Verify uniqueness before flashing.",
+
+  "fxid_version": "1.00",
+  "flags_byte":   1,
+
+  "params": [
+    { "name": "Freq", "max": 100, "default": 40, "comment": "params[5]. Carrier frequency (~0.5..2000 Hz, linear)." },
+    { "name": "Mix",  "max": 100, "default": 60, "comment": "params[6]. Dry/wet." }
+  ],
+
+  "audio_nop": false,
+  "audio_nop_comment": "Set true for a UI-only smoke build before trusting the DSP."
+}

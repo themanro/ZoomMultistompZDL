@@ -1,0 +1,21 @@
+{
+  "effect_name": "Flower",
+  "comment": "PEDAL BUILD manifest for Flower (2-knob, hardware-proven UI shape). The 6-knob manifest.json in this dir is the desktop-preview manifest; build.py reads THIS file. Reso, sweep range, and center frequency are baked into flower.c.",
+
+  "audio_func_name": "Fx_MOD_Flower",
+  "gid":  6,
+  "gid_comment": "0x06 = Modulation -> SONAME prefix ZDL_MOD_, matching Fx_MOD_Flower.",
+  "fxid": 451,
+  "fxid_comment": "0x01C3. Verify uniqueness against installed effects before flashing.",
+
+  "fxid_version": "1.00",
+  "flags_byte":   1,
+
+  "params": [
+    { "name": "Rate", "max": 100, "default": 45, "comment": "params[5]. Random step speed (~0.5..14 Hz)." },
+    { "name": "Mix",  "max": 100, "default": 85, "comment": "params[6]. Dry/wet blend." }
+  ],
+
+  "audio_nop": false,
+  "audio_nop_comment": "Set true for a UI-only smoke build (confirms it LOADS before trusting the DSP). The safe ladder is: flash audio_nop=true first; if it boots and shows up, set false and rebuild for sound."
+}

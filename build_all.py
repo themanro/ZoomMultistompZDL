@@ -34,6 +34,14 @@ RELEASE_PLUGINS = [
     ("verbtiny",    PLUGIN_DIR / "verbtiny"    / "build.py"),
     ("galactic",    PLUGIN_DIR / "galactic"    / "build.py"),
     ("ott",         CUSTOM_DIR / "ott"         / "build.py"),
+    ("flower",      CUSTOM_DIR / "flower"      / "build.py"),
+    ("shatter",     CUSTOM_DIR / "shatter"     / "build.py"),
+    ("arrakis",     CUSTOM_DIR / "arrakis"     / "build.py"),
+    ("microloom",   CUSTOM_DIR / "microloom"   / "build.py"),
+    ("corrupt",     CUSTOM_DIR / "corrupt"     / "build.py"),
+    ("klang",       CUSTOM_DIR / "klang"       / "build.py"),
+    ("genloss",     CUSTOM_DIR / "genloss"     / "build.py"),
+    ("scorch",      CUSTOM_DIR / "scorch"      / "build.py"),
 ]
 
 DIAGNOSTIC_PLUGINS = [

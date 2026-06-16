@@ -1,0 +1,21 @@
+{
+  "effect_name": "Scorch",
+  "comment": "PEDAL BUILD manifest for Scorch (2-knob). build.py reads THIS file; manifest.json is the 6-knob desktop-preview manifest. Tone stack + cab are baked (cab as 5 biquads, not the desktop FIR, to stay relocation-free).",
+
+  "audio_func_name": "Fx_DRV_Scorch",
+  "gid":  3,
+  "gid_comment": "0x03 = Drive -> SONAME prefix ZDL_DRV_. On MS-70CDR a custom Drive effect may need a stock Drive installed to appear in the device browser.",
+  "fxid": 457,
+  "fxid_comment": "0x01C9. Verify uniqueness before flashing.",
+
+  "fxid_version": "1.00",
+  "flags_byte":   1,
+
+  "params": [
+    { "name": "Gain",  "max": 100, "default": 70, "comment": "params[5]. Preamp gain / distortion amount." },
+    { "name": "Level", "max": 100, "default": 50, "comment": "params[6]. Output level." }
+  ],
+
+  "audio_nop": false,
+  "audio_nop_comment": "Set true for a UI-only smoke build before trusting the DSP."
+}
