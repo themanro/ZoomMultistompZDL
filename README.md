@@ -3,6 +3,31 @@
 Custom `.ZDL` effects for Zoom MultiStomp pedals, plus the reverse-engineered
 toolchain used to build them.
 
+## Custom effect pack
+
+This fork adds eight original custom effects — granular shimmer, drum glitch,
+tape degradation, a Dune-style drone, a Data Corrupter-style synth, ring mod,
+and a high-gain amp+cab — each with a full desktop preview and a 2-knob on-pedal
+build. See [CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md) for details and sound demos.
+
+<table>
+<tr>
+<td align="center"><img src="graphics/microloom.svg" width="150" alt="Microloom"></td>
+<td align="center"><img src="graphics/flower.svg" width="150" alt="Flower"></td>
+<td align="center"><img src="graphics/shatter.svg" width="150" alt="Shatter"></td>
+<td align="center"><img src="graphics/arrakis.svg" width="150" alt="Arrakis"></td>
+</tr>
+<tr>
+<td align="center"><img src="graphics/corrupt.svg" width="150" alt="Corrupt"></td>
+<td align="center"><img src="graphics/klang.svg" width="150" alt="Klang"></td>
+<td align="center"><img src="graphics/genloss.svg" width="150" alt="GenLoss"></td>
+<td align="center"><img src="graphics/scorch.svg" width="150" alt="Scorch"></td>
+</tr>
+</table>
+
+> These are not yet hardware-tested. Back up your effect list and flash one at
+> a time — see [CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md).
+
 ## Download Effects
 
 The ready-to-load effects are in [dist/](dist/). Point Zoom Effect Manager at
