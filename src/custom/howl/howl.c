@@ -1,17 +1,23 @@
 /*
- * howl.c -- Howl: Death By Audio TSA-style self-oscillating feedback, MS-70CDR.
+ * howl.c -- Howl: feedback/resonant "howl" effect, MS-70CDR.
  *
- * Pedal port of tools/audio_preview/renderers/howl.py. 2 knobs:
- *   Tune    (params[5]) - resonant / oscillation frequency
- *   Annihil (params[6]) - feedback loop gain (low = resonant, high = scream)
- * Drive (in-loop fuzz), Tone, and Mix are baked.
+ * v2 rewrite. The v1 design fed a resonant SVF back on itself; its loop gain
+ * (fbgain x the filter's resonance peak) crossed unity at almost any setting,
+ * so it self-oscillated into CONSTANT NOISE on hardware. This version uses a
+ * tuned 2-pole resonator with a controllable pole radius r < 1: the radius is
+ * ALWAYS below 1, so it is unconditionally stable and decays to silence when
+ * you stop playing (no constant noise), while r near 1 gives a multi-second
+ * feedback howl. Your input excites it; the grit (soft-clip) sits OUTSIDE the
+ * loop so it can never destabilize.
  *
- * A damped resonant bandpass (Chamberlin SVF) in a feedback loop with a cubic
- * soft-clip fuzz; past unity loop gain it self-oscillates, bounded by the
- * clipper. Two slightly detuned resonators (L/R) for a beating stereo howl.
+ * 2 knobs:
+ *   Tune    (params[5]) - resonant frequency (80..1950 Hz)
+ *   Annihil (params[6]) - pole radius / howl length (short ring -> long howl)
  *
- * Safe-DSP: no math lib (linear SVF coefficient, cubic soft-clip), no runtime
- * divide, no static arrays, no buffer. Tiny ctx[3] state. Magic shuttle kept.
+ * Safe-DSP: no math lib (cos via small-angle 1 - w^2/2, valid since the Tune
+ * range keeps w < 0.28; cubic soft-clip), no runtime divide, no buffer. Tiny
+ * ctx[3] state. ctx[11]/ctx[12] magic shuttle preserved. Pole radius capped
+ * below 1 -> cannot run away.
  */
 
 #include <stdint.h>
@@ -20,7 +26,7 @@
 #include "howl_params.h"
 
 #ifndef HOWL_AUDIO_FUNC
-#define HOWL_AUDIO_FUNC Fx_FLT_Howl
+#define HOWL_AUDIO_FUNC Fx_DYN_Howl
 #endif
 
 #define HOWL_DO_PRAGMA(x) _Pragma(#x)
@@ -32,25 +38,25 @@ HOWL_CODE_SECTION(HOWL_AUDIO_FUNC)
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
 #define HOWL_MAGIC   0x484F574Cu   /* 'HOWL' */
-#define HOWL_VERSION 1u
+#define HOWL_VERSION 2u
 
 #define HOWL_TWO_PI_SR (6.2831853f / 44100.0f)
-#define HOWL_Q         0.45f
 #define HOWL_FC_MIN    80.0f
-#define HOWL_FC_SPAN   1870.0f      /* 80 .. 1950 Hz (linear) */
-#define HOWL_DRIVE     5.0f         /* baked in-loop fuzz */
-#define HOWL_LPC       0.25f        /* baked output tone */
+#define HOWL_FC_SPAN   1870.0f
+#define HOWL_GAP_MIN   3.0e-5f      /* (1-r) at max Annihil -> longest howl */
+#define HOWL_GAP_MAX   1.2e-3f      /* extra (1-r) at min Annihil -> short ring */
+#define HOWL_GIN       0.12f        /* input excitation into the resonator */
+#define HOWL_DRIVE     2.4f         /* out-of-loop grit */
+#define HOWL_DETUNE    1.012f       /* R resonator detune for stereo width */
 #define HOWL_WET       0.75f
 #define HOWL_DRY       0.25f
-#define HOWL_DETUNE    1.012f
 
 typedef struct HowlState {
     uint32_t magic;
     uint32_t version;
     uint32_t initialized;
     uint32_t pad;
-    float lowL, bandL, fbL, lpL;
-    float lowR, bandR, fbR, lpR;
+    float y1L, y2L, y1R, y2R;
 } HowlState;
 
 static inline float howl_soft(float x)
@@ -83,8 +89,7 @@ void HOWL_AUDIO_FUNC(unsigned int *ctx)
     if (st->magic != HOWL_MAGIC || st->version != HOWL_VERSION || !st->initialized) {
         st->magic = HOWL_MAGIC;
         st->version = HOWL_VERSION;
-        st->lowL = st->bandL = st->fbL = st->lpL = 0.0f;
-        st->lowR = st->bandR = st->fbR = st->lpR = 0.0f;
+        st->y1L = st->y2L = st->y1R = st->y2R = 0.0f;
         st->initialized = 1u;
     }
 
@@ -92,40 +97,33 @@ void HOWL_AUDIO_FUNC(unsigned int *ctx)
     float annih = zoom_param_norm01(params[HOWL_ANNIHIL_SLOT], HOWL_ANNIHIL_DEFAULT_NORM);
 
     float fc = HOWL_FC_MIN + tune * HOWL_FC_SPAN;
-    float f1L = HOWL_TWO_PI_SR * fc;
-    float f1R = HOWL_TWO_PI_SR * fc * HOWL_DETUNE;
-    float fbgain = annih * annih * 2.2f;
+    float oma = 1.0f - annih;
+    float r = 1.0f - (HOWL_GAP_MIN + HOWL_GAP_MAX * oma * oma);   /* always < 1 */
+    float a2 = -r * r;
 
-    float lowL = st->lowL, bandL = st->bandL, fbL = st->fbL, lpL = st->lpL;
-    float lowR = st->lowR, bandR = st->bandR, fbR = st->fbR, lpR = st->lpR;
+    float wL = HOWL_TWO_PI_SR * fc;
+    float wR = wL * HOWL_DETUNE;
+    float a1L = 2.0f * r * (1.0f - 0.5f * wL * wL);   /* small-angle cos */
+    float a1R = 2.0f * r * (1.0f - 0.5f * wR * wR);
+
+    float y1L = st->y1L, y2L = st->y2L, y1R = st->y1R, y2R = st->y2R;
 
     int i;
     for (i = 0; i < 8; i++) {
         float inL = fxBuf[i];
         float inR = fxBuf[i + 8];
 
-        float xL = inL + fbgain * fbL;
-        lowL += f1L * bandL;
-        float hpL = xL - lowL - HOWL_Q * bandL;
-        bandL += f1L * hpL;
-        float yL = howl_soft(HOWL_DRIVE * bandL);
-        fbL = yL;
-        lpL += HOWL_LPC * (yL - lpL);
-        float wetL = howl_soft(lpL * 1.1f);
+        float yL = inL * HOWL_GIN + a1L * y1L + a2 * y2L;
+        y2L = y1L; y1L = yL;
+        float yR = inR * HOWL_GIN + a1R * y1R + a2 * y2R;
+        y2R = y1R; y1R = yR;
 
-        float xR = inR + fbgain * fbR;
-        lowR += f1R * bandR;
-        float hpR = xR - lowR - HOWL_Q * bandR;
-        bandR += f1R * hpR;
-        float yR = howl_soft(HOWL_DRIVE * bandR);
-        fbR = yR;
-        lpR += HOWL_LPC * (yR - lpR);
-        float wetR = howl_soft(lpR * 1.1f);
+        float wetL = howl_soft(yL * HOWL_DRIVE);
+        float wetR = howl_soft(yR * HOWL_DRIVE);
 
         fxBuf[i]     = HOWL_DRY * inL + HOWL_WET * wetL;
         fxBuf[i + 8] = HOWL_DRY * inR + HOWL_WET * wetR;
     }
 
-    st->lowL = lowL; st->bandL = bandL; st->fbL = fbL; st->lpL = lpL;
-    st->lowR = lowR; st->bandR = bandR; st->fbR = fbR; st->lpR = lpR;
+    st->y1L = y1L; st->y2L = y2L; st->y1R = y1R; st->y2R = y2R;
 }

@@ -1,66 +1,68 @@
-"""Desktop reference renderer for Howl — Death By Audio Total Sonic
-Annihilation-style self-oscillating feedback.
+"""Desktop reference renderer for Howl (v2) — feedback/resonant howl.
 
-A high-resonance bandpass (Chamberlin SVF) sits in a feedback loop with a fuzz
-clipper. The input plus the fed-back, clipped output drives the filter; once
-the loop gain (Annihil) crosses unity the resonance runs away into sustained
-self-oscillation at the Tune frequency, bounded by the clipper so it screams
-instead of exploding. Two slightly detuned resonators (L/R) give a beating
-stereo howl. Low Annihil = a resonant filter; high = endless feedback drone;
-max = chaos.
+v1 fed a resonant filter back on itself and self-oscillated into constant
+noise. v2 uses a tuned 2-pole resonator with a controllable pole radius r < 1:
+unconditionally stable (decays to silence when idle, no constant noise), with
+r near 1 giving a multi-second feedback howl. Input excites it; grit (soft
+clip) sits outside the loop. Two detuned resonators (L/R) for stereo width.
 
 Knobs (0..100): Tune, Annihil, Drive, Tone, Mix.
+(Pedal build is 2-knob Tune+Annihil with Drive/Tone/Mix baked.)
 """
 
 from __future__ import annotations
 
 import numpy as np
 
-PI = 3.14159265358979
-TWO_PI = 6.28318530717959
-Q = 0.45  # SVF damping — high enough that oscillation depends on Annihil
+GAP_MIN = 3.0e-5
+GAP_MAX = 1.2e-3
+GIN = 0.12
 
 
-def _channel(mono, sr, fc, fbgain, drv, lpc):
+def _channel(mono, sr, fc, r, drive):
+    w = 2.0 * np.pi * fc / sr
+    a1 = 2.0 * r * np.cos(w)
+    a2 = -r * r
     n = mono.shape[0]
-    out = np.zeros(n)
-    f1 = 2.0 * np.sin(PI * fc / sr)
-    low = band = fb = lp = 0.0
+    y = np.zeros(n)
+    y1 = y2 = 0.0
     for i in range(n):
-        x = mono[i] + fbgain * fb
-        low += f1 * band
-        hp = x - low - Q * band
-        band += f1 * hp
-        y = np.tanh(drv * band)      # fuzz clipper in the loop
-        fb = y
-        lp += lpc * (y - lp)         # output tone low-pass
-        out[i] = lp
-    return out
+        yi = mono[i] * GIN + a1 * y1 + a2 * y2
+        y2 = y1
+        y1 = yi
+        y[i] = yi
+    s = y * drive
+    # cubic soft-clip (outside the feedback loop), saturating to +/-1
+    return np.where(np.abs(s) <= 1.0, 1.5 * s - 0.5 * s ** 3, np.sign(s))
 
 
 def render(audio, sample_rate, params, tail, root):
     sr = sample_rate
     tune = float(params.get("tune", 45.0)) / 100.0
     annih = float(params.get("annihil", 60.0)) / 100.0
-    drive = float(params.get("drive", 55.0)) / 100.0
+    drive = 1.0 + float(params.get("drive", 55.0)) / 100.0 * 3.0
     tone = float(params.get("tone", 45.0)) / 100.0
     mix = float(params.get("mix", 70.0)) / 100.0
 
-    fc = 80.0 * (2.0 ** (tune * 4.6))      # ~80 .. ~1950 Hz
-    fbgain = annih * annih * 2.2           # quadratic: gentle low, runaway high
-    drv = 1.0 + drive * 9.0
-    lpc = 0.02 + tone * 0.5
+    fc = 80.0 + tune * 1870.0
+    oma = 1.0 - annih
+    r = 1.0 - (GAP_MIN + GAP_MAX * oma * oma)
 
     x = audio.astype(np.float64)
     mono = x.mean(axis=1)
     tail_samps = int(tail * sr)
     mono = np.concatenate([mono, np.zeros(tail_samps)])
 
-    wetL = _channel(mono, sr, fc, fbgain, drv, lpc)
-    wetR = _channel(mono, sr, fc * 1.012, fbgain, drv, lpc)
-    # makeup + final safety clip
-    wetL = np.tanh(wetL * 1.1)
-    wetR = np.tanh(wetR * 1.1)
+    wetL = _channel(mono, sr, fc, r, drive)
+    wetR = _channel(mono, sr, fc * 1.012, r, drive)
+
+    # simple output tone low-pass
+    a = np.exp(-2.0 * np.pi * (400.0 + tone * 5000.0) / sr)
+    for w in (wetL, wetR):
+        lp = 0.0
+        for i in range(len(w)):
+            lp = (1.0 - a) * w[i] + a * lp
+            w[i] = lp
 
     dry = np.concatenate([x, np.zeros((tail_samps, x.shape[1]))], axis=0)
     n = wetL.shape[0]
