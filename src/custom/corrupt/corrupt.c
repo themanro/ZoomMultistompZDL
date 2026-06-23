@@ -41,7 +41,7 @@ CORRUPT_CODE_SECTION(CORRUPT_AUDIO_FUNC)
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
 #define CR_MAGIC   0x43525054u   /* 'CRPT' */
-#define CR_VERSION 1u
+#define CR_VERSION 2u
 
 #define CR_LP_COEF  0.10f        /* ~800 Hz one-pole for pitch detection */
 #define CR_GATE     0.01f
@@ -64,6 +64,8 @@ typedef struct CorruptState {
     float period;
     float mphase;
     float sphase;
+    float hphase;
+    float tlp;
     float env;
 } CorruptState;
 
@@ -108,17 +110,23 @@ void CORRUPT_AUDIO_FUNC(unsigned int *ctx)
         st->period = 200.0f;
         st->mphase = 0.0f;
         st->sphase = 0.0f;
+        st->hphase = 0.0f;
+        st->tlp = 0.0f;
         st->env = 0.0f;
         st->initialized = 1u;
     }
 
-    float subLvl = zoom_param_norm01(params[CORRUPT_SUB_SLOT], CORRUPT_SUB_DEFAULT_NORM);
-    float mix    = zoom_param_norm01(params[CORRUPT_MIX_SLOT], CORRUPT_MIX_DEFAULT_NORM);
+    float subLvl  = zoom_param_norm01(params[CORRUPT_SUB_SLOT], CORRUPT_SUB_DEFAULT_NORM);
+    float tone    = zoom_param_norm01(params[CORRUPT_TONE_SLOT], CORRUPT_TONE_DEFAULT_NORM);
+    float waveLvl = zoom_param_norm01(params[CORRUPT_WAVE_SLOT], CORRUPT_WAVE_DEFAULT_NORM);
+    float mix     = zoom_param_norm01(params[CORRUPT_MIX_SLOT], CORRUPT_MIX_DEFAULT_NORM);
+    float tcoef = 0.04f + tone * 0.6f;      /* output low-pass: dark .. raw */
     float wet = mix;
     float dry = 1.0f - mix;
 
     float lpIn = st->lpIn, prevLp = st->prevLp, period = st->period;
-    float mphase = st->mphase, sphase = st->sphase, env = st->env;
+    float mphase = st->mphase, sphase = st->sphase, hphase = st->hphase;
+    float tlp = st->tlp, env = st->env;
     int sinceCross = st->sinceCross;
 
     int f;
@@ -152,12 +160,18 @@ void CORRUPT_AUDIO_FUNC(unsigned int *ctx)
         if (sphase >= 1.0f) sphase -= 1.0f;
         float sub = sphase < 0.5f ? 1.0f : -1.0f;
 
-        float synth = env * CR_MAKEUP * (master + subLvl * sub) * 0.5f;
-        if (synth > CR_CLAMP) synth = CR_CLAMP;
-        else if (synth < -CR_CLAMP) synth = -CR_CLAMP;
+        hphase += inc * 2.0f;             /* harmony: one octave up */
+        if (hphase >= 1.0f) hphase -= 1.0f;
+        float harm = hphase < 0.5f ? 1.0f : -1.0f;
 
-        fxBuf[f]     = dry * inL + wet * synth;
-        fxBuf[f + 8] = dry * inR + wet * synth;
+        float synth = env * CR_MAKEUP * (master + subLvl * sub + waveLvl * harm) * 0.45f;
+        tlp += tcoef * (synth - tlp);     /* Tone: tames the harsh square edges */
+        float o = tlp;
+        if (o > CR_CLAMP) o = CR_CLAMP;
+        else if (o < -CR_CLAMP) o = -CR_CLAMP;
+
+        fxBuf[f]     = dry * inL + wet * o;
+        fxBuf[f + 8] = dry * inR + wet * o;
     }
 
     st->lpIn = lpIn;
@@ -165,6 +179,8 @@ void CORRUPT_AUDIO_FUNC(unsigned int *ctx)
     st->period = period;
     st->mphase = mphase;
     st->sphase = sphase;
+    st->hphase = hphase;
+    st->tlp = tlp;
     st->env = env;
     st->sinceCross = sinceCross;
 }

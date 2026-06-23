@@ -106,8 +106,9 @@ void KLANG_AUDIO_FUNC(unsigned int *ctx)
 
         float cL = kl_sin(phL);
         float cR = kl_sin(phR);
-        fxBuf[i]     = dry * inL + wet * (inL * cL);
-        fxBuf[i + 8] = dry * inR + wet * (inR * cR);
+        /* ring output attenuated 0.5 — the raw sidebands read hot/piercing */
+        fxBuf[i]     = dry * inL + wet * (inL * cL) * 0.5f;
+        fxBuf[i + 8] = dry * inR + wet * (inR * cR) * 0.5f;
 
         phL += incL;
         if (phL > KLANG_TWO_PI) phL -= KLANG_TWO_PI;

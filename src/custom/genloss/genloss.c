@@ -143,7 +143,9 @@ void GENLOSS_AUDIO_FUNC(unsigned int *ctx)
 
     float wow  = zoom_param_norm01(params[GENLOSS_WOW_SLOT], GENLOSS_WOW_DEFAULT_NORM);
     float tone = zoom_param_norm01(params[GENLOSS_TONE_SLOT], GENLOSS_TONE_DEFAULT_NORM);
+    float hiss = zoom_param_norm01(params[GENLOSS_HISS_SLOT], GENLOSS_HISS_DEFAULT_NORM);
     float lpCoef = 0.03f + tone * 0.5f;     /* one-pole cutoff ~210 Hz .. ~3.7 kHz */
+    float hissLvl = hiss * 0.03f;           /* 0 .. ~0.03 noise floor */
 
     uint32_t wp = st->writePos;
     float wowPh = st->wowPhase, flutPh = st->flutPhase, rwLP = st->rwLP;
@@ -174,7 +176,7 @@ void GENLOSS_AUDIO_FUNC(unsigned int *ctx)
         hp += GL_HP_COEF * (warb - hp);
         float wh = warb - hp;            /* high-passed */
         lp += lpCoef * (wh - lp);        /* low-passed (Tone) */
-        float out = lp + gl_rand(&rng) * GL_HISS;
+        float out = lp + gl_rand(&rng) * hissLvl;
 
         fxBuf[i]     = out;
         fxBuf[i + 8] = out;

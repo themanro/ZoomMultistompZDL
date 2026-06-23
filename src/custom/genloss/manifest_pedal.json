@@ -1,27 +1,22 @@
 {
   "effect_name": "GenLoss",
-  "comment": "PEDAL BUILD manifest for GenLoss (2-knob v1). build.py reads THIS file; manifest.json is the 6-knob desktop-preview manifest. Drive, hiss, and mix (full wet) are baked; random dropouts deferred.",
+  "comment": "PEDAL BUILD manifest for GenLoss (3-knob). build.py reads THIS file. Drive and mix are baked; dropouts deferred. Hiss is now a knob.",
+
   "audio_func_name": "Fx_DYN_GenLoss",
   "gid": 1,
-  "gid_comment": "0x01 = Dynamics category -> SONAME prefix ZDL_DYN_. All custom effects grouped under Dynamics.",
+  "gid_comment": "0x01 = Dynamics -> SONAME prefix ZDL_DYN_.",
   "fxid": 456,
   "fxid_comment": "0x01C8. Verify uniqueness before flashing.",
+
   "fxid_version": "1.00",
   "flags_byte": 1,
+
   "params": [
-    {
-      "name": "Wow",
-      "max": 100,
-      "default": 45,
-      "comment": "params[5]. Wow & flutter + pitch-instability depth."
-    },
-    {
-      "name": "Tone",
-      "max": 100,
-      "default": 40,
-      "comment": "params[6]. Bandwidth / brightness (low-pass)."
-    }
+    { "name": "Wow",  "max": 100, "default": 45, "comment": "params[5]. Wow & flutter + pitch instability." },
+    { "name": "Tone", "max": 100, "default": 40, "comment": "params[6]. Bandwidth / brightness (low-pass)." },
+    { "name": "Hiss", "max": 100, "default": 20, "comment": "params[7]. Tape hiss / noise-floor level." }
   ],
+
   "audio_nop": false,
   "audio_nop_comment": "Set true for a UI-only smoke build before trusting the DSP."
 }

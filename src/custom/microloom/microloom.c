@@ -34,7 +34,7 @@ MICROLOOM_CODE_SECTION(MICROLOOM_AUDIO_FUNC)
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
 #define ML_MAGIC   0x4D4C4F4Fu   /* 'MLOO' */
-#define ML_VERSION 1u
+#define ML_VERSION 2u
 
 #define ML_MB        24576u      /* main delay ring (frames) */
 #define ML_AP0       113u
@@ -62,6 +62,7 @@ typedef struct MicroloomState {
     float phase;
     float feed;
     float lp;
+    float olp;
     uint32_t ap0i, ap1i, ap2i;
     uint32_t pad;
 } MicroloomState;
@@ -113,6 +114,7 @@ void MICROLOOM_AUDIO_FUNC(unsigned int *ctx)
         st->phase = 0.0f;
         st->feed = 0.0f;
         st->lp = 0.0f;
+        st->olp = 0.0f;
         st->ap0i = st->ap1i = st->ap2i = 0u;
     }
 
@@ -126,14 +128,18 @@ void MICROLOOM_AUDIO_FUNC(unsigned int *ctx)
         return;
     }
 
+    float pitch = zoom_param_norm01(params[MICROLOOM_PITCH_SLOT], MICROLOOM_PITCH_DEFAULT_NORM);
     float regen = zoom_param_norm01(params[MICROLOOM_REGEN_SLOT], MICROLOOM_REGEN_DEFAULT_NORM);
+    float tone  = zoom_param_norm01(params[MICROLOOM_TONE_SLOT], MICROLOOM_TONE_DEFAULT_NORM);
     float mix   = zoom_param_norm01(params[MICROLOOM_MIX_SLOT], MICROLOOM_MIX_DEFAULT_NORM);
+    float ratio = 0.5f + pitch * 1.5f;       /* 0.5 (oct down) .. 2.0 (oct up) */
+    float tcoef = 0.05f + tone * 0.7f;       /* output low-pass: dark .. bright */
     float regenGain = regen * 0.85f;
     float wet = mix;
     float dry = 1.0f - mix;
 
     uint32_t wp = st->writePos;
-    float phase = st->phase, feed = st->feed, lp = st->lp;
+    float phase = st->phase, feed = st->feed, lp = st->lp, olp = st->olp;
     uint32_t a0 = st->ap0i, a1 = st->ap1i, a2 = st->ap2i;
 
     int f;
@@ -151,8 +157,9 @@ void MICROLOOM_AUDIO_FUNC(unsigned int *ctx)
         float e1 = (ML_HALF - (d1 < ML_HALF ? ML_HALF - d1 : d1 - ML_HALF)) * ML_INV_HALF;
         float e2 = (ML_HALF - (d2 < ML_HALF ? ML_HALF - d2 : d2 - ML_HALF)) * ML_INV_HALF;
         float pitched = ml_read(buf, wp, ML_BASE + d1) * e1 + ml_read(buf, wp, ML_BASE + d2) * e2;
-        phase += (1.0f - 2.0f);              /* octave up: ratio 2 */
+        phase += (1.0f - ratio);             /* Pitch knob sets shift ratio */
         if (phase < 0.0f) phase += ML_GRAIN;
+        else if (phase >= ML_GRAIN) phase -= ML_GRAIN;
 
         float x = regenGain * clean + ML_SHIMMER * pitched;
 
@@ -167,8 +174,9 @@ void MICROLOOM_AUDIO_FUNC(unsigned int *ctx)
         if (feed > ML_CLAMP) feed = ML_CLAMP;
         else if (feed < -ML_CLAMP) feed = -ML_CLAMP;
 
-        fxBuf[f]     = dry * inL + wet * feed;
-        fxBuf[f + 8] = dry * inR + wet * feed;
+        olp += tcoef * (feed - olp);         /* Tone: output low-pass */
+        fxBuf[f]     = dry * inL + wet * olp;
+        fxBuf[f + 8] = dry * inR + wet * olp;
 
         wp++;
         if (wp >= ML_MB) wp = 0u;
@@ -178,6 +186,7 @@ void MICROLOOM_AUDIO_FUNC(unsigned int *ctx)
     st->phase = phase;
     st->feed = feed;
     st->lp = lp;
+    st->olp = olp;
     st->ap0i = a0;
     st->ap1i = a1;
     st->ap2i = a2;
