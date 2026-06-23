@@ -95,6 +95,8 @@ void HOWL_AUDIO_FUNC(unsigned int *ctx)
 
     float tune  = zoom_param_norm01(params[HOWL_TUNE_SLOT], HOWL_TUNE_DEFAULT_NORM);
     float annih = zoom_param_norm01(params[HOWL_ANNIHIL_SLOT], HOWL_ANNIHIL_DEFAULT_NORM);
+    float level = zoom_param_norm01(params[HOWL_LEVEL_SLOT], HOWL_LEVEL_DEFAULT_NORM);
+    float wetLvl = level * 0.7f;            /* Level knob: 0 .. 0.7 howl level */
 
     float fc = HOWL_FC_MIN + tune * HOWL_FC_SPAN;
     float oma = 1.0f - annih;
@@ -121,8 +123,8 @@ void HOWL_AUDIO_FUNC(unsigned int *ctx)
         float wetL = howl_soft(yL * HOWL_DRIVE);
         float wetR = howl_soft(yR * HOWL_DRIVE);
 
-        fxBuf[i]     = HOWL_DRY * inL + HOWL_WET * wetL;
-        fxBuf[i + 8] = HOWL_DRY * inR + HOWL_WET * wetR;
+        fxBuf[i]     = HOWL_DRY * inL + wetLvl * wetL;
+        fxBuf[i + 8] = HOWL_DRY * inR + wetLvl * wetR;
     }
 
     st->y1L = y1L; st->y2L = y2L; st->y1R = y1R; st->y2R = y2R;

@@ -80,6 +80,11 @@ def main() -> None:
         fxid_version=manifest.get("fxid_version", "1.00").encode("ascii"),
         flags_byte=manifest.get("flags_byte", 0x01),
         audio_nop=manifest.get("audio_nop", False),
+        knob_positions=[(2, 14, 46), (3, 55, 46), (4, 96, 46)],
+        use_object_edit_handlers=False,
+        synthesize_linesel_edit_handlers=True,
+        synth_edit_start_index=2,
+        knob3_blob_path="/tmp/__nonexistent__",
     )
     link(cfg)
 

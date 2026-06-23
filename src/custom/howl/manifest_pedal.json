@@ -1,27 +1,22 @@
 {
   "effect_name": "Howl",
-  "comment": "PEDAL BUILD manifest for Howl (2-knob). build.py reads THIS file; manifest.json is the 5-knob desktop-preview manifest. Drive (in-loop fuzz), Tone, and Mix are baked in howl.c.",
+  "comment": "PEDAL BUILD manifest for Howl (3-knob). build.py reads THIS file. Tuned 2-pole resonator feedback howl; Level scales the howl output.",
+
   "audio_func_name": "Fx_DYN_Howl",
   "gid": 1,
-  "gid_comment": "0x01 = Dynamics category -> SONAME prefix ZDL_DYN_. All custom effects grouped under Dynamics.",
+  "gid_comment": "0x01 = Dynamics -> SONAME prefix ZDL_DYN_.",
   "fxid": 458,
   "fxid_comment": "0x01CA. Verify uniqueness before flashing.",
+
   "fxid_version": "1.00",
   "flags_byte": 1,
+
   "params": [
-    {
-      "name": "Tune",
-      "max": 100,
-      "default": 45,
-      "comment": "params[5]. Oscillation/resonant frequency."
-    },
-    {
-      "name": "Annihil",
-      "max": 100,
-      "default": 60,
-      "comment": "params[6]. Feedback gain: resonant -> howl -> chaos."
-    }
+    { "name": "Tune",    "max": 100, "default": 45, "comment": "params[5]. Oscillation/resonant frequency." },
+    { "name": "Annihil", "max": 100, "default": 60, "comment": "params[6]. Pole radius: short ring -> long howl." },
+    { "name": "Level",   "max": 100, "default": 50, "comment": "params[7]. Howl output level (0 .. 0.7; default ~tame)." }
   ],
+
   "audio_nop": false,
   "audio_nop_comment": "Set true for a UI-only smoke build before trusting the DSP."
 }
