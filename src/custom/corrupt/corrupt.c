@@ -112,8 +112,8 @@ void CORRUPT_AUDIO_FUNC(unsigned int *ctx)
         st->initialized = 1u;
     }
 
-    float subLvl = zoom_param_norm(params[CORRUPT_SUB_SLOT], CORRUPT_SUB_DEFAULT_NORM);
-    float mix    = zoom_param_norm(params[CORRUPT_MIX_SLOT], CORRUPT_MIX_DEFAULT_NORM);
+    float subLvl = zoom_param_norm01(params[CORRUPT_SUB_SLOT], CORRUPT_SUB_DEFAULT_NORM);
+    float mix    = zoom_param_norm01(params[CORRUPT_MIX_SLOT], CORRUPT_MIX_DEFAULT_NORM);
     float wet = mix;
     float dry = 1.0f - mix;
 

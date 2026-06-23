@@ -126,8 +126,8 @@ void MICROLOOM_AUDIO_FUNC(unsigned int *ctx)
         return;
     }
 
-    float regen = zoom_param_norm(params[MICROLOOM_REGEN_SLOT], MICROLOOM_REGEN_DEFAULT_NORM);
-    float mix   = zoom_param_norm(params[MICROLOOM_MIX_SLOT], MICROLOOM_MIX_DEFAULT_NORM);
+    float regen = zoom_param_norm01(params[MICROLOOM_REGEN_SLOT], MICROLOOM_REGEN_DEFAULT_NORM);
+    float mix   = zoom_param_norm01(params[MICROLOOM_MIX_SLOT], MICROLOOM_MIX_DEFAULT_NORM);
     float regenGain = regen * 0.85f;
     float wet = mix;
     float dry = 1.0f - mix;

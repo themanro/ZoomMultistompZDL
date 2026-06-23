@@ -114,8 +114,8 @@ void SHATTER_AUDIO_FUNC(unsigned int *ctx)
         return;                       /* pass dry while clearing */
     }
 
-    float chance = zoom_param_norm(params[SHATTER_CHANCE_SLOT], SHATTER_CHANCE_DEFAULT_NORM);
-    float mix    = zoom_param_norm(params[SHATTER_MIX_SLOT], SHATTER_MIX_DEFAULT_NORM);
+    float chance = zoom_param_norm01(params[SHATTER_CHANCE_SLOT], SHATTER_CHANCE_DEFAULT_NORM);
+    float mix    = zoom_param_norm01(params[SHATTER_MIX_SLOT], SHATTER_MIX_DEFAULT_NORM);
     int chanceThr = (int)(chance * 65536.0f);
     float wet = mix;
     float dry = 1.0f - mix;

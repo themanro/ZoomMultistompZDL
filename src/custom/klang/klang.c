@@ -89,8 +89,8 @@ void KLANG_AUDIO_FUNC(unsigned int *ctx)
         st->initialized = 1u;
     }
 
-    float freq = zoom_param_norm(params[KLANG_FREQ_SLOT], KLANG_FREQ_DEFAULT_NORM);
-    float mix  = zoom_param_norm(params[KLANG_MIX_SLOT], KLANG_MIX_DEFAULT_NORM);
+    float freq = zoom_param_norm01(params[KLANG_FREQ_SLOT], KLANG_FREQ_DEFAULT_NORM);
+    float mix  = zoom_param_norm01(params[KLANG_MIX_SLOT], KLANG_MIX_DEFAULT_NORM);
 
     float carrierHz = KLANG_FREQ_MIN + freq * KLANG_FREQ_SPAN;
     float incL = carrierHz * KLANG_TWO_PI_SR;

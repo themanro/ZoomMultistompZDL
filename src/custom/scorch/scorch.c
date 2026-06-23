@@ -128,12 +128,12 @@ void SCORCH_AUDIO_FUNC(unsigned int *ctx)
         st->initialized = 1u;
     }
 
-    float gain  = zoom_param_norm(params[SCORCH_GAIN_SLOT], SCORCH_GAIN_DEFAULT_NORM);
-    float level = zoom_param_norm(params[SCORCH_LEVEL_SLOT], SCORCH_LEVEL_DEFAULT_NORM);
+    float gain  = zoom_param_norm01(params[SCORCH_GAIN_SLOT], SCORCH_GAIN_DEFAULT_NORM);
+    float level = zoom_param_norm01(params[SCORCH_LEVEL_SLOT], SCORCH_LEVEL_DEFAULT_NORM);
 
     float pre = 1.0f + gain * 45.0f;
     float g2  = 1.0f + gain * 6.0f;
-    float outGain = 0.4f + level * 1.4f;
+    float outGain = 0.25f + level * 0.9f;
     float biasOut = sc_soft(SC_BIAS);
 
     float hp = st->hp, lp = st->lp;

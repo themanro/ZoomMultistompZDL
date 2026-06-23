@@ -1,21 +1,27 @@
 {
   "effect_name": "Arrakis",
   "comment": "PEDAL BUILD manifest for Arrakis (2-knob). build.py reads THIS file; manifest.json is the 6-knob desktop-preview manifest. Sub-octave depth, sweep rate, drive, and tone are baked in arrakis.c.",
-
-  "audio_func_name": "Fx_MOD_Arrakis",
-  "gid":  6,
-  "gid_comment": "0x06 = Modulation -> SONAME prefix ZDL_MOD_, matching Fx_MOD_Arrakis.",
+  "audio_func_name": "Fx_DYN_Arrakis",
+  "gid": 1,
+  "gid_comment": "0x01 = Dynamics category -> SONAME prefix ZDL_DYN_. All custom effects grouped under Dynamics.",
   "fxid": 453,
   "fxid_comment": "0x01C5. Verify uniqueness before flashing.",
-
   "fxid_version": "1.00",
-  "flags_byte":   1,
-
+  "flags_byte": 1,
   "params": [
-    { "name": "Detune", "max": 100, "default": 45, "comment": "params[5]. Beat spread between the two detuned voices." },
-    { "name": "Mix",    "max": 100, "default": 80, "comment": "params[6]. Dry/wet." }
+    {
+      "name": "Detune",
+      "max": 100,
+      "default": 45,
+      "comment": "params[5]. Beat spread between the two detuned voices."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 80,
+      "comment": "params[6]. Dry/wet."
+    }
   ],
-
   "audio_nop": false,
   "audio_nop_comment": "Set true for a UI-only smoke build before trusting the DSP."
 }

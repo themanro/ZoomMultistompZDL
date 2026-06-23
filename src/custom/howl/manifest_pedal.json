@@ -1,21 +1,27 @@
 {
   "effect_name": "Howl",
   "comment": "PEDAL BUILD manifest for Howl (2-knob). build.py reads THIS file; manifest.json is the 5-knob desktop-preview manifest. Drive (in-loop fuzz), Tone, and Mix are baked in howl.c.",
-
-  "audio_func_name": "Fx_FLT_Howl",
-  "gid":  2,
-  "gid_comment": "0x02 = Filter -> SONAME prefix ZDL_FLT_, matching Fx_FLT_Howl.",
+  "audio_func_name": "Fx_DYN_Howl",
+  "gid": 1,
+  "gid_comment": "0x01 = Dynamics category -> SONAME prefix ZDL_DYN_. All custom effects grouped under Dynamics.",
   "fxid": 458,
   "fxid_comment": "0x01CA. Verify uniqueness before flashing.",
-
   "fxid_version": "1.00",
-  "flags_byte":   1,
-
+  "flags_byte": 1,
   "params": [
-    { "name": "Tune",    "max": 100, "default": 45, "comment": "params[5]. Oscillation/resonant frequency." },
-    { "name": "Annihil", "max": 100, "default": 60, "comment": "params[6]. Feedback gain: resonant -> howl -> chaos." }
+    {
+      "name": "Tune",
+      "max": 100,
+      "default": 45,
+      "comment": "params[5]. Oscillation/resonant frequency."
+    },
+    {
+      "name": "Annihil",
+      "max": 100,
+      "default": 60,
+      "comment": "params[6]. Feedback gain: resonant -> howl -> chaos."
+    }
   ],
-
   "audio_nop": false,
   "audio_nop_comment": "Set true for a UI-only smoke build before trusting the DSP."
 }

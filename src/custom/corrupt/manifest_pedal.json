@@ -1,21 +1,27 @@
 {
   "effect_name": "Corrupt",
   "comment": "PEDAL BUILD manifest for Corrupt (2-knob, v1 = square master + sub octave, zero-crossing pitch tracking). build.py reads THIS file; manifest.json is the 6-knob desktop-preview manifest. Harmony/FM are deferred.",
-
-  "audio_func_name": "Fx_DRV_Corrupt",
-  "gid":  3,
-  "gid_comment": "0x03 = Drive -> SONAME prefix ZDL_DRV_. On MS-70CDR a custom Drive effect may need a stock Drive installed to appear in the device browser.",
+  "audio_func_name": "Fx_DYN_Corrupt",
+  "gid": 1,
+  "gid_comment": "0x01 = Dynamics category -> SONAME prefix ZDL_DYN_. All custom effects grouped under Dynamics.",
   "fxid": 454,
   "fxid_comment": "0x01C6. Verify uniqueness before flashing.",
-
   "fxid_version": "1.00",
-  "flags_byte":   1,
-
+  "flags_byte": 1,
   "params": [
-    { "name": "Sub", "max": 100, "default": 60, "comment": "params[5]. Subharmonic (octave-down) square level." },
-    { "name": "Mix", "max": 100, "default": 85, "comment": "params[6]. Dry/synth blend." }
+    {
+      "name": "Sub",
+      "max": 100,
+      "default": 60,
+      "comment": "params[5]. Subharmonic (octave-down) square level."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 85,
+      "comment": "params[6]. Dry/synth blend."
+    }
   ],
-
   "audio_nop": false,
   "audio_nop_comment": "Set true for a UI-only smoke build before trusting the DSP."
 }

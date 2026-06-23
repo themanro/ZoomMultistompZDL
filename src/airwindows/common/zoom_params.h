@@ -25,6 +25,18 @@ static inline float zoom_param_norm(float raw, float fallback_norm)
     return zoom_clamp01(v);
 }
 
+/* Hardware reality (confirmed via StChorus + on-pedal testing of this pack):
+ * the spliced LineSel / synthesized-handler path delivers a NORMALIZED 0..1
+ * raw value, NOT the 0..0.14 the older GAIN probe saw. Using zoom_param_norm
+ * (the x7 helper) saturates every knob to max above ~14% travel — i.e. the
+ * knobs feel dead and levels pin loud. Use this 0..1 scaler instead. */
+static inline float zoom_param_norm01(float raw, float fallback_norm)
+{
+    if (raw <= 0.0001f) return zoom_clamp01(fallback_norm);
+    if (raw <= 1.0f) return zoom_clamp01(raw);
+    return zoom_clamp01(raw * 0.01f);
+}
+
 static inline float zoom_param_scale(float raw, float fallback_norm, float out_min, float out_max)
 {
     float n = zoom_param_norm(raw, fallback_norm);

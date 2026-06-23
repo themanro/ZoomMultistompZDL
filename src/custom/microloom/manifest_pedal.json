@@ -1,21 +1,27 @@
 {
   "effect_name": "Microlm",
   "comment": "PEDAL BUILD manifest for Microloom (2-knob, v1 shimmer-cloud core). build.py reads THIS file; manifest.json is the 7-knob desktop-preview manifest. Octave (+1), grain size, base delay, and shimmer amount are baked in microloom.c.",
-
-  "audio_func_name": "Fx_DLY_Microlm",
-  "gid":  8,
-  "gid_comment": "0x08 = Delay -> SONAME prefix ZDL_DLY_, matching Fx_DLY_Microlm.",
+  "audio_func_name": "Fx_DYN_Microlm",
+  "gid": 1,
+  "gid_comment": "0x01 = Dynamics category -> SONAME prefix ZDL_DYN_. All custom effects grouped under Dynamics.",
   "fxid": 450,
   "fxid_comment": "0x01C2. Verify uniqueness before flashing.",
-
   "fxid_version": "1.00",
-  "flags_byte":   1,
-
+  "flags_byte": 1,
   "params": [
-    { "name": "Regen", "max": 100, "default": 72, "comment": "params[5]. Feedback / shimmer cloud length." },
-    { "name": "Mix",   "max": 100, "default": 60, "comment": "params[6]. Dry/wet." }
+    {
+      "name": "Regen",
+      "max": 100,
+      "default": 72,
+      "comment": "params[5]. Feedback / shimmer cloud length."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 60,
+      "comment": "params[6]. Dry/wet."
+    }
   ],
-
   "audio_nop": false,
   "audio_nop_comment": "Set true for a UI-only smoke build before trusting the DSP."
 }

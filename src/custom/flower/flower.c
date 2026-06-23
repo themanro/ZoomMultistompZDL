@@ -123,8 +123,8 @@ void FLOWER_AUDIO_FUNC(unsigned int *ctx)
         flower_reset(st);
     }
 
-    float rate = zoom_param_norm(params[FLOWER_RATE_SLOT], FLOWER_RATE_DEFAULT_NORM);
-    float mix  = zoom_param_norm(params[FLOWER_MIX_SLOT],  FLOWER_MIX_DEFAULT_NORM);
+    float rate = zoom_param_norm01(params[FLOWER_RATE_SLOT], FLOWER_RATE_DEFAULT_NORM);
+    float mix  = zoom_param_norm01(params[FLOWER_MIX_SLOT],  FLOWER_MIX_DEFAULT_NORM);
 
     float rateHz   = 0.5f + rate * 13.5f;        /* ~0.5..14 steps/sec */
     float phaseInc = rateHz * FLOWER_INV_SR;     /* no runtime divide */

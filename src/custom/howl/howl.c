@@ -88,8 +88,8 @@ void HOWL_AUDIO_FUNC(unsigned int *ctx)
         st->initialized = 1u;
     }
 
-    float tune  = zoom_param_norm(params[HOWL_TUNE_SLOT], HOWL_TUNE_DEFAULT_NORM);
-    float annih = zoom_param_norm(params[HOWL_ANNIHIL_SLOT], HOWL_ANNIHIL_DEFAULT_NORM);
+    float tune  = zoom_param_norm01(params[HOWL_TUNE_SLOT], HOWL_TUNE_DEFAULT_NORM);
+    float annih = zoom_param_norm01(params[HOWL_ANNIHIL_SLOT], HOWL_ANNIHIL_DEFAULT_NORM);
 
     float fc = HOWL_FC_MIN + tune * HOWL_FC_SPAN;
     float f1L = HOWL_TWO_PI_SR * fc;

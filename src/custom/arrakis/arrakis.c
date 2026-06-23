@@ -138,8 +138,8 @@ void ARRAKIS_AUDIO_FUNC(unsigned int *ctx)
         return;
     }
 
-    float detune = zoom_param_norm(params[ARRAKIS_DETUNE_SLOT], ARRAKIS_DETUNE_DEFAULT_NORM);
-    float mix    = zoom_param_norm(params[ARRAKIS_MIX_SLOT], ARRAKIS_MIX_DEFAULT_NORM);
+    float detune = zoom_param_norm01(params[ARRAKIS_DETUNE_SLOT], ARRAKIS_DETUNE_DEFAULT_NORM);
+    float mix    = zoom_param_norm01(params[ARRAKIS_MIX_SLOT], ARRAKIS_MIX_DEFAULT_NORM);
     float dAmp = detune * AR_CENTS_MAX * AR_LN2_1200;   /* detune ratio swing */
     float wet = mix;
     float dry = 1.0f - mix;

@@ -47,7 +47,7 @@ GENLOSS_CODE_SECTION(GENLOSS_AUDIO_FUNC)
 #define GL_RW_COEF    0.0012f
 #define GL_HP_COEF    0.012f      /* sub high-pass (~80 Hz) */
 #define GL_DRIVE      1.8f
-#define GL_HISS       0.02f
+#define GL_HISS       0.006f
 
 typedef struct GenLossState {
     uint32_t magic;
@@ -141,8 +141,8 @@ void GENLOSS_AUDIO_FUNC(unsigned int *ctx)
         st->initialized = 1u;
     }
 
-    float wow  = zoom_param_norm(params[GENLOSS_WOW_SLOT], GENLOSS_WOW_DEFAULT_NORM);
-    float tone = zoom_param_norm(params[GENLOSS_TONE_SLOT], GENLOSS_TONE_DEFAULT_NORM);
+    float wow  = zoom_param_norm01(params[GENLOSS_WOW_SLOT], GENLOSS_WOW_DEFAULT_NORM);
+    float tone = zoom_param_norm01(params[GENLOSS_TONE_SLOT], GENLOSS_TONE_DEFAULT_NORM);
     float lpCoef = 0.03f + tone * 0.5f;     /* one-pole cutoff ~210 Hz .. ~3.7 kHz */
 
     uint32_t wp = st->writePos;
