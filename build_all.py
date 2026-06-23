@@ -43,6 +43,7 @@ RELEASE_PLUGINS = [
     ("genloss",     CUSTOM_DIR / "genloss"     / "build.py"),
     ("scorch",      CUSTOM_DIR / "scorch"      / "build.py"),
     ("howl",        CUSTOM_DIR / "howl"        / "build.py"),
+    ("reel",        CUSTOM_DIR / "reel"        / "build.py"),
 ]
 
 DIAGNOSTIC_PLUGINS = [
