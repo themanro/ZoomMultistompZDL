@@ -48,8 +48,8 @@ HOWL_CODE_SECTION(HOWL_AUDIO_FUNC)
 #define HOWL_GIN       0.12f        /* input excitation into the resonator */
 #define HOWL_DRIVE     2.4f         /* out-of-loop grit */
 #define HOWL_DETUNE    1.012f       /* R resonator detune for stereo width */
-#define HOWL_WET       0.75f
-#define HOWL_DRY       0.25f
+#define HOWL_WET       0.35f       /* howl rides at full scale -> keep it tame */
+#define HOWL_DRY       0.30f
 
 typedef struct HowlState {
     uint32_t magic;
