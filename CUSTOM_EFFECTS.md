@@ -1,6 +1,6 @@
 # Custom Effect Pack (themanro)
 
-Eight original custom effects for the Zoom MS-70CDR (ZDL family), built on the
+Nine original custom effects for the Zoom MS-70CDR (ZDL family), built on the
 [repeat98/ZoomMultistompZDL](https://github.com/repeat98/ZoomMultistompZDL)
 toolchain. Each effect has a full-quality **desktop preview** (Python, in
 `tools/audio_preview/renderers/`) and a **2-knob pedal build** (`src/custom/<name>/`).
@@ -18,13 +18,16 @@ toolchain. Each effect has a full-quality **desktop preview** (Python, in
 <td align="center"><img src="graphics/microloom.svg" width="150" alt="Microloom"></td>
 <td align="center"><img src="graphics/flower.svg" width="150" alt="Flower"></td>
 <td align="center"><img src="graphics/shatter.svg" width="150" alt="Shatter"></td>
-<td align="center"><img src="graphics/arrakis.svg" width="150" alt="Arrakis"></td>
 </tr>
 <tr>
+<td align="center"><img src="graphics/arrakis.svg" width="150" alt="Arrakis"></td>
 <td align="center"><img src="graphics/corrupt.svg" width="150" alt="Corrupt"></td>
 <td align="center"><img src="graphics/klang.svg" width="150" alt="Klang"></td>
+</tr>
+<tr>
 <td align="center"><img src="graphics/genloss.svg" width="150" alt="GenLoss"></td>
 <td align="center"><img src="graphics/scorch.svg" width="150" alt="Scorch"></td>
+<td align="center"><img src="graphics/howl.svg" width="150" alt="Howl"></td>
 </tr>
 </table>
 
@@ -43,6 +46,7 @@ GitHub's inline SVG preview the text may fall back to monospace.)
 | Klang | `Klang` | Modulation | Freq, Mix | Ring modulator |
 | GenLoss | `GenLoss` | Modulation | Wow, Tone | Tape/VHS generation-loss degradation |
 | Scorch | `Scorch` | Drive | Gain, Level | Aggressive high-gain amp + cab |
+| Howl | `Howl` | Filter | Tune, Annihil | DBA Total Sonic Annihilation-style self-oscillating feedback |
 
 The pedal builds are intentionally **2-knob** (the hardware-proven UI shape);
 the desktop previews expose the full control set. Some features are deferred on
@@ -64,6 +68,7 @@ Rendered demos (click to play in GitHub's audio viewer). These are the
 | Klang | [klang.wav](previews/audio/klang.wav) — metallic ring mod | [chord](previews/audio/dry_chord.wav) |
 | GenLoss | [genloss.wav](previews/audio/genloss.wav) — wrecked tape | [chord](previews/audio/dry_chord.wav) |
 | Scorch | [scorch.wav](previews/audio/scorch.wav) — djent high-gain amp+cab | [riff](previews/audio/dry_riff.wav) |
+| Howl | [howl.wav](previews/audio/howl.wav) — self-oscillating feedback | [guitar](previews/audio/dry_guitar.wav) |
 
 Regenerate or explore other presets with the preview tool below.
 

@@ -42,6 +42,7 @@ RELEASE_PLUGINS = [
     ("klang",       CUSTOM_DIR / "klang"       / "build.py"),
     ("genloss",     CUSTOM_DIR / "genloss"     / "build.py"),
     ("scorch",      CUSTOM_DIR / "scorch"      / "build.py"),
+    ("howl",        CUSTOM_DIR / "howl"        / "build.py"),
 ]
 
 DIAGNOSTIC_PLUGINS = [

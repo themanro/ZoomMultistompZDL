@@ -5,23 +5,27 @@ toolchain used to build them.
 
 ## Custom effect pack
 
-This fork adds eight original custom effects — granular shimmer, drum glitch,
+This fork adds nine original custom effects — granular shimmer, drum glitch,
 tape degradation, a Dune-style drone, a Data Corrupter-style synth, ring mod,
-and a high-gain amp+cab — each with a full desktop preview and a 2-knob on-pedal
-build. See [CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md) for details and sound demos.
+a high-gain amp+cab, and a self-oscillating feedback annihilator — each with a
+full desktop preview and a 2-knob on-pedal build. See
+[CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md) for details and sound demos.
 
 <table>
 <tr>
 <td align="center"><img src="graphics/microloom.svg" width="150" alt="Microloom"></td>
 <td align="center"><img src="graphics/flower.svg" width="150" alt="Flower"></td>
 <td align="center"><img src="graphics/shatter.svg" width="150" alt="Shatter"></td>
-<td align="center"><img src="graphics/arrakis.svg" width="150" alt="Arrakis"></td>
 </tr>
 <tr>
+<td align="center"><img src="graphics/arrakis.svg" width="150" alt="Arrakis"></td>
 <td align="center"><img src="graphics/corrupt.svg" width="150" alt="Corrupt"></td>
 <td align="center"><img src="graphics/klang.svg" width="150" alt="Klang"></td>
+</tr>
+<tr>
 <td align="center"><img src="graphics/genloss.svg" width="150" alt="GenLoss"></td>
 <td align="center"><img src="graphics/scorch.svg" width="150" alt="Scorch"></td>
+<td align="center"><img src="graphics/howl.svg" width="150" alt="Howl"></td>
 </tr>
 </table>
 

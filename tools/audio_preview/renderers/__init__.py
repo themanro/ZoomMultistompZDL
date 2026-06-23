@@ -4,6 +4,7 @@ from .arrakis import render as render_arrakis
 from .corrupt import render as render_corrupt
 from .flower import render as render_flower
 from .gain import render as render_gain
+from .howl import render as render_howl
 from .genloss import render as render_genloss
 from .klang import render as render_klang
 from .microloom import render as render_microloom
@@ -19,6 +20,7 @@ RENDERERS = {
     "corrupt": render_corrupt,
     "flower": render_flower,
     "gain": render_gain,
+    "howl": render_howl,
     "genloss": render_genloss,
     "klang": render_klang,
     "microloom": render_microloom,
