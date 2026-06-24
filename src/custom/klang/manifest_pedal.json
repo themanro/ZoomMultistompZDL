@@ -1,9 +1,9 @@
 {
   "effect_name": "Klang",
   "comment": "PEDAL BUILD manifest for Klang (2-knob, RING MOD only v1). build.py reads THIS file; manifest.json is the 5-knob desktop-preview manifest (which also has the frequency-shifter modes, deferred on pedal). Stereo spread is baked.",
-  "audio_func_name": "Fx_DYN_Klang",
-  "gid": 1,
-  "gid_comment": "0x01 = Dynamics category -> SONAME prefix ZDL_DYN_. All custom effects grouped under Dynamics.",
+  "audio_func_name": "Fx_DLY_Klang",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_. Grouped under DLY (fewest stock effects = easy to find).",
   "fxid": 455,
   "fxid_comment": "0x01C7. Verify uniqueness before flashing.",
   "fxid_version": "1.00",

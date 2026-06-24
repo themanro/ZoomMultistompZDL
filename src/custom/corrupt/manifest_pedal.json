@@ -1,23 +1,39 @@
 {
   "effect_name": "Corrupt",
   "comment": "PEDAL BUILD manifest for Corrupt (4-knob). build.py reads THIS file. Zero-crossing pitch track -> square master + sub octave + octave-up harmony, Tone low-pass to tame the harsh square edges.",
-
-  "audio_func_name": "Fx_DYN_Corrupt",
-  "gid": 1,
-  "gid_comment": "0x01 = Dynamics -> SONAME prefix ZDL_DYN_.",
+  "audio_func_name": "Fx_DLY_Corrupt",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_. Grouped under DLY (fewest stock effects = easy to find).",
   "fxid": 454,
   "fxid_comment": "0x01C6. Verify uniqueness before flashing.",
-
   "fxid_version": "1.00",
   "flags_byte": 1,
-
   "params": [
-    { "name": "Sub",  "max": 100, "default": 60, "comment": "params[5]. Sub (octave-down) square level." },
-    { "name": "Tone", "max": 100, "default": 45, "comment": "params[6]. Low-pass: dark/smooth .. raw/buzzy." },
-    { "name": "Wave", "max": 100, "default": 30, "comment": "params[7]. Octave-up harmony square level (richness)." },
-    { "name": "Mix",  "max": 100, "default": 85, "comment": "params[8]. Dry/synth blend." }
+    {
+      "name": "Sub",
+      "max": 100,
+      "default": 60,
+      "comment": "params[5]. Sub (octave-down) square level."
+    },
+    {
+      "name": "Tone",
+      "max": 100,
+      "default": 45,
+      "comment": "params[6]. Low-pass: dark/smooth .. raw/buzzy."
+    },
+    {
+      "name": "Wave",
+      "max": 100,
+      "default": 30,
+      "comment": "params[7]. Octave-up harmony square level (richness)."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 85,
+      "comment": "params[8]. Dry/synth blend."
+    }
   ],
-
   "audio_nop": false,
   "audio_nop_comment": "Set true for a UI-only smoke build before trusting the DSP."
 }

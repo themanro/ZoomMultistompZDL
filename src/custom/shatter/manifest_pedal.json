@@ -1,9 +1,9 @@
 {
   "effect_name": "Shatter",
   "comment": "PEDAL BUILD manifest for Shatter (2-knob). build.py reads THIS file; manifest.json is the 6-knob desktop-preview manifest. Slice length, stutter subdivision, and reverse probability are baked in shatter.c.",
-  "audio_func_name": "Fx_DYN_Shatter",
-  "gid": 1,
-  "gid_comment": "0x01 = Dynamics category -> SONAME prefix ZDL_DYN_. All custom effects grouped under Dynamics.",
+  "audio_func_name": "Fx_DLY_Shatter",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_. Grouped under DLY (fewest stock effects = easy to find).",
   "fxid": 452,
   "fxid_comment": "0x01C4. Verify uniqueness before flashing.",
   "fxid_version": "1.00",

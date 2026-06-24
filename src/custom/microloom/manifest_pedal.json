@@ -1,23 +1,39 @@
 {
   "effect_name": "Microlm",
   "comment": "PEDAL BUILD manifest for Microloom (4-knob shimmer cloud). build.py reads THIS file. Grain size, base delay, shimmer amount baked.",
-
-  "audio_func_name": "Fx_DYN_Microlm",
-  "gid": 1,
-  "gid_comment": "0x01 = Dynamics -> SONAME prefix ZDL_DYN_.",
+  "audio_func_name": "Fx_DLY_Microlm",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_. Grouped under DLY (fewest stock effects = easy to find).",
   "fxid": 450,
   "fxid_comment": "0x01C2. Verify uniqueness before flashing.",
-
   "fxid_version": "1.00",
   "flags_byte": 1,
-
   "params": [
-    { "name": "Pitch", "max": 100, "default": 100, "comment": "params[5]. Shimmer shift: 0=oct down, ~33=unison, 100=oct up." },
-    { "name": "Regen", "max": 100, "default": 72,  "comment": "params[6]. Feedback / cloud length." },
-    { "name": "Tone",  "max": 100, "default": 55,  "comment": "params[7]. Output low-pass: dark .. bright." },
-    { "name": "Mix",   "max": 100, "default": 60,  "comment": "params[8]. Dry/wet." }
+    {
+      "name": "Pitch",
+      "max": 100,
+      "default": 100,
+      "comment": "params[5]. Shimmer shift: 0=oct down, ~33=unison, 100=oct up."
+    },
+    {
+      "name": "Regen",
+      "max": 100,
+      "default": 72,
+      "comment": "params[6]. Feedback / cloud length."
+    },
+    {
+      "name": "Tone",
+      "max": 100,
+      "default": 55,
+      "comment": "params[7]. Output low-pass: dark .. bright."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 60,
+      "comment": "params[8]. Dry/wet."
+    }
   ],
-
   "audio_nop": false,
   "audio_nop_comment": "Set true for a UI-only smoke build before trusting the DSP."
 }
