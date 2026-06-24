@@ -133,7 +133,7 @@ void SCORCH_AUDIO_FUNC(unsigned int *ctx)
 
     float pre = 1.0f + gain * 45.0f;
     float g2  = 1.0f + gain * 6.0f;
-    float outGain = 0.25f + level * 0.9f;
+    float outGain = 0.08f + level * 0.42f;   /* lower range; no 1.5x soft-clip boost */
     float biasOut = sc_soft(SC_BIAS);
 
     float hp = st->hp, lp = st->lp;
@@ -165,8 +165,11 @@ void SCORCH_AUDIO_FUNC(unsigned int *ctx)
         x = sc_bq(x, SC_B0_3, SC_B1_3, SC_B2_3, SC_A1_3, SC_A2_3, &s1d, &s2d);
         x = sc_bq(x, SC_B0_4, SC_B1_4, SC_B2_4, SC_A1_4, SC_A2_4, &s1e, &s2e);
 
-        /* output level + safety soft clip */
-        x = sc_soft(x * outGain);
+        /* output level (plain gain — NOT sc_soft, which boosts 1.5x at low
+         * level) + hard safety clamp */
+        x = x * outGain;
+        if (x > 1.0f) x = 1.0f;
+        else if (x < -1.0f) x = -1.0f;
 
         fxBuf[i]     = x;
         fxBuf[i + 8] = x;
