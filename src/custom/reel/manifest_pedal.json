@@ -12,13 +12,13 @@
     {
       "name": "Drive",
       "max": 100,
-      "default": 50,
+      "default": 54,
       "comment": "params[5]. Tape drive / saturation."
     },
     {
       "name": "Level",
       "max": 100,
-      "default": 55,
+      "default": 26,
       "comment": "params[6]. Output level."
     }
   ],

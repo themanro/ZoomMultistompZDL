@@ -12,19 +12,19 @@
     {
       "name": "Tune",
       "max": 100,
-      "default": 45,
+      "default": 17,
       "comment": "params[5]. Oscillation/resonant frequency."
     },
     {
       "name": "Annihil",
       "max": 100,
-      "default": 60,
+      "default": 34,
       "comment": "params[6]. Pole radius: short ring -> long howl."
     },
     {
       "name": "Level",
       "max": 100,
-      "default": 50,
+      "default": 11,
       "comment": "params[7]. Howl output level (0 .. 0.7; default ~tame)."
     }
   ],

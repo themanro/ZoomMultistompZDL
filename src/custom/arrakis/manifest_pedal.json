@@ -12,13 +12,13 @@
     {
       "name": "Detune",
       "max": 100,
-      "default": 45,
+      "default": 63,
       "comment": "params[5]. Beat spread between the two detuned voices."
     },
     {
       "name": "Mix",
       "max": 100,
-      "default": 80,
+      "default": 88,
       "comment": "params[6]. Dry/wet."
     }
   ],

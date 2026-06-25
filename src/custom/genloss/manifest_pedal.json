@@ -12,19 +12,19 @@
     {
       "name": "Wow",
       "max": 100,
-      "default": 45,
+      "default": 72,
       "comment": "params[5]. Wow & flutter + pitch instability."
     },
     {
       "name": "Tone",
       "max": 100,
-      "default": 40,
+      "default": 52,
       "comment": "params[6]. Bandwidth / brightness (low-pass)."
     },
     {
       "name": "Hiss",
       "max": 100,
-      "default": 20,
+      "default": 2,
       "comment": "params[7]. Tape hiss / noise-floor level."
     }
   ],

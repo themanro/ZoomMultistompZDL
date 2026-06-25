@@ -12,13 +12,13 @@
     {
       "name": "Gain",
       "max": 100,
-      "default": 70,
+      "default": 22,
       "comment": "params[5]. Preamp gain / distortion amount."
     },
     {
       "name": "Level",
       "max": 100,
-      "default": 50,
+      "default": 1,
       "comment": "params[6]. Output level."
     }
   ],

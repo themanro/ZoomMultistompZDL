@@ -12,7 +12,7 @@
     {
       "name": "Sub",
       "max": 100,
-      "default": 60,
+      "default": 82,
       "comment": "params[5]. Sub (octave-down) square level."
     },
     {
@@ -24,7 +24,7 @@
     {
       "name": "Wave",
       "max": 100,
-      "default": 30,
+      "default": 50,
       "comment": "params[7]. Octave-up harmony square level (richness)."
     },
     {
