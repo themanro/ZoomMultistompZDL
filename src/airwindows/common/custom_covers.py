@@ -121,12 +121,28 @@ def _em_room(c):                          # Room (reverb)
     _line(c, 58, 24, 86, 24); _line(c, 86, 24, 86, 50); _line(c, 78, 30, 86, 24)
 
 
+def _em_stars(c):                         # Galactic (reverb)
+    c.circle(CX, EY, 7)
+    for k in range(8):
+        a = k * math.pi / 4
+        c.filled_circle(int(CX + 15 * math.cos(a)), int(EY + 15 * math.sin(a)), 1)
+    _spark(c, 44, 30, 3); _spark(c, 84, 54, 3)
+
+
+def _em_arrows(c):                        # OTT (compressor)
+    _line(c, 58, EY - 8, 64, EY - 15); _line(c, 64, EY - 15, 70, EY - 8)
+    c.vline(64, EY - 15, EY - 3)
+    _line(c, 58, EY + 8, 64, EY + 15); _line(c, 64, EY + 15, 70, EY + 8)
+    c.vline(64, EY + 3, EY + 15)
+
+
 EMBLEMS = {
     "Microlm": _em_shimmer, "Flower": _em_flower, "Shatter": _em_bars,
     "Arrakis": _em_dunes, "Corrupt": _em_square, "Klang": _em_rings,
     "GenLoss": _em_reels, "Howl": _em_resonance, "Scorch": _em_bolt,
     "Reel": _em_reels, "Spool": _em_reels, "Oxide": _em_reels,
     "Lush": _em_swirl, "Room": _em_room,
+    "Galactic": _em_stars, "OTT": _em_arrows,
 }
 
 
