@@ -142,7 +142,7 @@ EMBLEMS = {
     "GenLoss": _em_reels, "Howl": _em_resonance, "Scorch": _em_bolt,
     "Reel": _em_reels, "Spool": _em_reels, "Oxide": _em_reels,
     "Lush": _em_swirl, "Room": _em_room,
-    "Galactic": _em_stars, "OTT": _em_arrows,
+    "Galactic": _em_stars, "OTT": _em_arrows, "TapeHack": _em_reels,
 }
 
 

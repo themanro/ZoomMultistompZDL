@@ -12,6 +12,7 @@ ROOT = HERE.parent.parent.parent      # src/airwindows/<name>/build.py → repo 
 sys.path.insert(0, str(ROOT / "build"))
 
 from linker import LinkerConfig, link, params_from_manifest  # noqa: E402
+from custom_covers import make_cover  # noqa: E402
 
 TI_ROOT = Path("/Applications/ti/ti-cgt-c6000_8.5.0.LTS")
 CL6X    = TI_ROOT / "bin" / "cl6x"
@@ -48,6 +49,7 @@ def main() -> None:
 
     cfg = LinkerConfig(
         effect_name      = manifest["effect_name"],
+        screen_image     = make_cover(manifest["effect_name"]),
         audio_func_name  = manifest.get("audio_func_name"),
         gid              = manifest["gid"],
         fxid             = manifest["fxid"],
