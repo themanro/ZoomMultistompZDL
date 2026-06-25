@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT / "build"))
 sys.path.insert(0, str(HERE.parent / "common"))
 
 from airwindows_image import make_airwindows_chorus_screen  # noqa: E402
+from custom_covers import make_cover  # noqa: E402
 from linker import LinkerConfig, link, params_from_manifest  # noqa: E402
 from manifest_params import write_param_header  # noqa: E402
 
@@ -78,7 +79,7 @@ def main() -> None:
         output_path=out_zdl,
         fxid_version=manifest.get("fxid_version", "1.00").encode("ascii"),
         flags_byte=manifest.get("flags_byte", 0x01),
-        screen_image=make_airwindows_chorus_screen(),
+        screen_image=make_cover(manifest["effect_name"]),
         knob_positions=[(2, 26, 43), (3, 82, 43)],
         audio_nop=manifest.get("audio_nop", False),
     )

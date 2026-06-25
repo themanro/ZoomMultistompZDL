@@ -23,6 +23,7 @@ sys.path.insert(0, str(ROOT / "src" / "airwindows" / "common"))
 
 from linker import LinkerConfig, link, params_from_manifest  # noqa: E402
 from manifest_params import write_param_header  # noqa: E402
+from custom_covers import make_cover  # noqa: E402
 
 TI_ROOT = Path("/Applications/ti/ti-cgt-c6000_8.5.0.LTS")
 CL6X = TI_ROOT / "bin" / "cl6x"
