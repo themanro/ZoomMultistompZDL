@@ -10,6 +10,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent.parent      # src/airwindows/<name>/build.py → repo root
 sys.path.insert(0, str(ROOT / "build"))
+sys.path.insert(0, str(HERE.parent / "common"))
 
 from linker import LinkerConfig, link, params_from_manifest  # noqa: E402
 from custom_covers import make_cover  # noqa: E402
