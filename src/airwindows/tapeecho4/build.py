@@ -17,7 +17,7 @@ from airwindows_image import make_airwindows_tape_echo_screen  # noqa: E402
 from linker import LinkerConfig, link, params_from_manifest  # noqa: E402
 from manifest_params import write_param_header  # noqa: E402
 
-TI_ROOT = Path("/Applications/ti/ccs2050/ccs/tools/compiler/ti-cgt-c6000_8.5.0.LTS")
+TI_ROOT = Path("/Applications/ti/ti-cgt-c6000_8.5.0.LTS")
 CL6X = TI_ROOT / "bin" / "cl6x"
 
 CFLAGS = [
