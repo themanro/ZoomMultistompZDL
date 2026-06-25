@@ -5,32 +5,47 @@ toolchain used to build them.
 
 ## Custom effect pack
 
-This fork adds nine original custom effects — granular shimmer, drum glitch,
-tape degradation, a Dune-style drone, a Data Corrupter-style synth, ring mod,
-a high-gain amp+cab, and a self-oscillating feedback annihilator — each with a
-full desktop preview and a 2-knob on-pedal build. See
-[CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md) for details and sound demos.
+This fork is a consolidated custom **library of 17 effects** — all grouped
+under the Delay category, each with a custom on-device cover. Originals:
+granular shimmer, drum glitch, tape degradation, a Dune-style drone, a Data
+Corrupter-style synth, ring mod, high-gain amp+cab, a feedback howl, and tape
+saturation. Plus rebuilt/renamed Airwindows-derived ports: reverbs, stereo
+chorus, and tape. See [CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md) for details, knob
+layouts, and sound demos.
 
 <table>
 <tr>
-<td align="center"><img src="graphics/microloom.svg" width="150" alt="Microloom"></td>
-<td align="center"><img src="graphics/flower.svg" width="150" alt="Flower"></td>
-<td align="center"><img src="graphics/shatter.svg" width="150" alt="Shatter"></td>
+<td align="center"><img src="graphics/microloom.svg" width="120" alt="Microlm"></td>
+<td align="center"><img src="graphics/flower.svg" width="120" alt="Flower"></td>
+<td align="center"><img src="graphics/shatter.svg" width="120" alt="Shatter"></td>
+<td align="center"><img src="graphics/arrakis.svg" width="120" alt="Arrakis"></td>
 </tr>
 <tr>
-<td align="center"><img src="graphics/arrakis.svg" width="150" alt="Arrakis"></td>
-<td align="center"><img src="graphics/corrupt.svg" width="150" alt="Corrupt"></td>
-<td align="center"><img src="graphics/klang.svg" width="150" alt="Klang"></td>
+<td align="center"><img src="graphics/corrupt.svg" width="120" alt="Corrupt"></td>
+<td align="center"><img src="graphics/klang.svg" width="120" alt="Klang"></td>
+<td align="center"><img src="graphics/genloss.svg" width="120" alt="GenLoss"></td>
+<td align="center"><img src="graphics/scorch.svg" width="120" alt="Scorch"></td>
 </tr>
 <tr>
-<td align="center"><img src="graphics/genloss.svg" width="150" alt="GenLoss"></td>
-<td align="center"><img src="graphics/scorch.svg" width="150" alt="Scorch"></td>
-<td align="center"><img src="graphics/howl.svg" width="150" alt="Howl"></td>
+<td align="center"><img src="graphics/howl.svg" width="120" alt="Howl"></td>
+<td align="center"><img src="graphics/reel.svg" width="120" alt="Reel"></td>
+<td align="center"><img src="graphics/galactic.svg" width="120" alt="Galactic"></td>
+<td align="center"><img src="graphics/lush.svg" width="120" alt="Lush"></td>
+</tr>
+<tr>
+<td align="center"><img src="graphics/oxide.svg" width="120" alt="Oxide"></td>
+<td align="center"><img src="graphics/room.svg" width="120" alt="Room"></td>
+<td align="center"><img src="graphics/ott.svg" width="120" alt="OTT"></td>
+<td align="center"><img src="graphics/tapehack.svg" width="120" alt="TapeHack"></td>
+</tr>
+<tr>
+<td align="center"><img src="graphics/spool.svg" width="120" alt="Spool"></td>
 </tr>
 </table>
 
-> These are not yet hardware-tested. Back up your effect list and flash one at
-> a time — see [CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md).
+> Not all hardware-verified yet, and the pedal can't hold/run all 17 at once
+> (storage + DSP limits) — install a curated subset, back up first, flash one
+> at a time. See [CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md).
 
 ## Download Effects
 

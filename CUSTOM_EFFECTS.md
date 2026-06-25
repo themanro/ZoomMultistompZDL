@@ -1,33 +1,47 @@
 # Custom Effect Pack (themanro)
 
-Nine original custom effects for the Zoom MS-70CDR (ZDL family), built on the
-[repeat98/ZoomMultistompZDL](https://github.com/repeat98/ZoomMultistompZDL)
-toolchain. Each effect has a full-quality **desktop preview** (Python, in
-`tools/audio_preview/renderers/`) and a **2-knob pedal build** (`src/custom/<name>/`).
+A consolidated **library of 17 effects** for the Zoom MS-70CDR (ZDL family),
+built on the [repeat98/ZoomMultistompZDL](https://github.com/repeat98/ZoomMultistompZDL)
+toolchain. Ten are originals (each with a full-quality Python **desktop
+preview** in `tools/audio_preview/renderers/`); the rest are rebuilt/renamed
+Airwindows-derived ports. All are grouped under the **Delay** category with a
+custom on-device cover, and all compile clean (`.fardata 0`, `0 relocations`).
 
-> ⚠️ **Status: not yet hardware-tested.** Every effect compiles clean with the
-> repo's ideal safe-build markers (`.fardata 0 bytes`, `0 relocations`), but
-> none have been verified on a real pedal. Experimental builds can freeze a
-> pedal until power-cycled — **back up your effect list and flash one at a
-> time.**
+> ⚠️ **Status:** partially hardware-tested on an MS-70CDR. Knob scaling, the
+> Howl rewrite, the multi-knob path, and the TapeHack freeze-fix are confirmed;
+> the renamed Airwindows ports (Spool/Oxide/Room/Lush) still need a play-test.
+> The pedal **can't hold or run all 17 at once** (storage + DSP limits) —
+> install a curated subset, back up first, flash one at a time.
 
 ## Pedal icons
 
 <table>
 <tr>
-<td align="center"><img src="graphics/microloom.svg" width="150" alt="Microloom"></td>
-<td align="center"><img src="graphics/flower.svg" width="150" alt="Flower"></td>
-<td align="center"><img src="graphics/shatter.svg" width="150" alt="Shatter"></td>
+<td align="center"><img src="graphics/microloom.svg" width="120" alt="Microlm"></td>
+<td align="center"><img src="graphics/flower.svg" width="120" alt="Flower"></td>
+<td align="center"><img src="graphics/shatter.svg" width="120" alt="Shatter"></td>
+<td align="center"><img src="graphics/arrakis.svg" width="120" alt="Arrakis"></td>
 </tr>
 <tr>
-<td align="center"><img src="graphics/arrakis.svg" width="150" alt="Arrakis"></td>
-<td align="center"><img src="graphics/corrupt.svg" width="150" alt="Corrupt"></td>
-<td align="center"><img src="graphics/klang.svg" width="150" alt="Klang"></td>
+<td align="center"><img src="graphics/corrupt.svg" width="120" alt="Corrupt"></td>
+<td align="center"><img src="graphics/klang.svg" width="120" alt="Klang"></td>
+<td align="center"><img src="graphics/genloss.svg" width="120" alt="GenLoss"></td>
+<td align="center"><img src="graphics/scorch.svg" width="120" alt="Scorch"></td>
 </tr>
 <tr>
-<td align="center"><img src="graphics/genloss.svg" width="150" alt="GenLoss"></td>
-<td align="center"><img src="graphics/scorch.svg" width="150" alt="Scorch"></td>
-<td align="center"><img src="graphics/howl.svg" width="150" alt="Howl"></td>
+<td align="center"><img src="graphics/howl.svg" width="120" alt="Howl"></td>
+<td align="center"><img src="graphics/reel.svg" width="120" alt="Reel"></td>
+<td align="center"><img src="graphics/galactic.svg" width="120" alt="Galactic"></td>
+<td align="center"><img src="graphics/lush.svg" width="120" alt="Lush"></td>
+</tr>
+<tr>
+<td align="center"><img src="graphics/oxide.svg" width="120" alt="Oxide"></td>
+<td align="center"><img src="graphics/room.svg" width="120" alt="Room"></td>
+<td align="center"><img src="graphics/ott.svg" width="120" alt="OTT"></td>
+<td align="center"><img src="graphics/tapehack.svg" width="120" alt="TapeHack"></td>
+</tr>
+<tr>
+<td align="center"><img src="graphics/spool.svg" width="120" alt="Spool"></td>
 </tr>
 </table>
 
@@ -36,22 +50,32 @@ GitHub's inline SVG preview the text may fall back to monospace.)
 
 ## The effects
 
-| Effect | `.ZDL` | Category | Pedal knobs | What it is |
-|---|---|---|---|---|
-| Microloom | `Microlm` | Delay | Regen, Mix | Microcosm-style granular pitch-shimmer cloud |
-| Flower | `Flower` | Modulation | Rate, Mix | Korg "Random" S&H step filter (Deftones "Digital Bath") |
-| Shatter | `Shatter` | Delay | Chance, Mix | Stutter / beat-repeat glitch for drums |
-| Arrakis | `Arrakis` | Modulation | Detune, Mix | Dune-style detuned sub-octave beating drone |
-| Corrupt | `Corrupt` | Drive | Sub, Mix | EQD Data Corrupter-style PLL square synth |
-| Klang | `Klang` | Modulation | Freq, Mix | Ring modulator |
-| GenLoss | `GenLoss` | Modulation | Wow, Tone | Tape/VHS generation-loss degradation |
-| Scorch | `Scorch` | Drive | Gain, Level | Aggressive high-gain amp + cab |
-| Howl | `Howl` | Filter | Tune, Annihil | DBA Total Sonic Annihilation-style self-oscillating feedback |
+All effects sit in the **Delay** category. "Origin" marks original DSP vs
+rebuilt/renamed Airwindows-derived ports.
 
-The pedal builds are intentionally **2-knob** (the hardware-proven UI shape);
-the desktop previews expose the full control set. Some features are deferred on
-the pedal (Klang's frequency-shifter modes, GenLoss dropouts, Scorch's full
-cab IR) — see each effect's `manifest.json` vs `manifest_pedal.json`.
+| Effect | `.ZDL` | Knobs | Origin | What it is |
+|---|---|---|---|---|
+| Microloom | `Microlm` | Pitch, Regen, Tone, Mix | original | granular pitch-shimmer cloud |
+| Flower | `Flower` | Rate, Mix | original | Korg "Random" S&H step filter (Deftones "Digital Bath") |
+| Shatter | `Shatter` | Chance, Mix | original | stutter / beat-repeat glitch for drums |
+| Arrakis | `Arrakis` | Detune, Mix | original | Dune-style detuned sub-octave beating drone |
+| Corrupt | `Corrupt` | Sub, Tone, Wave, Mix | original | EQD Data Corrupter-style PLL square synth |
+| Klang | `Klang` | Freq, Mix | original | ring modulator |
+| GenLoss | `GenLoss` | Wow, Tone, Hiss | original | tape/VHS generation-loss degradation |
+| Scorch | `Scorch` | Gain, Level | original | aggressive high-gain amp + cab |
+| Howl | `Howl` | Tune, Annihil, Level | original | DBA Total Sonic Annihilation-style self-oscillating feedback |
+| Reel | `Reel` | Drive, Level | original | light tape saturation |
+| Galactic | `Galactic` | 5 | port | lush Airwindows reverb |
+| Lush | `Lush` | Speed, Depth | port | stereo chorus (Airwindows StereoChorus) |
+| Oxide | `Oxide` | 9 | port | tape saturation/drive (Airwindows ToTape) |
+| Room | `Room` | 5 | port | small reverb (Airwindows) |
+| OTT | `OTT` | 4 | port | OTT-style multiband compressor |
+| TapeHack | `TapeHack` | Input, Drive, Output | port | tape saturation (Airwindows; Output-knob freeze fixed) |
+| Spool | `Spool` | 9 | port | tape echo (Airwindows-inspired) |
+
+Some features are deferred on the originals (Klang's frequency-shifter modes,
+GenLoss dropouts, Scorch's full cab IR) — see each effect's `manifest.json` vs
+`manifest_pedal.json`.
 
 ## Sound previews
 
