@@ -15,31 +15,31 @@ layouts, and sound demos.
 
 <table>
 <tr>
-<td align="center"><img src="graphics/microloom.svg" width="120" alt="Microlm"></td>
-<td align="center"><img src="graphics/flower.svg" width="120" alt="Flower"></td>
-<td align="center"><img src="graphics/shatter.svg" width="120" alt="Shatter"></td>
-<td align="center"><img src="graphics/arrakis.svg" width="120" alt="Arrakis"></td>
+<td align="center"><img src="graphics/microloom.png" width="220" alt="Microlm"></td>
+<td align="center"><img src="graphics/flower.png" width="220" alt="Flower"></td>
+<td align="center"><img src="graphics/shatter.png" width="220" alt="Shatter"></td>
+<td align="center"><img src="graphics/arrakis.png" width="220" alt="Arrakis"></td>
 </tr>
 <tr>
-<td align="center"><img src="graphics/corrupt.svg" width="120" alt="Corrupt"></td>
-<td align="center"><img src="graphics/klang.svg" width="120" alt="Klang"></td>
-<td align="center"><img src="graphics/genloss.svg" width="120" alt="GenLoss"></td>
-<td align="center"><img src="graphics/scorch.svg" width="120" alt="Scorch"></td>
+<td align="center"><img src="graphics/corrupt.png" width="220" alt="Corrupt"></td>
+<td align="center"><img src="graphics/klang.png" width="220" alt="Klang"></td>
+<td align="center"><img src="graphics/genloss.png" width="220" alt="GenLoss"></td>
+<td align="center"><img src="graphics/scorch.png" width="220" alt="Scorch"></td>
 </tr>
 <tr>
-<td align="center"><img src="graphics/howl.svg" width="120" alt="Howl"></td>
-<td align="center"><img src="graphics/reel.svg" width="120" alt="Reel"></td>
-<td align="center"><img src="graphics/galactic.svg" width="120" alt="Galactic"></td>
-<td align="center"><img src="graphics/lush.svg" width="120" alt="Lush"></td>
+<td align="center"><img src="graphics/howl.png" width="220" alt="Howl"></td>
+<td align="center"><img src="graphics/reel.png" width="220" alt="Reel"></td>
+<td align="center"><img src="graphics/galactic.png" width="220" alt="Galactic"></td>
+<td align="center"><img src="graphics/lush.png" width="220" alt="Lush"></td>
 </tr>
 <tr>
-<td align="center"><img src="graphics/oxide.svg" width="120" alt="Oxide"></td>
-<td align="center"><img src="graphics/room.svg" width="120" alt="Room"></td>
-<td align="center"><img src="graphics/ott.svg" width="120" alt="OTT"></td>
-<td align="center"><img src="graphics/tapehack.svg" width="120" alt="TapeHack"></td>
+<td align="center"><img src="graphics/oxide.png" width="220" alt="Oxide"></td>
+<td align="center"><img src="graphics/room.png" width="220" alt="Room"></td>
+<td align="center"><img src="graphics/ott.png" width="220" alt="OTT"></td>
+<td align="center"><img src="graphics/tapehack.png" width="220" alt="TapeHack"></td>
 </tr>
 <tr>
-<td align="center"><img src="graphics/spool.svg" width="120" alt="Spool"></td>
+<td align="center"><img src="graphics/spool.png" width="220" alt="Spool"></td>
 </tr>
 </table>
 
