@@ -136,13 +136,49 @@ def _em_arrows(c):                        # OTT (compressor)
     c.vline(64, EY + 3, EY + 15)
 
 
+def _em_reel_single(c):                   # Reel — one clean big reel
+    _reel(c, CX, EY, 17)
+
+
+def _em_oxide(c):                         # Oxide — reels shedding oxide specks
+    _reel(c, 50, 38, 10); _reel(c, 78, 38, 10)
+    c.hline(50, 78, 27)
+    for x, y in [(46, 51), (58, 57), (64, 52), (72, 58), (82, 54), (54, 60), (76, 50)]:
+        c.filled_circle(x, y, 1)
+
+
+def _em_spool(c):                         # Spool — reel feeding shrinking echo loops
+    _reel(c, 46, EY, 12)
+    c.hline(46, 64, EY)
+    for cx, r in [(74, 9), (92, 6), (106, 4)]:
+        c.circle(cx, EY, r)
+
+
+def _em_genloss(c):                       # GenLoss — reels + tangled/spilled tape
+    _reel(c, 50, 36, 10); _reel(c, 78, 36, 10)
+    c.hline(50, 78, 26)
+    pts = [(42, 52), (52, 59), (60, 50), (68, 60), (76, 51), (86, 58)]
+    for i in range(len(pts) - 1):
+        _line(c, pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1])
+
+
+def _em_tapehack(c):                      # TapeHack — exploding tape
+    _reel(c, CX, EY, 11)
+    for k in range(8):
+        a = k * math.pi / 4
+        _line(c, int(CX + 13 * math.cos(a)), int(EY - 13 * math.sin(a)),
+              int(CX + 20 * math.cos(a)), int(EY - 20 * math.sin(a)))
+    for x, y in [(40, 26), (88, 26), (40, 60), (88, 60)]:
+        c.filled_circle(x, y, 1)
+
+
 EMBLEMS = {
     "Microlm": _em_shimmer, "Flower": _em_flower, "Shatter": _em_bars,
     "Arrakis": _em_dunes, "Corrupt": _em_square, "Klang": _em_rings,
-    "GenLoss": _em_reels, "Howl": _em_resonance, "Scorch": _em_bolt,
-    "Reel": _em_reels, "Spool": _em_reels, "Oxide": _em_reels,
+    "GenLoss": _em_genloss, "Howl": _em_resonance, "Scorch": _em_bolt,
+    "Reel": _em_reel_single, "Spool": _em_spool, "Oxide": _em_oxide,
     "Lush": _em_swirl, "Room": _em_room,
-    "Galactic": _em_stars, "OTT": _em_arrows, "TapeHack": _em_reels,
+    "Galactic": _em_stars, "OTT": _em_arrows, "TapeHack": _em_tapehack,
 }
 
 
