@@ -336,11 +336,13 @@ class LinkerConfig:
             )
         image_count = self.image_info_knob_count
         n_visible = min(3, image_count if image_count is not None else len(self.params))
+        # Bottom knob row (y=46), matching custom_covers.knob_layout so the
+        # firmware value boxes land on the dials drawn in the cover art.
         defaults_by_count = {
             0: [],
-            1: [(2, 54, 36)],
-            2: [(2, 38, 36), (3, 70, 36)],
-            3: [(2, 31, 36), (3, 55, 36), (4, 79, 36)],
+            1: [(2, 54, 46)],
+            2: [(2, 26, 46), (3, 82, 46)],
+            3: [(2, 14, 46), (3, 55, 46), (4, 96, 46)],
         }
         if self.knob_positions is None:
             self.knob_positions = defaults_by_count[n_visible]

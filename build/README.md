@@ -86,7 +86,7 @@ A factory ZDL's ELF exports a fixed set of symbols, addressed by name in
 | `Fx_FLT_<Name>_init`                | One-shot init.                              |
 | `Fx_FLT_<Name>_onf`                 | On/Off handler (effect bypass logic).       |
 | `Fx_FLT_<Name>_<param>_edit`        | One per knob — runs when the user turns it. |
-| `picEffectType_<Name>`              | RLE-compressed 128×40 pixel art (`.const`). |
+| `picEffectType_<Name>`              | RLE-compressed 128×64 pixel art (`.const`). |
 | `effectTypeImageInfo`               | Layout struct: image size + knob positions. |
 | `_infoEffectTypeKnob_A_2`           | Knob bitmap descriptor (`.fardata`).        |
 | `_Fx_FLT_<Name>_Coe`                | Effect coefficients table.                  |
@@ -123,7 +123,7 @@ into the final read-only `.const` segment and resolves references to them.
 
 The "UI" is two things:
 
-1. A 128×40 1-bpp picture in `.const`, RLE-compressed. Editable as ASCII
+1. A 128×64 1-bpp picture in `.const`, RLE-compressed. Editable as ASCII
    art via `zoom-fx-modding-ref/diy/decode_picture.py` /
    `encode_picture.py`. Knob shapes are *not* baked into the picture —
    the firmware paints them on top using the `_infoEffectTypeKnob_A_2`

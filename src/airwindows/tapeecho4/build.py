@@ -63,7 +63,7 @@ def main() -> None:
         output_path=out_zdl,
         fxid_version=manifest.get("fxid_version", "1.00").encode("ascii"),
         flags_byte=manifest.get("flags_byte", 0x01),
-        screen_image=make_cover(manifest["effect_name"]),
+        screen_image=make_cover(manifest["effect_name"], [p["name"] for p in manifest["params"]]),
         knob_positions=[(2, 14, 46), (3, 55, 46), (4, 96, 46)],
         audio_nop=manifest.get("audio_nop", False),
         use_object_edit_handlers=False,

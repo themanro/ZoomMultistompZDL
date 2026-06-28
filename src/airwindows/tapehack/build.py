@@ -50,7 +50,7 @@ def main() -> None:
 
     cfg = LinkerConfig(
         effect_name      = manifest["effect_name"],
-        screen_image     = make_cover(manifest["effect_name"]),
+        screen_image     = make_cover(manifest["effect_name"], [p["name"] for p in manifest["params"]]),
         audio_func_name  = manifest.get("audio_func_name"),
         gid              = manifest["gid"],
         fxid             = manifest["fxid"],
