@@ -217,7 +217,30 @@ def _draw_knob_row(c, param_names):
         c.vline(cx, cyd - 5, cyd)         # pointer
 
 
+COVERS_DIR = Path(__file__).resolve().parent / "covers"
+
+
+def _load_override(name: str):
+    """If covers/<Name>.json exists (hand-drawn in tools/cover_editor.html),
+    use that exact bitmap instead of the generated cover."""
+    f = COVERS_DIR / f"{name}.json"
+    if not f.exists():
+        return None
+    import json
+    rows = json.loads(f.read_text())["grid"]
+    c = Canvas()
+    for y in range(min(64, len(rows))):
+        row = rows[y]
+        for x in range(min(128, len(row))):
+            if row[x]:
+                c.px(x, y)
+    return encode_zoom_rle(c)
+
+
 def make_cover(name: str, param_names=None) -> bytes:
+    override = _load_override(name)
+    if override is not None:
+        return override
     c = Canvas()
     c.rect(1, 1, 126, 62)
     adv = 3 * 2 + 1                       # scale-2 glyph advance
