@@ -30,6 +30,73 @@ CX, CY = 64, 23          # emblem centre (top band)
 KNOB_Y = 46              # firmware value boxes sit at y=46 (rows 46..61)
 
 
+DEVICE_ASPECT = 1.30     # MS-70CDR LCD pixels are ~1.3x taller than wide
+
+
+class _VSquash:
+    """Draws onto `canvas` with y pre-compressed by 1/DEVICE_ASPECT around a
+    centre `cy`, so round shapes and text appear correct once the LCD stretches
+    them vertically. Every primitive routes through the remapped px/hline, so
+    circles become wider-than-tall in the bitmap and look round on the device.
+    Compress around each element's own centre to preserve layout/alignment."""
+
+    def __init__(self, canvas, cy, aspect=DEVICE_ASPECT):
+        self.c = canvas
+        self.cy = cy
+        self.a = aspect
+
+    def _ry(self, y):
+        return int(round(self.cy + (y - self.cy) / self.a))
+
+    def px(self, x, y, v=1):
+        self.c.px(x, self._ry(y), v)
+
+    def hline(self, x0, x1, y, v=1):
+        self.c.hline(x0, x1, self._ry(y), v)
+
+    def vline(self, x, y0, y1, v=1):
+        if y0 > y1:
+            y0, y1 = y1, y0
+        self.c.vline(x, self._ry(y0), self._ry(y1), v)
+
+    def rect(self, x0, y0, x1, y1, v=1):
+        self.hline(x0, x1, y0, v)
+        self.hline(x0, x1, y1, v)
+        self.vline(x0, y0, y1, v)
+        self.vline(x1, y0, y1, v)
+
+    def circle(self, cx, cy, r, v=1):
+        x, y, err = r, 0, 0
+        while x >= y:
+            for dx, dy in [(x, y), (-x, y), (x, -y), (-x, -y),
+                           (y, x), (-y, x), (y, -x), (-y, -x)]:
+                self.px(cx + dx, cy + dy, v)
+            if err <= 0:
+                y += 1; err += 2 * y + 1
+            if err > 0:
+                x -= 1; err -= 2 * x + 1
+
+    def filled_circle(self, cx, cy, r, v=1):
+        for dy in range(-r, r + 1):
+            w = int((r * r - dy * dy) ** 0.5)
+            self.hline(cx - w, cx + w, cy + dy, v)
+
+    def draw_char(self, ch, x0, y0, scale=1):
+        rows = Canvas._FONT.get(ch.upper(), Canvas._FONT[' '])
+        for ri, row in enumerate(rows):
+            for ci, bit in enumerate(row):
+                if bit == '1':
+                    for sy in range(scale):
+                        for sx in range(scale):
+                            self.px(x0 + ci * scale + sx, y0 + ri * scale + sy)
+
+    def draw_text(self, text, x0, y0, scale=1, spacing=1):
+        x = x0
+        for ch in text:
+            self.draw_char(ch, x, y0, scale)
+            x += 3 * scale + spacing
+
+
 def knob_layout(n: int):
     """Box positions (knob_id, x, y) for n visible knobs (n = min(3, params)).
 
@@ -213,8 +280,9 @@ def _draw_knob_row(c, param_names):
         lx = max(2, cx - w // 2)
         c.draw_text(label.upper(), lx, 37, scale=1, spacing=1)
         cyd = ky + 7                      # box is 15 tall -> centre
-        c.circle(cx, cyd, 6)
-        c.vline(cx, cyd - 5, cyd)         # pointer
+        sq = _VSquash(c, cyd)             # round dial on device
+        sq.circle(cx, cyd, 6)
+        sq.vline(cx, cyd - 5, cyd)        # pointer
 
 
 COVERS_DIR = Path(__file__).resolve().parent / "covers"
@@ -246,10 +314,10 @@ def make_cover(name: str, param_names=None) -> bytes:
     adv = 3 * 2 + 1                       # scale-2 glyph advance
     w = len(name) * adv - 1
     x = max(3, (128 - w) // 2)
-    c.draw_text(name.upper(), x, 3, scale=2, spacing=1)
+    _VSquash(c, 8).draw_text(name.upper(), x, 3, scale=2, spacing=1)
     fn = EMBLEMS.get(name)
     if fn:
-        fn(c)
+        fn(_VSquash(c, CY))              # emblem drawn round-on-device
     if param_names:
         _draw_knob_row(c, param_names)
     return encode_zoom_rle(c)
