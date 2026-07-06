@@ -129,7 +129,10 @@ def encode_zoom_rle(canvas: Canvas) -> bytes:
             j = i + 2
             while j < len(raw) and raw[j] == raw[i]:
                 j += 1
-            # Doubled marker followed by run-length-2 byte
+            # Doubled marker followed by run-length-2 byte. The count byte
+            # maxes at 255 (run of 257) — longer runs (e.g. the big blank
+            # regions of sparse hand-drawn covers) split into multiple runs.
+            j = min(j, i + 257)
             compressed.extend([raw[i], raw[i], j - i - 2])
             i = j
         else:

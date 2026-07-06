@@ -135,6 +135,11 @@ void MICROLOOM_AUDIO_FUNC(unsigned int *ctx)
     float ratio = 0.5f + pitch * 1.5f;       /* 0.5 (oct down) .. 2.0 (oct up) */
     float tcoef = 0.05f + tone * 0.7f;       /* output low-pass: dark .. bright */
     float regenGain = regen * 0.85f;
+    /* Loop-gain cap: near unison pitch the shimmer tap correlates with the
+     * clean tap, so total loop gain is regenGain + shimmer. Keep that sum
+     * below 1 or the cloud grows until it pins at ML_CLAMP and never decays. */
+    float shimmer = 0.98f - regenGain;
+    if (shimmer > ML_SHIMMER) shimmer = ML_SHIMMER;
     float wet = mix;
     float dry = 1.0f - mix;
 
@@ -161,7 +166,7 @@ void MICROLOOM_AUDIO_FUNC(unsigned int *ctx)
         if (phase < 0.0f) phase += ML_GRAIN;
         else if (phase >= ML_GRAIN) phase -= ML_GRAIN;
 
-        float x = regenGain * clean + ML_SHIMMER * pitched;
+        float x = regenGain * clean + shimmer * pitched;
 
         /* allpass diffusion chain */
         float d, y;

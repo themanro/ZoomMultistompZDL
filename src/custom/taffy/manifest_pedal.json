@@ -1,0 +1,33 @@
+{
+  "effect_name": "Taffy",
+  "comment": "PEDAL BUILD manifest for Taffy (3-knob). Red Panda Tensor-style live tape warp: reverse .. stop .. double speed with random slips.",
+  "audio_func_name": "Fx_DLY_Taffy",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_. Grouped under DLY with the rest of the pack.",
+  "fxid": 460,
+  "fxid_comment": "0x01CC. Verify uniqueness before flashing.",
+  "fxid_version": "1.00",
+  "flags_byte": 1,
+  "params": [
+    {
+      "name": "Speed",
+      "max": 100,
+      "default": 50,
+      "comment": "params[5]. 0=-1x reverse, 25=stop, 50=+1x normal, 100=+2x. Tape-motor glide."
+    },
+    {
+      "name": "Chance",
+      "max": 100,
+      "default": 35,
+      "comment": "params[6]. Random speed/direction slips + head relocations."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 1,
+      "comment": "params[7]. Dry/wet (starts at 1 = quiet-safe)."
+    }
+  ],
+  "audio_nop": false,
+  "audio_nop_comment": "Set true for a UI-only smoke build before trusting the DSP."
+}

@@ -30,7 +30,7 @@
     {
       "name": "Mix",
       "max": 100,
-      "default": 60,
+      "default": 1,
       "comment": "params[8]. Dry/wet."
     }
   ],

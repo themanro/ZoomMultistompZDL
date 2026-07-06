@@ -1,12 +1,15 @@
 /*
- * klang.c -- Klang: ring modulator, MS-70CDR.
+ * klang.c -- Klang v2: swept-carrier ring modulator, MS-70CDR.
  *
- * Pedal port (v1) of tools/audio_preview/renderers/klang.py, RING MOD only.
- * The frequency-shifter modes need a Hilbert allpass network and are deferred
- * to v2. 2 knobs:
- *   Freq (params[5]) - carrier frequency (linear ~0.5..2000 Hz)
- *   Mix  (params[6]) - dry/wet
- * Stereo spread (a slight L/R carrier detune) is baked.
+ * v2 adds a Sweep knob: an LFO oscillates the carrier frequency (rate and
+ * depth ride the one knob), turning the static ring mod into sirens, dive
+ * bombs, and seasick metallic warbles. Sweep=0 is the old static behavior.
+ * 3 knobs:
+ *   Freq  (params[5]) - carrier centre frequency (linear ~0.5..2000 Hz)
+ *   Sweep (params[6]) - carrier LFO: rate 0..~12 Hz and depth together
+ *   Mix   (params[7]) - dry/wet
+ * Stereo spread (a slight L/R carrier detune) is baked; the R channel's LFO
+ * runs slightly slow so the sweep also wanders across the stereo field.
  *
  * Safe-DSP: no math lib (carrier is a polynomial sine), no runtime divide
  * (carrier increment uses the compile-time 2*pi/SR constant), no buffer.
@@ -32,13 +35,16 @@ KLANG_CODE_SECTION(KLANG_AUDIO_FUNC)
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
 #define KLANG_MAGIC   0x4B4C4E47u   /* 'KLNG' */
-#define KLANG_VERSION 1u
+#define KLANG_VERSION 2u
 
 #define KLANG_TWO_PI    6.28318530718f
 #define KLANG_TWO_PI_SR (6.28318530718f / 44100.0f)
 #define KLANG_FREQ_MIN  0.5f
 #define KLANG_FREQ_SPAN 1999.5f       /* 0.5 .. 2000 Hz (linear) */
 #define KLANG_SPREAD    1.006f        /* R carrier slightly detuned */
+#define KLANG_LFO_MAX   12.0f         /* max sweep rate (Hz) */
+#define KLANG_DEPTH_MAX 0.75f         /* max carrier swing: f * (1 +/- 0.75) */
+#define KLANG_LFO_SKEW  0.83f         /* R LFO runs slow -> stereo wander */
 
 typedef struct KlangState {
     uint32_t magic;
@@ -47,6 +53,8 @@ typedef struct KlangState {
     uint32_t pad;
     float phaseL;
     float phaseR;
+    float lfoL;
+    float lfoR;
 } KlangState;
 
 static inline float kl_abs(float x) { return x < 0.0f ? -x : x; }
@@ -86,19 +94,24 @@ void KLANG_AUDIO_FUNC(unsigned int *ctx)
         st->version = KLANG_VERSION;
         st->phaseL = 0.0f;
         st->phaseR = 0.0f;
+        st->lfoL = 0.0f;
+        st->lfoR = 0.0f;
         st->initialized = 1u;
     }
 
-    float freq = zoom_param_norm01(params[KLANG_FREQ_SLOT], KLANG_FREQ_DEFAULT_NORM);
-    float mix  = zoom_param_norm01(params[KLANG_MIX_SLOT], KLANG_MIX_DEFAULT_NORM);
+    float freq  = zoom_param_norm01(params[KLANG_FREQ_SLOT], KLANG_FREQ_DEFAULT_NORM);
+    float sweep = zoom_param_norm01(params[KLANG_SWEEP_SLOT], KLANG_SWEEP_DEFAULT_NORM);
+    float mix   = zoom_param_norm01(params[KLANG_MIX_SLOT], KLANG_MIX_DEFAULT_NORM);
 
     float carrierHz = KLANG_FREQ_MIN + freq * KLANG_FREQ_SPAN;
-    float incL = carrierHz * KLANG_TWO_PI_SR;
-    float incR = incL * KLANG_SPREAD;
+    float baseInc = carrierHz * KLANG_TWO_PI_SR;
+    float lfoInc = sweep * sweep * KLANG_LFO_MAX * KLANG_TWO_PI_SR;
+    float depth = sweep * KLANG_DEPTH_MAX;
     float wet = mix;
     float dry = 1.0f - mix;
 
     float phL = st->phaseL, phR = st->phaseR;
+    float lfL = st->lfoL, lfR = st->lfoR;
     int i;
     for (i = 0; i < 8; i++) {
         float inL = fxBuf[i];
@@ -110,12 +123,20 @@ void KLANG_AUDIO_FUNC(unsigned int *ctx)
         fxBuf[i]     = dry * inL + wet * (inL * cL) * 0.5f;
         fxBuf[i + 8] = dry * inR + wet * (inR * cR) * 0.5f;
 
-        phL += incL;
+        /* carrier increment swept by the LFO; always positive (depth < 1) */
+        phL += baseInc * (1.0f + depth * kl_sin(lfL));
         if (phL > KLANG_TWO_PI) phL -= KLANG_TWO_PI;
-        phR += incR;
+        phR += baseInc * KLANG_SPREAD * (1.0f + depth * kl_sin(lfR));
         if (phR > KLANG_TWO_PI) phR -= KLANG_TWO_PI;
+
+        lfL += lfoInc;
+        if (lfL > KLANG_TWO_PI) lfL -= KLANG_TWO_PI;
+        lfR += lfoInc * KLANG_LFO_SKEW;
+        if (lfR > KLANG_TWO_PI) lfR -= KLANG_TWO_PI;
     }
 
     st->phaseL = phL;
     st->phaseR = phR;
+    st->lfoL = lfL;
+    st->lfoR = lfR;
 }

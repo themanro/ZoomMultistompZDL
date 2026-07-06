@@ -65,7 +65,7 @@
       "name": "DryWet",
       "type": "knob",
       "max": 100,
-      "default": 100,
+      "default": 1,
       "scale": "source_cubed_wet",
       "audio_min": 0.0,
       "audio_max": 1.0,

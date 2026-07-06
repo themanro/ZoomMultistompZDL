@@ -18,7 +18,7 @@
     {
       "name": "Mix",
       "max": 100,
-      "default": 85,
+      "default": 1,
       "comment": "params[6]. Dry/wet blend."
     }
   ],

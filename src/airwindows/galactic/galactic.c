@@ -352,8 +352,10 @@ static inline void gal_process_sample(GalacticState *st, float *sampleL, float *
 
     st->iirBL = (st->iirBL * (1.0f - lowpass)) + (inputSampleL * lowpass);
     st->iirBR = (st->iirBR * (1.0f - lowpass)) + (inputSampleR * lowpass);
-    inputSampleL = st->iirBL;
-    inputSampleR = st->iirBR;
+    /* Makeup gain: the raw tank output sits well below the dry level on the
+     * pedal (hardware feedback "ok but quiet"), so lift the wet path. */
+    inputSampleL = st->iirBL * 1.8f;
+    inputSampleR = st->iirBR * 1.8f;
 
     if (wet < 1.0f) {
         inputSampleL = (inputSampleL * wet) + (drySampleL * (1.0f - wet));

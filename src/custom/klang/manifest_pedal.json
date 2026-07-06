@@ -1,6 +1,6 @@
 {
   "effect_name": "Klang",
-  "comment": "PEDAL BUILD manifest for Klang (2-knob, RING MOD only v1). build.py reads THIS file; manifest.json is the 5-knob desktop-preview manifest (which also has the frequency-shifter modes, deferred on pedal). Stereo spread is baked.",
+  "comment": "PEDAL BUILD manifest for Klang v2 (3-knob swept ring mod). build.py reads THIS file. Sweep oscillates the carrier (rate+depth on one knob; 0 = static v1 behavior).",
   "audio_func_name": "Fx_DLY_Klang",
   "gid": 8,
   "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_. Grouped under DLY (fewest stock effects = easy to find).",
@@ -13,13 +13,19 @@
       "name": "Freq",
       "max": 100,
       "default": 40,
-      "comment": "params[5]. Carrier frequency (~0.5..2000 Hz, linear)."
+      "comment": "params[5]. Carrier centre frequency (~0.5..2000 Hz, linear)."
+    },
+    {
+      "name": "Sweep",
+      "max": 100,
+      "default": 30,
+      "comment": "params[6]. Carrier LFO rate (0..~12 Hz) + depth together; 0 = static."
     },
     {
       "name": "Mix",
       "max": 100,
-      "default": 60,
-      "comment": "params[6]. Dry/wet."
+      "default": 1,
+      "comment": "params[7]. Dry/wet (starts at 1 = quiet-safe)."
     }
   ],
   "audio_nop": false,

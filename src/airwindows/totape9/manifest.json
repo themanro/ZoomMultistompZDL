@@ -118,7 +118,7 @@
       "name": "Output",
       "type": "knob",
       "max": 100,
-      "default": 50,
+      "default": 1,
       "scale": "source_linear_gain",
       "audio_min": 0.0,
       "audio_max": 2.0,

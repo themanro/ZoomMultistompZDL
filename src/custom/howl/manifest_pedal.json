@@ -24,7 +24,7 @@
     {
       "name": "Level",
       "max": 100,
-      "default": 11,
+      "default": 1,
       "comment": "params[7]. Howl output level (0 .. 0.7; default ~tame)."
     }
   ],

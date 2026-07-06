@@ -5,7 +5,7 @@ toolchain used to build them.
 
 ## Custom effect pack
 
-This fork is a consolidated custom **library of 17 effects** — all grouped
+This fork is a curated custom **library of 14 effects** — all grouped
 under the Delay category, each with a custom on-device cover. Originals:
 granular shimmer, drum glitch, tape degradation, a Dune-style drone, a Data
 Corrupter-style synth, ring mod, high-gain amp+cab, a feedback howl, and tape
@@ -28,22 +28,17 @@ layouts, and sound demos.
 </tr>
 <tr>
 <td align="center"><img src="graphics/howl.png" width="220" alt="Howl"></td>
-<td align="center"><img src="graphics/reel.png" width="220" alt="Reel"></td>
 <td align="center"><img src="graphics/galactic.png" width="220" alt="Galactic"></td>
-<td align="center"><img src="graphics/lush.png" width="220" alt="Lush"></td>
-</tr>
-<tr>
 <td align="center"><img src="graphics/oxide.png" width="220" alt="Oxide"></td>
-<td align="center"><img src="graphics/room.png" width="220" alt="Room"></td>
-<td align="center"><img src="graphics/ott.png" width="220" alt="OTT"></td>
-<td align="center"><img src="graphics/tapehack.png" width="220" alt="TapeHack"></td>
+<td align="center"><img src="graphics/spool.png" width="220" alt="Spool"></td>
 </tr>
 <tr>
-<td align="center"><img src="graphics/spool.png" width="220" alt="Spool"></td>
+<td align="center"><img src="graphics/taffy.png" width="220" alt="Taffy"></td>
+<td align="center"><img src="graphics/dissolve.png" width="220" alt="Dissolve"></td>
 </tr>
 </table>
 
-> Not all hardware-verified yet, and the pedal can't hold/run all 17 at once
+> Not all hardware-verified yet, and the pedal can't hold/run all 14 at once
 > (storage + DSP limits) — install a curated subset, back up first, flash one
 > at a time. See [CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md).
 

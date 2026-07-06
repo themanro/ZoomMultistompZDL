@@ -103,7 +103,7 @@
       "name": "Mix",
       "type": "knob",
       "max": 100,
-      "default": 40,
+      "default": 1,
       "scale": "linear",
       "audio_min": 0.0,
       "audio_max": 1.0,

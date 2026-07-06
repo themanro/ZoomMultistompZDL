@@ -25,13 +25,9 @@ PROBE_DIR = ROOT / "src" / "hardware_probes"
 # Each entry: (display name, path to its build.py). Keep release builds clean by
 # default; diagnostic/probe builds remain available by name or with --all.
 RELEASE_PLUGINS = [
-    ("tapehack",    PLUGIN_DIR / "tapehack"    / "build.py"),
     ("tapeecho4",   PLUGIN_DIR / "tapeecho4"   / "build.py"),
     ("totape9",     PLUGIN_DIR / "totape9"     / "build.py"),
-    ("stereochorus", PLUGIN_DIR / "stereochorus" / "build.py"),
-    ("verbtiny",    PLUGIN_DIR / "verbtiny"    / "build.py"),
     ("galactic",    PLUGIN_DIR / "galactic"    / "build.py"),
-    ("ott",         CUSTOM_DIR / "ott"         / "build.py"),
     ("flower",      CUSTOM_DIR / "flower"      / "build.py"),
     ("shatter",     CUSTOM_DIR / "shatter"     / "build.py"),
     ("arrakis",     CUSTOM_DIR / "arrakis"     / "build.py"),
@@ -41,8 +37,13 @@ RELEASE_PLUGINS = [
     ("genloss",     CUSTOM_DIR / "genloss"     / "build.py"),
     ("scorch",      CUSTOM_DIR / "scorch"      / "build.py"),
     ("howl",        CUSTOM_DIR / "howl"        / "build.py"),
-    ("reel",        CUSTOM_DIR / "reel"        / "build.py"),
+    ("taffy",       CUSTOM_DIR / "taffy"       / "build.py"),
+    ("dissolve",    CUSTOM_DIR / "dissolve"    / "build.py"),
 ]
+
+# Dropped from the release set 2026-06-29 after hardware listening (user
+# verdict: "doesn't really do anything" / redundant): ott, reel, tapehack,
+# stereochorus (Lush), verbtiny (Room). Sources kept for reference.
 
 DIAGNOSTIC_PLUGINS = [
     ("tovinyl4",    PLUGIN_DIR / "tovinyl4"    / "build.py"),

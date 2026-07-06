@@ -260,6 +260,31 @@ def _em_tapehack(c):                      # TapeHack — exploding tape
               int(CX + 13 * math.cos(a)), int(CY - 13 * math.sin(a)))
 
 
+def _em_taffy(c):                         # Taffy — waveform pulled apart
+    _line(c, 44, CY, 50, CY - 4); _line(c, 44, CY, 50, CY + 4)   # left arrow
+    _line(c, 84, CY, 78, CY - 4); _line(c, 84, CY, 78, CY + 4)   # right arrow
+    prev = None
+    for x in range(50, 79):
+        t = (x - 50) / 28.0
+        stretch = 1.0 + 2.5 * t                   # wavelength stretches ->
+        y = int(CY - 5 * math.sin(t * 6.28318 * 2.2 / stretch))
+        if prev is not None:
+            _line(c, x - 1, prev, x, y)
+        prev = y
+
+
+def _em_dissolve(c):                      # Dissolve — block eroding to dots
+    for y in range(CY - 7, CY + 8):
+        c.hline(46, 58, y)
+    for x, y, r in [(62, 17, 1), (66, 25, 1), (63, 30, 0), (70, 20, 0),
+                    (72, 28, 1), (76, 16, 0), (78, 24, 0), (82, 21, 1),
+                    (86, 28, 0), (89, 18, 0)]:
+        if r:
+            c.filled_circle(x, y, r)
+        else:
+            c.px(x, y)
+
+
 EMBLEMS = {
     "Microlm": _em_shimmer, "Flower": _em_flower, "Shatter": _em_bars,
     "Arrakis": _em_dunes, "Corrupt": _em_square, "Klang": _em_rings,
@@ -267,6 +292,7 @@ EMBLEMS = {
     "Reel": _em_reel_single, "Spool": _em_spool, "Oxide": _em_oxide,
     "Lush": _em_swirl, "Room": _em_room,
     "Galactic": _em_stars, "OTT": _em_arrows, "TapeHack": _em_tapehack,
+    "Taffy": _em_taffy, "Dissolve": _em_dissolve,
 }
 
 
@@ -290,19 +316,25 @@ COVERS_DIR = Path(__file__).resolve().parent / "covers"
 
 def _load_override(name: str):
     """If covers/<Name>.json exists (hand-drawn in tools/cover_editor.html),
-    use that exact bitmap instead of the generated cover."""
+    use that exact bitmap instead of the generated cover. A malformed file
+    warns and falls back to the generated cover rather than killing the build."""
     f = COVERS_DIR / f"{name}.json"
     if not f.exists():
         return None
     import json
-    rows = json.loads(f.read_text())["grid"]
-    c = Canvas()
-    for y in range(min(64, len(rows))):
-        row = rows[y]
-        for x in range(min(128, len(row))):
-            if row[x]:
-                c.px(x, y)
-    return encode_zoom_rle(c)
+    try:
+        rows = json.loads(f.read_text())["grid"]
+        c = Canvas()
+        for y in range(min(64, len(rows))):
+            row = rows[y]
+            for x in range(min(128, len(row))):
+                if row[x]:
+                    c.px(x, y)
+        return encode_zoom_rle(c)
+    except Exception as exc:  # noqa: BLE001 — any bad override falls back
+        print(f"[covers] WARNING: override {f.name} unusable ({exc}); "
+              f"using generated cover")
+        return None
 
 
 def make_cover(name: str, param_names=None) -> bytes:

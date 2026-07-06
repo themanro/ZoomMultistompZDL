@@ -1,17 +1,18 @@
 # Custom Effect Pack (themanro)
 
-A consolidated **library of 17 effects** for the Zoom MS-70CDR (ZDL family),
+A curated **library of 14 effects** for the Zoom MS-70CDR (ZDL family),
 built on the [repeat98/ZoomMultistompZDL](https://github.com/repeat98/ZoomMultistompZDL)
 toolchain. Ten are originals (each with a full-quality Python **desktop
 preview** in `tools/audio_preview/renderers/`); the rest are rebuilt/renamed
 Airwindows-derived ports. All are grouped under the **Delay** category with a
 custom on-device cover, and all compile clean (`.fardata 0`, `0 relocations`).
 
-> ⚠️ **Status:** partially hardware-tested on an MS-70CDR. Knob scaling, the
-> Howl rewrite, the multi-knob path, and the TapeHack freeze-fix are confirmed;
-> the renamed Airwindows ports (Spool/Oxide/Room/Lush) still need a play-test.
-> The pedal **can't hold or run all 17 at once** (storage + DSP limits) —
-> install a curated subset, back up first, flash one at a time.
+> ⚠️ **Status:** curated after hardware listening (2026-06-29): OTT, Reel,
+> TapeHack, Lush and Room were dropped; Taffy and Dissolve are new and not yet
+> hardware-tested. All volume knobs (Level/Output/Mix) now default to **1** so
+> nothing is loud at patch select — dial them up. The pedal **can't hold or
+> run all 14 at once** (storage + DSP limits) — install a subset, back up
+> first, flash one at a time.
 
 ## Pedal icons
 
@@ -30,18 +31,13 @@ custom on-device cover, and all compile clean (`.fardata 0`, `0 relocations`).
 </tr>
 <tr>
 <td align="center"><img src="graphics/howl.png" width="220" alt="Howl"></td>
-<td align="center"><img src="graphics/reel.png" width="220" alt="Reel"></td>
 <td align="center"><img src="graphics/galactic.png" width="220" alt="Galactic"></td>
-<td align="center"><img src="graphics/lush.png" width="220" alt="Lush"></td>
-</tr>
-<tr>
 <td align="center"><img src="graphics/oxide.png" width="220" alt="Oxide"></td>
-<td align="center"><img src="graphics/room.png" width="220" alt="Room"></td>
-<td align="center"><img src="graphics/ott.png" width="220" alt="OTT"></td>
-<td align="center"><img src="graphics/tapehack.png" width="220" alt="TapeHack"></td>
+<td align="center"><img src="graphics/spool.png" width="220" alt="Spool"></td>
 </tr>
 <tr>
-<td align="center"><img src="graphics/spool.png" width="220" alt="Spool"></td>
+<td align="center"><img src="graphics/taffy.png" width="220" alt="Taffy"></td>
+<td align="center"><img src="graphics/dissolve.png" width="220" alt="Dissolve"></td>
 </tr>
 </table>
 
@@ -60,17 +56,14 @@ rebuilt/renamed Airwindows-derived ports.
 | Shatter | `Shatter` | Chance, Mix | original | stutter / beat-repeat glitch for drums |
 | Arrakis | `Arrakis` | Detune, Mix | original | Dune-style detuned sub-octave beating drone |
 | Corrupt | `Corrupt` | Sub, Tone, Wave, Mix | original | EQD Data Corrupter-style PLL square synth |
-| Klang | `Klang` | Freq, Mix | original | ring modulator |
+| Klang | `Klang` | Freq, Sweep, Mix | original | swept-carrier ring modulator (sirens, dive bombs) |
 | GenLoss | `GenLoss` | Wow, Tone, Hiss | original | tape/VHS generation-loss degradation |
 | Scorch | `Scorch` | Gain, Level | original | aggressive high-gain amp + cab |
 | Howl | `Howl` | Tune, Annihil, Level | original | DBA Total Sonic Annihilation-style self-oscillating feedback |
-| Reel | `Reel` | Drive, Level | original | light tape saturation |
-| Galactic | `Galactic` | 5 | port | lush Airwindows reverb |
-| Lush | `Lush` | Speed, Depth | port | stereo chorus (Airwindows StereoChorus) |
+| Taffy | `Taffy` | Speed, Chance, Mix | original | Red Panda Tensor-style tape warp: reverse/stop/double + random slips |
+| Dissolve | `Dissolve` | Chance, Smear, Glitch, Mix | original | OBNE Parting-style glitch delay dissolving into reverb wash |
+| Galactic | `Galactic` | 5 | port | lush Airwindows reverb (wet path boosted) |
 | Oxide | `Oxide` | 9 | port | tape saturation/drive (Airwindows ToTape) |
-| Room | `Room` | 5 | port | small reverb (Airwindows) |
-| OTT | `OTT` | 4 | port | OTT-style multiband compressor |
-| TapeHack | `TapeHack` | Input, Drive, Output | port | tape saturation (Airwindows; Output-knob freeze fixed) |
 | Spool | `Spool` | 9 | port | tape echo (Airwindows-inspired) |
 
 Some features are deferred on the originals (Klang's frequency-shifter modes,
@@ -118,7 +111,7 @@ python3 build_all.py flower          # one effect -> dist/Flower.ZDL
 python3 build_all.py scorch          # etc.
 ```
 
-Pre-built `.ZDL` files for all 17 are in [`dist/`](dist/).
+Pre-built `.ZDL` files for all 14 are in [`dist/`](dist/).
 
 ## Implementation notes
 

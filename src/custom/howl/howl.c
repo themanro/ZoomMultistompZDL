@@ -96,7 +96,8 @@ void HOWL_AUDIO_FUNC(unsigned int *ctx)
     float tune  = zoom_param_norm01(params[HOWL_TUNE_SLOT], HOWL_TUNE_DEFAULT_NORM);
     float annih = zoom_param_norm01(params[HOWL_ANNIHIL_SLOT], HOWL_ANNIHIL_DEFAULT_NORM);
     float level = zoom_param_norm01(params[HOWL_LEVEL_SLOT], HOWL_LEVEL_DEFAULT_NORM);
-    float wetLvl = level * 0.7f;            /* Level knob: 0 .. 0.7 howl level */
+    float wetLvl = level * 0.45f;           /* Level knob: 0 .. 0.45 howl level
+                                             * (was 0.7 -- "still a bit loud") */
 
     float fc = HOWL_FC_MIN + tune * HOWL_FC_SPAN;
     float oma = 1.0f - annih;
