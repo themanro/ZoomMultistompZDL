@@ -38,7 +38,7 @@ HOWL_CODE_SECTION(HOWL_AUDIO_FUNC)
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
 #define HOWL_MAGIC   0x484F574Cu   /* 'HOWL' */
-#define HOWL_VERSION 2u
+#define HOWL_VERSION 3u
 
 #define HOWL_TWO_PI_SR (6.2831853f / 44100.0f)
 #define HOWL_FC_MIN    80.0f
@@ -57,6 +57,16 @@ typedef struct HowlState {
     uint32_t initialized;
     uint32_t pad;
     float y1L, y2L, y1R, y2R;
+
+    /* Edit-driven knob latch (v3). The host clobbers the whole param block
+     * on patch load AND when refocusing the effect in the chain UI (all
+     * slots change at once, sometimes to garbage -> "very loud until you
+     * wiggle"). A real knob turn changes ONE slot at a time. So: accept a
+     * slot's value only when it is the lone change since the last block;
+     * otherwise hold the last accepted value. Result: the effect keeps
+     * sounding exactly as dialed across load/refocus. */
+    float accKnob[3];                  /* accepted Tune/Annihil/Level (norm) */
+    float prevRaw[3];                  /* raw slot values last block */
 } HowlState;
 
 static inline float howl_soft(float x)
@@ -90,14 +100,44 @@ void HOWL_AUDIO_FUNC(unsigned int *ctx)
         st->magic = HOWL_MAGIC;
         st->version = HOWL_VERSION;
         st->y1L = st->y2L = st->y1R = st->y2R = 0.0f;
+        st->accKnob[0] = HOWL_TUNE_DEFAULT_NORM;
+        st->accKnob[1] = HOWL_ANNIHIL_DEFAULT_NORM;
+        st->accKnob[2] = HOWL_LEVEL_DEFAULT_NORM;
+        st->prevRaw[0] = st->prevRaw[1] = st->prevRaw[2] = -1.0f;
         st->initialized = 1u;
     }
 
-    float tune  = zoom_param_norm01(params[HOWL_TUNE_SLOT], HOWL_TUNE_DEFAULT_NORM);
-    float annih = zoom_param_norm01(params[HOWL_ANNIHIL_SLOT], HOWL_ANNIHIL_DEFAULT_NORM);
-    float level = zoom_param_norm01(params[HOWL_LEVEL_SLOT], HOWL_LEVEL_DEFAULT_NORM);
-    float wetLvl = level * 0.45f;           /* Level knob: 0 .. 0.45 howl level
-                                             * (was 0.7 -- "still a bit loud") */
+    /* Edit-driven knob latch: accept only single-slot changes (knob turns);
+     * bulk rewrites (load / chain refocus) are ignored and the last accepted
+     * values keep sounding. A deliberate turn to zero IS accepted as zero. */
+    {
+        float raw[3];
+        int k, changed = -1, nch = 0;
+        raw[0] = params[HOWL_TUNE_SLOT];
+        raw[1] = params[HOWL_ANNIHIL_SLOT];
+        raw[2] = params[HOWL_LEVEL_SLOT];
+        for (k = 0; k < 3; k++) {
+            float d = raw[k] - st->prevRaw[k];
+            if (d > 1.0e-6f || d < -1.0e-6f) { changed = k; nch++; }
+            st->prevRaw[k] = raw[k];
+        }
+        if (nch == 1) {
+            float v = raw[changed];
+            float n;
+            if (v <= 0.0001f) n = 0.0f;             /* genuine knob zero */
+            else if (v <= 1.0f) n = v;              /* proven 0..1 edit path */
+            else if (v <= 100.0f) n = v * 0.01f;    /* UI-scale fallback */
+            else n = st->accKnob[changed];          /* implausible: hold */
+            if (n < 0.0f) n = 0.0f;
+            if (n > 1.0f) n = 1.0f;
+            st->accKnob[changed] = n;
+        }
+    }
+
+    float tune   = st->accKnob[0];
+    float annih  = st->accKnob[1];
+    float level  = st->accKnob[2];
+    float wetLvl = level * 0.45f;           /* Level knob: 0 .. 0.45 howl level */
 
     float fc = HOWL_FC_MIN + tune * HOWL_FC_SPAN;
     float oma = 1.0f - annih;
