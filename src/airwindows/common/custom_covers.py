@@ -81,19 +81,19 @@ class _VSquash:
             w = int((r * r - dy * dy) ** 0.5)
             self.hline(cx - w, cx + w, cy + dy, v)
 
-    def draw_char(self, ch, x0, y0, scale=1):
+    def draw_char(self, ch, x0, y0, scale=1, v=1):
         rows = Canvas._FONT.get(ch.upper(), Canvas._FONT[' '])
         for ri, row in enumerate(rows):
             for ci, bit in enumerate(row):
                 if bit == '1':
                     for sy in range(scale):
                         for sx in range(scale):
-                            self.px(x0 + ci * scale + sx, y0 + ri * scale + sy)
+                            self.px(x0 + ci * scale + sx, y0 + ri * scale + sy, v)
 
-    def draw_text(self, text, x0, y0, scale=1, spacing=1):
+    def draw_text(self, text, x0, y0, scale=1, spacing=1, v=1):
         x = x0
         for ch in text:
-            self.draw_char(ch, x, y0, scale)
+            self.draw_char(ch, x, y0, scale, v)
             x += 3 * scale + spacing
 
 
@@ -343,10 +343,16 @@ def make_cover(name: str, param_names=None) -> bytes:
         return override
     c = Canvas()
     c.rect(1, 1, 126, 62)
+    # Inverse-video name banner: solid bar with the name knocked out, like
+    # stock covers. Bold fills are what make the tiny Effect Manager
+    # thumbnail (which renders this same picture) read as real art instead
+    # of a washed-out generic pedal.
+    for by in range(2, 16):
+        c.hline(2, 125, by)
     adv = 3 * 2 + 1                       # scale-2 glyph advance
     w = len(name) * adv - 1
     x = max(3, (128 - w) // 2)
-    _VSquash(c, 8).draw_text(name.upper(), x, 3, scale=2, spacing=1)
+    _VSquash(c, 9).draw_text(name.upper(), x, 4, scale=2, spacing=1, v=0)
     fn = EMBLEMS.get(name)
     if fn:
         fn(_VSquash(c, CY))              # emblem drawn round-on-device
