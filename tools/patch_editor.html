@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MS-70CDR Patch Editor</title>
+<!--
+  Web MIDI patch editor for the Zoom MS-70CDR that KNOWS this repo's custom
+  effects (Taffy, Dissolve, Howl, ...) as well as the stock set — effect
+  names and parameters are extracted from the .ZDL binaries themselves
+  (build/extract_effect_db.py -> tools/effects_db.json).
+
+  Run:  python3 -m http.server 8000   (repo root)
+  Open: http://localhost:8000/tools/patch_editor.html
+  (Web MIDI needs a secure context: localhost or https. file:// won't work.)
+
+  Protocol + patch bit layout based on g200kg/zoom-ms-utility (MIT,
+  (c) g200kg) and this repo's own findings. Patch effect-type ID =
+  ((fxid&0x3F)<<17)|((fxid>>6&1)<<30)|((fxid>>7&7)<<8)|(gid<<1) — verified
+  against all 137 stock MS-70CDR ZDLs.
+-->
+<style>
+  :root { --bg:#15171c; --panel:#1e2128; --ink:#d7dde6; --accent:#5cc8ff;
+          --line:#2c313b; --on:#69d18c; --off:#5a6270; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:13px/1.45 ui-monospace,Menlo,Consolas,monospace; padding:14px; }
+  h1 { font-size:15px; margin:0 0 2px; }
+  .sub { color:#8b94a3; font-size:12px; margin:0 0 12px; }
+  .bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px 12px; }
+  button, select, input[type=text], input[type=number] {
+    background:#252a33; color:var(--ink); border:1px solid var(--line);
+    border-radius:6px; padding:6px 9px; font:inherit; }
+  button { cursor:pointer; } button:hover { border-color:var(--accent); }
+  button.primary { background:var(--accent); color:#0a0d12; border-color:var(--accent); }
+  .slots { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:10px; }
+  .slot { border:1px solid var(--line); border-radius:8px; padding:10px; background:var(--panel); }
+  .slot.on { border-color:#3a6b4d; }
+  .slot h3 { margin:0 0 8px; font-size:12px; color:#9aa4b2; display:flex; gap:8px; align-items:center; }
+  .stateBtn { min-width:44px; }
+  .stateBtn.on { background:var(--on); color:#0a0d12; border-color:var(--on); }
+  .param { display:grid; grid-template-columns:74px 1fr 44px; gap:8px; align-items:center; margin:4px 0; }
+  .param label { color:#9aa4b2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .param output { text-align:right; color:var(--accent); }
+  input[type=range] { width:100%; accent-color:var(--accent); }
+  #log { height:110px; overflow-y:auto; background:#0c0e12; border:1px solid var(--line);
+         border-radius:6px; padding:6px 8px; font-size:11px; color:#8fa1b3; margin-top:12px; white-space:pre-wrap; }
+  .warn { color:#e0b060; }
+  .dsp { letter-spacing:2px; }
+  .hint { color:#7c8694; font-size:11px; }
+</style>
+</head>
+<body>
+<h1>MS-70CDR Patch Editor</h1>
+<p class="sub">Sees and controls this repo's custom effects (plus stock). Serve over
+<code>http://localhost</code> — see comments in this file.</p>
+
+<div class="bar panel">
+  <button id="connect" class="primary">Connect MIDI</button>
+  <span id="devname" class="hint">not connected</span>
+  <label>Patch #</label>
+  <select id="prog"></select>
+  <input id="pname" type="text" maxlength="10" size="12" placeholder="patch name">
+  <span class="dsp" id="dsp" title="DSP-full bits"></span>
+  <button id="reread">Re-read</button>
+  <button id="sendall">Send patch</button>
+  <button id="store">Store to slot…</button>
+  <button id="expsyx">Export .syx</button>
+  <input type="file" id="impsyx" accept=".syx" style="max-width:190px">
+</div>
+
+<div class="slots" id="slots"></div>
+<div id="log"></div>
+
+<script>
+"use strict";
+/* ---------- patch codec (bit tables ported from g200kg/zoom-ms-utility, MIT) */
+const BITS=[
+ [[[6,1,0]],[[5,0x40,24],[6,0x7e,16],[7,0x07,8],[9,0x1f,0]],[[9,0x60,-5],[5,0x8,-1],[10,0x7f,3],[5,0x4,8],[11,0x1,11]],[[11,0x7c,-2],[5,0x2,4],[12,0x1f,6]],[[5,0x1,0],[14,0x7f,1],[13,0x40,2],[15,0x3,9]],[[15,0x70,-4],[13,0x20,-2],[16,0x0f,4]],[[16,0x70,-4],[13,0x10,-1],[17,0x0f,4]],[[17,0x70,-4],[13,0x08,0],[18,0x0f,4]],[[18,0x70,-4],[13,0x04,1],[19,0x0f,4]],[[19,0x70,-4],[13,0x02,2],[20,0x1f,4],[23,0x40,"NZ"]],[[24,0x7f,0],[21,0x10,3]]],
+ [[[26,1,0]],[[21,0x4,28],[26,0x7e,16],[27,0x07,8],[30,0x1f,0]],[[30,0x60,-5],[29,0x40,-4],[31,0x7f,3],[29,0x20,5],[32,0x1,11]],[[32,0x7c,-2],[29,0x10,1],[33,0x1f,6]],[[29,0x8,-3],[34,0x7f,1],[29,0x4,6],[35,0x3,9]],[[35,0x70,-4],[29,0x2,2],[36,0x0f,4]],[[36,0x70,-4],[29,0x1,3],[38,0x0f,4]],[[38,0x70,-4],[37,0x40,-3],[39,0x0f,4]],[[39,0x70,-4],[37,0x20,-2],[40,0x0f,4]],[[40,0x70,-4],[37,0x10,-1],[41,0x1f,4],[43,0x40,"NZ"]],[[44,0x7f,0],[37,0x1,7]]],
+ [[[47,1,0]],[[45,0x20,25],[47,0x7e,16],[48,0x07,8],[50,0x1f,0]],[[50,0x60,-5],[45,0x4,0],[51,0x7f,3],[45,0x2,9],[52,0x1,11]],[[52,0x7c,-2],[45,0x1,5],[54,0x1f,6]],[[53,0x40,-6],[55,0x7f,1],[53,0x20,3],[56,0x3,9]],[[56,0x70,-4],[53,0x10,-1],[57,0x0f,4]],[[57,0x70,-4],[53,0x8,0],[58,0x0f,4]],[[58,0x70,-4],[53,0x4,1],[59,0x0f,4]],[[59,0x70,-4],[53,0x2,2],[60,0x0f,4]],[[60,0x70,-4],[53,0x1,3],[62,0x1f,4],[64,0x40,"NZ"]],[[65,0x7f,0],[61,0x8,4]]],
+ [[[67,1,0]],[[61,0x2,29],[67,0x7e,16],[68,0x07,8],[71,0x1f,0]],[[71,0x60,-5],[69,0x20,-3],[72,0x7f,3],[69,0x10,6],[73,0x1,11]],[[73,0x7c,-2],[69,0x8,2],[74,0x1f,6]],[[69,0x4,-2],[75,0x7f,1],[69,0x2,7],[76,0x3,9]],[[76,0x70,-4],[69,0x1,3],[78,0x0f,4]],[[78,0x70,-4],[77,0x40,-3],[79,0x0f,4]],[[79,0x70,-4],[77,0x20,-2],[80,0x0f,4]],[[80,0x70,-4],[77,0x10,-1],[81,0x0f,4]],[[81,0x70,-4],[77,0x8,0],[82,0x1f,4],[84,0x40,"NZ"]],[[86,0x7f,0],[85,0x40,1]]],
+ [[[88,1,0]],[[85,0x10,26],[88,0x7e,16],[89,0x07,8],[91,0x1f,0]],[[91,0x60,-5],[85,0x2,1],[92,0x7f,3],[85,0x1,10],[94,0x1,11]],[[94,0x7c,-2],[93,0x40,-1],[95,0x1f,6]],[[93,0x20,-5],[96,0x7f,1],[93,0x10,4],[97,0x3,9]],[[97,0x70,-4],[93,0x8,0],[98,0x0f,4]],[[98,0x70,-4],[93,0x4,1],[99,0x0f,4]],[[99,0x70,-4],[93,0x2,2],[100,0x0f,4]],[[100,0x70,-4],[93,0x1,3],[102,0x0f,4]],[[102,0x70,-4],[101,0x40,-3],[103,0x1f,4],[105,0x40,"NZ"]],[[106,0x7f,0],[106,0x4,5]]],
+ [[[108,1,0]],[[101,0x1,30],[108,0x7e,16],[110,0x07,8],[112,0x1f,0]],[[112,0x60,-5],[109,0x10,-2],[113,0x7f,3],[109,0x8,7],[114,0x1,11]],[[114,0x7c,-2],[109,0x4,3],[115,0x1f,6]],[[109,0x2,-1],[116,0x7f,1],[109,0x1,8],[118,0x3,9]],[[118,0x70,-4],[117,0x40,-3],[119,0x0f,4]],[[119,0x70,-4],[117,0x20,-2],[120,0x0f,4]],[[120,0x70,-4],[117,0x10,-1],[121,0x0f,4]],[[121,0x70,-4],[117,0x8,0],[122,0x0f,4]],[[122,0x70,-4],[117,0x4,1],[123,0x1f,4],[126,0x40,"NZ"]],[[127,0x7f,0],[125,0x20,2]]],
+];
+const NAMIDX=[132,134,135,136,137,138,139,140,142,143];
+const EMPTY146=[
+ 0xf0,0x52,0x00,0x61,0x28,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0x01,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0x01,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+ 0,0,0,0,0,0,0,0,0,0x40,0x05,0x0f,0x45,0x00,0x6d,0x70,0x74,0x79,0x20,0x20,
+ 0x20,0x00,0x20,0x20,0x00,0xf7];
+
+function getBits(dat,bits){let v=0;for(const b of bits){if(b[0]<dat.length&&b[2]!=="NZ"){let x=dat[b[0]]&b[1];v|=b[2]>=0?(x<<b[2]):(x>>-b[2]);}}return v>>>0;}
+function setBits(dat,bits,val){for(const b of bits){if(b[0]>=dat.length)continue;
+  if(b[2]==="NZ"){dat[b[0]]=(dat[b[0]]&~b[1])|(val?b[1]:0);}
+  else{let x=b[2]>=0?(val>>b[2]):(val<<-b[2]);dat[b[0]]=(dat[b[0]]&~b[1])|(x&b[1]);}}}
+
+function decodePatch(d){
+  const p={name:"",fx:[],maxfx:0,curfx:0,dsp:0};
+  p.name=NAMIDX.map(i=>d[i]?String.fromCharCode(d[i]):"").join("").replace(/ +$/,"");
+  for(let s=0;s<6;s++){const f=[];for(let k=0;k<11;k++)f.push(getBits(d,BITS[s][k]));p.fx.push(f);}
+  p.maxfx=(d[130]&0x1c)>>2;
+  p.curfx=6-(((d[130]&1)<<2)+((d[125]&8)>>2)+((d[129]&0x40)>>6));
+  p.dsp=d[129]&0x3f;
+  return p;
+}
+function encodePatch(p){
+  const d=EMPTY146.slice();
+  const nm=(p.name||"").padEnd(10," ").slice(0,10);
+  for(let i=0;i<10;i++)d[NAMIDX[i]]=nm.charCodeAt(i)||0x20;
+  for(let s=0;s<6;s++)for(let k=0;k<11;k++)setBits(d,BITS[s][k],p.fx[s][k]);
+  let hi=5;while(hi>0&&p.fx[hi][1]===0)hi--;
+  d[130]=(d[130]&~0x1c)|(Math.min(6,hi+1)<<2);
+  let c=Math.max(0,6-Math.min(p.curfx,6));   // inverse of decode: curfx = 6 - stored
+  d[129]=(d[129]&~0x40)|((c&1)<<6);
+  d[125]=(d[125]&~0x8)|((c&2)<<2);
+  d[130]=(d[130]&~1)|((c&4)>>2);
+  return d;
+}
+
+/* ---------- effect database ------------------------------------------- */
+let DB=null, BYID={};
+async function loadDb(){
+  const r=await fetch("effects_db.json");
+  DB=await r.json();
+  for(const e of DB.custom.concat(DB.stock)) BYID[e.id]=e;
+  log(`effect DB: ${DB.custom.length} custom + ${DB.stock.length} stock`);
+}
+
+/* ---------- MIDI ------------------------------------------------------- */
+const DEVID=0x61;                       // MS-70CDR
+let midiIn=null, midiOut=null, patch=null, rawPatch=null;
+const $=id=>document.getElementById(id);
+function log(s,cls){const el=$("log");el.innerHTML+=(cls?`<span class="${cls}">`:"")+s+(cls?"</span>":"")+"\n";el.scrollTop=el.scrollHeight;}
+function hex(a){return Array.from(a,x=>x.toString(16).padStart(2,"0")).join(" ");}
+
+function send(bytes){ if(midiOut){ midiOut.send(bytes); } }
+const zx=cmd=>[0xf0,0x52,0x00,DEVID,...cmd,0xf7];
+
+async function connect(){
+  try{
+    const acc=await navigator.requestMIDIAccess({sysex:true});
+    let inp=null,out=null;
+    for(const i of acc.inputs.values()) if(/zoom ms/i.test(i.name)) inp=i;
+    for(const o of acc.outputs.values()) if(/zoom ms/i.test(o.name)) out=o;
+    if(!inp||!out){ // fall back to first ports
+      inp=inp||acc.inputs.values().next().value;
+      out=out||acc.outputs.values().next().value;
+    }
+    if(!inp||!out){ log("no MIDI ports found","warn"); return; }
+    midiIn=inp; midiOut=out;
+    midiIn.onmidimessage=onMidi;
+    $("devname").textContent=`${inp.name} ⇄ ${out.name}`;
+    send([0xf0,0x7e,0x00,0x06,0x01,0xf7]);        // identity
+    send(zx([0x50]));                              // param edit enable
+    requestPatch();
+  }catch(e){ log("MIDI access failed: "+e,"warn"); }
+}
+function requestPatch(){ send(zx([0x29])); }
+
+function onMidi(ev){
+  const d=ev.data;
+  if(d[0]===0xf0&&d[1]===0x52&&d[3]===DEVID&&d[4]===0x28&&d.length>=146){
+    rawPatch=Array.from(d.slice(0,146));
+    patch=decodePatch(rawPatch);
+    render();
+    log("patch received: "+patch.name);
+  }else if(d[0]===0xf0&&d[1]===0x7e){
+    log("identity: "+hex(d));
+  }else if(d[0]===0xc0){
+    log("program change -> "+d[1]); $("prog").value=d[1]; requestPatch();
+  }
+}
+
+/* ---------- edits ------------------------------------------------------ */
+function sendParam(slot,paramIdx,val){       // paramIdx: 0=on/off, 2..10 knobs
+  send(zx([0x31,slot,paramIdx,val&0x7f,(val>>7)&0x7f]));
+}
+function sendFullPatch(){
+  if(!patch)return;
+  rawPatch=encodePatch(patch);
+  send(rawPatch);
+  log("patch sent");
+}
+function storeTo(slotNum){
+  send(zx([0x32,0x01,0x00,0x00,slotNum,0x00,0x00,0x00,0x00,0x00]));
+  log("stored to patch #"+slotNum);
+}
+
+/* ---------- UI --------------------------------------------------------- */
+function effectOptions(sel){
+  sel.innerHTML="";
+  const mk=(v,t)=>{const o=document.createElement("option");o.value=v;o.textContent=t;return o;};
+  sel.appendChild(mk(0,"— empty —"));
+  const gC=document.createElement("optgroup");gC.label="★ Custom (this repo)";
+  for(const e of DB.custom) gC.appendChild(mk(e.id,e.name));
+  sel.appendChild(gC);
+  const cats={};
+  for(const e of DB.stock)(cats[e.category]=cats[e.category]||[]).push(e);
+  for(const c of Object.keys(cats).sort()){
+    const g=document.createElement("optgroup");g.label=c;
+    for(const e of cats[c]) g.appendChild(mk(e.id,e.name));
+    sel.appendChild(g);
+  }
+}
+function render(){
+  if(!patch)return;
+  $("pname").value=patch.name;
+  $("dsp").textContent=Array.from({length:6},(_,i)=>(patch.dsp>>i)&1?"●":"○").join("");
+  const root=$("slots"); root.innerHTML="";
+  patch.fx.forEach((f,s)=>{
+    const eid=f[1], on=f[0], e=BYID[eid];
+    const div=document.createElement("div");
+    div.className="slot"+(on&&eid?" on":"");
+    const h=document.createElement("h3");
+    h.textContent=`slot ${s+1}`;
+    const st=document.createElement("button");
+    st.className="stateBtn"+(on?" on":""); st.textContent=on?"ON":"off";
+    st.onclick=()=>{f[0]=on?0:1;sendParam(s,0,f[0]);render();};
+    h.appendChild(st);
+    if(eid&&!e){const u=document.createElement("span");u.className="warn";
+      u.textContent="unknown 0x"+eid.toString(16);h.appendChild(u);}
+    div.appendChild(h);
+    const sel=document.createElement("select");
+    effectOptions(sel); sel.value=BYID[eid]?eid:0;
+    sel.onchange=()=>{
+      const ne=BYID[+sel.value];
+      f[1]=+sel.value;
+      for(let k=0;k<9;k++)f[k+2]=ne&&ne.params[k]?ne.params[k].default:0;
+      f[0]=ne?1:0;
+      sendFullPatch(); render();
+    };
+    div.appendChild(sel);
+    const params=e?e.params:(eid?Array.from({length:9},(_,i)=>({name:"p"+i,max:2047})):[]);
+    params.forEach((pd,k)=>{
+      const row=document.createElement("div");row.className="param";
+      const lab=document.createElement("label");lab.textContent=pd.name;
+      const rng=document.createElement("input");rng.type="range";
+      rng.min=0;rng.max=pd.max;rng.value=f[k+2];
+      const out=document.createElement("output");out.value=f[k+2];
+      rng.oninput=()=>{f[k+2]=+rng.value;out.value=rng.value;sendParam(s,k+2,f[k+2]);};
+      // slots 4-6: realtime 0x31 may be ignored — follow up with a full send
+      if(s>=3) rng.onchange=()=>sendFullPatch();
+      row.append(lab,rng,out);div.appendChild(row);
+    });
+    root.appendChild(div);
+  });
+}
+
+/* ---------- bar wiring ------------------------------------------------- */
+$("connect").onclick=connect;
+$("reread").onclick=requestPatch;
+$("sendall").onclick=sendFullPatch;
+$("store").onclick=()=>{const n=+$("prog").value;if(confirm("Store current patch to slot "+n+"?"))storeTo(n);};
+$("pname").onchange=()=>{if(patch){patch.name=$("pname").value;sendFullPatch();}};
+$("prog").onchange=()=>{send([0xc0,+$("prog").value]);setTimeout(requestPatch,150);};
+$("expsyx").onclick=()=>{
+  if(!patch)return;
+  const blob=new Blob([new Uint8Array(encodePatch(patch))],{type:"application/octet-stream"});
+  const a=document.createElement("a");a.download=(patch.name||"patch")+".syx";
+  a.href=URL.createObjectURL(blob);a.click();
+};
+$("impsyx").onchange=ev=>{
+  const file=ev.target.files[0];if(!file)return;
+  const rd=new FileReader();
+  rd.onload=()=>{const d=Array.from(new Uint8Array(rd.result));
+    if(d.length!==146){log("not a 146-byte MS-70CDR patch","warn");return;}
+    d[3]=DEVID; rawPatch=d; patch=decodePatch(d); render(); sendFullPatch();};
+  rd.readAsArrayBuffer(file);
+};
+for(let i=0;i<50;i++){const o=document.createElement("option");o.value=i;o.textContent=i+1;$("prog").appendChild(o);}
+
+loadDb().then(()=>log("ready — click Connect MIDI (pedal on USB, not in firmware-update mode)"));
+</script>
+</body>
+</html>

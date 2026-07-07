@@ -1,0 +1,5353 @@
+{
+ "custom": [
+  {
+   "name": "Arrakis",
+   "fxid": 453,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1074397968,
+   "params": [
+    {
+     "name": "Detune",
+     "max": 100,
+     "default": 63
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "Corrupt",
+   "fxid": 454,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1074529040,
+   "params": [
+    {
+     "name": "Sub",
+     "max": 100,
+     "default": 82
+    },
+    {
+     "name": "Tone",
+     "max": 100,
+     "default": 45
+    },
+    {
+     "name": "Wave",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "Dissolve",
+   "fxid": 461,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1075446544,
+   "params": [
+    {
+     "name": "Chance",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "Smear",
+     "max": 100,
+     "default": 55
+    },
+    {
+     "name": "Glitch",
+     "max": 100,
+     "default": 35
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "Flower",
+   "fxid": 451,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1074135824,
+   "params": [
+    {
+     "name": "Rate",
+     "max": 100,
+     "default": 45
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "Galactic",
+   "fxid": 408,
+   "gid": 8,
+   "category": "Delay",
+   "id": 3146512,
+   "params": [
+    {
+     "name": "Replace",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Bright",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Detune",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Bigness",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "DryWet",
+     "max": 100,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "GenLoss",
+   "fxid": 456,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1074791184,
+   "params": [
+    {
+     "name": "Wow",
+     "max": 100,
+     "default": 72
+    },
+    {
+     "name": "Tone",
+     "max": 100,
+     "default": 52
+    },
+    {
+     "name": "Hiss",
+     "max": 100,
+     "default": 2
+    }
+   ]
+  },
+  {
+   "name": "Howl",
+   "fxid": 458,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1075053328,
+   "params": [
+    {
+     "name": "Tune",
+     "max": 100,
+     "default": 17
+    },
+    {
+     "name": "Annihil",
+     "max": 100,
+     "default": 34
+    },
+    {
+     "name": "Level",
+     "max": 100,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "Klang",
+   "fxid": 455,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1074660112,
+   "params": [
+    {
+     "name": "Freq",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "Sweep",
+     "max": 100,
+     "default": 30
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "Microlm",
+   "fxid": 450,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1074004752,
+   "params": [
+    {
+     "name": "Pitch",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "Regen",
+     "max": 100,
+     "default": 72
+    },
+    {
+     "name": "Tone",
+     "max": 100,
+     "default": 55
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "Oxide",
+   "fxid": 403,
+   "gid": 8,
+   "category": "Delay",
+   "id": 2491152,
+   "params": [
+    {
+     "name": "Input",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Tilt",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Shape",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Flutter",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "FlutSpd",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Bias",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "HeadBmp",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "HeadFrq",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Output",
+     "max": 100,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "Scorch",
+   "fxid": 457,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1074922256,
+   "params": [
+    {
+     "name": "Gain",
+     "max": 100,
+     "default": 22
+    },
+    {
+     "name": "Level",
+     "max": 100,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "Shatter",
+   "fxid": 452,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1074266896,
+   "params": [
+    {
+     "name": "Chance",
+     "max": 100,
+     "default": 55
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "Spool",
+   "fxid": 409,
+   "gid": 8,
+   "category": "Delay",
+   "id": 3277584,
+   "params": [
+    {
+     "name": "Tempo",
+     "max": 240,
+     "default": 120
+    },
+    {
+     "name": "Div",
+     "max": 100,
+     "default": 67
+    },
+    {
+     "name": "Feed",
+     "max": 100,
+     "default": 35
+    },
+    {
+     "name": "Flutter",
+     "max": 100,
+     "default": 35
+    },
+    {
+     "name": "Wow",
+     "max": 100,
+     "default": 25
+    },
+    {
+     "name": "Wear",
+     "max": 100,
+     "default": 55
+    },
+    {
+     "name": "Drive",
+     "max": 100,
+     "default": 35
+    },
+    {
+     "name": "Spring",
+     "max": 100,
+     "default": 0
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "Taffy",
+   "fxid": 460,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1075315472,
+   "params": [
+    {
+     "name": "Speed",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Chance",
+     "max": 100,
+     "default": 35
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 1
+    }
+   ]
+  }
+ ],
+ "stock": [
+  {
+   "name": "160 Comp",
+   "fxid": 53,
+   "gid": 1,
+   "category": "Dynamics",
+   "id": 6946818,
+   "params": [
+    {
+     "name": "THRSH",
+     "max": 60,
+     "default": 38
+    },
+    {
+     "name": "Ratio",
+     "max": 90,
+     "default": 30
+    },
+    {
+     "name": "Gain",
+     "max": 20,
+     "default": 6
+    },
+    {
+     "name": "Knee",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Air",
+   "fxid": 112,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 1080033298,
+   "params": [
+    {
+     "name": "Size",
+     "max": 99,
+     "default": 19
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "Ref",
+     "max": 10,
+     "default": 5
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "Ambience",
+   "fxid": 272,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 2097682,
+   "params": [
+    {
+     "name": "DECAY",
+     "max": 100,
+     "default": 70
+    },
+    {
+     "name": "TONE",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "MIX",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "PreD",
+     "max": 200,
+     "default": 29
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Dry",
+     "max": 1,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "ANA234Cho",
+   "fxid": 496,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1080034060,
+   "params": [
+    {
+     "name": "LEVEL",
+     "max": 100,
+     "default": 70
+    },
+    {
+     "name": "RATE",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "DEPTH",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "LOW",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "HIGH",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Mode",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "AnalogDly",
+   "fxid": 48,
+   "gid": 8,
+   "category": "Delay",
+   "id": 6291472,
+   "params": [
+    {
+     "name": "Time",
+     "max": 4022,
+     "default": 359
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 28
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "HiDMP",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "P-P",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "A-Pan DLY",
+   "fxid": 368,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1080033808,
+   "params": [
+    {
+     "name": "Time",
+     "max": 2014,
+     "default": 222
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 87
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 53
+    },
+    {
+     "name": "Rate",
+     "max": 52,
+     "default": 26
+    },
+    {
+     "name": "Width",
+     "max": 100,
+     "default": 0
+    },
+    {
+     "name": "Depth",
+     "max": 10,
+     "default": 7
+    },
+    {
+     "name": "Clip",
+     "max": 10,
+     "default": 0
+    },
+    {
+     "name": "Link",
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "Level",
+     "max": 200,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Arena",
+   "fxid": 80,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 1075838994,
+   "params": [
+    {
+     "name": "Decay",
+     "max": 29,
+     "default": 14
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 7
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 56
+    },
+    {
+     "name": "PreD",
+     "max": 99,
+     "default": 89
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "AutoPan",
+   "fxid": 80,
+   "gid": 7,
+   "category": "SFX",
+   "id": 1075838990,
+   "params": [
+    {
+     "name": "Rate",
+     "max": 78,
+     "default": 5
+    },
+    {
+     "name": "Width",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Depth",
+     "max": 10,
+     "default": 7
+    },
+    {
+     "name": "Clip",
+     "max": 10,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "AutoWah",
+   "fxid": 80,
+   "gid": 2,
+   "category": "Filter",
+   "id": 1075838980,
+   "params": [
+    {
+     "name": "Sense",
+     "max": 19,
+     "default": 17
+    },
+    {
+     "name": "Reso",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "A-Filter",
+   "fxid": 149,
+   "gid": 2,
+   "category": "Filter",
+   "id": 2752772,
+   "params": [
+    {
+     "name": "Sense",
+     "max": 9,
+     "default": 7
+    },
+    {
+     "name": "Peak",
+     "max": 10,
+     "default": 7
+    },
+    {
+     "name": "Mode",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Dry",
+     "max": 100,
+     "default": 10
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "BendCho",
+   "fxid": 336,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1075839500,
+   "params": [
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "Time",
+     "max": 50,
+     "default": 50
+    },
+    {
+     "name": "Bal",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "Mode",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "BF FLG 2",
+   "fxid": 432,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 6292236,
+   "params": [
+    {
+     "name": "MNL",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "DEPTH",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "RATE",
+     "max": 100,
+     "default": 30
+    },
+    {
+     "name": "RES",
+     "max": 100,
+     "default": 50
+    }
+   ]
+  },
+  {
+   "name": "BitCrush",
+   "fxid": 16,
+   "gid": 7,
+   "category": "SFX",
+   "id": 2097166,
+   "params": [
+    {
+     "name": "Bit",
+     "max": 12,
+     "default": 5
+    },
+    {
+     "name": "SMPL",
+     "max": 50,
+     "default": 2
+    },
+    {
+     "name": "Bal",
+     "max": 100,
+     "default": 90
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Bomber",
+   "fxid": 32,
+   "gid": 7,
+   "category": "SFX",
+   "id": 4194318,
+   "params": [
+    {
+     "name": "PTTRN",
+     "max": 3,
+     "default": 3
+    },
+    {
+     "name": "Decay",
+     "max": 99,
+     "default": 49
+    },
+    {
+     "name": "Bal",
+     "max": 100,
+     "default": 15
+    },
+    {
+     "name": "THRSH",
+     "max": 50,
+     "default": 40
+    },
+    {
+     "name": "Power",
+     "max": 30,
+     "default": 30
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 4
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Bottom B",
+   "fxid": 44,
+   "gid": 2,
+   "category": "Filter",
+   "id": 5767172,
+   "params": [
+    {
+     "name": "Bass",
+     "max": 10,
+     "default": 6
+    },
+    {
+     "name": "Trebl",
+     "max": 10,
+     "default": 7
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 60
+    }
+   ]
+  },
+  {
+   "name": "BaAutoWah",
+   "fxid": 88,
+   "gid": 2,
+   "category": "Filter",
+   "id": 1076887556,
+   "params": [
+    {
+     "name": "Sense",
+     "max": 19,
+     "default": 11
+    },
+    {
+     "name": "Reso",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Dry",
+     "max": 100,
+     "default": 0
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Ba Chorus",
+   "fxid": 120,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1081081868,
+   "params": [
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 42
+    },
+    {
+     "name": "Rate",
+     "max": 49,
+     "default": 22
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 57
+    },
+    {
+     "name": "LoCut",
+     "max": 10,
+     "default": 2
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "PreD",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "Ba Cry",
+   "fxid": 154,
+   "gid": 2,
+   "category": "Filter",
+   "id": 3408132,
+   "params": [
+    {
+     "name": "Range",
+     "max": 9,
+     "default": 4
+    },
+    {
+     "name": "Reso",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Sense",
+     "max": 19,
+     "default": 16
+    },
+    {
+     "name": "Bal",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Ba Detune",
+   "fxid": 136,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1048844,
+   "params": [
+    {
+     "name": "Cent",
+     "max": 50,
+     "default": 35
+    },
+    {
+     "name": "PreD",
+     "max": 50,
+     "default": 0
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "LoCut",
+     "max": 10,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "Ba Ensmbl",
+   "fxid": 184,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 7340300,
+   "params": [
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 48
+    },
+    {
+     "name": "Rate",
+     "max": 49,
+     "default": 22
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 5
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "BaFlanger",
+   "fxid": 232,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1078984972,
+   "params": [
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 76
+    },
+    {
+     "name": "Rate",
+     "max": 78,
+     "default": 40
+    },
+    {
+     "name": "Reso",
+     "max": 20,
+     "default": 15
+    },
+    {
+     "name": "PreD",
+     "max": 50,
+     "default": 2
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 95
+    },
+    {
+     "name": "LoCut",
+     "max": 10,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "Ba Octave",
+   "fxid": 280,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 3146252,
+   "params": [
+    {
+     "name": "Oct",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "Dry",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Low",
+     "max": 10,
+     "default": 3
+    },
+    {
+     "name": "Mid",
+     "max": 10,
+     "default": 4
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Ba PEQ",
+   "fxid": 36,
+   "gid": 2,
+   "category": "Filter",
+   "id": 4718596,
+   "params": [
+    {
+     "name": "Freq1",
+     "max": 37,
+     "default": 8
+    },
+    {
+     "name": "Q1",
+     "max": 5,
+     "default": 1
+    },
+    {
+     "name": "Gain1",
+     "max": 40,
+     "default": 20
+    },
+    {
+     "name": "Freq2",
+     "max": 37,
+     "default": 15
+    },
+    {
+     "name": "Q2",
+     "max": 5,
+     "default": 1
+    },
+    {
+     "name": "Gain2",
+     "max": 40,
+     "default": 20
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Ba Pitch",
+   "fxid": 312,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 7340556,
+   "params": [
+    {
+     "name": "Shift",
+     "max": 25,
+     "default": 0
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 7
+    },
+    {
+     "name": "Bal",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Fine",
+     "max": 50,
+     "default": 25
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 140
+    }
+   ]
+  },
+  {
+   "name": "Cave",
+   "fxid": 256,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 530,
+   "params": [
+    {
+     "name": "Decay",
+     "max": 100,
+     "default": 52
+    },
+    {
+     "name": "Tone",
+     "max": 100,
+     "default": 54
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "PreD",
+     "max": 200,
+     "default": 62
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "CE-Cho5",
+   "fxid": 384,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 780,
+   "params": [
+    {
+     "name": "E.LVL",
+     "max": 120,
+     "default": 100
+    },
+    {
+     "name": "RATE",
+     "max": 100,
+     "default": 31
+    },
+    {
+     "name": "DEPTH",
+     "max": 100,
+     "default": 67
+    },
+    {
+     "name": "LOW",
+     "max": 100,
+     "default": 43
+    },
+    {
+     "name": "HIGH",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "MODE",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "Chamber",
+   "fxid": 208,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 1075839250,
+   "params": [
+    {
+     "name": "Decay",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Tone",
+     "max": 100,
+     "default": 73
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 48
+    },
+    {
+     "name": "PreD",
+     "max": 200,
+     "default": 24
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "Chorus",
+   "fxid": 112,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1080033292,
+   "params": [
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "Rate",
+     "max": 49,
+     "default": 24
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 7
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Church",
+   "fxid": 240,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 1080033554,
+   "params": [
+    {
+     "name": "DECAY",
+     "max": 100,
+     "default": 49
+    },
+    {
+     "name": "PreD",
+     "max": 200,
+     "default": 96
+    },
+    {
+     "name": "MIX",
+     "max": 100,
+     "default": 46
+    },
+    {
+     "name": "TONE",
+     "max": 100,
+     "default": 61
+    },
+    {
+     "name": "HiDMP",
+     "max": 100,
+     "default": 83
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Dry",
+     "max": 1,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "CloneCho",
+   "fxid": 400,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 2097932,
+   "params": [
+    {
+     "name": "DEPTH",
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "RATE",
+     "max": 100,
+     "default": 23
+    }
+   ]
+  },
+  {
+   "name": "CombFLTR",
+   "fxid": 64,
+   "gid": 2,
+   "category": "Filter",
+   "id": 1073741828,
+   "params": [
+    {
+     "name": "Freq",
+     "max": 49,
+     "default": 24
+    },
+    {
+     "name": "Reso",
+     "max": 20,
+     "default": 15
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 30
+    },
+    {
+     "name": "HiDMP",
+     "max": 10,
+     "default": 6
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Comp",
+   "fxid": 8,
+   "gid": 1,
+   "category": "Dynamics",
+   "id": 1048578,
+   "params": [
+    {
+     "name": "Sense",
+     "max": 10,
+     "default": 6
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 6
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "ATTCK",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "CarbonDly",
+   "fxid": 240,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1080033552,
+   "params": [
+    {
+     "name": "DELAY",
+     "max": 562,
+     "default": 387
+    },
+    {
+     "name": "REGEN",
+     "max": 100,
+     "default": 47
+    },
+    {
+     "name": "MIX",
+     "max": 100,
+     "default": 69
+    },
+    {
+     "name": "MOD",
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "WIDTH",
+     "max": 50,
+     "default": 31
+    },
+    {
+     "name": "SPEED",
+     "max": 50,
+     "default": 28
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Sync",
+     "max": 15,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "CoronaCho",
+   "fxid": 480,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1077936908,
+   "params": [
+    {
+     "name": "SPEED",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "DEPTH",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "FxLVL",
+     "max": 100,
+     "default": 65
+    },
+    {
+     "name": "TONE",
+     "max": 100,
+     "default": 75
+    },
+    {
+     "name": "DRY",
+     "max": 1,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "CoronaTri",
+   "fxid": 512,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1036,
+   "params": [
+    {
+     "name": "SPEED",
+     "max": 100,
+     "default": 25
+    },
+    {
+     "name": "DEPTH",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "FxLVL",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "TONE",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "DRY",
+     "max": 1,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "Cry",
+   "fxid": 112,
+   "gid": 2,
+   "category": "Filter",
+   "id": 1080033284,
+   "params": [
+    {
+     "name": "Range",
+     "max": 9,
+     "default": 6
+    },
+    {
+     "name": "Reso",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Sense",
+     "max": 19,
+     "default": 16
+    },
+    {
+     "name": "Bal",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Delay",
+   "fxid": 8,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1048592,
+   "params": [
+    {
+     "name": "Time",
+     "max": 4022,
+     "default": 559
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 30
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 70
+    },
+    {
+     "name": "HiDMP",
+     "max": 10,
+     "default": 10
+    },
+    {
+     "name": "P-P",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "Detune",
+   "fxid": 128,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 268,
+   "params": [
+    {
+     "name": "Cent",
+     "max": 50,
+     "default": 35
+    },
+    {
+     "name": "PreD",
+     "max": 50,
+     "default": 0
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 52
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "DirtyGate",
+   "fxid": 112,
+   "gid": 1,
+   "category": "Dynamics",
+   "id": 1080033282,
+   "params": [
+    {
+     "name": "THRSH",
+     "max": 24,
+     "default": 9
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "DriveEcho",
+   "fxid": 256,
+   "gid": 8,
+   "category": "Delay",
+   "id": 528,
+   "params": [
+    {
+     "name": "DRIVE",
+     "max": 100,
+     "default": 39
+    },
+    {
+     "name": "MIX",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "TIME",
+     "max": 1985,
+     "default": 355
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 70
+    },
+    {
+     "name": "WOW",
+     "max": 100,
+     "default": 25
+    },
+    {
+     "name": "DRY",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Mode",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "DualDigiD",
+   "fxid": 224,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1077936400,
+   "params": [
+    {
+     "name": "TimeA",
+     "max": 2005,
+     "default": 500
+    },
+    {
+     "name": "TimeB",
+     "max": 2005,
+     "default": 375
+    },
+    {
+     "name": "FdbkA",
+     "max": 110,
+     "default": 50
+    },
+    {
+     "name": "FdbkB",
+     "max": 110,
+     "default": 50
+    },
+    {
+     "name": "Depth",
+     "max": 101,
+     "default": 0
+    },
+    {
+     "name": "Speed",
+     "max": 50,
+     "default": 25
+    },
+    {
+     "name": "FLTR",
+     "max": 200,
+     "default": 100
+    },
+    {
+     "name": "DlyMx",
+     "max": 100,
+     "default": 25
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 50
+    }
+   ]
+  },
+  {
+   "name": "DualComp",
+   "fxid": 160,
+   "gid": 1,
+   "category": "Dynamics",
+   "id": 4194562,
+   "params": [
+    {
+     "name": "Hi",
+     "max": 50,
+     "default": 24
+    },
+    {
+     "name": "Lo",
+     "max": 50,
+     "default": 15
+    },
+    {
+     "name": "Freq",
+     "max": 9,
+     "default": 9
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 2
+    }
+   ]
+  },
+  {
+   "name": "DualRev",
+   "fxid": 448,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 1073742610,
+   "params": [
+    {
+     "name": "PDlyA",
+     "max": 750,
+     "default": 350
+    },
+    {
+     "name": "PDlyB",
+     "max": 750,
+     "default": 700
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 30
+    },
+    {
+     "name": "ABMix",
+     "max": 18,
+     "default": 14
+    },
+    {
+     "name": "DCY A",
+     "max": 100,
+     "default": 15
+    },
+    {
+     "name": "DCY B",
+     "max": 100,
+     "default": 30
+    },
+    {
+     "name": "Size",
+     "max": 32,
+     "default": 21
+    },
+    {
+     "name": "ToneA",
+     "max": 200,
+     "default": 100
+    },
+    {
+     "name": "ToneB",
+     "max": 200,
+     "default": 70
+    }
+   ]
+  },
+  {
+   "name": "DuoPhase",
+   "fxid": 53,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 6946828,
+   "params": [
+    {
+     "name": "RateA",
+     "max": 77,
+     "default": 46
+    },
+    {
+     "name": "RateB",
+     "max": 51,
+     "default": 5
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "ResoA",
+     "max": 10,
+     "default": 0
+    },
+    {
+     "name": "ResoB",
+     "max": 10,
+     "default": 6
+    },
+    {
+     "name": "Link",
+     "max": 2,
+     "default": 0
+    },
+    {
+     "name": "DPT_A",
+     "max": 99,
+     "default": 36
+    },
+    {
+     "name": "DPT_B",
+     "max": 99,
+     "default": 62
+    }
+   ]
+  },
+  {
+   "name": "DuoTrem",
+   "fxid": 16,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 2097164,
+   "params": [
+    {
+     "name": "RateA",
+     "max": 78,
+     "default": 46
+    },
+    {
+     "name": "RateB",
+     "max": 78,
+     "default": 5
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "DPT_A",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "DPT_B",
+     "max": 100,
+     "default": 90
+    },
+    {
+     "name": "Link",
+     "max": 2,
+     "default": 0
+    },
+    {
+     "name": "WaveA",
+     "max": 29,
+     "default": 19
+    },
+    {
+     "name": "WaveB",
+     "max": 29,
+     "default": 21
+    }
+   ]
+  },
+  {
+   "name": "DynaDelay",
+   "fxid": 96,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1077936144,
+   "params": [
+    {
+     "name": "Time",
+     "max": 2014,
+     "default": 359
+    },
+    {
+     "name": "Sense",
+     "max": 19,
+     "default": 5
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 30
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "DynaRev",
+   "fxid": 368,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 1080033810,
+   "params": [
+    {
+     "name": "Decay",
+     "max": 100,
+     "default": 82
+    },
+    {
+     "name": "PreD",
+     "max": 100,
+     "default": 0
+    },
+    {
+     "name": "Color",
+     "max": 100,
+     "default": 76
+    },
+    {
+     "name": "Sense",
+     "max": 200,
+     "default": 172
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "DynaFLNGR",
+   "fxid": 240,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1080033548,
+   "params": [
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 30
+    },
+    {
+     "name": "Rate",
+     "max": 78,
+     "default": 38
+    },
+    {
+     "name": "Sense",
+     "max": 19,
+     "default": 0
+    },
+    {
+     "name": "Reso",
+     "max": 20,
+     "default": 15
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "EarlyRef",
+   "fxid": 96,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 1077936146,
+   "params": [
+    {
+     "name": "Decay",
+     "max": 29,
+     "default": 14
+    },
+    {
+     "name": "Shape",
+     "max": 20,
+     "default": 20
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 6
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "Echo",
+   "fxid": 320,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 1073742354,
+   "params": [
+    {
+     "name": "DECAY",
+     "max": 100,
+     "default": 25
+    },
+    {
+     "name": "TIME",
+     "max": 200,
+     "default": 125
+    },
+    {
+     "name": "TONE",
+     "max": 100,
+     "default": 70
+    },
+    {
+     "name": "MIX",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Mode",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "Ensemble",
+   "fxid": 176,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 6291724,
+   "params": [
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "Rate",
+     "max": 49,
+     "default": 29
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Exciter",
+   "fxid": 48,
+   "gid": 2,
+   "category": "Filter",
+   "id": 6291460,
+   "params": [
+    {
+     "name": "Bass",
+     "max": 100,
+     "default": 0
+    },
+    {
+     "name": "Trebl",
+     "max": 100,
+     "default": 0
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "fCycle",
+   "fxid": 208,
+   "gid": 2,
+   "category": "Filter",
+   "id": 1075839236,
+   "params": [
+    {
+     "name": "Rate",
+     "max": 77,
+     "default": 5
+    },
+    {
+     "name": "Wave",
+     "max": 3,
+     "default": 3
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "Reso",
+     "max": 10,
+     "default": 8
+    }
+   ]
+  },
+  {
+   "name": "Flanger",
+   "fxid": 224,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1077936396,
+   "params": [
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 47
+    },
+    {
+     "name": "Rate",
+     "max": 78,
+     "default": 7
+    },
+    {
+     "name": "Reso",
+     "max": 20,
+     "default": 18
+    },
+    {
+     "name": "PreD",
+     "max": 50,
+     "default": 4
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 65
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "FLTR PPD",
+   "fxid": 352,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1077936656,
+   "params": [
+    {
+     "name": "TimeA",
+     "max": 1915,
+     "default": 500
+    },
+    {
+     "name": "TimeB",
+     "max": 1915,
+     "default": 250
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "DlyMx",
+     "max": 100,
+     "default": 25
+    },
+    {
+     "name": "Fdbk",
+     "max": 110,
+     "default": 75
+    },
+    {
+     "name": "Slur",
+     "max": 10,
+     "default": 3
+    },
+    {
+     "name": "FLTR",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "Depth",
+     "max": 21,
+     "default": 8
+    },
+    {
+     "name": "Wave",
+     "max": 47,
+     "default": 35
+    }
+   ]
+  },
+  {
+   "name": "FilterDly",
+   "fxid": 112,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1080033296,
+   "params": [
+    {
+     "name": "Time",
+     "max": 2014,
+     "default": 499
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 90
+    },
+    {
+     "name": "Rate",
+     "max": 49,
+     "default": 6
+    },
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "Reso",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "GateRev",
+   "fxid": 288,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 4194834,
+   "params": [
+    {
+     "name": "Level",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "Tone",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Decay",
+     "max": 100,
+     "default": 55
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Dry",
+     "max": 1,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "GrayComp",
+   "fxid": 144,
+   "gid": 1,
+   "category": "Dynamics",
+   "id": 2097410,
+   "params": [
+    {
+     "name": "SUSTN",
+     "max": 100,
+     "default": 63
+    },
+    {
+     "name": "OUT",
+     "max": 100,
+     "default": 88
+    }
+   ]
+  },
+  {
+   "name": "Hall",
+   "fxid": 16,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 2097170,
+   "params": [
+    {
+     "name": "Decay",
+     "max": 29,
+     "default": 9
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 5
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 46
+    },
+    {
+     "name": "PreD",
+     "max": 99,
+     "default": 48
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "HD Hall",
+   "fxid": 8,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 1048594,
+   "params": [
+    {
+     "name": "PreD",
+     "max": 199,
+     "default": 80
+    },
+    {
+     "name": "Decay",
+     "max": 100,
+     "default": 45
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 62
+    },
+    {
+     "name": "LoDMP",
+     "max": 100,
+     "default": 32
+    },
+    {
+     "name": "HiDMP",
+     "max": 100,
+     "default": 70
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "HD Reverb",
+   "fxid": 12,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 1572882,
+   "params": [
+    {
+     "name": "Decay",
+     "max": 100,
+     "default": 10
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 7
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 46
+    },
+    {
+     "name": "PreD",
+     "max": 199,
+     "default": 53
+    },
+    {
+     "name": "HPF",
+     "max": 10,
+     "default": 7
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "HPS",
+   "fxid": 320,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1073742348,
+   "params": [
+    {
+     "name": "Scale",
+     "max": 9,
+     "default": 6
+    },
+    {
+     "name": "Key",
+     "max": 11,
+     "default": 0
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 70
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 6
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "HolyFLERB",
+   "fxid": 352,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 1077936658,
+   "params": [
+    {
+     "name": "RVRB",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "ICE Delay",
+   "fxid": 384,
+   "gid": 8,
+   "category": "Delay",
+   "id": 784,
+   "params": [
+    {
+     "name": "TIME",
+     "max": 1255,
+     "default": 440
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 64
+    },
+    {
+     "name": "MIX",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "INTVL",
+     "max": 30,
+     "default": 23
+    },
+    {
+     "name": "SLICE",
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "BLEND",
+     "max": 20,
+     "default": 12
+    },
+    {
+     "name": "SMEAR",
+     "max": 20,
+     "default": 7
+    },
+    {
+     "name": "DAMP",
+     "max": 10,
+     "default": 2
+    },
+    {
+     "name": "HPF",
+     "max": 20,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "Limiter",
+   "fxid": 58,
+   "gid": 1,
+   "category": "Dynamics",
+   "id": 7602178,
+   "params": [
+    {
+     "name": "THRSH",
+     "max": 50,
+     "default": 20
+    },
+    {
+     "name": "Ratio",
+     "max": 9,
+     "default": 3
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 90
+    },
+    {
+     "name": "REL",
+     "max": 9,
+     "default": 2
+    }
+   ]
+  },
+  {
+   "name": "LineSel",
+   "fxid": 8,
+   "gid": 2,
+   "category": "Filter",
+   "id": 1048580,
+   "params": [
+    {
+     "name": "EFX_L",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "OUT_L",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "LO-FI Dly",
+   "fxid": 304,
+   "gid": 8,
+   "category": "Delay",
+   "id": 6291984,
+   "params": [
+    {
+     "name": "TIME",
+     "max": 1913,
+     "default": 248
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 25
+    },
+    {
+     "name": "MIX",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "SMPL",
+     "max": 14,
+     "default": 5
+    },
+    {
+     "name": "BITS",
+     "max": 20,
+     "default": 10
+    },
+    {
+     "name": "BLEND",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "DAMP",
+     "max": 10,
+     "default": 0
+    },
+    {
+     "name": "FLT",
+     "max": 8,
+     "default": 2
+    },
+    {
+     "name": "VINYL",
+     "max": 18,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "LOFI Rev",
+   "fxid": 224,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 1077936402,
+   "params": [
+    {
+     "name": "DECAY",
+     "max": 100,
+     "default": 52
+    },
+    {
+     "name": "TONE",
+     "max": 100,
+     "default": 95
+    },
+    {
+     "name": "FxLVL",
+     "max": 100,
+     "default": 44
+    },
+    {
+     "name": "PreD",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Dry",
+     "max": 1,
+     "default": 1
+    }
+   ]
+  },
+  {
+   "name": "MirageCho",
+   "fxid": 464,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1075839756,
+   "params": [
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "Rate",
+     "max": 100,
+     "default": 38
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 55
+    },
+    {
+     "name": "PreD",
+     "max": 19,
+     "default": 10
+    },
+    {
+     "name": "Tone",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "MojoRolle",
+   "fxid": 352,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1077936652,
+   "params": [
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 37
+    },
+    {
+     "name": "Speed",
+     "max": 128,
+     "default": 57
+    },
+    {
+     "name": "Rise",
+     "max": 100,
+     "default": 75
+    },
+    {
+     "name": "Mode",
+     "max": 2,
+     "default": 0
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "MultiTapD",
+   "fxid": 80,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1075838992,
+   "params": [
+    {
+     "name": "Time",
+     "max": 3018,
+     "default": 2999
+    },
+    {
+     "name": "PTTRN",
+     "max": 7,
+     "default": 1
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 20
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 10
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "MangledSp",
+   "fxid": 432,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 6292242,
+   "params": [
+    {
+     "name": "PDLY",
+     "max": 500,
+     "default": 80
+    },
+    {
+     "name": "Clip",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 38
+    },
+    {
+     "name": "Decay",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Mod",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Size",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Low",
+     "max": 200,
+     "default": 97
+    },
+    {
+     "name": "High",
+     "max": 200,
+     "default": 101
+    },
+    {
+     "name": "Level",
+     "max": 200,
+     "default": 85
+    }
+   ]
+  },
+  {
+   "name": "MonoPitch",
+   "fxid": 304,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 6291980,
+   "params": [
+    {
+     "name": "Shift",
+     "max": 25,
+     "default": 0
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 6
+    },
+    {
+     "name": "Bal",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Fine",
+     "max": 50,
+     "default": 25
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "ModDelay",
+   "fxid": 32,
+   "gid": 8,
+   "category": "Delay",
+   "id": 4194320,
+   "params": [
+    {
+     "name": "Time",
+     "max": 2014,
+     "default": 499
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 62
+    },
+    {
+     "name": "Rate",
+     "max": 49,
+     "default": 20
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "ModDelay2",
+   "fxid": 40,
+   "gid": 8,
+   "category": "Delay",
+   "id": 5242896,
+   "params": [
+    {
+     "name": "Time",
+     "max": 2014,
+     "default": 529
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 45
+    },
+    {
+     "name": "Rate",
+     "max": 49,
+     "default": 16
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "ModReverb",
+   "fxid": 160,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 4194578,
+   "params": [
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 38
+    },
+    {
+     "name": "Decay",
+     "max": 29,
+     "default": 19
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 45
+    },
+    {
+     "name": "Rate",
+     "max": 49,
+     "default": 19
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 6
+    },
+    {
+     "name": "PreD",
+     "max": 99,
+     "default": 29
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "MonoSynth",
+   "fxid": 48,
+   "gid": 7,
+   "category": "SFX",
+   "id": 6291470,
+   "params": [
+    {
+     "name": "Synth",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "Dry",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Wave",
+     "max": 3,
+     "default": 2
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Speed",
+     "max": 100,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "M Comp",
+   "fxid": 32,
+   "gid": 1,
+   "category": "Dynamics",
+   "id": 4194306,
+   "params": [
+    {
+     "name": "THRSH",
+     "max": 50,
+     "default": 40
+    },
+    {
+     "name": "Ratio",
+     "max": 9,
+     "default": 3
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "ATTCK",
+     "max": 9,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "M-Filter",
+   "fxid": 144,
+   "gid": 2,
+   "category": "Filter",
+   "id": 2097412,
+   "params": [
+    {
+     "name": "Freq",
+     "max": 100,
+     "default": 56
+    },
+    {
+     "name": "Sense",
+     "max": 10,
+     "default": 5
+    },
+    {
+     "name": "Reso",
+     "max": 10,
+     "default": 7
+    },
+    {
+     "name": "Type",
+     "max": 2,
+     "default": 2
+    },
+    {
+     "name": "Chara",
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "VLCTY",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Bal",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "NoiseGate",
+   "fxid": 96,
+   "gid": 1,
+   "category": "Dynamics",
+   "id": 1077936130,
+   "params": [
+    {
+     "name": "THRSH",
+     "max": 24,
+     "default": 9
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Octave",
+   "fxid": 272,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 2097676,
+   "params": [
+    {
+     "name": "Oct1",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "Oct2",
+     "max": 100,
+     "default": 15
+    },
+    {
+     "name": "Dry",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "Chara",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "OptComp",
+   "fxid": 48,
+   "gid": 1,
+   "category": "Dynamics",
+   "id": 6291458,
+   "params": [
+    {
+     "name": "Drive",
+     "max": 10,
+     "default": 7
+    },
+    {
+     "name": "Tone",
+     "max": 100,
+     "default": 54
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 50
+    }
+   ]
+  },
+  {
+   "name": "OrangeLim",
+   "fxid": 128,
+   "gid": 1,
+   "category": "Dynamics",
+   "id": 258,
+   "params": []
+  },
+  {
+   "name": "ParticleR",
+   "fxid": 400,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 2097938,
+   "params": [
+    {
+     "name": "DWELL",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "GAIN",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "MODE",
+     "max": 2,
+     "default": 0
+    },
+    {
+     "name": "MIX",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "MONO",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "ParaEQ",
+   "fxid": 32,
+   "gid": 2,
+   "category": "Filter",
+   "id": 4194308,
+   "params": [
+    {
+     "name": "Freq1",
+     "max": 30,
+     "default": 8
+    },
+    {
+     "name": "Q1",
+     "max": 5,
+     "default": 1
+    },
+    {
+     "name": "Gain1",
+     "max": 24,
+     "default": 12
+    },
+    {
+     "name": "Freq2",
+     "max": 30,
+     "default": 15
+    },
+    {
+     "name": "Q2",
+     "max": 5,
+     "default": 1
+    },
+    {
+     "name": "Gain2",
+     "max": 24,
+     "default": 12
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "PhaseDly",
+   "fxid": 160,
+   "gid": 8,
+   "category": "Delay",
+   "id": 4194576,
+   "params": [
+    {
+     "name": "Time",
+     "max": 2014,
+     "default": 499
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 28
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 57
+    },
+    {
+     "name": "Rate",
+     "max": 49,
+     "default": 49
+    },
+    {
+     "name": "Color",
+     "max": 3,
+     "default": 3
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "Phaser",
+   "fxid": 48,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 6291468,
+   "params": [
+    {
+     "name": "Rate",
+     "max": 77,
+     "default": 11
+    },
+    {
+     "name": "Color",
+     "max": 3,
+     "default": 3
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "PitchDly",
+   "fxid": 128,
+   "gid": 8,
+   "category": "Delay",
+   "id": 272,
+   "params": [
+    {
+     "name": "Time",
+     "max": 1999,
+     "default": 89
+    },
+    {
+     "name": "Pitch",
+     "max": 30,
+     "default": 21
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "Plate",
+   "fxid": 144,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 2097426,
+   "params": [
+    {
+     "name": "PreD",
+     "max": 199,
+     "default": 8
+    },
+    {
+     "name": "Decay",
+     "max": 100,
+     "default": 52
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 44
+    },
+    {
+     "name": "Color",
+     "max": 100,
+     "default": 58
+    },
+    {
+     "name": "LoDMP",
+     "max": 100,
+     "default": 97
+    },
+    {
+     "name": "HiDMP",
+     "max": 100,
+     "default": 95
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "PitchSHFT",
+   "fxid": 288,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 4194828,
+   "params": [
+    {
+     "name": "Shift",
+     "max": 25,
+     "default": 19
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 7
+    },
+    {
+     "name": "Bal",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "Fine",
+     "max": 50,
+     "default": 25
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "RackComp",
+   "fxid": 16,
+   "gid": 1,
+   "category": "Dynamics",
+   "id": 2097154,
+   "params": [
+    {
+     "name": "THRSH",
+     "max": 50,
+     "default": 40
+    },
+    {
+     "name": "Ratio",
+     "max": 9,
+     "default": 5
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "ATTCK",
+     "max": 9,
+     "default": 6
+    }
+   ]
+  },
+  {
+   "name": "Resonance",
+   "fxid": 96,
+   "gid": 2,
+   "category": "Filter",
+   "id": 1077936132,
+   "params": [
+    {
+     "name": "Sense",
+     "max": 19,
+     "default": 14
+    },
+    {
+     "name": "Reso",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "RingMod",
+   "fxid": 368,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1080033804,
+   "params": [
+    {
+     "name": "Freq",
+     "max": 49,
+     "default": 27
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 10
+    },
+    {
+     "name": "Bal",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 120
+    }
+   ]
+  },
+  {
+   "name": "RndmFLTR",
+   "fxid": 192,
+   "gid": 2,
+   "category": "Filter",
+   "id": 1073742084,
+   "params": [
+    {
+     "name": "Speed",
+     "max": 77,
+     "default": 34
+    },
+    {
+     "name": "Range",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Reso",
+     "max": 10,
+     "default": 6
+    },
+    {
+     "name": "Type",
+     "max": 2,
+     "default": 2
+    },
+    {
+     "name": "Chara",
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "Bal",
+     "max": 100,
+     "default": 90
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Room",
+   "fxid": 32,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 4194322,
+   "params": [
+    {
+     "name": "Decay",
+     "max": 29,
+     "default": 9
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "PreD",
+     "max": 99,
+     "default": 4
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "Rt Closet",
+   "fxid": 96,
+   "gid": 7,
+   "category": "SFX",
+   "id": 1077936142,
+   "params": [
+    {
+     "name": "Bal",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Mode",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Drive",
+     "max": 100,
+     "default": 20
+    }
+   ]
+  },
+  {
+   "name": "ReverseDL",
+   "fxid": 64,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1073741840,
+   "params": [
+    {
+     "name": "Time",
+     "max": 2005,
+     "default": 990
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 20
+    },
+    {
+     "name": "Bal",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "HiDMP",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "ReverseRv",
+   "fxid": 304,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 6291986,
+   "params": [
+    {
+     "name": "Level",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "Tone",
+     "max": 100,
+     "default": 70
+    },
+    {
+     "name": "Decay",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Dry",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "SeqFLTR",
+   "fxid": 176,
+   "gid": 2,
+   "category": "Filter",
+   "id": 6291716,
+   "params": [
+    {
+     "name": "Step",
+     "max": 6,
+     "default": 6
+    },
+    {
+     "name": "PTTRN",
+     "max": 7,
+     "default": 6
+    },
+    {
+     "name": "Speed",
+     "max": 77,
+     "default": 25
+    },
+    {
+     "name": "Shape",
+     "max": 10,
+     "default": 10
+    },
+    {
+     "name": "Reso",
+     "max": 10,
+     "default": 10
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "ShimmerRv",
+   "fxid": 384,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 786,
+   "params": [
+    {
+     "name": "PreD",
+     "max": 99,
+     "default": 39
+    },
+    {
+     "name": "DECAY",
+     "max": 100,
+     "default": 90
+    },
+    {
+     "name": "MIX",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "LoDMP",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "HiDMP",
+     "max": 100,
+     "default": 74
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "SilkyCho",
+   "fxid": 448,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1073742604,
+   "params": [
+    {
+     "name": "LoMix",
+     "max": 100,
+     "default": 38
+    },
+    {
+     "name": "HiMix",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "ChMix",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "LoPit",
+     "max": 50,
+     "default": 31
+    },
+    {
+     "name": "HiPit",
+     "max": 50,
+     "default": 33
+    },
+    {
+     "name": "PreD",
+     "max": 50,
+     "default": 27
+    },
+    {
+     "name": "Rate",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 46
+    },
+    {
+     "name": "Tone",
+     "max": 100,
+     "default": 50
+    }
+   ]
+  },
+  {
+   "name": "SlapBack",
+   "fxid": 176,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 6291730,
+   "params": [
+    {
+     "name": "Time",
+     "max": 1010,
+     "default": 379
+    },
+    {
+     "name": "Decay",
+     "max": 29,
+     "default": 9
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 48
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 43
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 10
+    },
+    {
+     "name": "DRBal",
+     "max": 100,
+     "default": 70
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "SlapBackD",
+   "fxid": 272,
+   "gid": 8,
+   "category": "Delay",
+   "id": 2097680,
+   "params": [
+    {
+     "name": "TIME",
+     "max": 300,
+     "default": 98
+    },
+    {
+     "name": "SubDv",
+     "max": 2,
+     "default": 0
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 29
+    },
+    {
+     "name": "FxLVL",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "DRY",
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Mode",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "Slicer",
+   "fxid": 32,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 4194316,
+   "params": [
+    {
+     "name": "PTTRN",
+     "max": 19,
+     "default": 0
+    },
+    {
+     "name": "Speed",
+     "max": 77,
+     "default": 24
+    },
+    {
+     "name": "Bal",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "THRSH",
+     "max": 50,
+     "default": 20
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 130
+    }
+   ]
+  },
+  {
+   "name": "SlowFLTR",
+   "fxid": 128,
+   "gid": 2,
+   "category": "Filter",
+   "id": 260,
+   "params": [
+    {
+     "name": "Time",
+     "max": 49,
+     "default": 20
+    },
+    {
+     "name": "Curve",
+     "max": 10,
+     "default": 10
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Reso",
+     "max": 10,
+     "default": 6
+    },
+    {
+     "name": "Chara",
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "DRCTN",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "SlowATTCK",
+   "fxid": 64,
+   "gid": 1,
+   "category": "Dynamics",
+   "id": 1073741826,
+   "params": [
+    {
+     "name": "Time",
+     "max": 49,
+     "default": 20
+    },
+    {
+     "name": "Curve",
+     "max": 10,
+     "default": 10
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "SlwAtkDly",
+   "fxid": 320,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1073742352,
+   "params": [
+    {
+     "name": "TIME",
+     "max": 1914,
+     "default": 489
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 71
+    },
+    {
+     "name": "MIX",
+     "max": 100,
+     "default": 64
+    },
+    {
+     "name": "DEPTH",
+     "max": 100,
+     "default": 77
+    },
+    {
+     "name": "SWELL",
+     "max": 49,
+     "default": 24
+    },
+    {
+     "name": "Mode",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "SmoothDly",
+   "fxid": 288,
+   "gid": 8,
+   "category": "Delay",
+   "id": 4194832,
+   "params": [
+    {
+     "name": "TIME",
+     "max": 3014,
+     "default": 322
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 39
+    },
+    {
+     "name": "E.LVL",
+     "max": 100,
+     "default": 49
+    },
+    {
+     "name": "TONE",
+     "max": 100,
+     "default": 83
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "SpaceHole",
+   "fxid": 416,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 4195090,
+   "params": [
+    {
+     "name": "Decay",
+     "max": 200,
+     "default": 50
+    },
+    {
+     "name": "PDLY",
+     "max": 1000,
+     "default": 80
+    },
+    {
+     "name": " Mix",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": " F.B",
+     "max": 100,
+     "default": 45
+    },
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 58
+    },
+    {
+     "name": "Speed",
+     "max": 100,
+     "default": 39
+    },
+    {
+     "name": "Size",
+     "max": 100,
+     "default": 29
+    },
+    {
+     "name": " Low",
+     "max": 200,
+     "default": 87
+    },
+    {
+     "name": "High",
+     "max": 200,
+     "default": 82
+    }
+   ]
+  },
+  {
+   "name": "Splitter",
+   "fxid": 40,
+   "gid": 2,
+   "category": "Filter",
+   "id": 5242884,
+   "params": [
+    {
+     "name": "Hi",
+     "max": 50,
+     "default": 19
+    },
+    {
+     "name": "Lo",
+     "max": 50,
+     "default": 16
+    },
+    {
+     "name": "Freq",
+     "max": 15,
+     "default": 2
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 95
+    }
+   ]
+  },
+  {
+   "name": "Spring",
+   "fxid": 64,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 1073741842,
+   "params": [
+    {
+     "name": "Decay",
+     "max": 29,
+     "default": 19
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "PreD",
+     "max": 99,
+     "default": 0
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "Spring63",
+   "fxid": 192,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 1073742098,
+   "params": [
+    {
+     "name": "DWELL",
+     "max": 100,
+     "default": 35
+    },
+    {
+     "name": "MIXER",
+     "max": 100,
+     "default": 51
+    },
+    {
+     "name": "TONE",
+     "max": 100,
+     "default": 58
+    },
+    {
+     "name": "LEVEL",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "StereoCho",
+   "fxid": 160,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 4194572,
+   "params": [
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "Rate",
+     "max": 49,
+     "default": 29
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 7
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "StereoDly",
+   "fxid": 144,
+   "gid": 8,
+   "category": "Delay",
+   "id": 2097424,
+   "params": [
+    {
+     "name": "TimeL",
+     "max": 2014,
+     "default": 164
+    },
+    {
+     "name": "TimeR",
+     "max": 2014,
+     "default": 504
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "LchFB",
+     "max": 100,
+     "default": 55
+    },
+    {
+     "name": "RchFB",
+     "max": 100,
+     "default": 37
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "LchLv",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "RchLv",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "Step",
+   "fxid": 160,
+   "gid": 2,
+   "category": "Filter",
+   "id": 4194564,
+   "params": [
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "Rate",
+     "max": 78,
+     "default": 25
+    },
+    {
+     "name": "Reso",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Shape",
+     "max": 10,
+     "default": 10
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "StompDly",
+   "fxid": 192,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1073742096,
+   "params": [
+    {
+     "name": "E.LVL",
+     "max": 120,
+     "default": 30
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 20
+    },
+    {
+     "name": "Time",
+     "max": 599,
+     "default": 359
+    },
+    {
+     "name": "Sync",
+     "max": 15,
+     "default": 0
+    },
+    {
+     "name": "Mode",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "HiDMP",
+     "max": 10,
+     "default": 5
+    }
+   ]
+  },
+  {
+   "name": "StonePha",
+   "fxid": 416,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 4195084,
+   "params": [
+    {
+     "name": "COLOR",
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "RATE",
+     "max": 100,
+     "default": 50
+    }
+   ]
+  },
+  {
+   "name": "SuperCho",
+   "fxid": 208,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1075839244,
+   "params": [
+    {
+     "name": "E.LVL",
+     "max": 120,
+     "default": 50
+    },
+    {
+     "name": "Rate",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "EQ",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Mode",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "TapeEcho3",
+   "fxid": 208,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1075839248,
+   "params": [
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 20
+    },
+    {
+     "name": "MIX",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "TIME",
+     "max": 990,
+     "default": 350
+    },
+    {
+     "name": "RecLv",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "SYNC",
+     "max": 15,
+     "default": 0
+    },
+    {
+     "name": "P-Amp",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "TapeEcho",
+   "fxid": 16,
+   "gid": 8,
+   "category": "Delay",
+   "id": 2097168,
+   "params": [
+    {
+     "name": "Time",
+     "max": 2014,
+     "default": 559
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 64
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 56
+    },
+    {
+     "name": "HiDMP",
+     "max": 10,
+     "default": 5
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "TrgHldDly",
+   "fxid": 176,
+   "gid": 8,
+   "category": "Delay",
+   "id": 6291728,
+   "params": [
+    {
+     "name": "Time",
+     "max": 990,
+     "default": 40
+    },
+    {
+     "name": "Duty",
+     "max": 75,
+     "default": 75
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "THRSH",
+     "max": 30,
+     "default": 20
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "TheVibe",
+   "fxid": 64,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1073741836,
+   "params": [
+    {
+     "name": "Speed",
+     "max": 50,
+     "default": 25
+    },
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "Bias",
+     "max": 100,
+     "default": 48
+    },
+    {
+     "name": "Wave",
+     "max": 100,
+     "default": 24
+    },
+    {
+     "name": "Mode",
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "TiledRoom",
+   "fxid": 48,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 6291474,
+   "params": [
+    {
+     "name": "Decay",
+     "max": 29,
+     "default": 19
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 4
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 46
+    },
+    {
+     "name": "PreD",
+     "max": 99,
+     "default": 9
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "Tail",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "TremDelay",
+   "fxid": 336,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1075839504,
+   "params": [
+    {
+     "name": "TIME",
+     "max": 1855,
+     "default": 300
+    },
+    {
+     "name": "F.B",
+     "max": 100,
+     "default": 70
+    },
+    {
+     "name": "MIX",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "LFO",
+     "max": 4,
+     "default": 0
+    },
+    {
+     "name": "DEPTH",
+     "max": 100,
+     "default": 100
+    },
+    {
+     "name": "SPEED",
+     "max": 34,
+     "default": 19
+    },
+    {
+     "name": "DAMP",
+     "max": 10,
+     "default": 4
+    },
+    {
+     "name": "HPF",
+     "max": 20,
+     "default": 4
+    },
+    {
+     "name": "GRIT",
+     "max": 10,
+     "default": 2
+    }
+   ]
+  },
+  {
+   "name": "Tremolo",
+   "fxid": 8,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1048588,
+   "params": [
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "Rate",
+     "max": 78,
+     "default": 33
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 130
+    },
+    {
+     "name": "Wave",
+     "max": 29,
+     "default": 21
+    }
+   ]
+  },
+  {
+   "name": "TremoloRv",
+   "fxid": 336,
+   "gid": 9,
+   "category": "Reverb",
+   "id": 1075839506,
+   "params": [
+    {
+     "name": "Decay",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "PDLY",
+     "max": 500,
+     "default": 70
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 45
+    },
+    {
+     "name": "Speed",
+     "max": 218,
+     "default": 28
+    },
+    {
+     "name": "Shape",
+     "max": 5,
+     "default": 0
+    },
+    {
+     "name": "Depth",
+     "max": 199,
+     "default": 199
+    },
+    {
+     "name": "Size",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Low",
+     "max": 200,
+     "default": 100
+    },
+    {
+     "name": "High",
+     "max": 200,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Vibrato",
+   "fxid": 256,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 524,
+   "params": [
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "Rate",
+     "max": 78,
+     "default": 30
+    },
+    {
+     "name": "Bal",
+     "max": 100,
+     "default": 72
+    },
+    {
+     "name": "Tone",
+     "max": 10,
+     "default": 7
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 120
+    }
+   ]
+  },
+  {
+   "name": "VinFLNGR",
+   "fxid": 216,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 1076887820,
+   "params": [
+    {
+     "name": "Depth",
+     "max": 100,
+     "default": 47
+    },
+    {
+     "name": "Rate",
+     "max": 78,
+     "default": 7
+    },
+    {
+     "name": "Reso",
+     "max": 20,
+     "default": 18
+    },
+    {
+     "name": "PreD",
+     "max": 50,
+     "default": 4
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 65
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "VintageCE",
+   "fxid": 144,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 2097420,
+   "params": [
+    {
+     "name": "Comp",
+     "max": 9,
+     "default": 2
+    },
+    {
+     "name": "Rate",
+     "max": 49,
+     "default": 24
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "WarpPhase",
+   "fxid": 58,
+   "gid": 6,
+   "category": "Modulation",
+   "id": 7602188,
+   "params": [
+    {
+     "name": "Speed",
+     "max": 77,
+     "default": 24
+    },
+    {
+     "name": "Reso",
+     "max": 10,
+     "default": 7
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    },
+    {
+     "name": "DRCTN",
+     "max": 1,
+     "default": 0
+    }
+   ]
+  },
+  {
+   "name": "ZNR",
+   "fxid": 80,
+   "gid": 1,
+   "category": "Dynamics",
+   "id": 1075838978,
+   "params": [
+    {
+     "name": "THRSH",
+     "max": 24,
+     "default": 9
+    },
+    {
+     "name": "DETCT",
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Z-Organ",
+   "fxid": 64,
+   "gid": 7,
+   "category": "SFX",
+   "id": 1073741838,
+   "params": [
+    {
+     "name": "Upper",
+     "max": 100,
+     "default": 70
+    },
+    {
+     "name": "Lower",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "Dry",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "HPF",
+     "max": 10,
+     "default": 3
+    },
+    {
+     "name": "LPF",
+     "max": 10,
+     "default": 8
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 100
+    }
+   ]
+  },
+  {
+   "name": "Z Tron",
+   "fxid": 136,
+   "gid": 2,
+   "category": "Filter",
+   "id": 1048836,
+   "params": [
+    {
+     "name": "Sense",
+     "max": 19,
+     "default": 12
+    },
+    {
+     "name": "Reso",
+     "max": 10,
+     "default": 7
+    },
+    {
+     "name": "Dry",
+     "max": 100,
+     "default": 25
+    },
+    {
+     "name": "Level",
+     "max": 150,
+     "default": 108
+    }
+   ]
+  }
+ ]
+}
