@@ -9816,11 +9816,26 @@ async function libDelete(i){
   busy=false; renderLibrary(); await refreshCurrent();
   log(`erased #${i+1}`);
 }
+function slotSwap(a,b){
+  if(a===b||!patch)return;
+  const t=patch.fx[a]; patch.fx[a]=patch.fx[b]; patch.fx[b]=t;
+  sendFullPatch(); render();
+  log(`swapped slot ${a+1} ⇄ ${b+1}`);
+}
 function renderLibrary(){
   const root=$("librows"); root.innerHTML=""; root.classList.remove("hint");
   library.forEach((p,i)=>{
     const row=document.createElement("div");
     row.className="librow"+(i===+$("prog").value?" cur":"");
+    if(p){
+      row.draggable=true;
+      row.ondragstart=ev=>{ev.dataTransfer.setData("text/plain","L"+i);ev.dataTransfer.effectAllowed="move";};
+      row.ondragover=ev=>{ev.preventDefault();row.style.outline="2px dashed var(--accent)";};
+      row.ondragleave=()=>{row.style.outline="";};
+      row.ondrop=ev=>{ev.preventDefault();row.style.outline="";
+        const t=ev.dataTransfer.getData("text/plain");
+        if(t&&t[0]==="L"){const a=+t.slice(1);if(a!==i)libSwap(a,i);}};
+    }
     const num=document.createElement("span");num.className="num";num.textContent=(i+1);
     const nm=document.createElement("span");nm.className="nm";
     nm.textContent=p?(p.name||"(unnamed)"):"…";
@@ -9879,12 +9894,23 @@ function render(){
     const div=document.createElement("div");
     div.className="slot"+(on&&eid?" on":"");
     const h=document.createElement("h3");
-    h.textContent=`slot ${s+1}`;
+    const grip=document.createElement("span");
+    grip.textContent="⠿"; grip.title="drag to swap slots";
+    grip.style.cssText="cursor:grab;color:#7c8694;user-select:none";
+    grip.draggable=true;
+    grip.ondragstart=ev=>{ev.dataTransfer.setData("text/plain","S"+s);ev.dataTransfer.effectAllowed="move";};
+    h.appendChild(grip);
+    const ttl=document.createElement("span");ttl.textContent=`slot ${s+1}`;h.appendChild(ttl);
     const st=document.createElement("button");
     st.className="stateBtn"+(on?" on":""); st.textContent=on?"ON":"off";
     st.onclick=()=>{f[0]=on?0:1;sendParam(s,0,f[0]);render();};
     h.appendChild(st);
     div.appendChild(h);
+    div.ondragover=ev=>{ev.preventDefault();div.style.outline="2px dashed var(--accent)";};
+    div.ondragleave=()=>{div.style.outline="";};
+    div.ondrop=ev=>{ev.preventDefault();div.style.outline="";
+      const t=ev.dataTransfer.getData("text/plain");
+      if(t&&t[0]==="S") slotSwap(+t.slice(1), s);};
     const sel=document.createElement("select");
     effectOptions(sel, e?0:eid); sel.value=eid;
     sel.onchange=()=>{
