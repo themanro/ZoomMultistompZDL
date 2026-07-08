@@ -76,6 +76,7 @@ Serve over <code>http://localhost</code> — see the comments in this file.</p>
   <input id="pname" type="text" maxlength="10" size="12" placeholder="patch name">
   <span class="dsp" id="dsp" title="DSP-full bits"></span>
   <button id="reread">Re-read</button>
+  <label class="hint" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="trace"> MIDI log</label>
   <button id="sendall">Send patch</button>
   <button id="store">Store</button>
   <button id="expsyx">Export .syx</button>
@@ -9636,8 +9637,13 @@ function banner(msg){const b=document.createElement("div");
   b.textContent=msg;document.body.insertBefore(b,document.body.children[2]);log(msg,"warn");}
 function hex(a){return Array.from(a,x=>x.toString(16).padStart(2,"0")).join(" ");}
 
-function send(bytes){ if(midiOut){ midiOut.send(bytes); } }
+let TRACE=false, lastEnable=0;
+function send(bytes){ if(midiOut){ midiOut.send(bytes); if(TRACE) log("→ "+hex(bytes.slice(0,24))+(bytes.length>24?` …(${bytes.length}B)`:"")); } }
 const zx=cmd=>[0xf0,0x52,0x00,DEVID,...cmd,0xf7];
+function editEnable(force){                  // pedal can drop out of editor mode; re-assert (throttled)
+  const t=performance.now();
+  if(force||t-lastEnable>1000){ send(zx([0x50])); lastEnable=t; }
+}
 
 async function connect(){
   try{
@@ -9654,13 +9660,20 @@ async function connect(){
     midiIn.onmidimessage=onMidi;
     $("devname").textContent=`${inp.name} ⇄ ${out.name}`;
     send([0xf0,0x7e,0x00,0x06,0x01,0xf7]);        // identity request
-    send(zx([0x50]));                              // param edit enable
-    requestPatch();
+    editEnable(true);                              // param edit enable
+    reread();
   }catch(e){
     banner("MIDI access failed: "+e.message+" — check: Chrome/Edge? localhost? Did you allow the MIDI permission prompt? Is Zoom Effect Manager closed (it locks the port)?");
   }
 }
 function requestPatch(){ send(zx([0x29])); }
+async function reread(){                        // explicit: await the dump and report
+  if(!midiOut){banner("Connect MIDI first.");return;}
+  send(zx([0x29]));
+  const d=await awaitDump(1300);
+  if(d){ rawPatch=d.slice(0,146); patch=decodePatch(rawPatch); render(); log("re-read OK: "+patch.name); }
+  else log("re-read: NO reply from pedal — on USB? Effect Manager closed? on a patch screen (not menu)?","warn");
+}
 function awaitDump(timeout){
   return new Promise(res=>{
     pendingDump={res,t:setTimeout(()=>{pendingDump=null;res(null);},timeout||900)};
@@ -9669,6 +9682,7 @@ function awaitDump(timeout){
 
 function onMidi(ev){
   const d=ev.data;
+  if(TRACE&&d[0]===0xf0) log("← "+hex(Array.from(d).slice(0,24))+(d.length>24?` …(${d.length}B)`:""));
   if(d[0]===0xf0&&d[1]===0x52&&d[3]===DEVID&&d[4]===0x28&&d.length>=146){
     rawPatch=Array.from(d.slice(0,146));
     if(pendingDump){clearTimeout(pendingDump.t);const r=pendingDump.res;pendingDump=null;r(rawPatch);return;}
@@ -9685,13 +9699,15 @@ function onMidi(ev){
 
 /* ---------- edits ------------------------------------------------------ */
 function sendParam(slot,paramIdx,val){       // paramIdx: 0=on/off, 2..10 knobs
+  editEnable();
   send(zx([0x31,slot,paramIdx,val&0x7f,(val>>7)&0x7f]));
 }
 function sendFullPatch(){
-  if(!patch)return;
+  if(!patch){log("nothing to send — read a patch first","warn");return;}
+  editEnable(true);
   rawPatch=encodePatch(patch);
   send(rawPatch);
-  log("patch sent");
+  log("patch sent ("+patch.name+")");
 }
 function storeTo(slotNum){
   send(zx([0x32,0x01,0x00,0x00,slotNum,0x00,0x00,0x00,0x00,0x00]));
@@ -9908,7 +9924,8 @@ function render(){
 
 /* ---------- bar wiring ------------------------------------------------- */
 $("connect").onclick=connect;
-$("reread").onclick=requestPatch;
+$("reread").onclick=reread;
+$("trace").onchange=e=>{TRACE=e.target.checked;log("MIDI trace "+(TRACE?"ON":"off"));};
 $("sendall").onclick=sendFullPatch;
 $("store").onclick=()=>{const n=+$("prog").value;
   if(confirm("Store current patch to slot "+(n+1)+"?")){
