@@ -21,46 +21,56 @@
   against all 137 stock MS-70CDR ZDLs.
 -->
 <style>
-  :root { --bg:#15171c; --panel:#1e2128; --ink:#d7dde6; --accent:#5cc8ff;
-          --line:#2c313b; --on:#69d18c; --off:#5a6270; }
+  /* palette matched to the generative-music editor (Theme.swift) */
+  :root { --bg:#0a0d0d; --panel:#141717; --panelHi:#1f2121; --ink:rgba(255,255,255,0.9);
+          --accent:#59ebbf; --line:rgba(255,255,255,0.08); --dim:rgba(255,255,255,0.45); }
   * { box-sizing:border-box; }
   body { margin:0; background:var(--bg); color:var(--ink);
-         font:13px/1.45 ui-monospace,Menlo,Consolas,monospace; padding:14px; }
-  h1 { font-size:15px; margin:0 0 2px; }
-  .sub { color:#8b94a3; font-size:12px; margin:0 0 12px; }
+         font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; padding:16px; }
+  h1 { font-size:15px; margin:0 0 2px; font-weight:600; }
+  .sub { color:var(--dim); font-size:12px; margin:0 0 14px; }
   .bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
-  .panel { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px 12px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
   button, select, input[type=text] {
-    background:#252a33; color:var(--ink); border:1px solid var(--line);
-    border-radius:6px; padding:6px 9px; font:inherit; }
+    background:var(--panelHi); color:var(--ink); border:1px solid var(--line);
+    border-radius:8px; padding:6px 10px; font:inherit; }
   button { cursor:pointer; } button:hover { border-color:var(--accent); }
-  button.primary { background:var(--accent); color:#0a0d12; border-color:var(--accent); }
-  .main { display:flex; gap:12px; align-items:flex-start; }
-  .slots { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:10px; flex:1; }
-  .slot { border:1px solid var(--line); border-radius:8px; padding:10px; background:var(--panel); }
-  .slot.on { border-color:#3a6b4d; }
-  .slot h3 { margin:0 0 8px; font-size:12px; color:#9aa4b2; display:flex; gap:8px; align-items:center; }
-  .stateBtn { min-width:44px; }
-  .stateBtn.on { background:var(--on); color:#0a0d12; border-color:var(--on); }
+  button.primary { background:var(--accent); color:#06100c; border-color:var(--accent); font-weight:600; }
+  .main { display:flex; gap:12px; align-items:flex-start; flex-wrap:wrap; }
+  .slots { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:12px; flex:1; }
+  .slot { border:1px solid var(--line); border-radius:10px; padding:12px; background:var(--panel); }
+  .slot.on { border-color:rgba(89,235,191,0.4); }
+  .slot h3 { margin:0 0 10px; font-size:11px; color:var(--dim); text-transform:uppercase;
+             letter-spacing:1.2px; font-weight:600; display:flex; gap:8px; align-items:center; }
+  /* pill toggle, like the Sustain switch in the mock */
+  .toggle { width:38px; height:20px; border-radius:12px; background:var(--panelHi);
+            border:1px solid var(--line); position:relative; cursor:pointer; flex:none; transition:background .12s; }
+  .toggle::after { content:""; position:absolute; top:2px; left:2px; width:14px; height:14px;
+                   border-radius:50%; background:var(--dim); transition:transform .12s,background .12s; }
+  .toggle.on { background:var(--accent); }
+  .toggle.on::after { background:#06100c; transform:translateX(18px); }
   canvas.cover { width:100%; image-rendering:pixelated; border:1px solid var(--line);
-                 border-radius:4px; background:#101218; margin:6px 0; display:block; }
-  .param { display:grid; grid-template-columns:74px 1fr 44px; gap:8px; align-items:center; margin:4px 0; }
-  .param label { color:#9aa4b2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .param output { text-align:right; color:var(--accent); }
-  input[type=range] { width:100%; accent-color:var(--accent); }
-  .lib { width:280px; flex:none; }
-  .lib h2 { font-size:12px; color:#9aa4b2; margin:0 0 8px; }
-  .librow { display:flex; gap:4px; align-items:center; padding:2px 4px; border-radius:5px; cursor:pointer; }
-  .librow:hover { background:#262b34; }
-  .librow.cur { background:#20303d; }
-  .librow .num { width:22px; color:#7c8694; text-align:right; flex:none; }
+                 border-radius:6px; background:#0d1110; margin:8px 0; display:block; }
+  .knobs { display:flex; flex-wrap:wrap; gap:10px 6px; margin-top:8px; }
+  .knob { display:flex; flex-direction:column; align-items:center; width:72px; gap:4px; }
+  .knob .kl { font-size:9.5px; color:var(--dim); text-transform:uppercase; letter-spacing:1px;
+              text-align:center; max-width:72px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .knob canvas { cursor:ns-resize; touch-action:none; }
+  .knob .kv { font-size:12px; color:var(--ink); }
+  .lib { width:288px; flex:none; }
+  .lib h2 { font-size:11px; color:var(--dim); margin:0 0 8px; text-transform:uppercase; letter-spacing:1.2px; font-weight:600; }
+  .librow { display:flex; gap:4px; align-items:center; padding:3px 5px; border-radius:6px; cursor:pointer; }
+  .librow:hover { background:var(--panelHi); }
+  .librow.cur { background:rgba(89,235,191,0.12); }
+  .librow .num { width:22px; color:var(--dim); text-align:right; flex:none; }
   .librow .nm { flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
-  .librow button { padding:1px 5px; font-size:11px; border-radius:4px; }
-  #log { height:110px; overflow-y:auto; background:#0c0e12; border:1px solid var(--line);
-         border-radius:6px; padding:6px 8px; font-size:11px; color:#8fa1b3; margin-top:12px; white-space:pre-wrap; }
+  .librow button { padding:1px 5px; font-size:11px; border-radius:5px; }
+  #log { height:110px; overflow-y:auto; background:#0d1110; border:1px solid var(--line);
+         border-radius:8px; padding:6px 8px; font-size:11px; color:var(--dim); margin-top:12px; white-space:pre-wrap; }
   .warn { color:#e0b060; }
-  .dsp { letter-spacing:2px; }
-  .hint { color:#7c8694; font-size:11px; }
+  .dsp { letter-spacing:2px; color:var(--dim); }
+  .hint { color:var(--dim); font-size:11px; }
+  label { color:var(--dim); }
 </style>
 </head>
 <body>
@@ -9905,6 +9915,42 @@ function effectOptions(sel,unknownId){
     sel.appendChild(g);
   }
 }
+// Rotary knob matched to the generative-music editor (Controls.swift Knob):
+// 21 ticks, 280° sweep from -140°, accent pointer, vertical-drag / wheel.
+function makeKnob(label, raw, max, onchange, onrelease){
+  const wrap=document.createElement("div"); wrap.className="knob";
+  const kl=document.createElement("div"); kl.className="kl"; kl.textContent=label; kl.title=label;
+  const cv=document.createElement("canvas");
+  const S=54, dpr=window.devicePixelRatio||1;
+  cv.width=S*dpr; cv.height=S*dpr; cv.style.width=S+"px"; cv.style.height=S+"px";
+  const ctx=cv.getContext("2d"); ctx.scale(dpr,dpr);
+  const kv=document.createElement("div"); kv.className="kv";
+  const ACC="#59ebbf", DIMt="rgba(255,255,255,0.18)", STK="rgba(255,255,255,0.10)", BGc="#0a0d0d";
+  const start=-140, sweep=280, r=S/2-3;
+  let val=max>0?raw/max:0;
+  function draw(){
+    ctx.clearRect(0,0,S,S); const cx=S/2, cy=S/2;
+    for(let i=0;i<21;i++){ const frac=i/20, ang=(start+frac*sweep)*Math.PI/180;
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(ang);
+      ctx.fillStyle=frac<=val?ACC:DIMt; ctx.fillRect(-1,-r-3,2,6); ctx.restore(); }
+    ctx.beginPath(); ctx.arc(cx,cy,S*0.34,0,7); ctx.fillStyle=BGc; ctx.fill();
+    ctx.lineWidth=1; ctx.strokeStyle=STK; ctx.stroke();
+    const pa=(start+val*sweep)*Math.PI/180;
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(pa);
+    ctx.fillStyle=ACC; ctx.fillRect(-1.25,-S*0.31,2.5,S*0.30); ctx.restore();
+  }
+  function setNorm(nv){ nv=Math.max(0,Math.min(1,nv)); val=nv;
+    const rv=Math.round(nv*max);
+    if(rv!==raw){ raw=rv; kv.textContent=raw; onchange(raw); }
+    draw(); }
+  kv.textContent=raw; draw();
+  let startY=0, startVal=0, dragging=false;
+  cv.addEventListener("pointerdown",e=>{dragging=true;startY=e.clientY;startVal=val;cv.setPointerCapture(e.pointerId);e.preventDefault();});
+  cv.addEventListener("pointermove",e=>{ if(dragging) setNorm(startVal+(startY-e.clientY)/180); });
+  cv.addEventListener("pointerup",()=>{ if(dragging){dragging=false; if(onrelease)onrelease();} });
+  cv.addEventListener("wheel",e=>{e.preventDefault(); setNorm(val+(e.deltaY<0?1:-1)/(max||100)); if(onrelease)onrelease();},{passive:false});
+  wrap.append(kl,cv,kv); return wrap;
+}
 function render(){
   if(!patch)return;
   $("pname").value=patch.name;
@@ -9917,13 +9963,13 @@ function render(){
     const h=document.createElement("h3");
     const grip=document.createElement("span");
     grip.textContent="⠿"; grip.title="drag to swap slots";
-    grip.style.cssText="cursor:grab;color:#7c8694;user-select:none";
+    grip.style.cssText="cursor:grab;color:var(--dim);user-select:none";
     grip.draggable=true;
     grip.ondragstart=ev=>{ev.dataTransfer.setData("text/plain","S"+s);ev.dataTransfer.effectAllowed="move";};
     h.appendChild(grip);
-    const ttl=document.createElement("span");ttl.textContent=`slot ${s+1}`;h.appendChild(ttl);
-    const st=document.createElement("button");
-    st.className="stateBtn"+(on?" on":""); st.textContent=on?"ON":"off";
+    const ttl=document.createElement("span");ttl.textContent=`slot ${s+1}`;ttl.style.flex="1";h.appendChild(ttl);
+    const st=document.createElement("div");
+    st.className="toggle"+(on?" on":""); st.title="effect on / off";
     st.onclick=()=>{f[0]=on?0:1;sendParam(s,0,f[0]);render();};
     h.appendChild(st);
     div.appendChild(h);
@@ -9953,17 +9999,15 @@ function render(){
       div.appendChild(u);
     }
     const params=e?e.params:(eid?Array.from({length:9},(_,i)=>({name:"p"+(i+1),max:2047})):[]);
-    params.forEach((pd,k)=>{
-      const row=document.createElement("div");row.className="param";
-      const lab=document.createElement("label");lab.textContent=pd.name;lab.title=pd.name;
-      const rng=document.createElement("input");rng.type="range";
-      rng.min=0;rng.max=pd.max;rng.value=f[k+2];
-      const out=document.createElement("output");out.value=f[k+2];
-      rng.oninput=()=>{f[k+2]=+rng.value;out.value=rng.value;sendParam(s,k+2,f[k+2]);};
-      // slots 4-6: realtime 0x31 may be ignored — follow up with a full send
-      if(s>=3) rng.onchange=()=>sendFullPatch();
-      row.append(lab,rng,out);div.appendChild(row);
-    });
+    if(params.length){
+      const kc=document.createElement("div");kc.className="knobs";
+      params.forEach((pd,k)=>{
+        kc.appendChild(makeKnob(pd.name, f[k+2], pd.max||100,
+          v=>{ f[k+2]=v; sendParam(s,k+2,v); },
+          ()=>{ if(s>=3) sendFullPatch(); }));   // slots 4-6: 0x31 may be ignored -> full send
+      });
+      div.appendChild(kc);
+    }
     root.appendChild(div);
   });
   renderLibrary();
