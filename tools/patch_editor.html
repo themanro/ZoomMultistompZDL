@@ -85,7 +85,13 @@ Serve over <code>http://localhost</code> — see the comments in this file.</p>
 <div class="main">
   <div class="slots" id="slots"></div>
   <div class="lib panel">
-    <h2>Patch library <button id="readall" style="float:right">Read all 50</button></h2>
+    <h2>Patch library</h2>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+      <button id="readall">Read all 50</button>
+      <button id="backup">Backup bank</button>
+      <button id="restoreBtn">Restore…</button>
+      <input type="file" id="restore" accept=".syx" style="display:none">
+    </div>
     <div id="librows" class="hint">press “Read all 50”</div>
   </div>
 </div>
@@ -9621,7 +9627,7 @@ for(const e of DB.custom.concat(DB.stock)) BYID[e.id]=e;
 /* ---------- MIDI ------------------------------------------------------- */
 const DEVID=0x61;                       // MS-70CDR
 let midiIn=null, midiOut=null, patch=null, rawPatch=null;
-let library=new Array(50).fill(null), pendingDump=null, busy=false;
+let library=new Array(50).fill(null), libraryRaw=new Array(50).fill(null), pendingDump=null, busy=false;
 const $=id=>document.getElementById(id);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function log(s,cls){const el=$("log");el.innerHTML+=(cls?`<span class="${cls}">`:"")+s+(cls?"</span>":"")+"\n";el.scrollTop=el.scrollHeight;}
@@ -9700,6 +9706,7 @@ async function readAll(){
     send([0xc0,i]); await sleep(60);
     send(zx([0x29]));
     const d=await awaitDump();
+    libraryRaw[i]=d?d.slice(0,146):null;
     library[i]=d?decodePatch(d):null;
     if(i%10===9){log(`library: read ${i+1}/50`);renderLibrary();}
   }
@@ -9712,6 +9719,45 @@ async function readAll(){
 async function writeSlot(i,p){               // write buffer then store to slot i
   send(encodePatch(p)); await sleep(90);
   storeTo(i); await sleep(220);
+}
+async function writeRaw(i,raw){              // write raw 146-byte dump, store to slot i
+  const d=raw.slice(); d[3]=DEVID; send(d); await sleep(90);
+  storeTo(i); await sleep(220);
+}
+async function backupBank(){
+  if(!midiOut){banner("Connect MIDI first.");return;}
+  await readAll();                           // populates libraryRaw + library
+  const bytes=[];
+  let n=0;
+  for(let i=0;i<50;i++) if(libraryRaw[i]){ bytes.push(...libraryRaw[i]); n++; }
+  if(!n){banner("nothing read — is the pedal responding?");return;}
+  const stamp=new Date().toISOString().slice(0,16).replace(/[:T]/g,"-");
+  const blob=new Blob([new Uint8Array(bytes)],{type:"application/octet-stream"});
+  const a=document.createElement("a");
+  a.download=`MS70CDR_bank_${stamp}.syx`; a.href=URL.createObjectURL(blob); a.click();
+  log(`bank backed up: ${n} patches -> ${a.download}`);
+}
+async function restoreBank(file){
+  if(!midiOut){banner("Connect MIDI first.");return;}
+  const buf=new Uint8Array(await file.arrayBuffer());
+  const patches=[]; let i=0;                 // split concatenated F0..F7 messages
+  while(i<buf.length){
+    if(buf[i]!==0xF0){i++;continue;}
+    let j=i+1; while(j<buf.length&&buf[j]!==0xF7)j++;
+    const msg=Array.from(buf.slice(i,j+1));
+    if(msg.length===146&&msg[4]===0x28) patches.push(msg);
+    i=j+1;
+  }
+  if(!patches.length){banner("no MS-70CDR patches found in that .syx");return;}
+  if(!confirm(`Restore ${patches.length} patches — OVERWRITES slots 1..${Math.min(patches.length,50)} on the pedal. Continue?`))return;
+  busy=true;
+  for(let k=0;k<patches.length&&k<50;k++){
+    await writeRaw(k,patches[k]);
+    libraryRaw[k]=patches[k].slice(); library[k]=decodePatch(patches[k]);
+    if(k%10===9){log(`restored ${k+1}`);renderLibrary();}
+  }
+  busy=false; renderLibrary(); await refreshCurrent();
+  log(`bank restored: ${Math.min(patches.length,50)} patches`);
 }
 async function refreshCurrent(){
   send([0xc0,+$("prog").value]); await sleep(60); requestPatch();
@@ -9863,6 +9909,9 @@ $("store").onclick=()=>{const n=+$("prog").value;
 $("pname").onchange=()=>{if(patch){patch.name=$("pname").value;sendFullPatch();}};
 $("prog").onchange=()=>{send([0xc0,+$("prog").value]);setTimeout(requestPatch,150);renderLibrary();};
 $("readall").onclick=readAll;
+$("backup").onclick=backupBank;
+$("restoreBtn").onclick=()=>$("restore").click();
+$("restore").onchange=ev=>{const f=ev.target.files[0];if(f)restoreBank(f);ev.target.value="";};
 $("expsyx").onclick=()=>{
   if(!patch)return;
   const blob=new Blob([new Uint8Array(encodePatch(patch))],{type:"application/octet-stream"});
