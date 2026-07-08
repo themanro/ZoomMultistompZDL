@@ -98,16 +98,55 @@ def parse_zdl(path: Path):
     }
 
 
+def _cover_b64(path: Path):
+    """Row-major MSB-first 1024-byte cover bitmap, base64 (None if undecodable)."""
+    import base64
+    try:
+        from decode_picture import decode_picture
+        px, _ = decode_picture(str(path))
+        b = bytearray()
+        for y in range(64):
+            for xb in range(16):
+                byte = 0
+                for bit in range(8):
+                    if px[y][xb * 8 + bit]:
+                        byte |= 1 << (7 - bit)
+                b.append(byte)
+        return base64.b64encode(bytes(b)).decode()
+    except Exception:
+        return None
+
+
+def _rank(path: Path) -> int:
+    n = path.name
+    if path.parent.name == "dist":
+        return 0
+    for i, pre in enumerate(
+            ("MS-70CDR_",), start=1):
+        if n.startswith(pre):
+            return i
+    for i, pre in enumerate(("MS-50G_", "MS-60B_", "G1on_", "G1Xon_", "B1Xon_"), start=3):
+        if n.startswith(pre):
+            return i
+    return 2                              # bare-name files (MS-70CDR era)
+
+
 def main() -> None:
+    best = {}                             # patch id -> (rank, entry, is_custom)
+    files = sorted((ROOT / "dist").glob("*.ZDL")) + sorted((ROOT / "stock_zdls").glob("*.ZDL"))
+    for f in files:
+        e = parse_zdl(f)
+        if not e:
+            continue
+        r = _rank(f)
+        cur = best.get(e["id"])
+        if cur is None or r < cur[0]:
+            e["cover"] = _cover_b64(f)
+            best[e["id"]] = (r, e, r == 0)
+
     db = {"custom": [], "stock": []}
-    for f in sorted((ROOT / "dist").glob("*.ZDL")):
-        e = parse_zdl(f)
-        if e:
-            db["custom"].append(e)
-    for f in sorted((ROOT / "stock_zdls").glob("MS-70CDR_*.ZDL")):
-        e = parse_zdl(f)
-        if e:
-            db["stock"].append(e)
+    for r, e, is_custom in sorted(best.values(), key=lambda x: x[1]["name"].upper()):
+        db["custom" if is_custom else "stock"].append(e)
 
     # sanity: no patch-ID collisions
     ids = {}
