@@ -3,7 +3,7 @@
 Custom `.ZDL` effects for Zoom MultiStomp pedals, plus the reverse-engineered
 toolchain used to build them — no Zoom SDK required.
 
-This was a good amount of work and tokens, please consider to: buymeacoffee.com/SZ0KFIXKCt
+This was a good amount of work and tokens, please consider to: [buymeacoffee.com/SZ0KFIXKCt](buymeacoffee.com/SZ0KFIXKCt)
 
 ## Custom effect pack
 
