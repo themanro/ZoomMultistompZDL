@@ -9698,23 +9698,33 @@ function storeTo(slotNum){
 }
 
 /* ---------- patch library --------------------------------------------- */
+async function readSlot(i,tries){            // read one slot's raw dump, retrying
+  for(let t=0;t<(tries||4);t++){
+    send([0xc0,i]); await sleep(80);
+    send(zx([0x29]));
+    const d=await awaitDump(1300);
+    if(d&&d.length>=146) return d.slice(0,146);
+    await sleep(60);                         // let the port settle before retry
+  }
+  return null;
+}
 async function readAll(){
   if(!midiOut){banner("Connect MIDI first.");return;}
   busy=true;
   const cur=+$("prog").value;
+  let missed=[];
   for(let i=0;i<50;i++){
-    send([0xc0,i]); await sleep(60);
-    send(zx([0x29]));
-    const d=await awaitDump();
-    libraryRaw[i]=d?d.slice(0,146):null;
-    library[i]=d?decodePatch(d):null;
+    const d=await readSlot(i);
+    libraryRaw[i]=d; library[i]=d?decodePatch(d):null;
+    if(!d) missed.push(i+1);
     if(i%10===9){log(`library: read ${i+1}/50`);renderLibrary();}
   }
-  send([0xc0,cur]); await sleep(60);
+  send([0xc0,cur]); await sleep(80);
   busy=false;
   requestPatch();
   renderLibrary();
-  log("library: done");
+  log(missed.length?`library: done — no response from slot(s) ${missed.join(",")}; press Read all 50 again`
+                   :"library: done (all 50 read)", missed.length?"warn":undefined);
 }
 async function writeSlot(i,p){               // write buffer then store to slot i
   send(encodePatch(p)); await sleep(90);
