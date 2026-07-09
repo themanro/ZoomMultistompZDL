@@ -9712,20 +9712,39 @@ function awaitDump(timeout){
   });
 }
 
+// Web MIDI can deliver a SysEx dump split across several events (and can
+// batch a channel message in with it). Reassemble F0…F7 before parsing, or
+// a misaligned buffer decodes to garbage (scrambled patch names) / gets
+// dropped (missed dumps). Only a complete, correct-length 0x28 is accepted.
+let sxAccum=null;
 function onMidi(ev){
-  const d=ev.data;
-  if(TRACE&&d[0]===0xf0) log("← "+hex(Array.from(d).slice(0,24))+(d.length>24?` …(${d.length}B)`:""));
-  if(d[0]===0xf0&&d[1]===0x52&&d[3]===DEVID&&d[4]===0x28&&d.length>=146){
-    rawPatch=Array.from(d.slice(0,146));
+  const d=Array.from(ev.data);
+  if(d[0]===0xF0 || sxAccum){
+    sxAccum = sxAccum ? sxAccum.concat(d) : d;
+    const end = sxAccum.indexOf(0xF7);
+    if(end<0){ if(sxAccum.length>2048) sxAccum=null; return; }   // wait / bail on runaway
+    const msg = sxAccum.slice(0, end+1);
+    sxAccum = null;
+    if(TRACE) log("← "+hex(msg.slice(0,24))+(msg.length>24?` …(${msg.length}B)`:""));
+    handleSysex(msg);
+    return;
+  }
+  if(d[0]===0xC0){                       // program change echo
+    curProg=d[1]; renderLibrary(); log("program change -> "+d[1]);
+    if(!busy) requestPatch();
+  }
+}
+function handleSysex(m){
+  if(m[1]===0x52 && m[3]===DEVID && m[4]===0x28 && m.length===146){
+    rawPatch=m.slice(0,146);
     if(pendingDump){clearTimeout(pendingDump.t);const r=pendingDump.res;pendingDump=null;r(rawPatch);return;}
     patch=decodePatch(rawPatch); editModeActive=false;
     render();
     log("patch received: "+patch.name);
-  }else if(d[0]===0xf0&&d[1]===0x7e){
-    log("identity: "+hex(d));
-  }else if(d[0]===0xc0){
-    log("program change -> "+d[1]); curProg=d[1]; renderLibrary();
-    if(!busy) requestPatch();
+  }else if(m[1]===0x52 && m[3]===DEVID && m[4]===0x28){
+    log("bad dump ("+m.length+"B, expected 146) — ignored","warn");   // reject misaligned
+  }else if(m[1]===0x7e){
+    log("identity: "+hex(m));
   }
 }
 
@@ -9971,9 +9990,12 @@ function render(){
     const ttl=document.createElement("span");ttl.textContent=`slot ${s+1}`;ttl.style.flex="1";h.appendChild(ttl);
     const st=document.createElement("div");
     st.className="toggle"+(on?" on":""); st.title="effect on / off";
-    st.onclick=()=>{const nv=on?0:1; f[0]=nv; render();
-      sendParam(s,0,nv);                 // always send the on/off immediately
-      if(nv) materialize();              // turning ON: also re-push all values (pedal defaults them)
+    st.onclick=()=>{ if(busy||syncing) return; const nv=on?0:1; f[0]=nv; render();
+      // send the on/off cleanly (edit-enable + the bit), no value flood yet,
+      if(performance.now()-lastEnable>1000){ send(zx([0x50])); lastEnable=performance.now(); }
+      editModeActive=true;
+      rawParam(s,0,nv);
+      if(nv) setTimeout(materialize,80);  // turning ON: push values a beat later so the toggle lands first
     };
     h.appendChild(st);
     div.appendChild(h);
