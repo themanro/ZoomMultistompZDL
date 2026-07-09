@@ -79,33 +79,30 @@
 Serve over <code>http://localhost</code> — see the comments in this file.</p>
 
 <div class="bar panel">
-  <button id="connect" class="primary">Connect MIDI</button>
+  <button id="connect" class="primary">Connect &amp; read bank</button>
   <span id="devname" class="hint">not connected</span>
-  <label>Patch #</label>
-  <select id="prog"></select>
-  <input id="pname" type="text" maxlength="10" size="12" placeholder="patch name">
-  <span class="dsp" id="dsp" title="DSP-full bits"></span>
-  <button id="reread">Re-read</button>
+  <button id="readall">Reload bank</button>
+  <button id="reread">Re-read patch</button>
   <button id="sync" title="push all knob values so the pedal stops playing defaults">Sync pedal</button>
-  <label class="hint" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="trace"> MIDI log</label>
+  <span class="dsp" id="dsp" title="DSP-full bits"></span>
   <button id="sendall">Send patch</button>
-  <button id="store">Store</button>
+  <button id="store">Store to current</button>
   <button id="expsyx">Export .syx</button>
-  <input type="file" id="impsyx" accept=".syx" style="max-width:190px">
+  <input type="file" id="impsyx" accept=".syx" style="max-width:180px">
+  <label class="hint" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="trace"> MIDI log</label>
 </div>
 
 <div class="main">
-  <div class="slots" id="slots"></div>
   <div class="lib panel">
-    <h2>Patch library</h2>
+    <h2>Patches <span class="hint" style="font-weight:400;text-transform:none;letter-spacing:0">click to load · drag to reorder · ✎ rename · ✕ erase</span></h2>
     <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
-      <button id="readall">Read all 50</button>
       <button id="backup">Backup bank</button>
       <button id="restoreBtn">Restore…</button>
       <input type="file" id="restore" accept=".syx" style="display:none">
     </div>
-    <div id="librows" class="hint">press “Read all 50”</div>
+    <div id="librows" class="hint">Connect &amp; read bank to list your 50 patches</div>
   </div>
+  <div class="slots" id="slots"></div>
 </div>
 <div id="log"></div>
 
@@ -9640,6 +9637,7 @@ for(const e of DB.custom.concat(DB.stock)) BYID[e.id]=e;
 const DEVID=0x61;                       // MS-70CDR
 let midiIn=null, midiOut=null, patch=null, rawPatch=null;
 let library=new Array(50).fill(null), libraryRaw=new Array(50).fill(null), pendingDump=null, busy=false;
+let curProg=0;                                 // currently-loaded program (was the top-bar dropdown)
 const $=id=>document.getElementById(id);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function log(s,cls){const el=$("log");el.innerHTML+=(cls?`<span class="${cls}">`:"")+s+(cls?"</span>":"")+"\n";el.scrollTop=el.scrollHeight;}
@@ -9692,7 +9690,10 @@ async function connect(){
     midiIn.onmidimessage=onMidi;
     $("devname").textContent=`${inp.name} ⇄ ${out.name}`;
     send([0xf0,0x7e,0x00,0x06,0x01,0xf7]);        // identity request
-    reread();                                      // read-only; don't enter edit mode yet
+    send(zx([0x33]));                              // which program is current (-> curProg via PC)
+    await sleep(60);
+    await reread();                                // current patch (fast, read-only)
+    readAll();                                      // fill the bank list on the left
   }catch(e){
     banner("MIDI access failed: "+e.message+" — check: Chrome/Edge? localhost? Did you allow the MIDI permission prompt? Is Zoom Effect Manager closed (it locks the port)?");
   }
@@ -9723,7 +9724,7 @@ function onMidi(ev){
   }else if(d[0]===0xf0&&d[1]===0x7e){
     log("identity: "+hex(d));
   }else if(d[0]===0xc0){
-    log("program change -> "+d[1]); $("prog").value=d[1];
+    log("program change -> "+d[1]); curProg=d[1]; renderLibrary();
     if(!busy) requestPatch();
   }
 }
@@ -9759,7 +9760,7 @@ async function readSlot(i,tries){            // read one slot's raw dump, retryi
 async function readAll(){
   if(!midiOut){banner("Connect MIDI first.");return;}
   busy=true;
-  const cur=+$("prog").value;
+  const cur=curProg;
   let missed=[];
   for(let i=0;i<50;i++){
     const d=await readSlot(i);
@@ -9818,7 +9819,7 @@ async function restoreBank(file){
   log(`bank restored: ${Math.min(patches.length,50)} patches`);
 }
 async function refreshCurrent(){
-  send([0xc0,+$("prog").value]); await sleep(60); requestPatch();
+  send([0xc0,curProg]); await sleep(60); requestPatch();
 }
 async function libSwap(i,j){
   if(j<0||j>49||!library[i]||!library[j])return;
@@ -9858,7 +9859,7 @@ function renderLibrary(){
   const root=$("librows"); root.innerHTML=""; root.classList.remove("hint");
   library.forEach((p,i)=>{
     const row=document.createElement("div");
-    row.className="librow"+(i===+$("prog").value?" cur":"");
+    row.className="librow"+(i===curProg?" cur":"");
     if(p){
       row.draggable=true;
       row.ondragstart=ev=>{ev.dataTransfer.setData("text/plain","L"+i);ev.dataTransfer.effectAllowed="move";};
@@ -9871,7 +9872,7 @@ function renderLibrary(){
     const num=document.createElement("span");num.className="num";num.textContent=(i+1);
     const nm=document.createElement("span");nm.className="nm";
     nm.textContent=p?(p.name||"(unnamed)"):"…";
-    nm.onclick=async()=>{ $("prog").value=i; send([0xc0,i]); await sleep(80); requestPatch(); renderLibrary(); };
+    nm.onclick=async()=>{ curProg=i; send([0xc0,i]); await sleep(80); requestPatch(); renderLibrary(); };
     row.append(num,nm);
     if(p){
       const up=document.createElement("button");up.textContent="↑";up.title="swap with previous";
@@ -9954,7 +9955,6 @@ function makeKnob(label, raw, max, onchange, onrelease){
 }
 function render(){
   if(!patch)return;
-  $("pname").value=patch.name;
   $("dsp").textContent=Array.from({length:6},(_,i)=>(patch.dsp>>i)&1?"●":"○").join("");
   const root=$("slots"); root.innerHTML="";
   patch.fx.forEach((f,s)=>{
@@ -9971,10 +9971,10 @@ function render(){
     const ttl=document.createElement("span");ttl.textContent=`slot ${s+1}`;ttl.style.flex="1";h.appendChild(ttl);
     const st=document.createElement("div");
     st.className="toggle"+(on?" on":""); st.title="effect on / off";
-    st.onclick=()=>{f[0]=on?0:1;render();
-      // turning a slot ON: the pedal instantiates the effect with DEFAULT
-      // params, so re-push everything (on/off + all values) via materialize.
-      if(f[0]) materialize(); else sendParam(s,0,0);};
+    st.onclick=()=>{const nv=on?0:1; f[0]=nv; render();
+      sendParam(s,0,nv);                 // always send the on/off immediately
+      if(nv) materialize();              // turning ON: also re-push all values (pedal defaults them)
+    };
     h.appendChild(st);
     div.appendChild(h);
     div.ondragover=ev=>{ev.preventDefault();div.style.outline="2px dashed var(--accent)";};
@@ -10023,14 +10023,12 @@ $("reread").onclick=reread;
 $("sync").onclick=materialize;
 $("trace").onchange=e=>{TRACE=e.target.checked;log("MIDI trace "+(TRACE?"ON":"off"));};
 $("sendall").onclick=sendFullPatch;
-$("store").onclick=()=>{const n=+$("prog").value;
+$("store").onclick=()=>{const n=curProg;
   if(confirm("Store current patch to slot "+(n+1)+"?")){
     storeTo(n);log("stored to #"+(n+1));
     if(patch)library[n]=JSON.parse(JSON.stringify(patch));
     renderLibrary();
   }};
-$("pname").onchange=()=>{if(patch){patch.name=$("pname").value;sendFullPatch();}};
-$("prog").onchange=()=>{send([0xc0,+$("prog").value]);setTimeout(requestPatch,150);renderLibrary();};
 $("readall").onclick=readAll;
 $("backup").onclick=backupBank;
 $("restoreBtn").onclick=()=>$("restore").click();
@@ -10049,7 +10047,6 @@ $("impsyx").onchange=ev=>{
     d[3]=DEVID; rawPatch=d; patch=decodePatch(d); render(); sendFullPatch();};
   rd.readAsArrayBuffer(file);
 };
-for(let i=0;i<50;i++){const o=document.createElement("option");o.value=i;o.textContent=i+1;$("prog").appendChild(o);}
 
 window.addEventListener("error",e=>banner("Script error: "+e.message));
 if(!navigator.requestMIDIAccess)
