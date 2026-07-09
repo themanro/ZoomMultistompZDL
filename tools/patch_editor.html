@@ -9664,8 +9664,9 @@ async function materialize(){
   for(let s=0;s<6;s++){
     const id=patch.fx[s][1]; if(!id) continue;
     const e=BYID[id]; const n=e?e.params.length:9;
-    rawParam(s,0,patch.fx[s][0]);                 // on/off
-    for(let k=0;k<n;k++){ rawParam(s,k+2,patch.fx[s][k+2]); await sleep(6); }
+    rawParam(s,0,patch.fx[s][0]);                 // on/off first
+    await sleep(12);
+    for(let k=0;k<n;k++){ rawParam(s,k+2,patch.fx[s][k+2]); await sleep(12); }
   }
   syncing=false;
   log("synced values to pedal ("+(patch.name||"")+")");
@@ -9970,7 +9971,10 @@ function render(){
     const ttl=document.createElement("span");ttl.textContent=`slot ${s+1}`;ttl.style.flex="1";h.appendChild(ttl);
     const st=document.createElement("div");
     st.className="toggle"+(on?" on":""); st.title="effect on / off";
-    st.onclick=()=>{f[0]=on?0:1;sendParam(s,0,f[0]);render();};
+    st.onclick=()=>{f[0]=on?0:1;render();
+      // turning a slot ON: the pedal instantiates the effect with DEFAULT
+      // params, so re-push everything (on/off + all values) via materialize.
+      if(f[0]) materialize(); else sendParam(s,0,0);};
     h.appendChild(st);
     div.appendChild(h);
     div.ondragover=ev=>{ev.preventDefault();div.style.outline="2px dashed var(--accent)";};
