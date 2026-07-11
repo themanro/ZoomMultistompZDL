@@ -570,14 +570,13 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
     float rawHeadFrq = params[TOTAPE9_HEADFRQ_SLOT];
     float rawOutput = params[TOTAPE9_OUTPUT_SLOT];
 
-    int paramBlockMissing = TOTAPE9_PARAM_MISSING(rawInput) ||
-                            TOTAPE9_PARAM_MISSING(rawBias) ||
-                            TOTAPE9_PARAM_MISSING(rawOutput);
-    /* During reload the host can briefly expose zeroed user slots before an
-     * edit interaction materializes them. In that state params[0] can also
-     * read like "off", causing a hard mute. Trust the off gate only once the
-     * mute-prone controls are present. */
-    if (params[0] < 0.5f && !paramBlockMissing) return;
+    /* Bypass = clean dry passthrough, same off-gate as every other effect.
+     * (An earlier build kept processing while "off" whenever the param block
+     * looked unmaterialized, to dodge a reload mute -- but the host exposes a
+     * BYPASSED effect's params as all-zero too, so that made a switched-OFF
+     * Oxide keep running its up-to-2x output gain: louder when off. Reload
+     * materialization is handled at the editor / knob-latch level instead.) */
+    if (params[0] < 0.5f) return;
     float pInput = TOTAPE9_PARAM_NORM(rawInput, TOTAPE9_INPUT_DEFAULT_NORM);
     float pTilt = TOTAPE9_PARAM_NORM(rawTilt, TOTAPE9_TILT_DEFAULT_NORM);
     float pShape = TOTAPE9_PARAM_NORM(rawShape, TOTAPE9_SHAPE_DEFAULT_NORM);
