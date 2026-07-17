@@ -9813,18 +9813,18 @@ async function readAll(){
   const cur=curProg;
   const miss=[];
   const t0=performance.now();
-  // fast first pass: short settle + short timeout (a healthy dump replies in ~30-80ms)
+  // A dump resolves the instant it arrives, so the timeout only bounds MISSES
+  // (keep it generous so a slightly-slow-but-valid reply isn't dropped). Speed
+  // comes from a small settle; render each slot so the list fills live.
   for(let i=0;i<50;i++){
-    const d=await readOnce(i,22,320);
+    const d=await readOnce(i,45,900);
     libraryRaw[i]=d; library[i]=d?decodePatch(d):null;
+    renderLibrary();                          // progressive fill
     if(!d) miss.push(i);
-    if((i&7)===7) renderLibrary();
   }
-  renderLibrary();
-  // patient retry only for the ones that didn't answer in time
-  for(const i of miss){
-    const d=await readOnce(i,60,1100) || await readOnce(i,90,1400);
-    if(d){ libraryRaw[i]=d; library[i]=decodePatch(d); }
+  for(const i of miss){                        // patient retry for no-shows
+    const d=await readOnce(i,90,1400);
+    if(d){ libraryRaw[i]=d; library[i]=decodePatch(d); renderLibrary(); }
   }
   send([0xc0,cur]); await sleep(40);
   busy=false;
