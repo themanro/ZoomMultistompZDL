@@ -9801,33 +9801,39 @@ function storeTo(slotNum){
 }
 
 /* ---------- patch library --------------------------------------------- */
-async function readSlot(i,tries){            // read one slot's raw dump, retrying
-  for(let t=0;t<(tries||4);t++){
-    send([0xc0,i]); await sleep(80);
-    send(zx([0x29]));
-    const d=await awaitDump(1300);
-    if(d&&d.length>=146) return d.slice(0,146);
-    await sleep(60);                         // let the port settle before retry
-  }
-  return null;
+async function readOnce(i,settle,timeout){   // PC to slot i, request, await one dump
+  send([0xc0,i]); await sleep(settle);
+  send(zx([0x29]));
+  const d=await awaitDump(timeout);
+  return (d&&d.length>=146) ? d.slice(0,146) : null;
 }
 async function readAll(){
   if(!midiOut){banner("Connect MIDI first.");return;}
   busy=true;
   const cur=curProg;
-  let missed=[];
+  const miss=[];
+  const t0=performance.now();
+  // fast first pass: short settle + short timeout (a healthy dump replies in ~30-80ms)
   for(let i=0;i<50;i++){
-    const d=await readSlot(i);
+    const d=await readOnce(i,22,320);
     libraryRaw[i]=d; library[i]=d?decodePatch(d):null;
-    if(!d) missed.push(i+1);
-    if(i%10===9){log(`library: read ${i+1}/50`);renderLibrary();}
+    if(!d) miss.push(i);
+    if((i&7)===7) renderLibrary();
   }
-  send([0xc0,cur]); await sleep(80);
+  renderLibrary();
+  // patient retry only for the ones that didn't answer in time
+  for(const i of miss){
+    const d=await readOnce(i,60,1100) || await readOnce(i,90,1400);
+    if(d){ libraryRaw[i]=d; library[i]=decodePatch(d); }
+  }
+  send([0xc0,cur]); await sleep(40);
   busy=false;
   requestPatch();
   renderLibrary();
-  log(missed.length?`library: done — no response from slot(s) ${missed.join(",")}; press Read all 50 again`
-                   :"library: done (all 50 read)", missed.length?"warn":undefined);
+  const stillMiss=miss.filter(i=>!library[i]).map(i=>i+1);
+  log(`bank read in ${((performance.now()-t0)/1000).toFixed(1)}s`
+      + (stillMiss.length?` — no reply from slot(s) ${stillMiss.join(",")} (Reload bank to retry)`:""),
+      stillMiss.length?"warn":undefined);
 }
 async function writeSlot(i,p){               // write buffer then store to slot i
   send(encodePatch(p)); await sleep(90);
