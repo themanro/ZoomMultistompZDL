@@ -9681,7 +9681,7 @@ function banner(msg){const b=document.createElement("div");
   b.textContent=msg;document.body.insertBefore(b,document.body.children[2]);log(msg,"warn");}
 function hex(a){return Array.from(a,x=>x.toString(16).padStart(2,"0")).join(" ");}
 
-let TRACE=false, lastEnable=0, editModeActive=false, syncing=false;
+let TRACE=false, lastEnable=0, editModeActive=false, syncing=false, rxCount=0;
 function send(bytes){ if(midiOut){ midiOut.send(bytes); if(TRACE) log("→ "+hex(bytes.slice(0,24))+(bytes.length>24?` …(${bytes.length}B)`:"")); } }
 const zx=cmd=>[0xf0,0x52,0x00,DEVID,...cmd,0xf7];
 function rawParam(slot,pIdx,val){ send(zx([0x31,slot,pIdx,val&0x7f,(val>>7)&0x7f])); }
@@ -9721,7 +9721,11 @@ async function connect(){
       out=out||acc.outputs.values().next().value;
     }
     if(!inp||!out){ banner("No MIDI ports found. Pedal on USB and powered? Effect Manager closed?"); return; }
-    midiIn=inp; midiOut=out;
+    midiIn=inp; midiOut=out; rxCount=0;
+    const ins=[...acc.inputs.values()].map(i=>i.name), outs=[...acc.outputs.values()].map(o=>o.name);
+    log("IN  ports: "+(ins.join(" | ")||"(none)"));
+    log("OUT ports: "+(outs.join(" | ")||"(none)"));
+    log("using IN=\""+inp.name+"\"  OUT=\""+out.name+"\"");
     midiIn.onmidimessage=onMidi;
     $("devname").textContent=`${inp.name} ⇄ ${out.name}`;
     send([0xf0,0x7e,0x00,0x06,0x01,0xf7]);        // identity request (universal, safe)
@@ -9741,7 +9745,9 @@ async function reread(){                        // explicit: await the dump and 
   send(zx([0x29]));
   const d=await awaitDump(1300);
   if(d){ rawPatch=d.slice(0,146); patch=decodePatch(rawPatch); editModeActive=false; render(); log("re-read OK: "+patch.name); }
-  else log("re-read: NO reply from pedal — on USB? Effect Manager closed? on a patch screen (not menu)?","warn");
+  else log("re-read: NO dump. MIDI msgs received since connect = "+rxCount
+           +(rxCount===0?" (0 = we're not receiving — wrong IN port, or Effect Manager has the port)"
+                        :" (>0 = pedal talks but sent no patch dump — try power-cycling the pedal)"),"warn");
 }
 function awaitDump(timeout){
   return new Promise(res=>{
@@ -9756,6 +9762,7 @@ function awaitDump(timeout){
 let sxAccum=null;
 function onMidi(ev){
   const d=Array.from(ev.data);
+  rxCount++;
   if(d[0]===0xF0){
     sxAccum = d;                         // a new SysEx ALWAYS starts fresh (never append to a stale fragment)
   }else if(sxAccum){
