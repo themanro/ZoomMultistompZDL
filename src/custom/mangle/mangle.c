@@ -41,7 +41,7 @@ MANGLE_CODE_SECTION(MANGLE_AUDIO_FUNC)
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
 #define MG_MAGIC   0x4D414E47u        /* 'MANG' */
-#define MG_VERSION 1u
+#define MG_VERSION 2u
 
 #define MG_BUF        65536u          /* mono ring, ~1.49 s (power of 2) */
 #define MG_MASK       (MG_BUF - 1u)
@@ -66,7 +66,7 @@ typedef struct MangleState {
     float shReg;                      /* crush sample-hold register */
     uint32_t shCnt;                   /* crush sample-hold counter */
     float lpZ;                        /* crush low-pass state */
-    uint32_t pad;
+    uint32_t fpd;                     /* anti-denormal dither (xorshift) */
 } MangleState;
 
 static inline float mg_abs(float x) { return x < 0.0f ? -x : x; }
@@ -149,7 +149,9 @@ void MANGLE_AUDIO_FUNC(unsigned int *ctx)
         st->shReg = 0.0f;
         st->shCnt = 0u;
         st->lpZ = 0.0f;
+        st->fpd = 0x2468ACE1u;
     }
+    if (st->fpd == 0u) st->fpd = 0x2468ACE1u;   /* never let the dither die */
 
     if (!st->initialized) {
         uint32_t e = st->clearIndex + MG_CLEAR_STEP;
@@ -194,7 +196,7 @@ void MANGLE_AUDIO_FUNC(unsigned int *ctx)
 
     uint32_t wp = st->writePos;
     float gph = st->grainPhase, lfo = st->lfo, lpZ = st->lpZ, shReg = st->shReg;
-    uint32_t shCnt = st->shCnt;
+    uint32_t shCnt = st->shCnt, fpd = st->fpd;
 
     int f;
     for (f = 0; f < 8; f++) {
@@ -228,11 +230,19 @@ void MANGLE_AUDIO_FUNC(unsigned int *ctx)
                 if (shCnt >= shN) { shReg = base; shCnt = 0u; }
                 float q = (float)((int)(shReg * cMul + (shReg >= 0.0f ? 0.5f : -0.5f))) * cInv;
                 lpZ += lpCoef * (q - lpZ);
+                if (lpZ > -1.0e-25f && lpZ < 1.0e-25f) lpZ = 0.0f;   /* flush denormal state */
                 m = mg_soft(lpZ * 1.1f);
             }
         }
 
-        buf[wp] = mg_soft(in + fb * m);
+        /* Anti-denormal: the pitched feedback decays into denormal floats,
+         * which stall the C67x (audio thread misses its deadline -> the pedal
+         * appears to freeze). Inject a sub-audible dither floor when the value
+         * is denormal-small so the ring never holds denormals. */
+        float v = in + fb * m;
+        if (v > -1.18e-23f && v < 1.18e-23f) v = (float)fpd * 1.18e-17f;
+        fpd ^= fpd << 13; fpd ^= fpd >> 17; fpd ^= fpd << 5;
+        buf[wp] = mg_soft(v);
         fxBuf[f]     = dry * inL + wet * m;
         fxBuf[f + 8] = dry * inR + wet * m;
 
@@ -245,4 +255,5 @@ void MANGLE_AUDIO_FUNC(unsigned int *ctx)
     st->lpZ = lpZ;
     st->shReg = shReg;
     st->shCnt = shCnt;
+    st->fpd = fpd;
 }
