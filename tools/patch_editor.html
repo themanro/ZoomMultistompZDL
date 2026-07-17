@@ -9743,7 +9743,7 @@ async function reread(){                        // explicit: await the dump and 
 }
 function awaitDump(timeout){
   return new Promise(res=>{
-    pendingDump={res,t:setTimeout(()=>{pendingDump=null;res(null);},timeout||900)};
+    pendingDump={res,t:setTimeout(()=>{pendingDump=null;sxAccum=null;res(null);},timeout||900)};
   });
 }
 
@@ -9754,20 +9754,23 @@ function awaitDump(timeout){
 let sxAccum=null;
 function onMidi(ev){
   const d=Array.from(ev.data);
-  if(d[0]===0xF0 || sxAccum){
-    sxAccum = sxAccum ? sxAccum.concat(d) : d;
-    const end = sxAccum.indexOf(0xF7);
-    if(end<0){ if(sxAccum.length>2048) sxAccum=null; return; }   // wait / bail on runaway
-    const msg = sxAccum.slice(0, end+1);
-    sxAccum = null;
-    if(TRACE) log("← "+hex(msg.slice(0,24))+(msg.length>24?` …(${msg.length}B)`:""));
-    handleSysex(msg);
-    return;
-  }
-  if(d[0]===0xC0){                       // program change echo
+  if(d[0]===0xF0){
+    sxAccum = d;                         // a new SysEx ALWAYS starts fresh (never append to a stale fragment)
+  }else if(sxAccum){
+    sxAccum = sxAccum.concat(d);         // continuation of an in-progress SysEx
+  }else if(d[0]===0xC0){                 // standalone program-change echo
     curProg=d[1]; renderLibrary(); log("program change -> "+d[1]);
     if(!busy) requestPatch();
+    return;
+  }else{
+    return;                              // other channel/realtime bytes: ignore
   }
+  const end = sxAccum.indexOf(0xF7);
+  if(end<0){ if(sxAccum.length>4096) sxAccum=null; return; }   // wait / bail on runaway
+  const msg = sxAccum.slice(0, end+1);
+  sxAccum = null;
+  if(TRACE) log("← "+hex(msg.slice(0,24))+(msg.length>24?` …(${msg.length}B)`:""));
+  handleSysex(msg);
 }
 function handleSysex(m){
   if(m[1]===0x52 && m[3]===DEVID && m[4]===0x28 && m.length===146){
