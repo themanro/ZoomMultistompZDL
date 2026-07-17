@@ -9730,11 +9730,12 @@ async function connect(){
     $("devname").textContent=`${inp.name} ⇄ ${out.name}`;
     send([0xf0,0x7e,0x00,0x06,0x01,0xf7]);        // identity request (universal, safe)
     await sleep(40);
-    await reread();                                // read the CURRENT patch only (0x29)
-    // NOTE: connect is deliberately read-only and does NOT step through the 50
-    // programs or send 0x33 — a report showed patches being erased on connect
-    // after 0x33 was added, so the bank read is now behind "Reload bank" only.
-    log("connected (read-only). Press “Reload bank” to list all 50 patches.");
+    await reread();                                // show the CURRENT patch immediately
+    // Fill the library in the background (non-blocking) so names appear without
+    // pressing Reload bank. This only reads (PC-select + 0x29) — NO 0x33, the
+    // command that erased patches, is ever sent.
+    log("connected — reading bank in the background…");
+    readAll();
   }catch(e){
     banner("MIDI access failed: "+e.message+" — check: Chrome/Edge? localhost? Did you allow the MIDI permission prompt? Is Zoom Effect Manager closed (it locks the port)?");
   }
