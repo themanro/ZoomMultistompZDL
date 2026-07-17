@@ -188,7 +188,9 @@ void MANGLE_AUDIO_FUNC(unsigned int *ctx)
     float cMul = 256.0f, cInv = 0.00390625f;
     mg_crush_scale(bits, &cMul, &cInv);
     float lpCoef = 0.6f - mangle * 0.55f;         /* crush low-pass darkens */
-    uint32_t shN = 1u + (uint32_t)(mangle * 15.0f);   /* sample-hold 1..16x */
+    uint32_t shN = 1u + (uint32_t)(int)(mangle * 15.0f);   /* sample-hold 1..16x
+        (via signed int: a direct float->unsigned cast pulls in __c6xabi_fixfu,
+         which the loader can't resolve -> branch to 0 -> freeze) */
 
     uint32_t wp = st->writePos;
     float gph = st->grainPhase, lfo = st->lfo, lpZ = st->lpZ, shReg = st->shReg;
