@@ -9742,6 +9742,7 @@ async function connect(){
 function requestPatch(){ send(zx([0x29])); }
 async function reread(){                        // explicit: await the dump and report
   if(!midiOut){banner("Connect MIDI first.");return;}
+  send(zx([0x50])); await sleep(20);            // edit-enable: the pedal only dumps patches in this mode
   send(zx([0x29]));
   const d=await awaitDump(1300);
   if(d){ rawPatch=d.slice(0,146); patch=decodePatch(rawPatch); editModeActive=false; render(); log("re-read OK: "+patch.name); }
@@ -9815,6 +9816,7 @@ function storeTo(slotNum){
 /* ---------- patch library --------------------------------------------- */
 async function readOnce(i,settle,timeout){   // PC to slot i, request, await one dump
   send([0xc0,i]); await sleep(settle);
+  send(zx([0x50]));                            // re-assert edit-enable (a PC can drop it) so the dump comes
   send(zx([0x29]));
   const d=await awaitDump(timeout);
   return (d&&d.length>=146) ? d.slice(0,146) : null;
