@@ -273,6 +273,22 @@ def _em_taffy(c):                         # Taffy — waveform pulled apart
         prev = y
 
 
+def _em_mangle(c):                        # Mangle — repeats decaying + warping
+    # a row of echo "blips" shrinking and jittering as they mutate
+    spec = [(44, 0, 8), (56, -3, 6), (68, 4, 4), (80, -2, 3), (90, 2, 2)]
+    for cx, dy, h in spec:
+        c.vline(cx, CY + dy - h, CY + dy + h)
+        c.px(cx - 1, CY + dy - h); c.px(cx + 1, CY + dy - h)
+    # a warp squiggle threading through them
+    prev = None
+    for x in range(44, 92):
+        t = (x - 44) / 48.0
+        y = int(CY + 9 * math.sin(t * 6.28318 * 1.6) * (1.0 - t))
+        if prev is not None:
+            _line(c, x - 1, prev, x, y)
+        prev = y
+
+
 def _em_dissolve(c):                      # Dissolve — block eroding to dots
     for y in range(CY - 7, CY + 8):
         c.hline(46, 58, y)
@@ -292,7 +308,7 @@ EMBLEMS = {
     "Reel": _em_reel_single, "Spool": _em_spool, "Oxide": _em_oxide,
     "Lush": _em_swirl, "Room": _em_room,
     "Galactic": _em_stars, "OTT": _em_arrows, "TapeHack": _em_tapehack,
-    "Taffy": _em_taffy, "Dissolve": _em_dissolve,
+    "Taffy": _em_taffy, "Dissolve": _em_dissolve, "Mangle": _em_mangle,
 }
 
 

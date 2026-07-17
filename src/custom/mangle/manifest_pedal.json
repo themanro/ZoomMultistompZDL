@@ -1,0 +1,45 @@
+{
+  "effect_name": "Mangle",
+  "comment": "PEDAL BUILD manifest for Mangle (5-knob). Feedback delay whose repeats mutate each pass; Mode selects pitch-down / pitch-up / tremolo / crush.",
+  "audio_func_name": "Fx_DLY_Mangle",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_. Grouped under DLY with the rest of the pack.",
+  "fxid": 462,
+  "fxid_comment": "0x01CE. Verify uniqueness before flashing.",
+  "fxid_version": "1.00",
+  "flags_byte": 1,
+  "params": [
+    {
+      "name": "Time",
+      "max": 100,
+      "default": 40,
+      "comment": "params[5]. Delay length (~23 ms .. 1.3 s)."
+    },
+    {
+      "name": "Feedbk",
+      "max": 100,
+      "default": 45,
+      "comment": "params[6]. Feedback / repeat count (0 .. 0.92)."
+    },
+    {
+      "name": "Mangle",
+      "max": 100,
+      "default": 50,
+      "comment": "params[7]. Transform intensity; 0 = clean delay."
+    },
+    {
+      "name": "Mode",
+      "max": 100,
+      "default": 0,
+      "comment": "params[8]. 0-24 pitch down · 25-49 pitch up · 50-74 tremolo · 75-100 crush."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 1,
+      "comment": "params[9]. Dry/wet (starts at 1 = quiet-safe)."
+    }
+  ],
+  "audio_nop": false,
+  "audio_nop_comment": "Set true for a UI-only smoke build before trusting the DSP."
+}

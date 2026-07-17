@@ -7,11 +7,11 @@ This was a good amount of work and tokens, please consider to: [buymeacoffee.com
 
 ## Custom effect pack
 
-This fork ships a curated **library of 14 effects** — all grouped under the
-Delay category, each with a custom on-device cover. Eleven originals
+This fork ships a curated **library of 15 effects** — all grouped under the
+Delay category, each with a custom on-device cover. Twelve originals
 (granular shimmer, drum glitch, tape degradation, a Dune-style drone, a Data
 Corrupter-style synth, a swept ring mod, high-gain amp+cab, a feedback howl,
-a Tensor-style tape warp, a Parting-style glitch delay) plus three
+a Tensor-style tape warp, a Parting-style glitch delay, a mutating-repeats delay) plus three
 Airwindows-derived ports (Galactic reverb, Oxide tape, Spool tape echo).
 See [CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md) for knob layouts and sound demos.
 
@@ -37,10 +37,11 @@ See [CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md) for knob layouts and sound demos.
 <tr>
 <td align="center"><img src="graphics/taffy.png" width="220" alt="Taffy"></td>
 <td align="center"><img src="graphics/dissolve.png" width="220" alt="Dissolve"></td>
+<td align="center"><img src="graphics/mangle.png" width="220" alt="Mangle"></td>
 </tr>
 </table>
 
-> Not all hardware-verified yet, and the pedal can't hold/run all 14 at once
+> Not all hardware-verified yet, and the pedal can't hold/run all 15 at once
 > (storage + DSP limits) — install a subset, back up first, flash one at a
 > time. All volume knobs default to **1** so nothing is loud at patch select.
 

@@ -1,8 +1,8 @@
 # Custom Effect Pack (themanro)
 
-A curated **library of 14 effects** for the Zoom MS-70CDR (ZDL family),
+A curated **library of 15 effects** for the Zoom MS-70CDR (ZDL family),
 built on the [repeat98/ZoomMultistompZDL](https://github.com/repeat98/ZoomMultistompZDL)
-toolchain. Ten are originals (each with a full-quality Python **desktop
+toolchain. Twelve are originals (each with a full-quality Python **desktop
 preview** in `tools/audio_preview/renderers/`); the rest are rebuilt/renamed
 Airwindows-derived ports. All are grouped under the **Delay** category with a
 custom on-device cover, and all compile clean (`.fardata 0`, `0 relocations`).
@@ -11,7 +11,7 @@ custom on-device cover, and all compile clean (`.fardata 0`, `0 relocations`).
 > TapeHack, Lush and Room were dropped; Taffy and Dissolve are new and not yet
 > hardware-tested. All volume knobs (Level/Output/Mix) now default to **1** so
 > nothing is loud at patch select — dial them up. The pedal **can't hold or
-> run all 14 at once** (storage + DSP limits) — install a subset, back up
+> run all 15 at once** (storage + DSP limits) — install a subset, back up
 > first, flash one at a time.
 
 ## Pedal icons
@@ -38,6 +38,7 @@ custom on-device cover, and all compile clean (`.fardata 0`, `0 relocations`).
 <tr>
 <td align="center"><img src="graphics/taffy.png" width="220" alt="Taffy"></td>
 <td align="center"><img src="graphics/dissolve.png" width="220" alt="Dissolve"></td>
+<td align="center"><img src="graphics/mangle.png" width="220" alt="Mangle"></td>
 </tr>
 </table>
 
@@ -67,6 +68,7 @@ rebuilt/renamed Airwindows-derived ports.
 | Howl | `Howl` | Tune, Annihil, Level | original | DBA Total Sonic Annihilation-style self-oscillating feedback |
 | Taffy | `Taffy` | Speed, Chance, Mix | original | Red Panda Tensor-style tape warp: reverse/stop/double + random slips |
 | Dissolve | `Dissolve` | Chance, Smear, Glitch, Mix | original | OBNE Parting-style glitch delay dissolving into reverb wash |
+| Mangle | `Mangle` | Time, Feedbk, Mangle, Mode, Mix | original | delay whose repeats mutate each pass: pitch↓/pitch↑/tremolo/crush |
 | Galactic | `Galactic` | 5 | port | lush Airwindows reverb (wet path boosted) |
 | Oxide | `Oxide` | 9 | port | tape saturation/drive (Airwindows ToTape) |
 | Spool | `Spool` | 9 | port | tape echo (Airwindows-inspired) |
@@ -116,7 +118,7 @@ python3 build_all.py flower          # one effect -> dist/Flower.ZDL
 python3 build_all.py scorch          # etc.
 ```
 
-Pre-built `.ZDL` files for all 14 are in [`dist/`](dist/).
+Pre-built `.ZDL` files for all 15 are in [`dist/`](dist/).
 
 ## Implementation notes
 

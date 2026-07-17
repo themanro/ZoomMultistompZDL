@@ -39,6 +39,7 @@ RELEASE_PLUGINS = [
     ("howl",        CUSTOM_DIR / "howl"        / "build.py"),
     ("taffy",       CUSTOM_DIR / "taffy"       / "build.py"),
     ("dissolve",    CUSTOM_DIR / "dissolve"    / "build.py"),
+    ("mangle",      CUSTOM_DIR / "mangle"      / "build.py"),
 ]
 
 # Dropped from the release set 2026-06-29 after hardware listening (user
