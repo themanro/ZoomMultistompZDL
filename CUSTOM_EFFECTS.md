@@ -1,17 +1,22 @@
 # Custom Effect Pack (themanro)
 
-A curated **library of 15 effects** for the Zoom MS-70CDR (ZDL family),
+A curated **library of 16 effects** for the Zoom MS-70CDR (ZDL family),
 built on the [repeat98/ZoomMultistompZDL](https://github.com/repeat98/ZoomMultistompZDL)
-toolchain. Twelve are originals (each with a full-quality Python **desktop
+toolchain. Thirteen are originals (most with a full-quality Python **desktop
 preview** in `tools/audio_preview/renderers/`); the rest are rebuilt/renamed
 Airwindows-derived ports. All are grouped under the **Delay** category with a
 custom on-device cover, and all compile clean (`.fardata 0`, `0 relocations`).
 
-> ⚠️ **Status:** curated after hardware listening (2026-06-29): OTT, Reel,
-> TapeHack, Lush and Room were dropped; Taffy and Dissolve are new and not yet
-> hardware-tested. All volume knobs (Level/Output/Mix) now default to **1** so
-> nothing is loud at patch select — dial them up. The pedal **can't hold or
-> run all 15 at once** (storage + DSP limits) — install a subset, back up
+> ⚠️ **Status:** curated after hardware listening. **Mangle** is now a 6-knob
+> blendable delay (Crush/Tremolo/Pitch), **Taffy** a 5-knob tape warp, and
+> **Rooms** (new) is a multi-mode reverb — lightly hardware-checked so far.
+> All volume knobs (Level/Output/Mix) default to **1** so nothing is loud at
+> patch select — dial them up (in the Patch Editor, patches self-materialise on
+> load; on the pedal's own footswitch you may need to nudge a knob once).
+> **Custom fxids must not collide with any stock effect id** — the pedal keys
+> effects by fxid alone, so a collision loads the wrong DSP (cracking/dead);
+> `build/extract_effect_db.py` now guards against this. The pedal **can't hold
+> or run all 16 at once** (storage + DSP limits) — install a subset, back up
 > first, flash one at a time.
 
 ## Pedal icons
@@ -39,6 +44,7 @@ custom on-device cover, and all compile clean (`.fardata 0`, `0 relocations`).
 <td align="center"><img src="graphics/taffy.png" width="220" alt="Taffy"></td>
 <td align="center"><img src="graphics/dissolve.png" width="220" alt="Dissolve"></td>
 <td align="center"><img src="graphics/mangle.png" width="220" alt="Mangle"></td>
+<td align="center"><img src="graphics/rooms.png" width="220" alt="Rooms"></td>
 </tr>
 </table>
 
@@ -66,9 +72,10 @@ rebuilt/renamed Airwindows-derived ports.
 | GenLoss | `GenLoss` | Wow, Tone, Hiss | original | tape/VHS generation-loss degradation |
 | Scorch | `Scorch` | Gain, Level | original | aggressive high-gain amp + cab |
 | Howl | `Howl` | Tune, Annihil, Level | original | DBA Total Sonic Annihilation-style self-oscillating feedback |
-| Taffy | `Taffy` | Speed, Chance, Mix | original | Red Panda Tensor-style tape warp: reverse/stop/double + random slips |
+| Taffy | `Taffy` | Speed, Chance, Depth, Glide, Mix | original | Red Panda Tensor-style tape warp: Speed anchors the head (reverse/stop/double), Depth/Chance add random slips, Glide sets motor smoothness |
 | Dissolve | `Dissolve` | Chance, Smear, Glitch, Mix | original | OBNE Parting-style glitch delay dissolving into reverb wash |
-| Mangle | `Mangle` | Time, Feedbk, Mangle, Mode, Mix | original | delay whose repeats mutate each pass: pitch↓/pitch↑/tremolo/crush |
+| Mangle | `Mangle` | Time, Feedbk, Crush, Tremolo, Pitch, Mix | original | delay with three blendable per-repeat mutations: Crush (bitcrush/degrade) + Tremolo compound in the feedback, Pitch (octave-down grain) on the output |
+| Rooms | `Rooms` | Mode, Time, Freq, Depth, Mix | original | DBA Rooms-inspired multi-mode reverb — Mode picks ROOM/DIGIT/PEAK/GATE/WAVE/GONG; Freq/Depth are re-purposed per mode |
 | Galactic | `Galactic` | 5 | port | lush Airwindows reverb (wet path boosted) |
 | Oxide | `Oxide` | 9 | port | tape saturation/drive (Airwindows ToTape) |
 | Spool | `Spool` | 9 | port | tape echo (Airwindows-inspired) |
@@ -79,8 +86,9 @@ GenLoss dropouts, Scorch's full cab IR) — see each effect's `manifest.json` vs
 
 ## Sound previews
 
-Rendered demos (click to play in GitHub's audio viewer). These are the
-**desktop** renders — full-quality, before the 2-knob pedal reduction.
+Rendered demos (click to play in GitHub's audio viewer) for the effects that
+have a desktop renderer. These are the **desktop** renders — full-quality,
+before the pedal knob reduction.
 
 | Effect | Demo | Dry source |
 |---|---|---|
@@ -118,7 +126,7 @@ python3 build_all.py flower          # one effect -> dist/Flower.ZDL
 python3 build_all.py scorch          # etc.
 ```
 
-Pre-built `.ZDL` files for all 15 are in [`dist/`](dist/).
+Pre-built `.ZDL` files for all 16 are in [`dist/`](dist/).
 
 ## Implementation notes
 
