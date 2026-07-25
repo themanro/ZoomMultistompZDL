@@ -51,14 +51,24 @@ def _find_symbol(d, base, secs, prefix):
     sym = next(s for s in secs if s["typ"] in (11, 2))
     strs = secs[sym["link"]]
     strtab = d[base + strs["off"]: base + strs["off"] + strs["size"]]
+    # Effects ship BOTH `picEffectType_<name>` (the full 128x64 cover) and
+    # `picEffectTypeKnob_<name>` (a small knob graphic). The loose prefix matches
+    # both; grabbing the Knob one decodes to garbage. Prefer the real cover;
+    # fall back to the Knob symbol only if no plain cover exists.
+    fallback = (None, None)
     for k in range(sym["size"] // sym["entsz"]):
         b = base + sym["off"] + k * sym["entsz"]
         st_name, st_value, st_size, info, other, shndx = struct.unpack_from("<IIIBBH", d, b)
         end = strtab.index(b"\0", st_name)
         name = strtab[st_name:end].decode("latin1")
-        if name.startswith(prefix):
-            return name, st_value
-    return None, None
+        if not name.startswith(prefix):
+            continue
+        if "Knob" in name:
+            if fallback[0] is None:
+                fallback = (name, st_value)
+            continue
+        return name, st_value
+    return fallback
 
 
 def decode_picture(path: str):
