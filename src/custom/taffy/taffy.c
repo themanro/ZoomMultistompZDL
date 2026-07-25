@@ -3,12 +3,16 @@
  *
  * The input is continuously recorded into a ring; a playback head reads it
  * back at a variable speed, from full reverse through stop to double speed.
- * 3 knobs:
- *   Speed  (params[5]) - 0 = -1x (full reverse), 25 = stop, 50 = +1x
- *                        (normal), 100 = +2x (octave up). Tape-style glide.
- *   Chance (params[6]) - random slips: the head keeps re-deciding its speed
- *                        (reverse/half/normal/double) and sometimes jumps.
- *   Mix    (params[7]) - dry/wet.
+ * 5 knobs:
+ *   Speed  (params[5]) - the tape-motor speed the head ALWAYS trends toward:
+ *                        0 = -1x (full reverse), 25 = stop, 50 = +1x (normal),
+ *                        100 = +2x (octave up). This is the anchor.
+ *   Chance (params[6]) - how often random speed/direction slips happen.
+ *   Depth  (params[7]) - how far a slip deviates from Speed. 0 = slips do
+ *                        nothing (pure speed control); 1 = fully random warps.
+ *   Glide  (params[8]) - tape-motor smoothness: 0 = snappy/abrupt speed jumps,
+ *                        1 = long smooth pitch glides.
+ *   Mix    (params[9]) - dry/wet.
  *
  * When the head runs off the usable window (catches the record head at +2x,
  * or falls off the back at -1x) it jumps to a fresh spot through a short
@@ -137,6 +141,8 @@ void TAFFY_AUDIO_FUNC(unsigned int *ctx)
 
     float speedK = zoom_param_norm01(params[TAFFY_SPEED_SLOT], TAFFY_SPEED_DEFAULT_NORM);
     float chance = zoom_param_norm01(params[TAFFY_CHANCE_SLOT], TAFFY_CHANCE_DEFAULT_NORM);
+    float depth  = zoom_param_norm01(params[TAFFY_DEPTH_SLOT], TAFFY_DEPTH_DEFAULT_NORM);
+    float glide  = zoom_param_norm01(params[TAFFY_GLIDE_SLOT], TAFFY_GLIDE_DEFAULT_NORM);
     float mix    = zoom_param_norm01(params[TAFFY_MIX_SLOT], TAFFY_MIX_DEFAULT_NORM);
 
     /* knob -> speed: -1x .. stop .. +1x (noon) .. +2x */
@@ -145,6 +151,10 @@ void TAFFY_AUDIO_FUNC(unsigned int *ctx)
     else               knobSpeed = 1.0f + 2.0f * (speedK - 0.5f);
     float wet = mix;
     float dry = 1.0f - mix;
+
+    /* Glide -> motor slew: high glide = smaller step = smoother pitch bends. */
+    float slew = 0.0005f + (1.0f - glide) * 0.015f;   /* ~0.0005 (smooth) .. ~0.0155 (snappy) */
+    float slipProb = chance * chance;                 /* per-decision slip probability */
 
     uint32_t wp = st->writePos;
     float dA = st->dA, dB = st->dB, fade = st->fade;
@@ -160,36 +170,41 @@ void TAFFY_AUDIO_FUNC(unsigned int *ctx)
         float inR = fxBuf[f + 8];
         buf[wp] = 0.5f * (inL + inR);
 
-        /* random slips: every TF_EVT samples, maybe re-decide */
+        /* random slips: every TF_EVT samples, maybe re-decide. Slips are now
+         * DEVIATIONS FROM the knob speed, scaled by Depth, so Speed stays the
+         * audible anchor and Depth controls how wild the warps get. */
         evt++;
         if (evt >= TF_EVT) {
             evt = 0u;
             rng = tf_rng(rng);
-            if (TF_RAND01(rng) < chance * chance * 0.9f) {
+            if (TF_RAND01(rng) < slipProb) {
                 rng = tf_rng(rng);
                 /* pick 0..4 without integer modulo (runtime divide = banned):
                  * 3 bits 0..7, fold 5..7 down (slight bias, fine for slips) */
                 uint32_t pick = (rng >> 4) & 7u;
                 if (pick > 4u) pick -= 5u;
-                if (pick == 0u)      tgt = -1.0f;   /* rewind */
-                else if (pick == 1u) tgt = -0.5f;   /* slow rewind */
-                else if (pick == 2u) tgt = 0.5f;    /* octave down */
-                else if (pick == 3u) tgt = 1.0f;    /* normal */
-                else                 tgt = 2.0f;    /* octave up */
+                float slipSpeed;
+                if (pick == 0u)      slipSpeed = -1.0f;   /* rewind */
+                else if (pick == 1u) slipSpeed = -0.5f;   /* slow rewind */
+                else if (pick == 2u) slipSpeed = 0.5f;    /* octave down */
+                else if (pick == 3u) slipSpeed = 1.0f;    /* normal */
+                else                 slipSpeed = 2.0f;    /* octave up */
+                /* blend from the knob speed toward the slip target by Depth */
+                tgt = knobSpeed + depth * (slipSpeed - knobSpeed);
                 rng = tf_rng(rng);
-                if (fade <= 0.0f && TF_RAND01(rng) < 0.3f) {
-                    /* relocate: jump the head somewhere fresh */
+                if (fade <= 0.0f && TF_RAND01(rng) < 0.3f * depth) {
+                    /* relocate: jump the head somewhere fresh (Depth-gated) */
                     rng = tf_rng(rng);
                     dB = TF_DMIN + TF_RAND01(rng) * (TF_DMAX * 0.5f);
                     fade = TF_FADE_INC;
                 }
-            } else if (TF_RAND01(rng) >= chance) {
-                tgt = knobSpeed;                    /* drift back to the knob */
+            } else {
+                tgt = knobSpeed;                    /* between slips, sit at the knob speed */
             }
         }
 
-        /* tape-motor glide toward the target speed */
-        cur += (tgt - cur) * TF_SLEW;
+        /* tape-motor glide toward the target speed (Glide sets the rate) */
+        cur += (tgt - cur) * slew;
 
         /* both heads move together through the material */
         float dd = 1.0f - cur;

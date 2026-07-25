@@ -148,6 +148,43 @@ def main() -> None:
     for r, e, is_custom in sorted(best.values(), key=lambda x: x[1]["name"].upper()):
         db["custom" if is_custom else "stock"].append(e)
 
+    # ---- legacy fxid aliases -------------------------------------------------
+    # Every fxid an effect has EVER shipped under. Old patches (and pedals still
+    # running an old build) reference these ids; without aliases the editor
+    # shows "unknown effect 0x…" for effects that are installed and playing
+    # fine. Alias entries reuse the current build's params/cover.
+    LEGACY_FXIDS = {
+        "Microlm":  [474],
+        "Flower":   [475],
+        "Shatter":  [476],
+        "Arrakis":  [453],
+        "Corrupt":  [477],
+        "Klang":    [478],
+        "Scorch":   [479],
+        "Howl":     [480],
+        "Taffy":    [460, 482],
+        "Dissolve": [481],
+        "Mangle":   [462, 463, 464, 465, 467, 468, 469, 483],
+        "Rooms":    [471],
+    }
+    current_ids = {e["id"] for e in db["custom"]} | {e["id"] for e in db["stock"]}
+    db["legacy"] = []
+    for e in db["custom"]:
+        for old in LEGACY_FXIDS.get(e["name"], []):
+            if old == e["fxid"]:
+                continue
+            lid = patch_id(old, e["gid"])
+            if lid in current_ids:
+                continue
+            alias = dict(e)
+            alias["fxid"] = old
+            alias["id"] = lid
+            alias["legacy"] = True
+            alias["name"] = f"{e['name']} (old {old})"
+            db["legacy"].append(alias)
+    db["legacy"].sort(key=lambda x: x["name"].upper())
+    print(f"legacy aliases: {len(db['legacy'])}")
+
     # sanity: no patch-ID collisions
     ids = {}
     for kind in ("custom", "stock"):
@@ -156,9 +193,44 @@ def main() -> None:
                 print(f"WARNING: patch-ID collision {e['name']} vs {ids[e['id']]}")
             ids[e["id"]] = e["name"]
 
+    # sanity: no fxid collision with a stock effect. The pedal keys effects by
+    # fxid ALONE (independent of gid/category), so a custom fxid equal to any
+    # stock fxid loads the wrong DSP on hardware -> cracking / dead effect. (This
+    # is what fxids 474-483 hit, e.g. Howl 480 vs stock CoronaCho 480.)
+    stock_fx = {}
+    for e in db["stock"]:
+        if "fxid" in e:
+            stock_fx.setdefault(e["fxid"], e["name"])
+    for e in db["custom"]:
+        if e.get("fxid") in stock_fx:
+            print(f"*** fxid COLLISION: custom {e['name']} fxid {e['fxid']} == stock "
+                  f"{stock_fx[e['fxid']]} — PICK A DIFFERENT fxid, this breaks on hardware ***")
+
+    db_json = json.dumps(db, indent=1)
+
     out = ROOT / "tools" / "effects_db.json"
-    out.write_text(json.dumps(db, indent=1))
+    out.write_text(db_json)
     print(f"{len(db['custom'])} custom + {len(db['stock'])} stock effects -> {out}")
+
+    # The patch editor embeds the DB INLINE (const DB={...};) so it works over
+    # file:// without a fetch. Keep that inline copy in sync — otherwise the
+    # editor silently runs a stale DB and shows freshly-built effects as
+    # "unknown effect 0x…". Splice the same JSON into the HTML.
+    import re
+    editor = ROOT / "tools" / "patch_editor.html"
+    if editor.exists():
+        html = editor.read_text()
+        new_html, n = re.subn(
+            r"const DB=\{[\s\S]*?\n\};",
+            lambda _m: "const DB=" + db_json + ";",
+            html,
+            count=1,
+        )
+        if n == 1:
+            editor.write_text(new_html)
+            print(f"synced inline DB -> {editor}")
+        else:
+            print(f"WARNING: could not find inline 'const DB={{...}};' block in {editor}")
 
 
 if __name__ == "__main__":

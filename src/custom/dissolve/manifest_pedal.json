@@ -5,8 +5,8 @@
   "gid": 8,
   "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_. Grouped under DLY with the rest of the pack.",
   "fxid": 461,
-  "fxid_comment": "0x01CD. Verify uniqueness before flashing.",
-  "fxid_version": "1.00",
+  "fxid_comment": "0x01CD. Reverted from 481 to the last known-working id + safe default. (The 481 bump collided with stock effect fxids and broke on hardware; the audible-on-load Mix hack is obsolete now the editor materialises patches via a full-patch send.)",
+  "fxid_version": "2.00",
   "flags_byte": 1,
   "params": [
     {
@@ -31,7 +31,7 @@
       "name": "Mix",
       "max": 100,
       "default": 1,
-      "comment": "params[8]. Dry/wet (starts at 1 = quiet-safe)."
+      "comment": "Mix default 1 (quiet-safe). The editor materialises patches on load (full-patch send), so audible-on-load no longer needs a hot default."
     }
   ],
   "audio_nop": false,

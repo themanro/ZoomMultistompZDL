@@ -52,11 +52,29 @@ experiment, not a port.
 * Use release ZDL filenames with unique basenames of 8 characters or less.
   Zoom tooling/device code can truncate longer basenames, and duplicate
   post-trim names have been reported to freeze the pedal when loading.
+* **Never use a `switch` (or a dense `if/else` on an int) in `.audio` code.**
+  The compiler lowers it to a jump table: a `.switch:<func>` section of
+  absolute code addresses reached by an INDIRECT branch (`B An`/`B Bn`). Those
+  addresses need relocation, but ZDLs link with **zero relocations**, so the
+  branch lands on garbage and the DSP freezes. Replace with straight-line
+  arithmetic (e.g. `2^n` via `(float)(1<<n)`; `2^-n` by building the IEEE-754
+  exponent field `((uint32_t)(127-n))<<23` — no divide, no table). Verify with
+  `dis6x`: there must be no `.switch:*` section and no register-indirect branch
+  other than `B B3` (the return). This freeze is insidious because if the
+  switch result is unused the compiler deletes it (so a pass-through smoke build
+  looks fine) — it only appears once the result is actually consumed.
 
 ## Known Freeze Patterns
 
 * Large Airwindows delay/reverb/chorus state arrays in `.fardata`.
 * Small statics compiled into `.bss` or B14/SBR-relative addressing.
+* `switch` statements / jump tables in `.audio` (indirect branch through an
+  unrelocated `.switch` section). This froze Mangle across ~6 rebuilds — a
+  `mg_crush_scale(bits)` switch was called every buffer and its jump table's
+  indirect branch landed on garbage. The freeze presented as "turning the knob
+  freezes the pedal" because the knob changed the switch index. Every red
+  herring (granular reads, feedback, denormals) was ruled out only after
+  disassembly showed the `.switch:Fx_DLY_Mangle` section + `BNOP.S2X A5`.
 * New external `__c6xabi_*` helpers beyond the tiny set already handled by
   the linker.
 * Helper-heavy DSP paths in the first executable build. `ToTape9` cleared

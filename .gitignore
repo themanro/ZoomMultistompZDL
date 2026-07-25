@@ -26,3 +26,6 @@ build/probes/
 *.id2
 *.nam
 *.til
+
+# local per-effect safety backups
+src/custom/*/backup_v1/

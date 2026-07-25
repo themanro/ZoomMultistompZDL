@@ -1,26 +1,35 @@
 /*
- * mangle.c -- Mangle: a delay whose repeats mutate every pass, MS-70CDR.
+ * mangle.c -- Mangle: a delay whose repeats mutate, MS-70CDR.
  *
- * A feedback delay where the feedback path runs a transform, so each repeat
- * is more processed than the last. A Mode knob picks the character; Mangle
- * sets the intensity (Mangle=0 = a clean delay). 5 knobs:
+ * A feedback delay with three blendable "mangle" characters. Each has its own
+ * amount knob and can be dialled in independently (all at 0 = clean delay):
+ *   Crush    - sample-rate reduce + bitcrush + darkening, IN the feedback, so
+ *              echoes erode more each pass
+ *   Tremolo  - amplitude LFO, IN the feedback, so repeats pulse harder as they
+ *              regenerate
+ *   Pitch    - granular octave-down shimmer on the wet OUTPUT (feed-forward)
+ *
+ * 6 knobs:
  *   Time     (params[5]) - delay length (~23 ms .. 1.3 s)
  *   Feedback (params[6]) - repeat count / regeneration
- *   Mangle   (params[7]) - transform intensity (0 = clean delay)
- *   Mode     (params[8]) - 0 pitch down · 1 pitch up · 2 tremolo · 3 crush
- *   Mix      (params[9]) - dry/wet
+ *   Crush    (params[7]) - degradation amount (0 = clean)
+ *   Tremolo  (params[8]) - amplitude-wobble depth (0 = off)
+ *   Pitch    (params[9]) - octave-down shimmer amount (0 = off)
+ *   Mix      (params[10]) - dry/wet
  *
- * Modes (applied to the wet before it feeds back, so they compound):
- *   pitch  - granular pitch shift; repeats spiral down or up an octave
- *   trem   - amplitude LFO; repeats pulse harder as they regen
- *   crush  - sample-rate reduce + bitcrush + darkening low-pass + soft sat;
- *            echoes erode into lo-fi dust
- *
- * Safe-DSP: no math lib (polynomial sine, cubic clip), no runtime divide
- * (crush quantiser uses power-of-two mul/inv chosen by a switch; reciprocals
- * are compile-time), no static arrays. Mono ring in the ctx[3] arena
- * (validated + lazily cleared). ctx[11]/ctx[12] magic shuttle preserved.
- * The feedback write is soft-clipped (unity slope) so no mode can run away.
+ * SAFE-DSP -- hard-won, see docs/SAFE-DSP-RULES.md:
+ *   - NO `switch` anywhere: it compiles to a jump table (a `.switch` section of
+ *     code addresses reached by an indirect branch). ZDLs link with zero
+ *     relocations, so that branch lands on garbage and the DSP freezes. This
+ *     was the real cause of Mangle's long freeze saga. Crush levels are built
+ *     with arithmetic instead.
+ *   - The granular read is FEED-FORWARD only (never fed back); the feedback
+ *     loop carries only the plain-delay signal or scalar-mutated versions of it.
+ *   - No math lib, no runtime divide, no static arrays, no float->unsigned cast.
+ *   - Denormals flushed so the decaying tail can't stall the FPU.
+ *   - ctx[11]/ctx[12] magic shuttle preserved; ctx[3] arena validated + cleared.
+ * Verify every build with dis6x: no `.switch:*` section, and no register-
+ * indirect branch other than `B B3`.
  */
 
 #include <stdint.h>
@@ -41,10 +50,13 @@ MANGLE_CODE_SECTION(MANGLE_AUDIO_FUNC)
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
 #define MG_MAGIC   0x4D414E47u        /* 'MANG' */
-#define MG_VERSION 2u
+#define MG_VERSION 5u                 /* multi-character blendable build */
 
-#define MG_BUF        65536u          /* mono ring, ~1.49 s (power of 2) */
+#define MG_BUF        65536u          /* delay ring, ~1.49 s (power of 2) */
 #define MG_MASK       (MG_BUF - 1u)
+#define MG_GBUF       8192u           /* small pitch-grain ring (power of 2) */
+#define MG_GMASK      (MG_GBUF - 1u)
+#define MG_TOTAL      (MG_BUF + MG_GBUF)
 #define MG_CLEAR_STEP 4096u
 #define MG_DMIN       1024.0f         /* ~23 ms */
 #define MG_DMAX       58000.0f        /* ~1.31 s */
@@ -61,11 +73,12 @@ typedef struct MangleState {
     uint32_t clearIndex;
 
     uint32_t writePos;
-    float grainPhase;                 /* pitch grain phase 0..MG_GRAIN */
-    float lfo;                        /* tremolo phase */
-    float shReg;                      /* crush sample-hold register */
+    uint32_t gWritePos;               /* pitch-grain ring write head */
+    float    grainPhase;              /* pitch grain phase 0..MG_GRAIN */
+    float    lfo;                     /* tremolo phase */
+    float    shReg;                   /* crush sample-hold register */
     uint32_t shCnt;                   /* crush sample-hold counter */
-    float lpZ;                        /* crush low-pass state */
+    float    lpZ;                     /* crush low-pass state */
     uint32_t fpd;                     /* anti-denormal dither (xorshift) */
 } MangleState;
 
@@ -89,7 +102,7 @@ static inline float mg_soft(float x)
     return x - (x * x * x) * 0.14814815f;   /* x - x^3/6.75 */
 }
 
-/* linear read, d samples behind the write head */
+/* linear read, d samples behind the write head (big delay ring, FIXED d) */
 static inline float mg_read(const float *buf, uint32_t wp, float d)
 {
     int di = (int)d;
@@ -99,19 +112,26 @@ static inline float mg_read(const float *buf, uint32_t wp, float d)
     return buf[i0] * (1.0f - fr) + buf[i1] * fr;
 }
 
-/* crush quantiser step from a "bits" value, as power-of-two mul + inv
- * (no runtime divide). bits 2..8 -> levels 4..256. */
+/* linear read on the small grain ring (d stays < MG_GRAIN: small distance) */
+static inline float mg_gread(const float *g, uint32_t gwp, float d)
+{
+    int di = (int)d;
+    float fr = d - (float)di;
+    uint32_t i0 = (gwp - (uint32_t)di) & MG_GMASK;
+    uint32_t i1 = (i0 - 1u) & MG_GMASK;
+    return g[i0] * (1.0f - fr) + g[i1] * fr;
+}
+
+/* Crush levels as a power of two, WITHOUT a switch (a switch -> jump table ->
+ * indirect branch -> freeze here). cMul = 2^bits, cInv = 2^-bits built in the
+ * IEEE-754 exponent field (no divide). bits clamped to 3..8. */
 static inline void mg_crush_scale(int bits, float *mul, float *inv)
 {
-    switch (bits) {
-    case 2: *mul = 4.0f;   *inv = 0.25f;        break;
-    case 3: *mul = 8.0f;   *inv = 0.125f;       break;
-    case 4: *mul = 16.0f;  *inv = 0.0625f;      break;
-    case 5: *mul = 32.0f;  *inv = 0.03125f;     break;
-    case 6: *mul = 64.0f;  *inv = 0.015625f;    break;
-    case 7: *mul = 128.0f; *inv = 0.0078125f;   break;
-    default:*mul = 256.0f; *inv = 0.00390625f;  break;
-    }
+    if (bits < 3) bits = 3; else if (bits > 8) bits = 8;
+    *mul = (float)(1 << bits);
+    union { uint32_t u; float f; } cvt;
+    cvt.u = ((uint32_t)(127 - bits)) << 23;   /* exact 2^-bits, mantissa 0 */
+    *inv = cvt.f;
 }
 
 void MANGLE_AUDIO_FUNC(unsigned int *ctx)
@@ -133,10 +153,11 @@ void MANGLE_AUDIO_FUNC(unsigned int *ctx)
     if ((base & 3u) != 0u) return;
 
     uintptr_t bufBase = (base + sizeof(MangleState) + 7u) & ~(uintptr_t)7u;
-    if (bufBase + (uintptr_t)MG_BUF * 4u > end) return;
+    if (bufBase + (uintptr_t)MG_TOTAL * 4u > end) return;   /* delay ring + grain ring */
 
     MangleState *st = (MangleState *)base;
-    float *buf = (float *)bufBase;
+    float *buf  = (float *)bufBase;
+    float *gbuf = buf + MG_BUF;
 
     if (st->magic != MG_MAGIC || st->version != MG_VERSION) {
         st->magic = MG_MAGIC;
@@ -144,6 +165,7 @@ void MANGLE_AUDIO_FUNC(unsigned int *ctx)
         st->initialized = 0u;
         st->clearIndex = 0u;
         st->writePos = 0u;
+        st->gWritePos = 0u;
         st->grainPhase = 0.0f;
         st->lfo = 0.0f;
         st->shReg = 0.0f;
@@ -153,50 +175,44 @@ void MANGLE_AUDIO_FUNC(unsigned int *ctx)
     }
     if (st->fpd == 0u) st->fpd = 0x2468ACE1u;   /* never let the dither die */
 
-    if (!st->initialized) {
+    if (!st->initialized) {                     /* clear both rings, one chunk per call */
         uint32_t e = st->clearIndex + MG_CLEAR_STEP;
-        if (e > MG_BUF) e = MG_BUF;
+        if (e > MG_TOTAL) e = MG_TOTAL;
         uint32_t i;
         for (i = st->clearIndex; i < e; i++) buf[i] = 0.0f;
         st->clearIndex = e;
-        if (e >= MG_BUF) st->initialized = 1u;
+        if (e >= MG_TOTAL) st->initialized = 1u;
         return;
     }
 
-    float time   = zoom_param_norm01(params[MANGLE_TIME_SLOT], MANGLE_TIME_DEFAULT_NORM);
-    float fbk    = zoom_param_norm01(params[MANGLE_FEEDBK_SLOT], MANGLE_FEEDBK_DEFAULT_NORM);
-    float mangle = zoom_param_norm01(params[MANGLE_MANGLE_SLOT], MANGLE_MANGLE_DEFAULT_NORM);
-    float modeN  = zoom_param_norm01(params[MANGLE_MODE_SLOT], MANGLE_MODE_DEFAULT_NORM);
-    float mix    = zoom_param_norm01(params[MANGLE_MIX_SLOT], MANGLE_MIX_DEFAULT_NORM);
-
-    int mode = (int)(modeN * 3.999f);            /* 0..3 */
-    if (mode < 0) mode = 0; else if (mode > 3) mode = 3;
+    float time  = zoom_param_norm01(params[MANGLE_TIME_SLOT], MANGLE_TIME_DEFAULT_NORM);
+    float fbk   = zoom_param_norm01(params[MANGLE_FEEDBK_SLOT], MANGLE_FEEDBK_DEFAULT_NORM);
+    float crush = zoom_param_norm01(params[MANGLE_CRUSH_SLOT], MANGLE_CRUSH_DEFAULT_NORM);
+    float trmA  = zoom_param_norm01(params[MANGLE_TREMOLO_SLOT], MANGLE_TREMOLO_DEFAULT_NORM);
+    float ptchA = zoom_param_norm01(params[MANGLE_PITCH_SLOT], MANGLE_PITCH_DEFAULT_NORM);
+    float mix   = zoom_param_norm01(params[MANGLE_MIX_SLOT], MANGLE_MIX_DEFAULT_NORM);
 
     float delay = MG_DMIN + time * (MG_DMAX - MG_DMIN);
     float fb = fbk * MG_FB_MAX;
     float wet = mix, dry = 1.0f - mix;
 
-    /* per-mode setup */
-    float ratio = 1.0f;                           /* pitch modes */
-    if (mode == 0) ratio = 1.0f - 0.5f * mangle;  /* down to 0.5x (oct down) */
-    else if (mode == 1) ratio = 1.0f + mangle;    /* up to 2.0x (oct up) */
-    float gInc = 1.0f - ratio;                    /* grain phase increment */
-
-    float lfoInc = (2.0f + mangle * 8.0f) * (MG_TWO_PI / 44100.0f);   /* trem 2..10 Hz */
-    float tremDepth = mangle;
-
-    int bits = 8 - (int)(mangle * 6.0f);          /* crush 8..2 bits */
-    if (bits < 2) bits = 2;
+    /* Crush -> sample-rate reduction (hold 1..12) + bit depth (8..3) + tone. */
+    uint32_t shN = 1u + (uint32_t)(int)(crush * 11.0f);   /* signed int cast: no __c6xabi_fixfu */
+    int bits = 8 - (int)(crush * 5.0f);
     float cMul = 256.0f, cInv = 0.00390625f;
     mg_crush_scale(bits, &cMul, &cInv);
-    float lpCoef = 0.6f - mangle * 0.55f;         /* crush low-pass darkens */
-    uint32_t shN = 1u + (uint32_t)(int)(mangle * 15.0f);   /* sample-hold 1..16x
-        (via signed int: a direct float->unsigned cast pulls in __c6xabi_fixfu,
-         which the loader can't resolve -> branch to 0 -> freeze) */
+    float lpCoef = 0.95f - 0.85f * crush;                 /* more crush = darker feedback */
 
-    uint32_t wp = st->writePos;
-    float gph = st->grainPhase, lfo = st->lfo, lpZ = st->lpZ, shReg = st->shReg;
-    uint32_t shCnt = st->shCnt, fpd = st->fpd;
+    /* Tremolo -> depth + a fixed ~4.5 Hz rate. */
+    float lfoInc = 4.5f * (MG_TWO_PI / 44100.0f);
+
+    /* Pitch -> octave-down grain ratio + a blend amount so the grain fades out
+     * cleanly at 0 (no comb colouration when pitch is off). */
+    float ratio = 1.0f - 0.5f * ptchA;                    /* 1.0 .. 0.5 (oct down) */
+    float gInc = 1.0f - ratio;
+
+    uint32_t wp = st->writePos, gwp = st->gWritePos, shCnt = st->shCnt, fpd = st->fpd;
+    float gph = st->grainPhase, lfo = st->lfo, shReg = st->shReg, lpZ = st->lpZ;
 
     int f;
     for (f = 0; f < 8; f++) {
@@ -204,56 +220,57 @@ void MANGLE_AUDIO_FUNC(unsigned int *ctx)
         float inR = fxBuf[f + 8];
         float in = 0.5f * (inL + inR);
 
-        float m;
-        if (mode <= 1) {
-            /* granular pitch read at the delay tap */
-            float d1 = delay + gph;
-            float g2 = gph + MG_HALF;
-            if (g2 >= MG_GRAIN) g2 -= MG_GRAIN;
-            float d2 = delay + g2;
-            float e1 = (MG_HALF - mg_abs(MG_HALF - gph)) * MG_INV_HALF;
-            float e2 = (MG_HALF - mg_abs(MG_HALF - g2)) * MG_INV_HALF;
-            m = mg_read(buf, wp, d1) * e1 + mg_read(buf, wp, d2) * e2;
-            gph += gInc;
-            if (gph >= MG_GRAIN) gph -= MG_GRAIN;
-            else if (gph < 0.0f) gph += MG_GRAIN;
-        } else {
-            float base = mg_read(buf, wp, delay);
-            if (mode == 2) {
-                float trem = 1.0f - tremDepth * (0.5f - 0.5f * mg_sin(lfo));
-                lfo += lfoInc;
-                if (lfo > MG_TWO_PI) lfo -= MG_TWO_PI;
-                m = base * trem;
-            } else {
-                /* crush: sample-hold -> bit quantise -> low-pass -> sat */
-                shCnt++;
-                if (shCnt >= shN) { shReg = base; shCnt = 0u; }
-                float q = (float)((int)(shReg * cMul + (shReg >= 0.0f ? 0.5f : -0.5f))) * cInv;
-                lpZ += lpCoef * (q - lpZ);
-                if (lpZ > -1.0e-25f && lpZ < 1.0e-25f) lpZ = 0.0f;   /* flush denormal state */
-                m = mg_soft(lpZ * 1.1f);
-            }
-        }
+        /* delay tap: ONE fixed-distance read (the only pattern proven safe) */
+        float tap = mg_read(buf, wp, delay);
 
-        /* Anti-denormal: the pitched feedback decays into denormal floats,
-         * which stall the C67x (audio thread misses its deadline -> the pedal
-         * appears to freeze). Inject a sub-audible dither floor when the value
-         * is denormal-small so the ring never holds denormals. */
-        float v = in + fb * m;
+        /* --- feedback-side mangling (compounds every pass), all scalar --- */
+        /* tremolo */
+        float trem = 1.0f - trmA * (0.5f - 0.5f * mg_sin(lfo));
+        lfo += lfoInc;
+        if (lfo > MG_TWO_PI) lfo -= MG_TWO_PI;
+        float t = tap * trem;
+
+        /* crush: sample-hold -> quantise -> darken -> soft-clip, blended in */
+        shCnt++;
+        if (shCnt >= shN) { shReg = t; shCnt = 0u; }
+        float q = (float)((int)(shReg * cMul + (shReg >= 0.0f ? 0.5f : -0.5f))) * cInv;
+        lpZ += lpCoef * (q - lpZ);
+        if (lpZ > -1.0e-25f && lpZ < 1.0e-25f) lpZ = 0.0f;   /* flush low-pass denormals */
+        float crushed = mg_soft(lpZ * 1.15f);
+        float proc = t + crush * (crushed - t);              /* blend clean <-> crushed */
+
+        /* feedback ring write (smoke-proven plain-delay loop) */
+        float v = in + fb * proc;
         if (v > -1.18e-23f && v < 1.18e-23f) v = (float)fpd * 1.18e-17f;
         fpd ^= fpd << 13; fpd ^= fpd >> 17; fpd ^= fpd << 5;
         buf[wp] = mg_soft(v);
-        fxBuf[f]     = dry * inL + wet * m;
-        fxBuf[f + 8] = dry * inR + wet * m;
+
+        /* --- pitch shimmer on the OUTPUT (feed-forward grain, Arrakis-safe) --- */
+        gbuf[gwp] = proc;
+        float g2 = gph + MG_HALF;
+        if (g2 >= MG_GRAIN) g2 -= MG_GRAIN;
+        float e1 = (MG_HALF - mg_abs(MG_HALF - gph)) * MG_INV_HALF;
+        float e2 = (MG_HALF - mg_abs(MG_HALF - g2)) * MG_INV_HALF;
+        float pitched = mg_gread(gbuf, gwp, gph) * e1 + mg_gread(gbuf, gwp, g2) * e2;
+        gph += gInc;
+        if (gph >= MG_GRAIN) gph -= MG_GRAIN;
+        else if (gph < 0.0f) gph += MG_GRAIN;
+        gwp = (gwp + 1u) & MG_GMASK;
+
+        float wetSig = proc + ptchA * (pitched - proc);      /* blend dry <-> pitched */
+
+        fxBuf[f]     = dry * inL + wet * wetSig;
+        fxBuf[f + 8] = dry * inR + wet * wetSig;
 
         wp = (wp + 1u) & MG_MASK;
     }
 
     st->writePos = wp;
+    st->gWritePos = gwp;
     st->grainPhase = gph;
     st->lfo = lfo;
-    st->lpZ = lpZ;
     st->shReg = shReg;
     st->shCnt = shCnt;
+    st->lpZ = lpZ;
     st->fpd = fpd;
 }

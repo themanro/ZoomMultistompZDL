@@ -1,12 +1,12 @@
 {
   "effect_name": "Mangle",
-  "comment": "PEDAL BUILD manifest for Mangle (5-knob). Feedback delay whose repeats mutate each pass; Mode selects pitch-down / pitch-up / tremolo / crush.",
+  "comment": "PEDAL BUILD manifest for Mangle (6-knob). Feedback delay with three blendable mangle characters: Crush (degradation) + Tremolo (amplitude wobble) both in the feedback so they compound; Pitch (octave-down grain shimmer) feed-forward on the output. All at 0 = clean delay. No switch anywhere (jump table = freeze).",
   "audio_func_name": "Fx_DLY_Mangle",
   "gid": 8,
   "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_. Grouped under DLY with the rest of the pack.",
-  "fxid": 462,
-  "fxid_comment": "0x01CE. Verify uniqueness before flashing.",
-  "fxid_version": "1.00",
+  "fxid": 470,
+  "fxid_comment": "0x01D6. Reverted from 483 to the last known-working id + safe default. (The 483 bump collided with stock effect fxids and broke on hardware; the audible-on-load Mix hack is obsolete now the editor materialises patches via a full-patch send.)",
+  "fxid_version": "9.00",
   "flags_byte": 1,
   "params": [
     {
@@ -22,22 +22,28 @@
       "comment": "params[6]. Feedback / repeat count (0 .. 0.92)."
     },
     {
-      "name": "Mangle",
-      "max": 100,
-      "default": 50,
-      "comment": "params[7]. Transform intensity; 0 = clean delay."
-    },
-    {
-      "name": "Mode",
+      "name": "Crush",
       "max": 100,
       "default": 0,
-      "comment": "params[8]. 0-24 pitch down · 25-49 pitch up · 50-74 tremolo · 75-100 crush."
+      "comment": "params[7]. Degradation depth (sample-rate reduce + bitcrush + darken), in the feedback so it compounds. 0 = off."
+    },
+    {
+      "name": "Tremolo",
+      "max": 100,
+      "default": 0,
+      "comment": "params[8]. Amplitude-wobble depth (~4.5 Hz), in the feedback so repeats pulse harder each pass. 0 = off."
+    },
+    {
+      "name": "Pitch",
+      "max": 100,
+      "default": 0,
+      "comment": "params[9]. Octave-down grain shimmer on the wet output (feed-forward). 0 = off."
     },
     {
       "name": "Mix",
       "max": 100,
       "default": 1,
-      "comment": "params[9]. Dry/wet (starts at 1 = quiet-safe)."
+      "comment": "Mix default 1 (quiet-safe). The editor materialises patches on load (full-patch send), so audible-on-load no longer needs a hot default."
     }
   ],
   "audio_nop": false,
