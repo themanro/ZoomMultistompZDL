@@ -21,56 +21,76 @@
   against all 137 stock MS-70CDR ZDLs.
 -->
 <style>
-  /* palette matched to the generative-music editor (Theme.swift) */
-  :root { --bg:#0a0d0d; --panel:#141717; --panelHi:#1f2121; --ink:rgba(255,255,255,0.9);
-          --accent:#59ebbf; --line:rgba(255,255,255,0.08); --dim:rgba(255,255,255,0.45); }
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink);
-         font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; padding:16px; }
-  h1 { font-size:15px; margin:0 0 2px; font-weight:600; }
-  .sub { color:var(--dim); font-size:12px; margin:0 0 14px; }
-  .bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
-  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
-  button, select, input[type=text] {
-    background:var(--panelHi); color:var(--ink); border:1px solid var(--line);
-    border-radius:8px; padding:6px 10px; font:inherit; }
-  button { cursor:pointer; } button:hover { border-color:var(--accent); }
-  button.primary { background:var(--accent); color:#06100c; border-color:var(--accent); font-weight:600; }
-  .main { display:flex; gap:12px; align-items:flex-start; flex-wrap:wrap; }
-  .slots { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:12px; flex:1; }
-  .slot { border:1px solid var(--line); border-radius:10px; padding:12px; background:var(--panel); }
-  .slot.on { border-color:rgba(89,235,191,0.4); }
-  .slot h3 { margin:0 0 10px; font-size:11px; color:var(--dim); text-transform:uppercase;
-             letter-spacing:1.2px; font-weight:600; display:flex; gap:8px; align-items:center; }
-  /* pill toggle, like the Sustain switch in the mock */
-  .toggle { width:38px; height:20px; border-radius:12px; background:var(--panelHi);
-            border:1px solid var(--line); position:relative; cursor:pointer; flex:none; transition:background .12s; }
-  .toggle::after { content:""; position:absolute; top:2px; left:2px; width:14px; height:14px;
-                   border-radius:50%; background:var(--dim); transition:transform .12s,background .12s; }
-  .toggle.on { background:var(--accent); }
-  .toggle.on::after { background:#06100c; transform:translateX(18px); }
-  canvas.cover { width:100%; image-rendering:pixelated; border:1px solid var(--line);
-                 border-radius:6px; background:#0d1110; margin:8px 0; display:block; }
-  .knobs { display:flex; flex-wrap:wrap; gap:10px 6px; margin-top:8px; }
-  .knob { display:flex; flex-direction:column; align-items:center; width:72px; gap:4px; }
-  .knob .kl { font-size:9.5px; color:var(--dim); text-transform:uppercase; letter-spacing:1px;
-              text-align:center; max-width:72px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .knob canvas { cursor:ns-resize; touch-action:none; }
-  .knob .kv { font-size:12px; color:var(--ink); }
-  .lib { width:288px; flex:none; }
-  .lib h2 { font-size:11px; color:var(--dim); margin:0 0 8px; text-transform:uppercase; letter-spacing:1.2px; font-weight:600; }
-  .librow { display:flex; gap:4px; align-items:center; padding:3px 5px; border-radius:6px; cursor:pointer; }
-  .librow:hover { background:var(--panelHi); }
-  .librow.cur { background:rgba(89,235,191,0.12); }
-  .librow .num { width:22px; color:var(--dim); text-align:right; flex:none; }
-  .librow .nm { flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
-  .librow button { padding:1px 5px; font-size:11px; border-radius:5px; }
-  #log { height:110px; overflow-y:auto; background:#0d1110; border:1px solid var(--line);
-         border-radius:8px; padding:6px 8px; font-size:11px; color:var(--dim); margin-top:12px; white-space:pre-wrap; }
-  .warn { color:#e0b060; }
-  .dsp { letter-spacing:2px; color:var(--dim); }
-  .hint { color:var(--dim); font-size:11px; }
-  label { color:var(--dim); }
+@font-face{font-family:'LCD';font-display:swap;src:url(data:font/woff2;base64,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) format('woff2');}
+
+  /* ---- pixel-LCD restyle: the pedal's own screen as the whole UI ---- */
+  :root{
+    --lcd:#a6d2f0; --lcd-lit:#c6e6fb; --lcd-deep:#8bc0e8;
+    --ink:#0b1a27; --ink-soft:#34566b; --paper:#eaf6ff;
+    --good:#178f5b; --err:#c9364c; --b:3px;
+    /* legacy token aliases so inline/JS var() usages keep working */
+    --bg:var(--lcd); --panel:var(--lcd-lit); --panelHi:var(--lcd-deep);
+    --accent:var(--good); --line:var(--ink); --dim:var(--ink-soft);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--lcd); color:var(--ink);
+       font-family:'LCD',ui-monospace,Menlo,Consolas,monospace; font-size:15px; line-height:1.25; padding:16px;}
+  canvas.cover{image-rendering:pixelated;}
+  h1{font-size:19px; margin:0 0 2px; letter-spacing:2px; text-transform:uppercase; font-weight:400;}
+  .sub{color:var(--ink-soft); font-size:12px; margin:0 0 14px; text-transform:uppercase; letter-spacing:1px;}
+  .bar{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:14px;}
+  .panel{background:var(--lcd-lit); border:var(--b) solid var(--ink); box-shadow:5px 5px 0 var(--ink); padding:12px;}
+  button,select,input[type=text]{
+    background:var(--lcd); color:var(--ink); border:var(--b) solid var(--ink); box-shadow:3px 3px 0 var(--ink);
+    padding:5px 9px; font:inherit; font-size:13px; text-transform:uppercase; letter-spacing:1px;}
+  select{text-transform:none;}
+  button{cursor:pointer;} button:hover{background:var(--lcd-deep);}
+  button:active{transform:translate(3px,3px); box-shadow:0 0 0 var(--ink);}
+  button.primary{background:var(--ink); color:var(--paper);}
+  button.primary:hover{background:#16324a;}
+  .main{display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap;}
+  .slots{display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px; flex:1;}
+  .slot{padding:12px; background:var(--lcd-lit); border:var(--b) solid var(--ink); box-shadow:5px 5px 0 var(--ink);}
+  .slot h3{margin:0 0 10px; font-size:13px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:1.5px;
+           display:flex; gap:8px; align-items:center;}
+  .toggle{width:44px; height:24px; border:var(--b) solid var(--ink); background:var(--lcd);
+          position:relative; cursor:pointer; flex:none;}
+  .toggle::after{content:""; position:absolute; top:1px; left:1px; width:16px; height:16px; background:var(--ink); transition:left .1s;}
+  .toggle.on{background:var(--good);}
+  .toggle.on::after{left:auto; right:1px; background:var(--paper);}
+  canvas.cover{width:100%; border:var(--b) solid var(--ink); background:var(--ink); margin:10px 0; display:block;}
+  .knobs{display:flex; flex-wrap:wrap; gap:12px 6px; margin-top:8px;}
+  .knob{display:flex; flex-direction:column; align-items:center; width:72px; gap:3px;}
+  .knob .kl{font-size:10px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:1px;
+            text-align:center; max-width:72px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .knob canvas{cursor:ns-resize; touch-action:none;}
+  .knob .kv{font-size:14px; color:var(--ink);}
+  .lib{width:276px; flex:none;}
+  .lib h2{font-size:13px; color:var(--ink-soft); margin:0 0 10px; text-transform:uppercase; letter-spacing:1.5px;
+          border-bottom:2px solid var(--ink); padding-bottom:6px; font-weight:400;}
+  .librow{display:flex; gap:5px; align-items:center; padding:5px 4px; border-bottom:2px solid var(--lcd-deep); cursor:pointer;}
+  .librow:hover{background:var(--lcd-deep);}
+  .librow.cur{background:var(--ink); color:var(--paper);}
+  .librow.cur .num{color:var(--lcd);}
+  .librow .num{width:18px; color:var(--ink-soft); text-align:right; flex:none; font-size:13px;}
+  .librow .nm{flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; font-size:14px;}
+  .librow button{padding:0; font-size:15px; width:23px; height:23px; line-height:19px; text-align:center;
+                 box-shadow:2px 2px 0 var(--ink); flex:none; letter-spacing:0;}
+  .librow button:active{transform:translate(2px,2px); box-shadow:0 0 0 var(--ink);}
+  #log{height:118px; overflow-y:auto; background:var(--ink); border:var(--b) solid var(--ink);
+       box-shadow:5px 5px 0 var(--ink); padding:8px 10px; font-size:14px; color:#9fd6c2; margin-top:16px;
+       white-space:pre-wrap; line-height:1.3;}
+  .warn{color:#ffb0a0;}
+  .dsp{letter-spacing:3px; color:var(--ink); font-size:15px; margin-left:auto;}
+  .hint{color:var(--ink-soft); font-size:12px;}
+  label{color:var(--ink-soft);}
+  /* dismissable error band */
+  .errband{display:flex; align-items:center; gap:12px; background:var(--err); color:var(--paper);
+           border:var(--b) solid var(--ink); box-shadow:5px 5px 0 var(--ink); padding:10px 12px; margin-bottom:14px; font-size:15px;}
+  .errband .errx{margin-left:auto; background:var(--paper); color:var(--err); border:2px solid var(--ink);
+                 box-shadow:2px 2px 0 var(--ink); width:26px; height:26px; font-size:15px; cursor:pointer;
+                 flex:none; text-transform:none; letter-spacing:0; padding:0;}
+  .errband .errx:active{transform:translate(2px,2px); box-shadow:0 0 0 var(--ink);}
 </style>
 </head>
 <body>
@@ -83,15 +103,48 @@ Serve over <code>http://localhost</code> — see the comments in this file.</p>
   <span id="devname" class="hint">not connected</span>
   <button id="readall" title="Read all 50 patches. The pedal cycles through every patch OUT LOUD (~8s) — mute your amp.">Reload bank 🔊</button>
   <button id="reread">Re-read patch</button>
-  <button id="sync" title="push all knob values so the pedal stops playing defaults">Sync pedal</button>
-  <span class="dsp" id="dsp" title="DSP-full bits"></span>
-  <button id="sendall">Send patch</button>
-  <button id="store">Store to current</button>
+  <button id="store" title="Write the patch, store it, and force the pedal to reload it — this is what makes PE knob edits audible. Overwrites the current slot.">Apply → pedal</button>
   <button id="expsyx">Export .syx</button>
   <input type="file" id="impsyx" accept=".syx" style="max-width:180px">
-  <label class="hint" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="trace"> MIDI log</label>
-  <button id="diag" title="Copy a full diagnostic snapshot (state + last ~400 MIDI msgs + log) to the clipboard — paste it to report an issue">Copy diag</button>
+  <button id="diagtoggle" title="Show the log, MIDI trace, auto-apply and the param probe">Show diagnostics</button>
 </div>
+<!-- Everything below is diagnostics / advanced: hidden behind "Show diagnostics"
+     so the main toolbar stays about actually using the pedal. -->
+<div id="diagpanel" hidden>
+<div class="bar" style="padding-top:0">
+  <label class="hint" style="display:flex;gap:4px;align-items:center" title="Slots 4-6 cannot update live. With this on, PE applies for you ~1s after you stop turning a knob: it re-reads, writes only your changed fields, and bypass-bounces that one slot. Nothing is written to flash."><input type="checkbox" id="autoapply"> auto-apply slots 4-6</label>
+  <label class="hint" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="trace"> MIDI log</label>
+  <button id="diag" title="Copy a full diagnostic snapshot (state + patch bytes + last ~400 MIDI msgs + log) to the clipboard — paste it to report an issue">Copy diag</button>
+  <span class="hint" style="margin-left:12px">raw writes:</span>
+  <button id="sendall" title="Blind-write PE's WHOLE model to the edit buffer: no re-read, no merge, and it will overwrite slots you never touched plus any knob you moved on the pedal. A buffer write alone does NOT make params take effect (see docs/MIDI-PARAM-EDIT.md) — use Apply instead. Kept for recovery only.">Send patch (blind)</button>
+  <button id="sync" title="Same blind whole-model buffer write as Send patch. Added when we believed a buffer write 'materialised' params; it does not. Superseded by Apply.">Sync pedal (blind)</button>
+  <span class="hint" style="margin-left:12px" title="patch.dsp bits, shown as filled/empty. Assumed to mean DSP-full per slot but never verified against hardware.">dsp?</span>
+  <span class="dsp" id="dsp" title="patch.dsp bits — meaning UNVERIFIED"></span>
+</div>
+<!-- Param probe: PE assumes a slot's Nth knob is 0x31 param index N+2. That is a
+     guess, and a knob that moves on the pedal but not from PE means the index is
+     wrong for that knob. Sweep finds the real one. 0x31 is non-destructive and
+     nothing is stored, so a bad guess is undone by "Re-read patch". -->
+<details class="bar" style="padding-top:0">
+  <summary class="hint" style="cursor:pointer">Param probe (find a knob's real 0x31 index)</summary>
+  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:6px">
+    <label class="hint">slot <input id="pbSlot" type="number" min="1" max="6" value="4" style="width:54px"></label>
+    <label class="hint">param idx <input id="pbIdx" type="number" min="0" max="12" value="4" style="width:60px"></label>
+    <label class="hint">value <input id="pbVal" type="number" min="0" max="2047" value="100" style="width:70px"></label>
+    <button id="pbSend">Send one</button>
+    <button id="pbSweep" title="Sets param index 2..10 to the value above, one at a time, 800ms apart. Listen for WHICH index moves the knob you care about, then tell me the number.">Sweep 2→10</button>
+  </div>
+  <!-- Ground truth: two dumps from the PEDAL with one knob moved between them. The
+       bytes that differ ARE that knob's real field, independent of PE's bit tables. -->
+  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px">
+    <span class="hint">Find a knob's real bits:</span>
+    <button id="snapA" title="Set the knob to its LOW position on the pedal, then click. Re-reads and captures automatically.">Snapshot A</button>
+    <button id="snapB" title="Now set that same knob HIGH on the pedal, then click. Re-reads and captures automatically.">Snapshot B</button>
+    <button id="snapDiff" title="Lists the bytes that differ between A and B — the real field for the knob you moved.">Diff A/B</button>
+  </div>
+</details>
+</div>
+
 
 <div class="main">
   <div class="lib panel">
@@ -124,7 +177,7 @@ Serve over <code>http://localhost</code> — see the comments in this file.</p>
   </div>
   <div class="slots" id="slots"></div>
 </div>
-<div id="log"></div>
+<div id="log" hidden></div>
 
 <script>
 "use strict";
@@ -138,6 +191,12 @@ const BITS=[
  [[[108,1,0]],[[101,0x1,30],[108,0x7e,16],[110,0x07,8],[112,0x1f,0]],[[112,0x60,-5],[109,0x10,-2],[113,0x7f,3],[109,0x8,7],[114,0x1,11]],[[114,0x7c,-2],[109,0x4,3],[115,0x1f,6]],[[109,0x2,-1],[116,0x7f,1],[109,0x1,8],[118,0x3,9]],[[118,0x70,-4],[117,0x40,-3],[119,0x0f,4]],[[119,0x70,-4],[117,0x20,-2],[120,0x0f,4]],[[120,0x70,-4],[117,0x10,-1],[121,0x0f,4]],[[121,0x70,-4],[117,0x8,0],[122,0x0f,4]],[[122,0x70,-4],[117,0x4,1],[123,0x1f,4],[126,0x40,"NZ"]],[[127,0x7f,0],[125,0x20,2]]],
 ];
 const NAMIDX=[132,134,135,136,137,138,139,140,142,143];
+// "NZ" entries are write-only: getBits() skips them, so PE never learns their real
+// value, yet setBits() would derive one from a field that excludes them. When we're
+// writing on top of the pedal's own dump, keep the pedal's bit rather than guess.
+const NZBITS=[];
+for(const slot of BITS)for(const spec of slot)for(const bf of spec)
+  if(bf[2]==="NZ") NZBITS.push([bf[0],bf[1]]);
 const EMPTY146=[
  0xf0,0x52,0x00,0x61,0x28,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
  0,0,0,0,0,0,0x01,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -164,11 +223,25 @@ function decodePatch(d){
   p.dsp=d[129]&0x3f;
   return p;
 }
-function encodePatch(p){
-  const d=EMPTY146.slice();
+// The bit tables cover only ~55% of the 146 bytes. Rebuilding from EMPTY146 therefore
+// ZEROES the other 65 bytes — whatever the pedal keeps there is destroyed on every
+// write, which is why a PE-side knob edit could round-trip inside PE yet never take
+// effect on hardware. Always start from the last dump the PEDAL sent (`base`) so the
+// bytes we don't understand survive untouched, and only overwrite the known fields.
+function encodePatch(p, base){
+  const d=(base&&base.length===146)?base.slice():EMPTY146.slice();
   const nm=(p.name||"").padEnd(10," ").slice(0,10);
-  for(let i=0;i<10;i++)d[NAMIDX[i]]=nm.charCodeAt(i)||0x20;
+  // Force 7-bit: a byte >0x7F is illegal in SysEx and corrupts the patch.
+  for(let i=0;i<10;i++)d[NAMIDX[i]]=(nm.charCodeAt(i)||0x20)&0x7f;
+  // Bytes 133/141 (and 125 bit6) are Zoom 7-in-8 COLLECTORS carrying bit 7 of the
+  // name characters. With the old EMPTY146 base they were always zero, so nothing
+  // cleared them; now that we write on top of the pedal's own dump, a stale bit
+  // here ORs 0x80 into a name char and the name comes back garbled. libRename
+  // already did this — encodePatch has to as well, for the same reason.
+  d[125]&=~0x40; d[133]=0; d[141]&=~0x03;
   for(let s=0;s<6;s++)for(let k=0;k<11;k++)setBits(d,BITS[s][k],p.fx[s][k]);
+  if(base&&base.length===146)
+    for(const [byte,mask] of NZBITS) d[byte]=(d[byte]&~mask)|(base[byte]&mask);
   let hi=5;while(hi>0&&p.fx[hi][1]===0)hi--;
   d[130]=(d[130]&~0x1c)|(Math.min(6,hi+1)<<2);
   let c=Math.max(0,6-Math.min(p.curfx,6));   // inverse of decode: curfx = 6 - stored
@@ -647,7 +720,7 @@ const DB={
      "default": 1
     }
    ],
-   "cover": "AAAAAAAAAAAAAAAAAAAAAH////////////////////5////////////////////+f////////////////////n////////////////////5///////+EPnzn///////+f///////hD585////////n///////nzJkyf///////5///////+cOZMn///////+f///////nDmTJ////////n///////+T5kyf///////5///////4E+BAgf//////+f//////+HP584H///////n////////////////////5////////////////////+f////////////////////kAAAAAAAAAAAAAAAAAAAAJAAAAAAAAgAAAAAAAAAAACQAAAAAAD/gAAIAAAAAAAAkAAAAAABCEAANgAAAAAAAJAAAAAAAgggAEEAIAAAAACQAAAAAAQIEAGAwNgOAAAAkAAAAAAEHBABAEEEEQAAAJAAAAAACD//+gAiAiCAAACQAAAAAAReEAEAQQQRAAAAkAAAAAAHidABgMDYDgAAAJAAAAAAAgAgAEEAIAAAAACQAAAAAAEAQAA2AAAAAAAAkAAAAAAA94AACAAAAAAAAJAAAAAAAAgAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAB3ViAAAAM6gAAAB3dgAJAAJHVQAAACkoAAAAREUACQACZ2UAAAApKAAAAGZlAAkAAkVFAAAAKRAAAABERQAJAAJ1QgAAADOQAAAAR3YACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAgAAAAABAAAAAACAAAkAAA+AAAAAB8AAAAAD4AAJAAASQAAAAAkgAAAABJAACQAAYjAAAAAxGAAAABiMAAkAAEIQAAAAIQgAAAAQhAAJAACCCAAAAEEEAAAAIIIACQAAQBAAAAAgCAAAABAEAAkAAGAwAAAAMBgAAAAYDAAJAAAQQAAAAAggAAAABBAACQAADYAAAAAGwAAAAANgAAkAAAIAAAAAAQAAAAAAgAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJ////////////////////+AAAAAAAAAAAAAAAAAAAAAA=="
+   "cover": "AAAAAAAAAAAAAAAAAAAAAH////////////////////5////////////////////+f////////////////////n////////////////////5///////+EPnzn///////+f///////hD585////////n///////nzJkyf///////5///////+cOZMn///////+f///////nDmTJ////////n///////+T5kyf///////5///////4E+BAgf//////+f//////+HP584H///////n////////////////////5////////////////////+f////////////////////kAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAB////////AAAAAAkAAAAABxHAAAABycAAAAAJAAAAAAwQYAAAAwhgAAAACQAAABMYEDAAAAQIEQAAAAkAAAAiMBAYAAAMCBjAAAAJAAAAYiB8CAAAGD4MSAAACQAAAEZAxgQAABBjBEQAAAkAAABEQYMEAAAQwYREAAAJAAAARH8R/AAAH4j8RAAACQAAAERBgwQAABDBhEwAAAkAAABGQMYEH/wQYwRIAAAJAAAAIiB8CBAEGD4MQAAACQAAADMwEBh1V4wIGYAAAAkAAAAxGBAx3/zECBEAAAAJAAAAAAwQbwAAewhgAAAACQAAAAAHEfgAAA/JwAAAAAkAAAAAAP4AAAAA/wAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAB3ViAAAAM6gAAAB3dgAJAAJHVQAAACkoAAAAREUACQACZ2UAAAApKAAAAGZlAAkAAkVFAAAAKRAAAABERQAJAAJ1QgAAADOQAAAAR3YACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAgAAAAABAAAAAACAAAkAAA+AAAAAB8AAAAAD4AAJAAASQAAAAAkgAAAABJAACQAAYjAAAAAxGAAAABiMAAkAAEIQAAAAIQgAAAAQhAAJAACCCAAAAEEEAAAAIIIACQAAQBAAAAAgCAAAABAEAAkAAGAwAAAAMBgAAAAYDAAJAAAQQAAAAAggAAAABBAACQAADYAAAAAGwAAAAANgAAkAAAIAAAAAAQAAAAAAgAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJ////////////////////+AAAAAAAAAAAAAAAAAAAAAA=="
   },
   {
    "name": "Taffy",
@@ -10410,6 +10483,11 @@ for(const e of DB.custom.concat(DB.stock, DB.legacy||[])) BYID[e.id]=e;
 /* ---------- MIDI ------------------------------------------------------- */
 const DEVID=0x61;                       // MS-70CDR
 let midiIn=null, midiOut=null, patch=null, rawPatch=null;
+// Pristine last dump AS THE PEDAL SENT IT. encodePatch() uses this as its base so the
+// 65 bytes the bit tables don't cover are preserved instead of being zeroed. Kept
+// separate from rawPatch, which gets overwritten with our own encodings.
+let rawFromPedal=null;
+let lastTxPatch=null;                       // last 146-byte patch PE sent, for byte-level diffing
 let library=new Array(50).fill(null), libraryRaw=new Array(50).fill(null), pendingDump=null, busy=false;
 let curProg=0;                                 // currently-loaded program (was the top-bar dropdown)
 const $=id=>document.getElementById(id);
@@ -10425,9 +10503,11 @@ function log(s,cls){const el=$("log");
 function midiRec(dir,bytes){                    // record EVERY MIDI msg (in + out), regardless of the trace checkbox
   MIDIBUF.push(_ts()+" "+dir+" "+hex(Array.from(bytes).slice(0,32))+(bytes.length>32?` …(${bytes.length}B)`:""));
   if(MIDIBUF.length>400)MIDIBUF.shift();}
-function banner(msg){const b=document.createElement("div");
-  b.style.cssText="background:#5a2c2c;border:1px solid #a05252;color:#f0d0d0;padding:10px 12px;border-radius:8px;margin-bottom:12px";
-  b.textContent=msg;document.body.insertBefore(b,document.body.children[2]);log(msg,"warn");}
+function banner(msg){const b=document.createElement("div"); b.className="errband";
+  const t=document.createElement("span"); t.textContent=msg; b.appendChild(t);
+  const x=document.createElement("button"); x.className="errx"; x.textContent="\u2715"; x.title="dismiss";
+  x.onclick=()=>b.remove(); b.appendChild(x);
+  document.body.insertBefore(b,document.body.children[2]); log(msg,"warn");}
 function hex(a){return Array.from(a,x=>x.toString(16).padStart(2,"0")).join(" ");}
 
 let TRACE=false, lastEnable=0, editModeActive=false, syncing=false, rxCount=0;
@@ -10444,6 +10524,7 @@ function send(bytes){
   const t=Math.max(now, nextSend);
   try{ midiOut.send(bytes, t); }catch(e){ midiOut.send(bytes); }
   nextSend = t + (bytes.length>=64 ? 22 : 3);   // ms gap after this message
+  if(bytes.length===146) lastTxPatch=Array.from(bytes);   // keep for byte-level diffing
   midiRec("→",bytes);
   if(TRACE) log("→ "+hex(bytes.slice(0,24))+(bytes.length>24?` …(${bytes.length}B)`:""));
 }
@@ -10464,7 +10545,7 @@ async function materialize(){
   try{
     send(zx([0x50])); lastEnable=performance.now(); editModeActive=true;
     await sleep(20);
-    rawPatch=encodePatch(patch); rawPatch[3]=DEVID;
+    rawPatch=encodePatch(patch, rawFromPedal); rawPatch[3]=DEVID;
     send(rawPatch);
     await sleep(160);
     log("sent full patch to pedal ("+(patch.name||"")+")");
@@ -10529,7 +10610,9 @@ async function reread(){                        // explicit: await the dump and 
   send(zx([0x50])); await sleep(20);            // edit-enable: the pedal only dumps patches in this mode
   send(zx([0x29]));
   const d=await awaitDump(1300);
-  if(d){ rawPatch=d.slice(0,146); patch=decodePatch(rawPatch); editModeActive=false; render(); log("re-read OK: "+patch.name); }
+  if(d){ rawPatch=d.slice(0,146); rawFromPedal=d.slice(0,146); patch=decodePatch(rawPatch); editModeActive=false; render();
+    log("re-read OK: "+patch.name);
+    banner("Re-read \u201c"+patch.name+"\u201d from the pedal \u2014 PE now matches the hardware."); }
   else log("re-read: NO dump. MIDI msgs received since connect = "+rxCount
            +(rxCount===0?" (0 = we're not receiving — wrong IN port, or Effect Manager has the port)"
                         :" (>0 = pedal talks but sent no patch dump — try power-cycling the pedal)"),"warn");
@@ -10577,9 +10660,24 @@ function handleSysex(m){
   if(m[1]===0x52 && m[3]===DEVID && m[4]===0x28 && m.length===146){
     rawPatch=m.slice(0,146);
     if(pendingDump){clearTimeout(pendingDump.t);const r=pendingDump.res;pendingDump=null;r(rawPatch);return;}
-    patch=decodePatch(rawPatch); editModeActive=false;
+    // Only pair the encode base with the patch we actually DISPLAY. Setting it for
+    // every dump would let a bank read leave the base pointing at patch #50 while
+    // `patch` is #2 — writes would then splice PE's fields onto the wrong bytes.
+    rawFromPedal=m.slice(0,146);
+    patch=decodePatch(rawPatch); editModeActive=false; focusedSlot=-1; offWarned={}; dirty.clear();
     render();
     log("patch received: "+patch.name);
+  }else if(m[1]===0x52 && m[3]===DEVID && m[4]===0x31 && m.length>=9){
+    // The pedal REPORTS its own knob moves with the very same 0x31 form PE sends
+    // (slot, param index, 7-bit lo/hi). Proof that PE's addressing is right — and
+    // free live sync: mirror the move into the model so PE follows the hardware.
+    const s=m[5], pi=m[6], v=m[7]|(m[8]<<7);
+    const nm=(patch&&patch.fx[s]&&BYID[patch.fx[s][1]])?BYID[patch.fx[s][1]].name:"?";
+    log(`pedal moved: slot ${s+1} (${nm}) param idx ${pi} = ${v}`);
+    if(patch&&patch.fx[s]&&pi>=0&&pi<=10){
+      patch.fx[s][pi]= pi===0 ? (v?1:0) : v;
+      render();
+    }
   }else if(m[1]===0x52 && m[3]===DEVID && m[4]===0x28){
     log("bad dump ("+m.length+"B, expected 146) — ignored","warn");   // reject misaligned
   }else if(m[1]===0x7e){
@@ -10592,11 +10690,63 @@ function sendParam(slot,paramIdx,val){       // paramIdx: 0=on/off, 2..10 knobs
   editEnable();
   send(zx([0x31,slot,paramIdx,val&0x7f,(val>>7)&0x7f]));
 }
+// Put a slot on the PEDAL's screen, so the pedal shows the effect you're editing
+// in PE. A 0x31 param edit is what moves the pedal's display to a slot, so
+// re-assert that slot's first knob at its CURRENT value: sonically a no-op, but
+// it pulls focus. Also used to undo the display jump a full-patch write causes.
+let focusedSlot=-1;
+// UNPROVEN on hardware: there is no documented MS-70CDR command for "show slot N",
+// so this is a best guess. Harmless either way (it re-sends a value the slot
+// already has), but if the pedal's screen doesn't follow, that's why.
+function focusSlot(s,force){
+  if(!patch)return;
+  const f=patch.fx[s];
+  if(!f||!f[1])return;                       // empty slot: nothing to display
+  if(!force&&focusedSlot===s)return;         // already focused — don't spam MIDI
+  focusedSlot=s;
+  sendParam(s,2,f[2]|0);
+  if(force) log("focus attempt -> slot "+(s+1)+" (0x31 re-assert)");
+}
+// HARDWARE FACT (the Hiss/Mix hunt): a live 0x31 param edit does NOT take effect
+// on this pedal — the cell stays unmaterialised, zoom_param_norm01() keeps
+// returning the manifest default, and the knob reads as dead from PE while it
+// still works from the pedal's own encoder. The full-patch write (0x28) is what
+// actually lands, which is why "Send patch" fixes every stuck knob at once, and
+// why the on/off toggle (which goes through materialize()) always worked.
+// So: push the whole patch on knob release, for EVERY slot. The cost is that the
+// pedal's display can jump to another slot; the toolbar checkbox trades that
+// back for 0x31-only if you prefer a stable screen over working knobs.
+let AUTOAPPLY=false;
+// HARDWARE RULE (confirmed on 2026-07-31 by moving GenLoss from slot 4 to slot 1):
+// the pedal honours live 0x31 param edits only for the EARLY slots. In slot 1 the
+// knobs respond instantly; in slot 4 the identical message is ignored. Slots 4-6
+// therefore need the store+reload Apply, which lands everywhere. This is what the
+// original "slots 4-6: 0x31 may be ignored" note meant — it was correct.
+const LIVE_EDIT_SLOTS=3;                 // slots 1..3 (index 0..2) accept live 0x31
+const liveEditable=s=>s<LIVE_EDIT_SLOTS;
+let AUTOAPPLY_LATE=false;                // OFF until the name-garble regression is confirmed clear
+// A knob on a switched-OFF slot is inaudible, and because the release commits the
+// WHOLE patch, PE's "off" also re-bypasses the effect on the pedal — so turning it
+// on with the footswitch then tweaking in PE silently switches it back off. That
+// combination reads exactly like "the knob is broken". Say so, once per slot.
+let offWarned={};
+let lastEditedSlot=null;              // so Apply can leave the pedal on the effect you're editing
+// Fields the USER changed in PE since the last read, as "slot,field". Apply re-reads
+// the pedal and re-applies ONLY these, so a model that has drifted (pedal-side knob
+// moves, live 0x31 edits, another slot's state) can never be pushed back over the
+// pedal's own values. Writing all six slots blind is what made Apply clobber things.
+const dirty=new Set();
+const markDirty=(s,k)=>dirty.add(s+","+k);
+function knobOffWarn(s){
+  if(offWarned[s])return; offWarned[s]=true;
+  banner(`Slot ${s+1} is switched OFF — knob moves won't be audible. Click its toggle (top-right of the slot) to turn it on.`);
+  log(`slot ${s+1} is OFF — knob edits stay inaudible until you switch it on`,"warn");
+}
 function sendFullPatch(){
   if(!patch){log("nothing to send — read a patch first","warn");return;}
   if(performance.now()-lastEnable>1000){ send(zx([0x50])); lastEnable=performance.now(); }
   editModeActive=true;                       // full patch already carries every value
-  rawPatch=encodePatch(patch);
+  rawPatch=encodePatch(patch, rawFromPedal);
   send(rawPatch);
   log("patch sent ("+patch.name+")");
 }
@@ -10847,7 +10997,7 @@ async function llWriteToSlot(fi,k,slot){       // library -> pedal slot (verifie
 function llLoadToEditor(fi,k){                 // library -> edit buffer (not stored)
   const ent=(LLIB.folders[fi]||{}).patches?.[k]; if(!ent)return;
   const raw=bytesFromB64(ent.raw); raw[3]=DEVID;
-  rawPatch=raw; patch=decodePatch(raw); editModeActive=false; render();
+  rawPatch=raw; rawFromPedal=raw.slice(); patch=decodePatch(raw); editModeActive=false; render();
   if(midiOut){
     send(zx([0x50])); lastEnable=performance.now(); editModeActive=true;
     send(rawPatch); setTimeout(materialize,60);
@@ -10970,7 +11120,7 @@ function makeKnob(label, raw, max, onchange, onrelease){
   cv.width=S*dpr; cv.height=S*dpr; cv.style.width=S+"px"; cv.style.height=S+"px";
   const ctx=cv.getContext("2d"); ctx.scale(dpr,dpr);
   const kv=document.createElement("div"); kv.className="kv";
-  const ACC="#59ebbf", DIMt="rgba(255,255,255,0.18)", STK="rgba(255,255,255,0.10)", BGc="#0a0d0d";
+  const ACC="#0b1a27", DIMt="rgba(11,26,39,0.22)", STK="#0b1a27", BGc="#a6d2f0";
   const start=-140, sweep=280, r=S/2-3;
   let val=max>0?raw/max:0;
   function draw(){
@@ -10979,7 +11129,7 @@ function makeKnob(label, raw, max, onchange, onrelease){
       ctx.save(); ctx.translate(cx,cy); ctx.rotate(ang);
       ctx.fillStyle=frac<=val?ACC:DIMt; ctx.fillRect(-1,-r-3,2,6); ctx.restore(); }
     ctx.beginPath(); ctx.arc(cx,cy,S*0.34,0,7); ctx.fillStyle=BGc; ctx.fill();
-    ctx.lineWidth=1; ctx.strokeStyle=STK; ctx.stroke();
+    ctx.lineWidth=2; ctx.strokeStyle=STK; ctx.stroke();
     const pa=(start+val*sweep)*Math.PI/180;
     ctx.save(); ctx.translate(cx,cy); ctx.rotate(pa);
     ctx.fillStyle=ACC; ctx.fillRect(-1.25,-S*0.31,2.5,S*0.30); ctx.restore();
@@ -11024,10 +11174,13 @@ function render(){
     grip.draggable=true;
     grip.ondragstart=ev=>{ev.dataTransfer.setData("text/plain","S"+s);ev.dataTransfer.effectAllowed="move";};
     h.appendChild(grip);
-    const ttl=document.createElement("span");ttl.textContent=`slot ${s+1}`;ttl.style.flex="1";h.appendChild(ttl);
+    const ttl=document.createElement("span");ttl.textContent=`slot ${s+1}`;ttl.style.flex="1";
+    ttl.style.cursor="pointer"; ttl.title="click: show this effect on the pedal";
+    ttl.onclick=()=>focusSlot(s,true);
+    h.appendChild(ttl);
     const st=document.createElement("div");
     st.className="toggle"+(on?" on":""); st.title="effect on / off";
-    st.onclick=async()=>{ await waitIdle(2500); const nv=on?0:1; f[0]=nv; render();
+    st.onclick=async()=>{ await waitIdle(2500); const nv=on?0:1; f[0]=nv; markDirty(s,0); offWarned[s]=false; render();
       // On/off is carried in the full patch — flip the bit in the model and push
       // the whole patch (0x28). One reliable write instead of a live 0x31 + flood.
       await materialize();
@@ -11046,6 +11199,7 @@ function render(){
       f[1]=+sel.value;
       for(let k=0;k<9;k++)f[k+2]=ne&&ne.params[k]?ne.params[k].default:0;
       f[0]=ne?1:0;
+      for(let k=0;k<11;k++) markDirty(s,k);
       render();
       // Effect-TYPE change: write the whole patch to the edit buffer, then
       // materialise. The pedal may not always reload a changed effect type over
@@ -11061,7 +11215,25 @@ function render(){
     if(eid){
       const cv=document.createElement("canvas");
       cv.className="cover"; cv.width=128; cv.height=64;
+      cv.style.cursor="pointer";
+      cv.title="click: show this effect on the pedal";
+      cv.onclick=()=>focusSlot(s,true);
       div.appendChild(cv); drawCover(cv, e?e.cover:null);
+    }
+    if(eid&&!liveEditable(s)){
+      const w=document.createElement("div");w.className="hint";
+      // Say what will actually happen, and track the auto-apply setting — a label
+      // promising "auto-applies" while auto-apply is off is worse than no label.
+      w.textContent="slot "+(s+1)+" can't update live — "+(AUTOAPPLY_LATE
+        ? "changes are applied for you a moment after you stop turning a knob"
+        : "click \u201cApply \u2192 pedal\u201d to hear your changes");
+      div.appendChild(w);
+    }
+    if(eid&&!on){
+      const w=document.createElement("div");w.className="hint";
+      w.textContent="⦸ bypassed — knob moves won't be audible";
+      w.style.color="var(--err)";
+      div.appendChild(w);
     }
     if(eid&&!e){
       const u=document.createElement("div");u.className="hint";
@@ -11073,8 +11245,13 @@ function render(){
       const kc=document.createElement("div");kc.className="knobs";
       params.forEach((pd,k)=>{
         kc.appendChild(makeKnob(pd.name, f[k+2], pd.max||100,
-          v=>{ f[k+2]=v; sendParam(s,k+2,v); },
-          ()=>{ if(s>=3) sendFullPatch(); }));   // slots 4-6: 0x31 may be ignored -> full send
+          // touching a knob pulls the pedal's display to this slot first
+          v=>{ if(!f[0]) knobOffWarn(s); lastEditedSlot=s; markDirty(s,k+2); focusSlot(s); f[k+2]=v; sendParam(s,k+2,v); },
+          // On release commit the whole patch — the only write this pedal
+          // actually materialises. Every slot, not just 4-6: the last knob
+          // (Mix / Hiss / Level) was dead from PE on all of them.
+          // Slots 1-3 already took effect live via 0x31; slots 4-6 only land via Apply.
+          ()=>{ if(!liveEditable(s)) autoApplyMaybe(); }));
       });
       div.appendChild(kc);
     }
@@ -11084,11 +11261,78 @@ function render(){
 }
 
 /* ---------- bar wiring ------------------------------------------------- */
+let snapA=null, snapB=null;
+$("snapA").onclick=async()=>{ await reread();          // re-read for you, so the capture can't be stale
+  snapA=rawFromPedal?rawFromPedal.slice():null;
+  log(snapA?"snapshot A captured (re-read done automatically)":"no dump — is the pedal connected?","warn"); };
+$("snapB").onclick=async()=>{ await reread();
+  snapB=rawFromPedal?rawFromPedal.slice():null;
+  log(snapB?"snapshot B captured (re-read done automatically)":"no dump — is the pedal connected?","warn"); };
+$("snapDiff").onclick=()=>{
+  if(!snapA||!snapB){ log("need both A and B (re-read the patch before each snapshot)","warn"); return; }
+  let n=0;
+  log("A/B diff — these are the PEDAL's own bits for the knob you moved:");
+  for(let i=0;i<146;i++) if(snapA[i]!==snapB[i]){ n++;
+    log(`  byte ${i}: A ${snapA[i].toString(16).padStart(2,"0")} -> B ${snapB[i].toString(16).padStart(2,"0")}`
+        +`   [PE's table calls this: ${ownersFor(i,snapA[i]^snapB[i])||"UNMAPPED"}]`); }
+  if(!n) log("  identical — did you Re-read patch between the two snapshots?","warn");
+};
+$("pbSend").onclick=()=>{
+  const s=+$("pbSlot").value-1, i=+$("pbIdx").value, v=+$("pbVal").value;
+  sendParam(s,i,v); log(`probe: slot ${s+1} param idx ${i} = ${v}`);
+};
+$("pbSweep").onclick=async()=>{
+  const s=+$("pbSlot").value-1, v=+$("pbVal").value;
+  log(`probe sweep, slot ${s+1}: setting param idx 2..10 to ${v}, 800ms apart —`);
+  log(`  listen for WHICH index moves the knob you care about, then report that number`);
+  for(let i=2;i<=10;i++){ sendParam(s,i,v); log(`  → param idx ${i} = ${v}`); await sleep(800); }
+  log(`sweep done — click "Re-read patch" to pull the real values back from the pedal`);
+};
+// Diagnostics live behind one toggle so the toolbar stays about playing, not debugging.
+// The choice is remembered — someone mid-investigation shouldn't have to re-open it
+// after every reload.
+function setDiag(on){
+  $("diagpanel").hidden=!on;
+  $("log").hidden=!on;
+  $("diagtoggle").textContent=on?"Hide diagnostics":"Show diagnostics";
+  try{ localStorage.setItem("ms70_show_diag", on?"1":"0"); }catch(_){}
+}
+$("diagtoggle").onclick=()=>setDiag($("diagpanel").hidden);
+try{ setDiag(localStorage.getItem("ms70_show_diag")==="1"); }catch(_){ setDiag(false); }
 $("connect").onclick=connect;
 $("reread").onclick=reread;
 $("sync").onclick=materialize;
 $("trace").onchange=e=>{TRACE=e.target.checked;log("MIDI trace "+(TRACE?"ON":"off"));};
 // ---- diagnostics snapshot (one click -> clipboard, or download if blocked) ----
+// Which patch field owns a given byte/bit — so a byte diff reads as "s4.p3" instead
+// of raw numbers. Collector bytes (5+8k) carry the high bits of the next 7 bytes.
+const BITOWNER={};
+for(let s=0;s<6;s++)for(let k=0;k<11;k++)
+  for(const [byte,mask] of BITS[s][k].map(b=>[b[0],b[1]]))
+    for(let b=0;b<8;b++) if(mask>>b&1)
+      BITOWNER[byte+":"+b]=`s${s+1}.`+(k===0?"onoff":k===1?"type":"p"+(k-1));
+function ownersFor(byte,xor){
+  const o=[];
+  for(let b=0;b<8;b++) if(xor>>b&1) o.push(BITOWNER[byte+":"+b]||"?");
+  return [...new Set(o)].join(",");
+}
+function bytesHex(a){
+  if(!a) return "(none)";
+  const L=[];
+  for(let i=0;i<a.length;i+=16)
+    L.push(String(i).padStart(3," ")+": "+Array.from(a.slice(i,i+16))
+      .map(x=>x.toString(16).padStart(2,"0")).join(" "));
+  return L.join("\n");
+}
+function patchDiffLines(){
+  if(!rawFromPedal||!lastTxPatch) return ["(need one dump from the pedal and one patch sent by PE)"];
+  const out=[];
+  for(let i=0;i<146;i++){
+    const a=rawFromPedal[i], b=lastTxPatch[i];
+    if(a!==b) out.push(`  byte ${String(i).padStart(3," ")}: pedal ${a.toString(16).padStart(2,"0")} -> PE ${b.toString(16).padStart(2,"0")}   [${ownersFor(i,a^b)}]`);
+  }
+  return out.length?out:["  (identical — PE sent the pedal's bytes back unchanged)"];
+}
 function diagText(){
   const p=patch?`${JSON.stringify(patch.name)} [${patch.fx.map((f,s)=>f[1]?("s"+(s+1)+(f[0]?"on":"off")+":"+(BYID[f[1]]?BYID[f[1]].name:"0x"+(f[1]>>>0).toString(16))):null).filter(Boolean).join(", ")}]`:"(none)";
   return [
@@ -11097,10 +11341,14 @@ function diagText(){
     "conn   : "+(!!midiOut)+"   IN="+(midiIn&&midiIn.name)+"  OUT="+(midiOut&&midiOut.name),
     "port   : IN "+(midiIn?midiIn.state+"/"+midiIn.connection:"-")+"   OUT "+(midiOut?midiOut.state+"/"+midiOut.connection:"-"),
     "flags  : busy="+busy+" syncing="+syncing+" editMode="+editModeActive+" rxCount="+rxCount+" curProg="+(curProg+1),
+    "display: patch.curfx="+(patch?patch.curfx:"-")+"  maxfx="+(patch?patch.maxfx:"-")+"  lastEditedSlot="+(lastEditedSlot===null?"-":lastEditedSlot+1),
     "patch  : "+p,
     "bank   : "+library.filter(Boolean).length+"/50 read   library folders="+LLIB.folders.length,
     "DB     : "+DB.custom.length+" custom + "+DB.stock.length+" stock + "+(DB.legacy||[]).length+" legacy",
     "agent  : "+navigator.userAgent,
+    "","=== last dump FROM pedal (146B) ===", bytesHex(rawFromPedal),
+    "","=== last patch PE SENT (146B) ===", bytesHex(lastTxPatch),
+    "","=== diff: pedal dump vs PE's write ===", ...patchDiffLines(),
     "","=== recent MIDI (oldest → newest) ===",
     ...MIDIBUF.slice(-160),
     "","=== log (recent) ===",
@@ -11118,28 +11366,69 @@ $("diag").onclick=copyDiag;
 window.addEventListener("error",e=>log("JS ERROR: "+(e.message||e.error)+"  @"+(e.filename||"").split("/").pop()+":"+e.lineno,"warn"));
 window.addEventListener("unhandledrejection",e=>log("PROMISE REJECT: "+((e.reason&&e.reason.message)||e.reason),"warn"));
 $("sendall").onclick=sendFullPatch;
-$("store").onclick=async()=>{const n=curProg;
+// APPLY, ToneLib-style (from a MIDI capture of ToneLib editing slot 4 successfully):
+//   0x50            edit enable
+//   0x28 <146B>     write the edit buffer
+//   CC 0  = 0       Bank Select MSB
+//   CC 32 = 0       Bank Select LSB
+//   0xCn            program change to the SAME program
+// A bare program change to the current program is a no-op, but preceded by the two
+// bank-select CCs the pedal DOES reload — which is how ToneLib live-edits slots 4-6.
+// No 0x32 store, so this writes nothing to flash, is non-destructive, and does not
+// blip through a neighbouring patch the way the old bounce did. Use "Store to slot"
+// when you want it kept; until then the stored patch is untouched.
+async function applyToPedal(){const n=curProg;
   if(!patch){banner("No patch loaded.");return;}
-  if(!confirm("Store the current patch to slot "+(n+1)+"?  (overwrites that slot)"))return;
+  if(!dirty.size){ log("nothing changed in PE — nothing to apply"); return; }
   await waitIdle(3000);
   busy=true;
-  // Commit the PE's CURRENT model (including a changed effect TYPE, which a live
-  // write alone doesn't load): write full patch -> store -> recall so the pedal
-  // adopts it -> push once more so it plays (recall reloads unmaterialised).
-  const d=encodePatch(patch); d[3]=DEVID;
+  // Re-read FIRST: the pedal is the source of truth for everything except the fields
+  // you actually touched. Writing PE's whole model blind is what pushed stale values
+  // over slots you never edited.
+  const fresh=await readOnce(n,80,1600);
+  if(!fresh){ busy=false; log("apply aborted — pedal didn't respond; nothing written","warn"); return; }
+  const live=decodePatch(fresh);
+  for(const key of dirty){
+    const [si,ki]=key.split(",").map(Number);
+    live.fx[si][ki]=patch.fx[si][ki];
+  }
+  live.name=patch.name;
+  const d=encodePatch(live, fresh); d[3]=DEVID;
   send(zx([0x50])); lastEnable=performance.now(); editModeActive=true; await sleep(20);
-  send(d); await sleep(160);              // write buffer
-  storeTo(n); await sleep(320);           // commit to slot
-  send([0xc0,n]); await sleep(140);       // recall so a new effect type actually loads
-  send(zx([0x50])); lastEnable=performance.now(); await sleep(20);
-  send(d); await sleep(160);              // materialise (recall left it unmaterialised)
-  busy=false;
-  const back=await readOnce(n,100,1800);
-  if(back){ libraryRaw[n]=back; library[n]=decodePatch(back); rawPatch=back.slice(); patch=decodePatch(back);
-    log("stored to #"+(n+1)+" -> "+library[n].name+" (verified)"); }
-  else { libraryRaw[n]=d.slice(); library[n]=decodePatch(d);
-    log("stored to #"+(n+1)+" (no read-back — Reload bank to confirm)","warn"); }
-  render(); renderLibrary();
+  // WHY THE BYPASS BOUNCE: the DSP caches a slot's params when the effect is
+  // INSTANTIATED. A plain buffer write updates the patch but leaves that cache
+  // untouched, which is exactly why slots 4-6 ignored written params while slots 1-3
+  // (which accept live 0x31) did not. Flipping the slot's bypass bit off and back on
+  // re-instantiates the effect so it re-reads the new values — the manual
+  // "turn the slot off, turn it back on" trick, automated. Also the same reason
+  // "wiggle the Mix knob on the pedal" ever worked.
+  // No program change is involved, so the pedal's display no longer jumps.
+  const bs=lastEditedSlot;
+  if(bs!==null && live.fx[bs] && live.fx[bs][0]){
+    const wasOn=live.fx[bs][0];
+    live.fx[bs][0]=0;
+    const dOff=encodePatch(live, fresh); dOff[3]=DEVID;
+    live.fx[bs][0]=wasOn;
+    send(dOff); await sleep(130);              // bypass: tear the effect down
+  }
+  send(d); await sleep(150);                   // re-enable: it re-reads the new params
+  patch=live; rawFromPedal=fresh.slice(); rawPatch=d.slice();
+  dirty.clear();
+  busy=false; render();
+  log("applied to pedal — only your changed fields, nothing written to flash");
+}
+$("store").onclick=applyToPedal;
+// Optional zero-click: apply once the knob has been still for a moment. Debounced so
+// a drag produces ONE store, not one per pixel — each apply writes flash and blips.
+let autoApplyT=null;
+function autoApplyMaybe(){
+  if(!AUTOAPPLY_LATE) return;
+  clearTimeout(autoApplyT);
+  autoApplyT=setTimeout(()=>{ if(!busy&&!syncing) applyToPedal(); }, 900);
+}
+$("autoapply").onchange=e=>{ AUTOAPPLY_LATE=e.target.checked;
+  log("auto-apply for slots 4-6: "+(AUTOAPPLY_LATE?"ON":"off — those knobs need the Apply button"));
+  if(patch) render();                       // slot labels state the current behaviour
 };
 $("readall").onclick=readAll;
 $("backup").onclick=backupBank;
@@ -11172,7 +11461,7 @@ $("locimp").onchange=ev=>{const f=ev.target.files[0];if(f)llImport(f);ev.target.
 renderLocalLib();
 $("expsyx").onclick=()=>{
   if(!patch)return;
-  const blob=new Blob([new Uint8Array(encodePatch(patch))],{type:"application/octet-stream"});
+  const blob=new Blob([new Uint8Array(encodePatch(patch, rawFromPedal))],{type:"application/octet-stream"});
   const a=document.createElement("a");a.download=(patch.name||"patch")+".syx";
   a.href=URL.createObjectURL(blob);a.click();
 };
@@ -11181,7 +11470,7 @@ $("impsyx").onchange=ev=>{
   const rd=new FileReader();
   rd.onload=()=>{const d=Array.from(new Uint8Array(rd.result));
     if(d.length!==146){log("not a 146-byte MS-70CDR patch","warn");return;}
-    d[3]=DEVID; rawPatch=d; patch=decodePatch(d); render(); sendFullPatch();};
+    d[3]=DEVID; rawPatch=d; rawFromPedal=d.slice(); patch=decodePatch(d); render(); sendFullPatch();};
   rd.readAsArrayBuffer(file);
 };
 
@@ -11191,6 +11480,9 @@ if(!navigator.requestMIDIAccess)
 else if(location.protocol==="file:")
   banner("Opened as file:// — Web MIDI needs localhost. From the repo root run: python3 -m http.server 8000  then open http://localhost:8000/tools/patch_editor.html");
 log(`effect DB: ${DB.custom.length} custom + ${DB.stock.length} stock (incl. other MS/G1/B1 pedals)`);
+// Build stamp: if this line is missing you are looking at a CACHED old copy of
+// the page — hard-reload (Cmd-Shift-R) before reporting a fix as not working.
+log("PE build 2026-07-31l — retired the blind-write buttons; Re-read confirms visibly");
 log("ready — click Connect MIDI (pedal on USB, normal mode, Effect Manager CLOSED)");
 </script>
 </body>
