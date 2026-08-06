@@ -1,0 +1,54 @@
+{
+  "effect_name": "Spiral",
+  "comment": "Spiral \u2014 a delay whose repeats climb or sink. A grain-re-triggered tap is read at `ratio` inside the FEEDBACK loop, so the shift compounds: repeat 1 is one step away, repeat 2 two steps, an endless staircase fading with the feedback. Rise sets a constant ratio (bipolar, unity at centre) for the discrete per-repeat staircase; Glide+Span are an onset-triggered ramp on that same ratio: a note resets the ramp to ZERO and it then climbs toward Glide's depth over Span, so the repeats begin at pitch and drift away over a while. That is the 'slowly rises for a while' behaviour; it is deliberately not a decay back to unity. Glide 0 = pure staircase; Rise centred + Glide up = pure glide with no net transposition. Ratio mapping is piecewise LINEAR, not 2^(semis/12), because the pedal cannot call exp2 without a helper call.",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_.",
+  "fxid": 449,
+  "fxid_comment": "0x01C1. Free: no stock effect uses it, not a retired custom alias (checked against tools/effects_db.json). Sits just below the 450-459 custom block.",
+  "fxid_version": "1.00",
+  "flags_byte": 1,
+  "params": [
+    {
+      "name": "Time",
+      "max": 100,
+      "default": 45,
+      "comment": "Delay time, squared curve ~40 ms .. 1.2 s."
+    },
+    {
+      "name": "Feedbk",
+      "max": 100,
+      "default": 60,
+      "comment": "Repeats. Scaled to 0.92 max and the loop is soft-clipped, so a compounding shift cannot run away."
+    },
+    {
+      "name": "Rise",
+      "max": 100,
+      "default": 62,
+      "comment": "Pitch step PER REPEAT (the staircase). 0 = octave down, 50 = unity, 100 = octave up. Bipolar, unity at centre."
+    },
+    {
+      "name": "Glide",
+      "max": 100,
+      "default": 45,
+      "comment": "How FAR the pitch travels over the rise (depth). Follows Rise's direction. Paired with Span, which sets how long it takes."
+    },
+    {
+      "name": "Span",
+      "max": 100,
+      "default": 45,
+      "comment": "How LONG the rise takes after a note: squared curve ~0.2 s .. 8 s. A note onset resets the ramp to zero and it then climbs toward full Glide depth over Span, so the repeats start at pitch and drift away \u2014 not the other way round."
+    },
+    {
+      "name": "Tone",
+      "max": 100,
+      "default": 50,
+      "comment": "Low-pass INSIDE the loop, so the climb dulls with each pass instead of turning harsh."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 50,
+      "comment": "Dry/wet."
+    }
+  ]
+}
