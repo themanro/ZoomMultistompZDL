@@ -227,6 +227,16 @@ def main() -> None:
             count=1,
         )
         if n == 1:
+            # Also stamp the effect list into the startup log. A stale cached page
+            # is indistinguishable from a missing effect otherwise -- you only find
+            # out by hunting the dropdown for something that IS in the file.
+            names = ", ".join(e["name"] for e in db["custom"])
+            new_html = re.sub(
+                r'log\(`effect DB: [^;]*;(?:\n *log\("custom: [^\n]*\);)?',
+                'log(`effect DB: ${DB.custom.length} custom + ${DB.stock.length} stock '
+                '(incl. other MS/G1/B1 pedals)`);\n'
+                f'log("custom: {names}");',
+                new_html, count=1)
             editor.write_text(new_html)
             print(f"synced inline DB -> {editor}")
         else:

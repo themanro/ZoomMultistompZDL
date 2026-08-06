@@ -106,6 +106,36 @@ The editor re-reads the patch and re-applies **only the fields the user changed*
 stale values over slots the user never touched — including pedal-side knob moves
 and live `0x31` edits that already landed.
 
+## External references, and a coordinate-space trap
+
+[shooking/ZoomPedalFun — "De re MS-70 CDR"](https://github.com/shooking/ZoomPedalFun/wiki/De-re-MS-70-CDR)
+is the only other MS-70CDR-specific protocol write-up found. It independently
+confirms every command this repo uses (`0x50`/`0x51` edit enable/disable, `0x29`
+request → `0x28` dump, `0x31 <fx> <param+1> <lo> <hi>`, on/off as `0x31` with
+param byte `00`, `0x32` store, `0xC0` load) and the 7-in-8 packing. It documents
+**nothing** about per-slot live-edit limits or the param cache, so the findings
+above are not recorded anywhere else.
+
+Two corrections to it, both checked against hardware:
+
+* It says the pedal has **5 FX slots** and that the `0x31` slot byte is "0-4 for
+  FX 1-5". The MS-70CDR has **6** — confirmed on the device. `maxfx` is not
+  evidence either way; it counts *populated* slots, not capacity.
+* **Its byte offsets are in UNPACKED space; this repo's bit tables index the RAW
+  PACKED message.** The two are not comparable. Convert with:
+
+  ```
+  raw = 5 + 8*(u // 7) + 1 + (u % 7)        # u = unpacked index
+  ```
+
+  So its "tempo is spread over bytes 109 and 110" means **raw bytes 130-131**.
+  Mixing the two spaces made it look briefly as though `encodePatch` was
+  clobbering the tempo. It is not: raw byte 130's `0x1c` bits decode as the
+  effect count (read 5 on a patch with exactly 5 populated slots), raw 131 is
+  never written, and PE touches only `0x1c` and bit 0 of 130. Tempo lives in
+  bits PE leaves alone — but anything that starts writing raw 130/131 more
+  broadly needs to account for it.
+
 ## Editor behaviour
 
 `tools/patch_editor.html` (`LIVE_EDIT_SLOTS = 3`):

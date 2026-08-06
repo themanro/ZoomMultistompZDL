@@ -301,6 +301,36 @@ def _em_dissolve(c):                      # Dissolve — block eroding to dots
             c.px(x, y)
 
 
+def _em_hydra(c):                         # Hydra — one body, a fast head and a slow head
+    def wave(x0, x1, ycen, wavelen, amp=3):
+        prev = None
+        for x in range(x0, x1):
+            t = (x - x0) / float(wavelen)
+            y = int(ycen - amp * math.sin(t * 6.28318))
+            if prev is not None:
+                _line(c, x - 1, prev, x, y)
+            prev = y
+    wave(40, 58, CY, 9)                   # the body: source written to the ring
+    wave(62, 92, CY - 5, 7, 2)            # fast head: 2x, wavelength halved, rides high
+    wave(62, 92, CY + 6, 24, 3)           # slow head: 0.5x, stretched out, rides low
+    _line(c, 58, CY, 62, CY - 5)          # the split into two heads
+    _line(c, 58, CY, 62, CY + 6)
+
+
+def _em_spiral(c):                        # Spiral — echoes climbing a staircase
+    # each repeat one step higher and one step shorter: the compounding shift
+    base = CY + 8
+    for k in range(6):
+        x = 42 + k * 9
+        top = base - 3 - k * 2
+        _line(c, x, top, x, base)          # the repeat
+        _line(c, x - 1, base, x + 1, base)  # its foot on the step
+    # an arrow head on the last, tallest repeat
+    tip = base - 3 - 5 * 2
+    _line(c, 42 + 5 * 9, tip, 42 + 5 * 9 - 3, tip + 4)
+    _line(c, 42 + 5 * 9, tip, 42 + 5 * 9 + 3, tip + 4)
+
+
 EMBLEMS = {
     "Microlm": _em_shimmer, "Flower": _em_flower, "Shatter": _em_bars,
     "Arrakis": _em_dunes, "Corrupt": _em_square, "Klang": _em_rings,
@@ -309,6 +339,7 @@ EMBLEMS = {
     "Lush": _em_swirl, "Room": _em_room,
     "Galactic": _em_stars, "OTT": _em_arrows, "TapeHack": _em_tapehack,
     "Taffy": _em_taffy, "Dissolve": _em_dissolve, "Mangle": _em_mangle,
+    "Hydra": _em_hydra, "Spiral": _em_spiral,
 }
 
 

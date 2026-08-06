@@ -1,8 +1,8 @@
 # Custom Effect Pack (themanro)
 
-A curated **library of 16 effects** for the Zoom MS-70CDR (ZDL family),
+A curated **library of 18 effects** for the Zoom MS-70CDR (ZDL family),
 built on the [repeat98/ZoomMultistompZDL](https://github.com/repeat98/ZoomMultistompZDL)
-toolchain. Thirteen are originals (most with a full-quality Python **desktop
+toolchain. Fifteen are originals (most with a full-quality Python **desktop
 preview** in `tools/audio_preview/renderers/`); the rest are rebuilt/renamed
 Airwindows-derived ports. All are grouped under the **Delay** category with a
 custom on-device cover, and all compile clean (`.fardata 0`, `0 relocations`).
@@ -16,7 +16,7 @@ custom on-device cover, and all compile clean (`.fardata 0`, `0 relocations`).
 > **Custom fxids must not collide with any stock effect id** — the pedal keys
 > effects by fxid alone, so a collision loads the wrong DSP (cracking/dead);
 > `build/extract_effect_db.py` now guards against this. The pedal **can't hold
-> or run all 16 at once** (storage + DSP limits) — install a subset, back up
+> or run all 18 at once** (storage + DSP limits) — install a subset, back up
 > first, flash one at a time.
 
 ## Pedal icons
@@ -45,6 +45,11 @@ custom on-device cover, and all compile clean (`.fardata 0`, `0 relocations`).
 <td align="center"><img src="graphics/dissolve.png" width="220" alt="Dissolve"></td>
 <td align="center"><img src="graphics/mangle.png" width="220" alt="Mangle"></td>
 <td align="center"><img src="graphics/rooms.png" width="220" alt="Rooms"></td>
+</tr>
+<tr>
+<td align="center"><img src="graphics/hydra.png" width="220" alt="Hydra"></td>
+<td align="center"><img src="graphics/spiral.png" width="220" alt="Spiral"></td>
+<td></td><td></td>
 </tr>
 </table>
 
@@ -76,6 +81,8 @@ rebuilt/renamed Airwindows-derived ports.
 | Dissolve | `Dissolve` | Chance, Smear, Glitch, Mix | original | OBNE Parting-style glitch delay dissolving into reverb wash |
 | Mangle | `Mangle` | Time, Feedbk, Crush, Tremolo, Pitch, Mix | original | delay with three blendable per-repeat mutations: Crush (bitcrush/degrade) + Tremolo compound in the feedback, Pitch (octave-down grain) on the output |
 | Rooms | `Rooms` | Mode, Time, Freq, Depth, Mix | original | DBA Rooms-inspired multi-mode reverb — Mode picks ROOM/DIGIT/PEAK/GATE/WAVE/GONG; Freq/Depth are re-purposed per mode |
+| Hydra | `Hydra` | Window, Fast, Slow, Tone, Mix | original | two extra playback heads on one delay ring — a 2× (octave-up / double-time) and a 0.5× (octave-down / half-time) layer, re-triggered every Window. Short Window = granular pitch layers, long Window = rhythmic ghosts. Built for drums |
+| Spiral | `Spiral` | Time, Feedbk, Rise, Glide, Span, Tone, Mix | original | delay whose repeats climb or sink — the pitch shift sits *inside* the feedback loop so it compounds. Rise = per-repeat staircase (bipolar, unity at centre); Glide + Span = a note resets a ramp to zero and it climbs over 0.2–8 s, so repeats start at pitch and drift away |
 | Galactic | `Galactic` | 5 | port | lush Airwindows reverb (wet path boosted) |
 | Oxide | `Oxide` | 9 | port | tape saturation/drive (Airwindows ToTape) |
 | Spool | `Spool` | 9 | port | tape echo (Airwindows-inspired) |
@@ -101,6 +108,8 @@ before the pedal knob reduction.
 | GenLoss | [genloss.wav](previews/audio/genloss.wav) — wrecked tape | [chord](previews/audio/dry_chord.wav) |
 | Scorch | [scorch.wav](previews/audio/scorch.wav) — djent high-gain amp+cab | [riff](previews/audio/dry_riff.wav) |
 | Howl | [howl.wav](previews/audio/howl.wav) — self-oscillating feedback | [guitar](previews/audio/dry_guitar.wav) |
+| Hydra | [hydra.wav](previews/audio/hydra.wav) — double-time ghost + half-time drag | [drums](previews/audio/dry_drums.wav) |
+| Spiral | [spiral.wav](previews/audio/spiral.wav) — slow 8-second rising delay | [guitar](previews/audio/dry_guitar.wav) |
 
 Regenerate or explore other presets with the preview tool below.
 
@@ -126,7 +135,7 @@ python3 build_all.py flower          # one effect -> dist/Flower.ZDL
 python3 build_all.py scorch          # etc.
 ```
 
-Pre-built `.ZDL` files for all 16 are in [`dist/`](dist/).
+Pre-built `.ZDL` files for all 18 are in [`dist/`](dist/).
 
 ## Implementation notes
 

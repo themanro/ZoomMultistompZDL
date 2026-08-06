@@ -41,6 +41,8 @@ RELEASE_PLUGINS = [
     ("dissolve",    CUSTOM_DIR / "dissolve"    / "build.py"),
     ("mangle",      CUSTOM_DIR / "mangle"      / "build.py"),
     ("rooms",       CUSTOM_DIR / "rooms"       / "build.py"),
+    ("hydra",       CUSTOM_DIR / "hydra"       / "build.py"),
+    ("spiral",      CUSTOM_DIR / "spiral"      / "build.py"),
 ]
 
 # Dropped from the release set 2026-06-29 after hardware listening (user
