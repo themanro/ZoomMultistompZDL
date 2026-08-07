@@ -73,6 +73,13 @@ See [CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md) for knob layouts and sound demos.
 <td align="center"><img src="graphics/taffy.png" width="220" alt="Taffy"></td>
 <td align="center"><img src="graphics/dissolve.png" width="220" alt="Dissolve"></td>
 <td align="center"><img src="graphics/mangle.png" width="220" alt="Mangle"></td>
+<td align="center"><img src="graphics/rooms.png" width="220" alt="Rooms"></td>
+</tr>
+<tr>
+<td align="center"><img src="graphics/hydra.png" width="220" alt="Hydra"></td>
+<td align="center"><img src="graphics/spiral.png" width="220" alt="Spiral"></td>
+<td></td>
+<td></td>
 </tr>
 </table>
 
