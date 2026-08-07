@@ -5,14 +5,49 @@ toolchain used to build them — no Zoom SDK required.
 
 This was a good amount of work and tokens, please consider to: [buymeacoffee.com/SZ0KFIXKCt](buymeacoffee.com/SZ0KFIXKCt)
 
+<p align="center"><img src="graphics/thumb_effects.png" width="820" alt="18 custom effects for the Zoom MS-70CDR"></p>
+
+## Quickstart — edit your pedal from the browser
+
+**[▶ Open the Patch Editor](https://themanro.github.io/ZoomMultistompZDL/tools/patch_editor.html)**
+
+Plug the MS-70CDR in over USB, click **Connect**, and edit patches live — no
+install, no clone, nothing sent anywhere (it is one self-contained HTML file and
+your patch library lives in your own browser).
+
+* **Chrome, Edge or Opera.** Safari and Firefox do not implement Web MIDI; the
+  editor will tell you if you are on one of them.
+* **Close Zoom Effect Manager first** — it holds the MIDI port.
+* Slots 1–3 respond to knob moves instantly. Slots 4–6 cannot be edited live by
+  this hardware, so the editor applies those for you — see
+  [docs/MIDI-PARAM-EDIT.md](docs/MIDI-PARAM-EDIT.md).
+
+<p align="center"><img src="graphics/thumb_editors.png" width="820" alt="Patch Editor and Cover Editor"></p>
+
+**[▶ Open the Cover Editor](https://themanro.github.io/ZoomMultistompZDL/tools/cover_editor.html)**
+— draw the 128×64 image an effect shows on the pedal's screen. Drawing, PNG/JSON
+export and the device preview all work from the link above; the one-click
+**Update ZDL** button additionally needs the local build server:
+
+```bash
+git clone https://github.com/themanro/ZoomMultistompZDL.git
+cd ZoomMultistompZDL
+python3 tools/serve_editor.py        # opens the editor, wires up "Update ZDL"
+```
+
+Loading new effects onto the pedal still goes through Zoom Effect Manager — the
+browser can edit patches, but it cannot install effects.
+
 ## Custom effect pack
 
-This fork ships a curated **library of 15 effects** — all grouped under the
-Delay category, each with a custom on-device cover. Twelve originals
+This fork ships a curated **library of 18 effects** — all grouped under the
+Delay category, each with a custom on-device cover. Fifteen originals
 (granular shimmer, drum glitch, tape degradation, a Dune-style drone, a Data
 Corrupter-style synth, a swept ring mod, high-gain amp+cab, a feedback howl,
-a Tensor-style tape warp, a Parting-style glitch delay, a mutating-repeats delay) plus three
-Airwindows-derived ports (Galactic reverb, Oxide tape, Spool tape echo).
+a Tensor-style tape warp, a Parting-style glitch delay, a mutating-repeats
+delay, a multi-mode reverb, double/half-time drum layers, and a delay whose
+repeats climb in pitch) plus three Airwindows-derived ports (Galactic reverb,
+Oxide tape, Spool tape echo).
 See [CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md) for knob layouts and sound demos.
 
 <table>
@@ -286,7 +321,19 @@ my MS-70CDR" is more useful than "works everywhere."
 
 ## License
 
-Repository code is MIT unless a file says otherwise. Airwindows plugin DSP is
-MIT by Chris Johnson/Airwindows. Zoom firmware, stock effects, and third-party
-reference material are owned by their respective authors and are used only for
-interoperability and reverse-engineering research.
+See [LICENSE](LICENSE). The original work in this fork — the custom effects in
+`src/custom/`, the browser tools in `tools/`, the notes in `docs/` and the cover
+art in `graphics/` — is MIT.
+
+That grant deliberately stops there. The upstream toolchain this is forked from,
+[repeat98/ZoomMultistompZDL](https://github.com/repeat98/ZoomMultistompZDL),
+publishes no licence file, so inherited material stays under its author's
+default copyright and is not relicensed here. Airwindows DSP in
+`src/airwindows/` is MIT by Chris Johnson/Airwindows under its own terms. Zoom
+firmware, stock effect binaries and the TI toolchain belong to Zoom Corporation
+and Texas Instruments; they are referenced for interoperability and
+reverse-engineering research only, and none of their code is redistributed
+here.
+
+Not affiliated with or endorsed by Zoom Corporation. Flashing custom effects is
+at your own risk.
