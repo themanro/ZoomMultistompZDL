@@ -126,8 +126,20 @@
     background:transparent; color:var(--ink);
     border:var(--b) solid var(--ink); border-radius:var(--radius);
     box-shadow:var(--halo-box); text-shadow:var(--halo-text);
-    padding:10px 22px; font-size:22px; letter-spacing:0.04em;   /* --ac-btn padding/size */
+    padding:4px 10px; font-size:16px; letter-spacing:0.04em;
   }
+  /* AmberConsole's 10px/22px at 22px is for PRIMARY soft keys. Applying it to
+     every control squeezed the patch-list rows -- .librow .nm is flex:1, so four
+     oversized row buttons collapsed the name to zero width and the list looked
+     empty. Full size belongs on the toolbar; dense controls stay compact. */
+  html[data-theme="p4"] .bar>button, html[data-theme="p3"] .bar>button{
+    padding:10px 22px; font-size:22px;
+  }
+  html[data-theme="p4"] .librow button, html[data-theme="p3"] .librow button{
+    padding:1px 6px; font-size:14px; box-shadow:none;
+  }
+  html[data-theme="p4"] .librow .nm, html[data-theme="p3"] .librow .nm{ font-size:16px; }
+  html[data-theme="p4"] .librow .num, html[data-theme="p3"] .librow .num{ font-size:14px; width:24px; }
   html[data-theme="p4"] button:hover, html[data-theme="p3"] button:hover{
     background:transparent; color:var(--ink-bright); border-color:var(--ink-bright);
   }
@@ -11773,7 +11785,7 @@ log(`effect DB: ${DB.custom.length} custom + ${DB.stock.length} stock (incl. oth
 log("custom: Arrakis, Corrupt, Dissolve, Flower, Galactic, GenLoss, Howl, Hydra, Klang, Mangle, Microlm, Oxide, Rooms, Scorch, Shatter, Spiral, Spool, Taffy");
 // Build stamp: if this line is missing you are looking at a CACHED old copy of
 // the page — hard-reload (Cmd-Shift-R) before reporting a fix as not working.
-log("PE build 2026-08-11b — CRT themes match AmberConsole component language");
+log("PE build 2026-08-14a — CRT: compact row controls so patch names show");
 log("ready — click Connect MIDI (pedal on USB, normal mode, Effect Manager CLOSED)");
 </script>
 </body>
