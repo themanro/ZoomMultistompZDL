@@ -3,6 +3,15 @@
 **Confirmed on hardware 2026-07-31.** Recorded here because this cost a very long
 debugging session — an earlier one-line note said the same thing and was overruled.
 
+> **CORRECTION, 2026-08-14 — read this before trusting anything below.**
+> The "slot rule" is real but it is **not a property of the pedal**. Stock
+> effects accept live `0x31` knob edits on ALL SIX slots, 4-6 included. Only
+> effects built by this repo fail on 4-6, so the boundary described below is a
+> bug in our edit handlers, not a firmware limitation. Everything in this file
+> about slots 4-6 needing a bypass bounce is a workaround for our own defect and
+> should not be treated as an ABI fact. See "Where the slot 4-6 asymmetry
+> actually comes from".
+
 ## The rule
 
 The MS-70CDR honours live `0x31` parameter edits **only for the early effect
@@ -17,8 +26,10 @@ F0 52 00 61 31 <slot> <paramIdx> <lo7> <hi7> F7
 * **slots 4-6** (`<slot>` = 3..5) — ignored. These need a buffer write plus a
   bypass bounce on that slot (see "the param cache" below). No store required.
 
-All six slots were tested individually (2026-07-31), so the 1-3 / 4-6 boundary is
-measured rather than inferred. The first clue was moving GenLoss from slot 4 to
+All six slots were tested individually (2026-07-31) using CUSTOM effects, so the
+1-3 / 4-6 boundary is measured rather than inferred -- but measured only for this
+repo's effects. Retesting with a STOCK effect (2026-08-14) showed no boundary at
+all, which is what exposed the real cause. The first clue was moving GenLoss from slot 4 to
 slot 1: its knobs began responding instantly with no change to the effect at all
 — same ZDL, same fxid, same descriptor.
 
@@ -105,6 +116,117 @@ The editor re-reads the patch and re-applies **only the fields the user changed*
 (tracked as dirty `slot,field` pairs). Writing a whole cached model back pushes
 stale values over slots the user never touched — including pedal-side knob moves
 and live `0x31` edits that already landed.
+
+## Hardware probe: what a patch write does and does not reach
+
+The obvious hope was that some OTHER host-owned region tracks a patch write even
+when `params[]` does not -- a custom effect could then read its knobs from there
+and behave identically on all six slots, with no bypass bounce and no audible
+gap. `src/hardware_probes/ctxwatch/` was built to answer that. It hashes a window
+behind every `ctx[]` pointer each block and beeps that word's index when a region
+that had been sitting still moves.
+
+Run on slot 4, 2026-08-14:
+
+| Stimulus | Result |
+| --- | --- |
+| boot | two beeps -- alive, at least one region under watch |
+| full patch write, NO bypass bounce (`0x50` + `0x28`) | **silence** |
+| Apply, i.e. the same write WITH the bounce | **1 blip = `ctx[1]`, the params table** |
+
+So a plain `0x28` to a slot-4 effect changes nothing the running DSP can see --
+not `params[]`, and not any other watched word. That much is solid.
+
+**The conclusion originally drawn from it was WRONG.** This section used to end
+"the bypass bounce is the mechanism, not a workaround, and no effect can avoid
+it", generalising a fact about PATCH WRITES into a claim about slots 4-6 as a
+whole. A later test killed it outright: **stock effects accept live `0x31` knob
+edits on all six slots, including 4-6.** Only OUR effects fail there. There is no
+hardware rule about slot position; the asymmetry is a bug in this repo's edit
+handlers. See "Where the slot 4-6 asymmetry actually comes from" below.
+
+Coverage caveat, so the negative result is not over-read: the probe skips
+`ctx[3]`-`ctx[6]` and `ctx[11]`-`ctx[14]` (arena and audio buffers, which change
+every block by definition), and any pointer failing its address guard is silently
+not watched. The boot beep confirms at least one region was live but does not
+report how many. A word that is both unguardable and a param mirror would have
+been missed -- unlikely, but not excluded.
+
+Two things the probe established incidentally, both worth knowing:
+
+* **The host calls a slot's audio function even when the slot is bypassed.**
+  Bypass is the effect returning early on `params[0]`, not the host skipping it.
+* A readout that hums continuously and re-reports on every change is unreadable
+  in practice. Silence-by-default plus a one-shot-per-index latch is what finally
+  produced a countable answer; three earlier runs were wasted on volume and gate
+  tuning of a design that could not have given one.
+
+## Where the slot 4-6 asymmetry actually comes from
+
+Test that settled it: put a STOCK effect in slot 4 and turn its Mix from an
+editor. It works. Custom effects from this repo do not. Same slot, same message,
+different result -- so slot position is not the variable, the effect is.
+
+What differs. A custom build gets its edit handlers from three sources:
+
+| Knob | Handler | Writes |
+| --- | --- | --- |
+| 1 | LineSel blob, copied verbatim from stock | `params[5]` |
+| 2 | LineSel blob, copied verbatim from stock | `params[6]` |
+| 3 | AIR `Fx_REV_Air_mix_edit` blob, verbatim | `params[7]` |
+| 4+ | CLONED LineSel blob with knob id and param offset patched in (`_patch_linesel_knob_clone` in `build/linker.py`) | `params[8]`+ |
+
+Knobs 1-3 are stock code. Knob 4 and beyond are synthesized, and that is the
+least-proven path in the build. Note which knob "Mix" usually is on a custom
+effect: the last one.
+
+This is made much harder to notice by `zoom_param_norm01`, which returns the
+DEFAULT whenever a param reads ~0:
+
+```c
+if (raw <= 0.0001f) return zoom_clamp01(fallback_norm);
+```
+
+A param that is never written is therefore indistinguishable from a knob that
+does nothing -- the effect simply sits at its default and sounds fine. This is
+almost certainly the long-standing "Mix knob does nothing until I wiggle it on
+the pedal" problem, and it is why that went undiagnosed for so long.
+
+NOT yet established: why the synthesized handlers would care about slot position
+at all. The blob reads new knob values from a host-provided state object (see
+`build/find_firmware_state_offsets.py`), so a read that is only correct in some
+contexts would produce exactly this -- but that is a hypothesis awaiting a probe,
+not a finding. Do not build on it.
+
+Next test: on a custom effect in slot 4, check knobs 1-3 against knobs 4+. If the
+first three respond and the rest do not, the bug is handler synthesis.
+
+## What ToneLib actually does on slots 4-6
+
+ToneLib drives slots 4-6 from its UI, which looks like proof that a live path
+exists. It is not. A MIDI capture of ONE knob drag, watching the pedal's output:
+
+| Emitted by the pedal during a single drag | Count |
+| --- | --- |
+| Bank Select CC0 + CC32, then Program Change | 16 each |
+| 146-byte patch dumps | 32 |
+| `0x31` live param messages | **0** |
+
+ToneLib reloads the WHOLE PATCH on every knob step -- sixteen full
+re-instantiations during one drag -- and the pedal re-announces the patch each
+time. The only bytes that differ between the dumps are the param being turned.
+
+So there is no special command and no hidden live path. Every editor that
+"works" on slots 4-6 is re-instantiating constantly and hiding the seam behind
+UI responsiveness. The bypass bounce is the same trick applied to ONE slot
+rather than all six, which is strictly less disruptive; PE's only real
+disadvantage was making it a button press instead of doing it while you drag.
+PE now auto-applies with a trailing scheduler (one apply in flight, re-fired on
+completion if the knob moved meanwhile), which matches ToneLib's feel.
+
+Caveat on the capture: it recorded only the pedal's OUTPUT, so ToneLib's own
+sends were never seen. What is certain is that a full patch reload accompanies
+every step; what ToneLib sends to *cause* it is inferred, not observed.
 
 ## External references, and a coordinate-space trap
 
