@@ -41,14 +41,10 @@ browser can edit patches, but it cannot install effects.
 ## Custom effect pack
 
 This fork ships a curated **library of 18 effects** — all grouped under the
-Delay category, each with a custom on-device cover. Fifteen originals
-(granular shimmer, drum glitch, tape degradation, a Dune-style drone, a Data
-Corrupter-style synth, a swept ring mod, high-gain amp+cab, a feedback howl,
-a Tensor-style tape warp, a Parting-style glitch delay, a mutating-repeats
-delay, a multi-mode reverb, double/half-time drum layers, and a delay whose
-repeats climb in pitch) plus three Airwindows-derived ports (Galactic reverb,
-Oxide tape, Spool tape echo).
-See [CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md) for knob layouts and sound demos.
+Delay category, each with a custom on-device cover. Fifteen originals plus three
+Airwindows-derived ports (Galactic reverb, Oxide tape, Spool tape echo).
+Full knob layouts, caveats and sound demos are in
+[CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md).
 
 <table>
 <tr>
@@ -83,7 +79,30 @@ See [CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md) for knob layouts and sound demos.
 </tr>
 </table>
 
-> Not all hardware-verified yet, and the pedal can't hold/run all 15 at once
+### What each one does
+
+| | |
+|---|---|
+| **Microlm** | granular pitch-shimmer cloud; grains are pitched and fed back, so it builds rather than repeats |
+| **Flower** | Korg-style random sample-and-hold step filter — the "Digital Bath" sound |
+| **Shatter** | stutter / beat-repeat glitch for drums |
+| **Arrakis** | Dune-style detuned sub-octave drone, two subs beating against each other |
+| **Corrupt** | EQD Data Corrupter-style PLL square synth with tracked sub and divided harmony |
+| **Klang** | swept-carrier ring modulator — sirens, dive bombs, clangorous metal |
+| **GenLoss** | tape/VHS generation loss: wow, head-bump tone shift, hiss |
+| **Scorch** | aggressive high-gain amp with a cab-style filter |
+| **Howl** | DBA Total Sonic Annihilation-style feedback loop that self-oscillates on demand |
+| **Taffy** | Red Panda Tensor-style tape warp — reverse, stop, double-speed, random slips |
+| **Dissolve** | OBNE Parting-style glitch delay dissolving into a reverb wash |
+| **Mangle** | delay with three blendable per-repeat mutations (crush, tremolo, octave-down grain) |
+| **Rooms** | DBA Rooms-inspired multi-mode reverb: ROOM / DIGIT / PEAK / GATE / WAVE / GONG |
+| **Hydra** | **tempo-locked** double-time and half-time ghost layers on one delay ring; built for drums |
+| **Spiral** | **tempo-locked** delay whose repeats climb or sink in pitch, compounding every repeat |
+| **Galactic** | lush Airwindows reverb, wet path boosted for pedal levels |
+| **Oxide** | Airwindows ToTape9 saturation — drive, tilt, bias, flutter, head bump |
+| **Spool** | tempo-locked tape echo with flutter, wow, head wear, drive and a spring tail |
+
+> Not all hardware-verified yet, and the pedal can't hold/run all 18 at once
 > (storage + DSP limits) — install a subset, back up first, flash one at a
 > time. All volume knobs default to **1** so nothing is loud at patch select.
 
