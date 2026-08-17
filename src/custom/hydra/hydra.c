@@ -15,12 +15,23 @@
  * re-trigger rate up at audio frequency, which IS granular pitch shifting
  * (octave-up / octave-down layers in time with the dry); 100 ms .. 0.7 s puts
  * it at rhythmic rates, so the layers become double-time hits and a half-time
- * drag. Aimed at drums. 5 knobs:
- *   Window (params[5]) - re-trigger length, cubic 256 .. 32768 samples
- *   Fast   (params[6]) - level of the 2x head
- *   Slow   (params[7]) - level of the 0.5x head
- *   Tone   (params[8]) - low-pass on the two layers only
- *   Mix    (params[9]) - dry/wet
+ * drag. Aimed at drums.
+ *
+ * Window is now TEMPO-LOCKED. The re-trigger rate IS the rhythm of both ghost
+ * layers, and a free sweep never lines up with a drum machine -- which is why
+ * it "never got dialled in to tempo". 6 knobs, Div and Tempo on knobs 1-2 (the
+ * verbatim-stock LineSel handlers, the most reliable pair in the pack):
+ *   Div    (knob 1) window as a division of Tempo. Position 0 is Grain: a fixed
+ *                   256-sample free-running window, i.e. the granular
+ *                   octave-shifter mode above, which no musical division
+ *                   reaches at any sane BPM. Above it: 1/32, 1/16T, 1/16, 1/8T,
+ *                   1/8, dotted 1/8, 1/4.
+ *   Tempo  (knob 2) BPM 40..240, read straight off the knob so the pedal's own
+ *                   number IS the tempo. Ignored at Grain.
+ *   Fast   (knob 3) level of the 2x head -- double-time ghost, octave up
+ *   Slow   (knob 4) level of the 0.5x head -- half-time drag, octave down
+ *   Tone   (knob 5) low-pass on the two layers only; the dry stays open
+ *   Mix    (knob 6) dry/wet
  *
  * Safe-DSP: no math lib (smoothstep seam fade instead of a cosine, no pow --
  * the Window curve is a cubic), no runtime divide (the fade length is a fixed
@@ -55,8 +66,21 @@ HYDRA_CODE_SECTION(HYDRA_AUDIO_FUNC)
  * the ring is 4x the largest window -- comfortable margin. */
 #define HY_BUF      131072u
 #define HY_MASK     (HY_BUF - 1u)
-#define HY_WIN_MIN  256          /* ~5.8 ms */
-#define HY_WIN_SPAN 32512        /* max window 32768 = ~743 ms */
+#define HY_WIN_MIN  256          /* ~5.8 ms -- also the fixed Grain window */
+/* Hard ceiling. The 2x head consumes TWO windows of history per window, so the
+ * ring must hold 2*W with margin: 2*49152 = 98304 of 131072. A musical division
+ * longer than this (1/4 below ~54 BPM) is clamped rather than allowed to read
+ * past the write head. */
+#define HY_WIN_MAX  49152
+#define HY_SR_X60   2646000.0f   /* 44100*60: samples per quarter = this / BPM */
+#define HY_BPM_MIN  40.0f
+#define HY_BPM_MAX  240.0f
+/* Quadratic seed for 1/BPM through 40/140/240 + 4 Newton-Raphson steps.
+ * Multiplies only: a runtime divide would pull in __c6xabi_divf, a freeze
+ * class. Worst relative error over the range is 2.0e-9. */
+#define HY_RSEED_A  0.03630952f
+#define HY_RSEED_B  (-3.125e-4f)
+#define HY_RSEED_C  7.440476e-7f
 #define HY_FADE     32           /* seam fade, fixed power of two ... */
 #define HY_INV_FADE 0.03125f     /* ... so 1/HY_FADE is a literal, not a divide */
 #define HY_DENORM   1.0e-18f
@@ -132,17 +156,48 @@ void HYDRA_AUDIO_FUNC(unsigned int *ctx)
         st->initialized = 1u;
     }
 
-    float wn   = zoom_param_norm01(params[HYDRA_WINDOW_SLOT], HYDRA_WINDOW_DEFAULT_NORM);
+    float dv   = zoom_param_norm01(params[HYDRA_DIV_SLOT],   HYDRA_DIV_DEFAULT_NORM);
+    float tp   = zoom_param_norm01(params[HYDRA_TEMPO_SLOT], HYDRA_TEMPO_DEFAULT_NORM);
     float fast = zoom_param_norm01(params[HYDRA_FAST_SLOT],   HYDRA_FAST_DEFAULT_NORM);
     float slow = zoom_param_norm01(params[HYDRA_SLOW_SLOT],   HYDRA_SLOW_DEFAULT_NORM);
     float tone = zoom_param_norm01(params[HYDRA_TONE_SLOT],   HYDRA_TONE_DEFAULT_NORM);
     float mix  = zoom_param_norm01(params[HYDRA_MIX_SLOT],    HYDRA_MIX_DEFAULT_NORM);
 
-    /* cubic Window curve: fine control down at the granular end, sweeping out
-     * to rhythmic lengths at the top. Cheaper and safer than a pow(). */
-    float wc = wn * wn * wn;
-    int32_t W = HY_WIN_MIN + (int32_t)(wc * (float)HY_WIN_SPAN);
+    /* Window used to be a free cubic sweep over 5.8ms..743ms, which is why it
+     * "never got dialled in to tempo": the re-trigger rate IS the rhythm of the
+     * two ghost layers, and nothing tied it to the beat. It is now a musical
+     * division, so the 2x head lands on the subdivision and the 0.5x drag is
+     * coherent with it. Position 0 keeps the old granular mode, which the
+     * tempo ladder cannot reach at any sane BPM. */
+    int32_t W;
+    if (dv < 0.0625f) {
+        W = HY_WIN_MIN;                          /* Grain: free-running */
+    } else {
+        float bpm = tp * HY_BPM_MAX;
+        if (bpm < HY_BPM_MIN) bpm = HY_BPM_MIN;
+        else if (bpm > HY_BPM_MAX) bpm = HY_BPM_MAX;
+
+        float r = HY_RSEED_A + HY_RSEED_B * bpm + HY_RSEED_C * bpm * bpm;
+        r = r * (2.0f - bpm * r);
+        r = r * (2.0f - bpm * r);
+        r = r * (2.0f - bpm * r);
+        r = r * (2.0f - bpm * r);
+        float quarter = HY_SR_X60 * r;
+
+        /* if/else, never switch: a jump table is unreachable in a ZDL. */
+        float divMul;
+        if      (dv < 0.1875f) divMul = 0.125f;              /* 1/32         */
+        else if (dv < 0.3125f) divMul = 0.1666667f;          /* 1/16 triplet */
+        else if (dv < 0.4375f) divMul = 0.25f;               /* 1/16         */
+        else if (dv < 0.5625f) divMul = 0.3333333f;          /* 1/8 triplet  */
+        else if (dv < 0.6875f) divMul = 0.5f;                /* 1/8          */
+        else if (dv < 0.8125f) divMul = 0.75f;               /* dotted 1/8   */
+        else                   divMul = 1.0f;                /* 1/4          */
+
+        W = (int32_t)(quarter * divMul);
+    }
     if (W < HY_WIN_MIN) W = HY_WIN_MIN;
+    else if (W > HY_WIN_MAX) W = HY_WIN_MAX;
 
     float lpCoef = 0.02f + tone * 0.55f;
 

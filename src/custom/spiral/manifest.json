@@ -9,40 +9,46 @@
   "flags_byte": 1,
   "params": [
     {
-      "name": "Time",
+      "name": "Div",
       "max": 100,
-      "default": 45,
-      "comment": "Delay time, squared curve ~40 ms .. 1.2 s."
+      "default": 30,
+      "comment": "Musical division of the tempo below: 1/32, 1/16T, 1/16, 1/8T, 1/8, dotted 1/8, 1/4, dotted 1/4. Default 30 lands on 1/16, which at 120 BPM is the 125 ms that the old Time=17 produced."
+    },
+    {
+      "name": "Tempo",
+      "max": 240,
+      "default": 120,
+      "comment": "BPM, read straight off the knob so the pedal's own number IS the tempo. Clamped to 40..240 in the DSP."
     },
     {
       "name": "Feedbk",
       "max": 100,
       "default": 60,
-      "comment": "Repeats. Scaled to 0.92 max and the loop is soft-clipped, so a compounding shift cannot run away."
+      "comment": "Repeats, scaled to 0.965 and soft-clipped in the loop."
     },
     {
       "name": "Rise",
       "max": 100,
       "default": 62,
-      "comment": "Pitch step PER REPEAT (the staircase). 0 = octave down, 50 = unity, 100 = octave up. Bipolar, unity at centre."
+      "comment": "Per-repeat ratio: 0 = octave down, 50 = unity, 100 = octave up."
     },
     {
       "name": "Glide",
       "max": 100,
       "default": 45,
-      "comment": "How FAR the pitch travels over the rise (depth). Follows Rise's direction. Paired with Span, which sets how long it takes."
+      "comment": "Depth of the onset-triggered ramp on that ratio."
     },
     {
       "name": "Span",
       "max": 100,
       "default": 45,
-      "comment": "How LONG the rise takes after a note: squared curve ~0.2 s .. 8 s. A note onset resets the ramp to zero and it then climbs toward full Glide depth over Span, so the repeats start at pitch and drift away \u2014 not the other way round."
+      "comment": "How long the rise takes, ~0.19 s .. ~8 s."
     },
     {
       "name": "Tone",
       "max": 100,
       "default": 50,
-      "comment": "Low-pass INSIDE the loop, so the climb dulls with each pass instead of turning harsh."
+      "comment": "Low-pass inside the feedback loop."
     },
     {
       "name": "Mix",
