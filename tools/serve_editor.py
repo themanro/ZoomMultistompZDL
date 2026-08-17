@@ -68,19 +68,45 @@ def _bind(port: int) -> ThreadingHTTPServer:
 
 
 def main() -> None:
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
+    """Serve the repo and open an editor.
+
+        python3 tools/serve_editor.py              # patch editor
+        python3 tools/serve_editor.py --cover      # cover editor
+        python3 tools/serve_editor.py --no-open    # just serve
+        python3 tools/serve_editor.py 8100         # pick a starting port
+
+    Opens the PATCH editor by default: it is the tool reached for most, and it
+    needs a localhost origin because Web MIDI refuses to run on a file:// page.
+    """
+    args = sys.argv[1:]
+    which = "patch"
+    if "--cover" in args:
+        which = "cover"
+    if "--no-open" in args:
+        which = None
+    ports = [a for a in args if a.isdigit()]
+    port = int(ports[0]) if ports else 8000
+
     httpd = _bind(port)
     actual = httpd.server_address[1]
-    url = f"http://localhost:{actual}/tools/cover_editor.html"
+    base = f"http://localhost:{actual}"
+    patch_url = f"{base}/tools/patch_editor.html"
+    cover_url = f"{base}/tools/cover_editor.html"
+
     if actual != port:
-        print(f"(port {port} was busy — using {actual})")
-    print(f"Cover Editor  ->  {url}")
-    print("   'Update ZDL' writes the cover + rebuilds the effect. Ctrl-C to stop.")
-    print("   Use THIS url (not any other tab) so the build button can reach the server.")
-    try:
-        webbrowser.open(url)
-    except Exception:
-        pass
+        print(f"(port {port} was busy -- using {actual})")
+    print(f"Patch Editor  ->  {patch_url}")
+    print(f"Cover Editor  ->  {cover_url}")
+    print("   Web MIDI only works on localhost or https, so open these URLs --")
+    print("   a file:// page will load but can never reach the pedal.")
+    print("   'Update ZDL' in the cover editor rebuilds the effect. Ctrl-C to stop.")
+
+    url = patch_url if which == "patch" else (cover_url if which == "cover" else None)
+    if url:
+        try:
+            webbrowser.open(url)
+        except Exception:
+            pass
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
