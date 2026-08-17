@@ -68,7 +68,7 @@ SPIRAL_CODE_SECTION(SPIRAL_AUDIO_FUNC)
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
 #define SP_MAGIC   0x53505241u   /* 'SPRA' */
-#define SP_VERSION 1u
+#define SP_VERSION 2u   /* state grew: peak + armed */
 
 #define SP_BUF       131072u     /* 512 KB, ~2.97 s */
 #define SP_MASK      (SP_BUF - 1u)
@@ -96,7 +96,16 @@ SPIRAL_CODE_SECTION(SPIRAL_AUDIO_FUNC)
 #define SP_ENV_SLOW  0.0008f
 #define SP_ONSET_MUL 1.7f
 #define SP_ONSET_ADD 0.008f
-#define SP_COOLDOWN  2205        /* ~50 ms between onset triggers */
+#define SP_COOLDOWN  11025       /* 250 ms between ramp restarts */
+/* Restart the climb at the START OF A PHRASE, not on every note.
+ * Previously ANY onset reset the ramp. Against a drum machine that means a
+ * reset every 16th, i.e. every 125 ms at 120 BPM -- and the ramp needs 0.2 s to
+ * 8 s to travel. It never climbed, so Glide only ever scaled a small wobble and
+ * Span appeared to do nothing (worse: a LONGER Span travelled LESS in the time
+ * available, so the knob read as backwards). The trigger is now armed only
+ * after the input has actually dropped away relative to its recent peak. */
+#define SP_ARM_FRAC  0.08f       /* envF must fall to 8% of held peak to re-arm */
+#define SP_PEAK_DEC  0.99995465f /* peak hold, ~0.5 s decay (exp is a helper) */
 #define SP_K_MAX     1.13e-4f    /* Span short end (~0.19 s) */
 #define SP_K_MIN     2.8e-6f     /* Span long end  (~8.1 s) */
 #define SP_DENORM    1.0e-18f
@@ -110,6 +119,8 @@ typedef struct SpiralState {
     int32_t grainT;
     float lp;
     float envFast, envSlow, ramp;
+    float peak;
+    uint32_t armed;
     int32_t cool;
 } SpiralState;
 
@@ -182,6 +193,8 @@ void SPIRAL_AUDIO_FUNC(unsigned int *ctx)
         st->lp = 0.0f;
         st->envFast = st->envSlow = 0.0f;
         st->ramp = 1.0f;
+        st->peak = 0.0f;
+        st->armed = 1u;
         st->cool = 0;
         uint32_t i;
         for (i = 0u; i < SP_BUF; i++) buf[i] = 0.0f;
@@ -255,6 +268,8 @@ void SPIRAL_AUDIO_FUNC(unsigned int *ctx)
     float envF   = st->envFast;
     float envS   = st->envSlow;
     float ramp   = st->ramp;
+    float peak   = st->peak;
+    uint32_t armed = st->armed;
     int32_t cool = st->cool;
 
     int i;
@@ -264,9 +279,12 @@ void SPIRAL_AUDIO_FUNC(unsigned int *ctx)
         float ax = sp_abs(dry);
         envF += SP_ENV_FAST * (ax - envF);
         envS += SP_ENV_SLOW * (ax - envS);
-        if (cool <= 0 && envF > envS * SP_ONSET_MUL + SP_ONSET_ADD) {
-            ramp = 0.0f;                 /* a note restarts the climb from pitch */
+        peak = (envF > peak) ? envF : peak * SP_PEAK_DEC;
+        if (envF < peak * SP_ARM_FRAC) armed = 1u;   /* input dropped away */
+        if (armed && cool <= 0 && envF > envS * SP_ONSET_MUL + SP_ONSET_ADD) {
+            ramp = 0.0f;                 /* a PHRASE restarts the climb from pitch */
             cool = SP_COOLDOWN;
+            armed = 0u;
         }
         if (cool > 0) cool--;
         ramp += rampK * (1.0f - ramp);   /* ... and it rises from there over Span */
@@ -309,6 +327,8 @@ void SPIRAL_AUDIO_FUNC(unsigned int *ctx)
     st->lp = sp_flush(lp);
     st->envFast = sp_flush(envF);
     st->envSlow = sp_flush(envS);
+    st->peak = sp_flush(peak);
+    st->armed = armed;
     /* Snap the ramp to exactly 1 once it is close enough to hear no difference.
      * Leaving it to converge asymptotically means (1 - ramp) spends the rest of
      * the patch's life as a denormal. */
