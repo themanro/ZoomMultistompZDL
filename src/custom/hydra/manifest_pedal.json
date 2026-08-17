@@ -9,34 +9,40 @@
   "flags_byte": 1,
   "params": [
     {
-      "name": "Window",
+      "name": "Div",
       "max": 100,
-      "default": 50,
-      "comment": "Re-trigger length, exponential ~3 ms .. 1 s. Low = granular octave-up/down layers in time with the dry; high = rhythmic double-time / half-time ghosts."
+      "default": 42,
+      "comment": "Re-trigger length as a division of Tempo. Position 0 is Grain: a fixed 256-sample window, free-running, which is the granular octave-shifter mode the tempo ladder cannot reach. Above that: 1/32, 1/16T, 1/16, 1/8T, 1/8, dotted 1/8, 1/4. Default 42 = 1/8T."
+    },
+    {
+      "name": "Tempo",
+      "max": 240,
+      "default": 120,
+      "comment": "BPM, read straight off the knob. Clamped to 40..240 in the DSP. Ignored when Div is at Grain."
     },
     {
       "name": "Fast",
       "max": 100,
-      "default": 60,
-      "comment": "Level of the 2x head (octave up / double time). Independent so either head can be used alone."
+      "default": 70,
+      "comment": "Level of the 2x head: double-time ghost, octave up."
     },
     {
       "name": "Slow",
       "max": 100,
-      "default": 60,
-      "comment": "Level of the 0.5x head (octave down / half time)."
+      "default": 55,
+      "comment": "Level of the 0.5x head: half-time drag, octave down."
     },
     {
       "name": "Tone",
       "max": 100,
-      "default": 50,
-      "comment": "Low-pass on the two layers ONLY, so they tuck under the dry. The 2x head gets spiky on cymbals."
+      "default": 45,
+      "comment": "Low-pass on the two layers only; the dry stays open."
     },
     {
       "name": "Mix",
       "max": 100,
-      "default": 1,
-      "comment": "Dry/wet. Default 1 (quiet-safe) like the rest of the pack \u2014 the editor materialises patches on load, so an audible-on-load default is not needed."
+      "default": 50,
+      "comment": "Dry/wet."
     }
   ],
   "audio_func_name": "Fx_DLY_Hydra",

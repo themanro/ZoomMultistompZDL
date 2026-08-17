@@ -199,7 +199,22 @@ void ROOMS_AUDIO_FUNC(unsigned int *ctx)
     float wetMix = mix, dry = 1.0f - mix;
 
     /* --- global decay; GONG's depth pushes it toward self-oscillation --- */
-    float fb = 0.70f + 0.283f * timeN;                 /* 0.70 .. ~0.983 */
+    /* Time -> decay, geometric rather than linear in fb.
+     *
+     * fb used to be a straight lerp 0.70..0.983. Because T60 goes as
+     * 1/ln(fb), that put 0.65s..2.5s across the FIRST THREE QUARTERS of the
+     * knob and 2.5s..13.6s in the last quarter -- so most of the travel did
+     * almost nothing and the knob read as dead. Making (1 - fb) geometric
+     * instead gives an even ~1.33x per 10 clicks: 0.65, 0.90, 1.23 ... 12.1 s.
+     *
+     * (1 - fb) = 0.30 * exp(-2.744 * timeN), and exp() is a helper call, so it
+     * is evaluated as (exp(-0.343*t))^8 -- a cubic Taylor term small enough to
+     * be accurate at u <= 0.343, then three squarings. Multiplies only; max
+     * error vs a true exp is 1.2e-4 in fb. */
+    float u = 0.343f * timeN;
+    float e = 1.0f - u + 0.5f * u * u - 0.16666667f * u * u * u;
+    e = e * e; e = e * e; e = e * e;                   /* ^8 */
+    float fb = 1.0f - 0.30f * e;                       /* 0.70 .. ~0.981 */
     fb += enGong * depth * (0.997f - fb);              /* GONG regen -> up to ~0.997 */
 
     /* --- damping: ROOM uses FREQ; other modes a fixed moderate value --- */

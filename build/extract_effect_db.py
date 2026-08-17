@@ -133,7 +133,15 @@ def _rank(path: Path) -> int:
 
 def main() -> None:
     best = {}                             # patch id -> (rank, entry, is_custom)
-    files = sorted((ROOT / "dist").glob("*.ZDL")) + sorted((ROOT / "stock_zdls").glob("*.ZDL"))
+    # Probes build to build/probes/, not dist/, so they stay out of the release
+    # set -- but the editor still needs to know their knobs, otherwise a probe
+    # loaded on the pedal shows up as "unknown effect 0x..." with generic p1..p9
+    # names and you cannot drive the experiment from PE. Scanned into their own
+    # group so they never mix with the shipped pack.
+    files = (sorted((ROOT / "dist").glob("*.ZDL"))
+             + sorted((ROOT / "build" / "probes").glob("*.ZDL"))
+             + sorted((ROOT / "stock_zdls").glob("*.ZDL")))
+    probe_names = {f.stem for f in (ROOT / "build" / "probes").glob("*.ZDL")}
     for f in files:
         e = parse_zdl(f)
         if not e:
@@ -144,9 +152,12 @@ def main() -> None:
             e["cover"] = _cover_b64(f)
             best[e["id"]] = (r, e, r == 0)
 
-    db = {"custom": [], "stock": []}
+    db = {"custom": [], "stock": [], "probes": []}
     for r, e, is_custom in sorted(best.values(), key=lambda x: x[1]["name"].upper()):
-        db["custom" if is_custom else "stock"].append(e)
+        if e["name"] in probe_names:
+            db["probes"].append(e)
+        else:
+            db["custom" if is_custom else "stock"].append(e)
 
     # ---- legacy fxid aliases -------------------------------------------------
     # Every fxid an effect has EVER shipped under. Old patches (and pedals still
@@ -210,7 +221,7 @@ def main() -> None:
 
     out = ROOT / "tools" / "effects_db.json"
     out.write_text(db_json)
-    print(f"{len(db['custom'])} custom + {len(db['stock'])} stock effects -> {out}")
+    print(f"{len(db['custom'])} custom + {len(db['stock'])} stock + {len(db['probes'])} probes -> {out}")
 
     # The patch editor embeds the DB INLINE (const DB={...};) so it works over
     # file:// without a fetch. Keep that inline copy in sync — otherwise the

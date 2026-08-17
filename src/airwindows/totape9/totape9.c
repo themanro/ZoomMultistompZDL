@@ -402,16 +402,23 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
 
     /* Small-stack release core. The full Airwindows body below is kept for
      * future state-ABI work, but this path avoids the large state block that
-     * freezes hardware while preserving the source parameter control laws. */
-    float pInput   = zoom_param_norm(params[TOTAPE9_INPUT_SLOT],   TOTAPE9_INPUT_DEFAULT_NORM);
-    float pTilt    = zoom_param_norm(params[TOTAPE9_TILT_SLOT],    TOTAPE9_TILT_DEFAULT_NORM);
-    float pShape   = zoom_param_norm(params[TOTAPE9_SHAPE_SLOT],   TOTAPE9_SHAPE_DEFAULT_NORM);
-    float pFlutter = zoom_param_norm(params[TOTAPE9_FLUTTER_SLOT], TOTAPE9_FLUTTER_DEFAULT_NORM);
-    float pFlutSpd = zoom_param_norm(params[TOTAPE9_FLUTSPD_SLOT], TOTAPE9_FLUTSPD_DEFAULT_NORM);
-    float pBias    = zoom_param_norm(params[TOTAPE9_BIAS_SLOT],    TOTAPE9_BIAS_DEFAULT_NORM);
-    float pHeadBmp = zoom_param_norm(params[TOTAPE9_HEADBMP_SLOT], TOTAPE9_HEADBMP_DEFAULT_NORM);
-    float pHeadFrq = zoom_param_norm(params[TOTAPE9_HEADFRQ_SLOT], TOTAPE9_HEADFRQ_DEFAULT_NORM);
-    float pOutput  = zoom_param_norm(params[TOTAPE9_OUTPUT_SLOT],  TOTAPE9_OUTPUT_DEFAULT_NORM);
+     * freezes hardware while preserving the source parameter control laws.
+     *
+     * These read through zoom_param_norm01, NOT zoom_param_norm. The latter
+     * multiplies by 1/0.14, which pins every knob to its maximum above ~14% of
+     * travel -- so Input leapt to full gain around 15 and then did nothing, and
+     * Tilt and Shape sat clamped at 1.0 across almost their whole range, i.e.
+     * felt dead. zoom_params.h documents this and says to use the 0..1 scaler;
+     * this file was the last one still on the old helper. */
+    float pInput   = zoom_param_norm01(params[TOTAPE9_INPUT_SLOT],   TOTAPE9_INPUT_DEFAULT_NORM);
+    float pTilt    = zoom_param_norm01(params[TOTAPE9_TILT_SLOT],    TOTAPE9_TILT_DEFAULT_NORM);
+    float pShape   = zoom_param_norm01(params[TOTAPE9_SHAPE_SLOT],   TOTAPE9_SHAPE_DEFAULT_NORM);
+    float pFlutter = zoom_param_norm01(params[TOTAPE9_FLUTTER_SLOT], TOTAPE9_FLUTTER_DEFAULT_NORM);
+    float pFlutSpd = zoom_param_norm01(params[TOTAPE9_FLUTSPD_SLOT], TOTAPE9_FLUTSPD_DEFAULT_NORM);
+    float pBias    = zoom_param_norm01(params[TOTAPE9_BIAS_SLOT],    TOTAPE9_BIAS_DEFAULT_NORM);
+    float pHeadBmp = zoom_param_norm01(params[TOTAPE9_HEADBMP_SLOT], TOTAPE9_HEADBMP_DEFAULT_NORM);
+    float pHeadFrq = zoom_param_norm01(params[TOTAPE9_HEADFRQ_SLOT], TOTAPE9_HEADFRQ_DEFAULT_NORM);
+    float pOutput  = zoom_param_norm01(params[TOTAPE9_OUTPUT_SLOT],  TOTAPE9_OUTPUT_DEFAULT_NORM);
 
     float inputGain = pInput * 2.0f;
     inputGain *= inputGain;
