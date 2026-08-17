@@ -33,7 +33,7 @@
       "audio_default": 0.5,
       "source_default": 0.5,
       "source_formula": "dublyAmount = B * 2.0; outlyAmount = max((1.0 - B) * -2.0, -1.0)",
-      "comment": "Airwindows B. Dubly encode/decode tilt."
+      "comment": "Dolby-style encode/decode balance: sets pre-emphasis against de-emphasis, which drives both tape drive and the wet/dry blend."
     },
     {
       "name": "Shape",
@@ -46,7 +46,7 @@
       "audio_default": 0.5,
       "source_default": 0.5,
       "source_formula": "iirEncFreq = 1.0 - C; iirDecFreq = C",
-      "comment": "Airwindows C. Dubly IIR shape/frequency."
+      "comment": "Weights how much of Tilt's encode vs decode lands (0.35..1.0 each way). Subtle by construction, and it was invisible while the x7.14 scaling pinned it."
     },
     {
       "name": "Flutter",
@@ -85,7 +85,7 @@
       "audio_default": 0.5,
       "source_default": 0.5,
       "source_formula": "(F * 2.0) - 1.0",
-      "comment": "Airwindows F. Tape bias; 50 = neutral."
+      "comment": "Asymmetric even-harmonic drive: biased = x + k*x^2, k bipolar around centre. The k curve is quartic below centre and cubic above, so the distortion character genuinely changes at different points of travel rather than just getting louder."
     },
     {
       "name": "HeadBmp",
@@ -98,7 +98,7 @@
       "audio_default": 0.5,
       "source_default": 0.5,
       "source_formula": "headBumpDrive = G * 0.1; headBumpMix = G * 0.5",
-      "comment": "Airwindows G. Head-bump resonance amount."
+      "comment": "Head bump. In this reduced core it is a BROADBAND drive+level lift, not a low-frequency resonance -- there is no filter behind it. Reads as 'more bass' mostly because it is lifting level into saturation."
     },
     {
       "name": "HeadFrq",
@@ -112,20 +112,20 @@
       "audio_default": 0.5,
       "source_default": 0.5,
       "source_formula": "((H * H) * 175.0) + 25.0",
-      "comment": "Airwindows H. Head-bump frequency; 50 displays 68.75 Hz."
+      "comment": "Nominally the head-bump frequency (25..200 Hz) but in this reduced core it only scales the lift AMOUNT inversely -- it does not move a filter, because there is no filter. Fidelity gap vs ToTape9."
     },
     {
       "name": "Output",
       "type": "knob",
       "max": 100,
-      "default": 1,
+      "default": 50,
       "scale": "source_linear_gain",
       "audio_min": 0.0,
       "audio_max": 2.0,
       "audio_default": 0.5,
       "source_default": 0.5,
       "source_formula": "I * 2.0",
-      "comment": "Airwindows I. Output gain; 50 = unity, 100 = 2x."
+      "comment": "Output gain, 0..2x, unity at 50. NOT a dry/wet mix. Default was 1, which with correct 0..1 scaling is 0.02x -- effectively silent."
     }
   ],
   "audio_nop": false
