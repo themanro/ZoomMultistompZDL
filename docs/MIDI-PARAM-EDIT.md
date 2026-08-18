@@ -3,14 +3,22 @@
 **Confirmed on hardware 2026-07-31.** Recorded here because this cost a very long
 debugging session — an earlier one-line note said the same thing and was overruled.
 
-> **CORRECTION, 2026-08-14 — read this before trusting anything below.**
-> The "slot rule" is real but it is **not a property of the pedal**. Stock
-> effects accept live `0x31` knob edits on ALL SIX slots, 4-6 included. Only
-> effects built by this repo fail on 4-6, so the boundary described below is a
-> bug in our edit handlers, not a firmware limitation. Everything in this file
-> about slots 4-6 needing a bypass bounce is a workaround for our own defect and
-> should not be treated as an ABI fact. See "Where the slot 4-6 asymmetry
-> actually comes from".
+> **NOTE, 2026-08-18. A correction that was itself wrong.**
+> On 2026-08-14 this file carried a banner saying the slot rule was not a
+> property of the pedal, because stock effects appeared to take live `0x31`
+> edits on all six slots. **That test was confounded**: PE had auto-apply ON at
+> the time, so every knob move was being followed by a patch write and a bypass
+> toggle. What it showed was that the AUTO-APPLY PATH works on slots 4-6, not
+> that live `0x31` does.
+>
+> Acting on it broke the editor -- live edits were re-enabled for all six slots
+> and the auto-apply fallback removed, after which slot 4-6 knobs did nothing at
+> all, not even move the pedal's display. Reverted.
+>
+> The slot rule below stands. What remains genuinely open is the separate
+> question of this repo's synthesised edit handlers for knobs 4+, which is a
+> different axis entirely -- see "Where the slot 4-6 asymmetry actually comes
+> from", read with this note in mind.
 
 ## The rule
 
@@ -177,9 +185,20 @@ Two things the probe established incidentally, both worth knowing:
 
 ## Where the slot 4-6 asymmetry actually comes from
 
-Test that settled it: put a STOCK effect in slot 4 and turn its Mix from an
-editor. It works. Custom effects from this repo do not. Same slot, same message,
-different result -- so slot position is not the variable, the effect is.
+Test: put a STOCK effect in slot 4 and turn its Mix from an editor. It responds;
+custom effects from this repo were reported not to.
+
+**Weakened, 2026-08-18.** That comparison was run with PE's auto-apply enabled,
+so the stock effect was being served by a patch write plus a bypass toggle
+rather than by a live `0x31`. It therefore does not isolate stock-vs-custom at
+all. Oxide's failure turned out to be a `x7.14` param-scaling bug rather than
+anything to do with handlers, which weakens the theory further. Treat the
+handler table below as a description of how the build works, not as a diagnosis.
+
+The clean test has still not been run: on ONE custom effect in ONE slot, with
+auto-apply OFF, compare a knob backed by a verbatim-stock handler (knob 1 or 2)
+against one backed by a synthesised clone (knob 4+). Spiral's Time against its
+Span does it.
 
 What differs. A custom build gets its edit handlers from three sources:
 
