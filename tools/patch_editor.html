@@ -242,9 +242,22 @@
   #librows.hint, #locrows.hint{display:block;}
   .strip .librow{width:210px; flex:0 0 auto; border-bottom:none;
                  border:2px solid var(--lcd-deep); border-radius:2px;}
-  /* Row buttons only on hover, so the name gets the width the rest of the time. */
-  .strip .librow button{opacity:0; transition:opacity .08s;}
+  /* Row buttons only on hover. They are taken OUT OF FLOW rather than just made
+     transparent: opacity:0 still reserves the width, and four 23px buttons plus
+     the number left too little for the name, so names were being ellipsed even
+     though the pedal caps them at 10 characters. Absolutely positioned and
+     right-anchored, they cost the name nothing until they appear. */
+  .strip .librow{position:relative;}
+  .strip .librow button{position:absolute; top:50%; transform:translateY(-50%);
+                        opacity:0; transition:opacity .08s; z-index:2;}
+  .strip .librow button:nth-last-child(1){right:3px;}
+  .strip .librow button:nth-last-child(2){right:27px;}
+  .strip .librow button:nth-last-child(3){right:51px;}
+  .strip .librow button:nth-last-child(4){right:75px;}
   .strip .librow:hover button, .strip .librow:focus-within button{opacity:1;}
+  /* the name fades under the buttons on hover instead of being overdrawn */
+  .strip .librow:hover .nm{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 104px),transparent calc(100% - 92px));
+                           mask-image:linear-gradient(90deg,#000 calc(100% - 104px),transparent calc(100% - 92px));}
   .slots{display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px; flex:1;}
   .slot{padding:12px; background:var(--lcd-lit); border:var(--b) solid var(--ink); box-shadow:5px 5px 0 var(--ink);}
   .slot h3{margin:0 0 10px; font-size:13px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:1.5px;
