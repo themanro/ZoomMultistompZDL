@@ -64,6 +64,7 @@ DIAGNOSTIC_PLUGINS = [
     ("desciso",     PROBE_DIR / "desciso"     / "build.py"),
     ("initprobe",   PROBE_DIR / "initprobe"   / "build.py"),
     ("ctxwatch",    PROBE_DIR / "ctxwatch"    / "build.py"),
+    ("edgewatch",   PROBE_DIR / "edgewatch"   / "build.py"),
 ]
 
 PLUGINS = RELEASE_PLUGINS + DIAGNOSTIC_PLUGINS
