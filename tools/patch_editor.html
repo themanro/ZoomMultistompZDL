@@ -331,7 +331,7 @@ Serve over <code>http://localhost</code> — see the comments in this file.</p>
      so the main toolbar stays about actually using the pedal. -->
 <div id="diagpanel" hidden>
 <div class="bar" style="padding-top:0">
-  <label class="hint" style="display:flex;gap:4px;align-items:center" title="Slots 4-6 cannot update live. With this on, PE applies for you ~1s after you stop turning a knob: it re-reads, writes only your changed fields, and bypass-bounces that one slot. Nothing is written to flash."><input type="checkbox" id="autoapply" checked> auto-apply slots 4-6</label>
+  <label class="hint" style="display:flex;gap:4px;align-items:center" title="Slots 4-6 cannot update live. With this on, PE applies for you ~1s after you stop turning a knob: it re-reads, writes only your changed fields, and bypass-bounces that one slot. Nothing is written to flash."><input type="checkbox" id="autoapply"> auto-apply slots 4-6</label>
   <label class="hint" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="trace"> MIDI log</label>
   <button id="diag" title="Copy a full diagnostic snapshot (state + patch bytes + last ~400 MIDI msgs + log) to the clipboard — paste it to report an issue">Copy diag</button>
   <span class="hint" style="margin-left:12px">raw writes:</span>
@@ -11149,7 +11149,11 @@ let AUTOAPPLY=false;
 // knobs respond instantly; in slot 4 the identical message is ignored. Slots 4-6
 // therefore need the store+reload Apply, which lands everywhere. This is what the
 // original "slots 4-6: 0x31 may be ignored" note meant — it was correct.
-const LIVE_EDIT_SLOTS=3;                 // slots 1..3 (index 0..2) accept live 0x31
+// ALL six slots accept live 0x31. This was 3 for a long time, on the belief that
+// the pedal refused live edits on slots 4-6; retesting with a STOCK effect showed
+// no such rule. Where a custom effect's knobs still fail on a later slot, that is
+// a defect in the effect, not something the editor should paper over.
+const LIVE_EDIT_SLOTS=6;
 const liveEditable=s=>s<LIVE_EDIT_SLOTS;
 // ON by default. ToneLib drives slots 4-6 by forcing a full patch RELOAD on every
 // knob step -- a capture of one knob drag showed 16x (bank select + program change)
@@ -11157,7 +11161,7 @@ const liveEditable=s=>s<LIVE_EDIT_SLOTS;
 // simply re-instantiates constantly so the user never sees the seam. Our bypass
 // bounce is the same trick applied to ONE slot instead of all six, so doing it
 // automatically while you drag gives the same feel with less disruption.
-let AUTOAPPLY_LATE=true;
+let AUTOAPPLY_LATE=false;   // live 0x31 works on every slot; nothing to auto-apply
 // A knob on a switched-OFF slot is inaudible, and because the release commits the
 // WHOLE patch, PE's "off" also re-bypasses the effect on the pedal — so turning it
 // on with the footswitch then tweaking in PE silently switches it back off. That
@@ -11733,9 +11737,8 @@ function render(){
       const w=document.createElement("div");w.className="hint";
       // Say what will actually happen, and track the auto-apply setting — a label
       // promising "auto-applies" while auto-apply is off is worse than no label.
-      w.textContent="slot "+(s+1)+" — "+(AUTOAPPLY_LATE
-        ? "tracks your knob as you turn it (the slot re-instantiates, so expect a faint tick)"
-        : "auto-apply is off — click \u201cApply \u2192 pedal\u201d to hear your changes");
+      w.textContent="slot "+(s+1)+" — knobs edit live. If a knob here does nothing, "
+        +"that is a defect in the effect, not the slot (see docs/MIDI-PARAM-EDIT.md).";
       div.appendChild(w);
     }
     if(eid&&!on){
@@ -11915,29 +11918,20 @@ async function applyToPedal(){const n=curProg;
   live.name=patch.name;
   const d=encodePatch(live, fresh); d[3]=DEVID;
   send(zx([0x50])); lastEnable=performance.now(); editModeActive=true; await sleep(20);
-  // Write the new values into the buffer FIRST, then re-instantiate the slot.
+  // Just write the merged patch. No bypass toggle, no reload, no bounce.
   //
-  // The re-instantiation is a 0x31 param-0 (on/off) pair, NOT a patch write. The
-  // only action ever confirmed to make a slot 4-6 edit audible is toggling that
-  // slot's bypass ON THE PEDAL. Doing the same thing by writing the bypass BIT into
-  // the patch never worked -- the probe showed a patch write is invisible to a
-  // running effect, and a bypass bit is just more patch data. 0x31 param 0 is the
-  // message the pedal itself uses for that toggle. We had only ever established
-  // that 0x31 is ignored for KNOB params (index 2+); on/off is a different
-  // parameter and had never been tested on slots 4-6.
-  send(d); await sleep(40);
-  const bs=lastEditedSlot;
-  if(bs!==null && live.fx[bs] && live.fx[bs][0]){
-    sendParam(bs,0,0); await sleep(110);       // bypass the slot  -> tear down
-    sendParam(bs,0,1); await sleep(90);        // un-bypass        -> rebuild, re-read
-  }
+  // Every re-instantiation trick this function accumulated was built on the
+  // belief that slots 4-6 cannot take live knob edits. That turned out to be
+  // false: STOCK effects accept live 0x31 on all six slots, and the asymmetry
+  // was a bug in THIS repo's effects (Oxide's was a x7.14 param-scaling bug; the
+  // synthesised handlers for knobs 4+ remain under investigation). EdgeWatch
+  // then showed why the workarounds could not have helped -- a patch write DOES
+  // update params[0], so the bypass toggles were seen, but nothing about that
+  // refreshes the KNOB params. So they cost an audible bypass blip per apply and
+  // bought nothing.
+  send(d); await sleep(60);
   patch=live; rawFromPedal=fresh.slice(); rawPatch=d.slice();
-  // Deliberately NOT cleared. The PC-led read reloads the patch from flash, so any
-  // edit that only ever lived in the edit buffer is thrown away by the next apply --
-  // that is what made successive applies appear to reset each other. Keeping every
-  // edit of this session and re-writing the whole set each time makes the reload
-  // harmless: it can no longer lose anything PE still knows about. Cleared on an
-  // explicit re-read, patch change or bank load, where the pedal IS the truth.
+  dirty.clear();
   busy=false; render();
   log("applied to pedal — only your changed fields, nothing written to flash");
 }

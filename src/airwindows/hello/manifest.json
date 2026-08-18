@@ -1,12 +1,25 @@
 {
   "effect_name": "HELLO",
   "gid": 2,
-  "fxid": 400,
+  "fxid": 463,
   "params": [
-    {"name": "Knob 1", "max": 100, "default": 50},
-    {"name": "Knob 2", "max": 100, "default": 50},
-    {"name": "Knob 3", "max": 100, "default": 50}
+    {
+      "name": "Knob 1",
+      "max": 100,
+      "default": 50
+    },
+    {
+      "name": "Knob 2",
+      "max": 100,
+      "default": 50
+    },
+    {
+      "name": "Knob 3",
+      "max": 100,
+      "default": 50
+    }
   ],
   "fxid_version": "1.01",
-  "flags_byte": 1
+  "flags_byte": 1,
+  "fxid_comment": "0x1CF. Reassigned from 400 to clear the last fxid collision (with GAIN). Every fxid in the tree is now unique."
 }
