@@ -11863,6 +11863,15 @@ function diagText(){
     "flags  : busy="+busy+" syncing="+syncing+" editMode="+editModeActive+" rxCount="+rxCount+" curProg="+(curProg+1),
     "display: patch.curfx="+(patch?patch.curfx:"-")+"  maxfx="+(patch?patch.maxfx:"-")+"  lastEditedSlot="+(lastEditedSlot===null?"-":lastEditedSlot+1),
     "patch  : "+p,
+    // Per-slot write-only flags. These are the bits a slot swap used to leave
+    // behind, and they are invisible in every other view -- getBits skips them by
+    // design, so they never reach patch.fx. A reorder can only corrupt a slot
+    // whose flag is SET, so "all zero" means a reorder test did not exercise the
+    // bug at all, which is exactly how it stayed unreproducible for so long.
+    "nzflags: "+(rawFromPedal&&rawFromPedal.length===146
+       ? BITS.map(sl=>{let v=0;sl.forEach(f=>f.forEach(b=>{if(b[2]==="NZ"&&(rawFromPedal[b[0]]&b[1]))v=1;}));return v;}).join(" ")
+         +"   (slots 1..6; all zero = a reorder here proves nothing)"
+       : "(no dump)"),
     "bank   : "+library.filter(Boolean).length+"/50 read   library folders="+LLIB.folders.length,
     "DB     : "+DB.custom.length+" custom + "+DB.stock.length+" stock + "+(DB.legacy||[]).length+" legacy + "+(DB.probes||[]).length+" probes",
     "agent  : "+navigator.userAgent,
