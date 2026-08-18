@@ -163,37 +163,37 @@
     padding:4px 8px; font-size:16px;
   }
 
-  /* Slot on/off. The plain two-tone rectangle gave no cue which end was which --
-     on a monochrome phosphor palette "filled" and "unfilled" read almost the
-     same. AmberConsole's answer is a travelling knob plus an explicit word, so
-     position and label agree instead of relying on brightness alone. */
+  /* Slot on/off.
+     The switch sits ON the inverse header strip, which paints background:var(--ink)
+     with color:var(--paper). Drawing it in ink colours therefore put light on
+     light -- OFF was literally the same #7f9db0 as the band behind it, hence
+     invisible. It is drawn in the strip's FOREGROUND colour instead, exactly
+     like the "SLOT n" text beside it.
+     OFF  outlined, knob left, dark on the bright band.
+     ON   body filled dark, knob bright at the right -- a solid block that reads
+          at a glance, with the word agreeing. */
   html[data-theme="p4"] .toggle, html[data-theme="p3"] .toggle{
-    border-radius:var(--radius); box-shadow:var(--halo-box);
+    border-radius:var(--radius); box-shadow:none;
     width:46px; height:22px; overflow:visible; background:transparent;
-    border:var(--b) solid var(--ink);
+    border:var(--b) solid var(--paper);
   }
-  /* OFF used emit-70 for both the frame and the knob, which on a dark phosphor
-     ground reads as switched-off-and-broken rather than switched-off. Both
-     states now sit at a legible brightness; ON is separated by the FILLED body
-     and the label, not by making OFF nearly invisible. */
   html[data-theme="p4"] .toggle::after, html[data-theme="p3"] .toggle::after{
-    top:2px; left:2px; width:16px; height:14px; background:var(--ink);
+    top:2px; left:2px; width:16px; height:14px; background:var(--paper);
     transition:left .08s, background .08s;
   }
   html[data-theme="p4"] .toggle.on, html[data-theme="p3"] .toggle.on{
-    background:var(--ink-faint); border-color:var(--ink-bright);
+    background:var(--paper); border-color:var(--paper);
   }
   html[data-theme="p4"] .toggle.on::after, html[data-theme="p3"] .toggle.on::after{
-    left:auto; right:2px; background:var(--ink-bright);
-    box-shadow:0 0 6px rgba(var(--halo),0.75);
+    left:auto; right:2px; background:var(--ink-bright); box-shadow:none;
   }
   html[data-theme="p4"] .toggle::before, html[data-theme="p3"] .toggle::before{
     content:"OFF"; position:absolute; right:100%; margin-right:9px; top:50%;
-    transform:translateY(-50%); font-size:14px; letter-spacing:0.08em;
-    color:var(--ink); pointer-events:none;
+    transform:translateY(-50%); font-size:15px; letter-spacing:0.08em;
+    color:var(--paper); opacity:0.75; pointer-events:none;
   }
   html[data-theme="p4"] .toggle.on::before, html[data-theme="p3"] .toggle.on::before{
-    content:"ON"; color:var(--ink-bright);
+    content:"ON"; color:var(--paper); opacity:1;
   }
 
   /* CRT dressing, only on the phosphor themes. Fixed overlay, never interactive. */
