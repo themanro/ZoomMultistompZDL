@@ -14,13 +14,13 @@
       "name": "Length",
       "max": 100,
       "default": 35,
-      "comment": "How much of the past is captured AND the loop length, ~60 ms .. ~1.4 s. The capture looks BACKWARDS from the moment you stomp -- Stasis records continuously while the slot is off and stops when it is on, so it holds what you just played rather than making you play into it."
+      "comment": "Loop length, ~60 ms .. ~1.4 s, and live. The stomp always captures the full 1.4 s looking BACKWARDS (Stasis records while the slot is off and stops when it is on), and Length chooses how much of that loops, ending at the moment you stomped. Was latched at capture in v1-v2, which made it dead while the hold was running."
     },
     {
       "name": "Blur",
       "max": 100,
       "default": 50,
-      "comment": "Crossfade length at the loop seam, 5.8..93 ms. Short is a tighter, more defined hold; long smears the join away. Clamped so it always fits twice inside the loop. Was a grain size in v1, when playback used random grain offsets and chopped sustained notes."
+      "comment": "Crossfade at the loop seam, as a FRACTION of the loop (~2%..40%), so it does the same audible thing at any Length. As an absolute sample count its whole sweep moved the crossfade 0.4%..6.5% of the loop at long Lengths -- inaudible."
     },
     {
       "name": "Decay",

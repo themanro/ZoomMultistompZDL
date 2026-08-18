@@ -35,11 +35,14 @@
  * 5 knobs. Length and Blur sit on knobs 1-2, the verbatim-stock LineSel edit
  * handlers -- the most reliable pair in the pack, and the two that shape the
  * sound most:
- *   Length (knob 1) how much of the past is captured, ~60 ms .. ~1.4 s. Short
- *                   is a single grain of a chord; long is a whole phrase.
- *   Blur   (knob 2) crossfade length at the loop seam, 5.8..93 ms. Short is a
- *                   tighter, more defined hold; long smears the join away
- *                   entirely. Clamped so it always fits twice inside the loop.
+ *   Length (knob 1) loop length, ~60 ms .. ~1.4 s, and LIVE -- the stomp always
+ *                   captures the full 1.4 s, and Length then chooses how much of
+ *                   it loops, ending at the moment you stomped. Winding it down
+ *                   closes in on the last instant before the press.
+ *   Blur   (knob 2) crossfade at the loop seam, as a FRACTION of the loop
+ *                   (~2%..40%) so it does the same audible thing at any Length.
+ *                   Short is a tighter, more defined hold; long smears the join
+ *                   away entirely.
  *   Decay  (knob 3) how the hold fades. Fully up is genuinely infinite.
  *   Tone   (knob 4) low-pass on the held layer only; the dry stays open.
  *   Mix    (knob 5) LEVEL of the held layer. Not a dry/wet crossfade -- the one
@@ -80,12 +83,15 @@ STASIS_CODE_SECTION(STASIS_AUDIO_FUNC)
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
 #define SS_MAGIC   0x53545341u   /* 'STSA' */
-#define SS_VERSION 2u   /* playback rewritten: crossfade loop, not random grains */
+#define SS_VERSION 3u   /* Length is live; Blur scales with the loop */
 
 #define SS_BUF      65536u       /* 256 KB, ~1.49 s -- the capture ceiling */
 #define SS_MASK     (SS_BUF - 1u)
-#define SS_CAP_MIN  2646         /* ~60 ms */
-#define SS_CAP_SPAN 60000        /* max capture 62646, inside the ring */
+#define SS_CAP_MIN  2646         /* ~60 ms  -- shortest LOOP */
+#define SS_CAP_SPAN 60000        /* longest loop 62646, inside the ring */
+#define SS_CAP_MAX  62646        /* the capture is ALWAYS this long; Length then
+                                  * chooses how much of it loops, which is what
+                                  * makes Length live instead of capture-only */
 #define SS_DENORM   1.0e-18f
 #define SS_WET_TRIM 0.9f
 
@@ -97,8 +103,7 @@ typedef struct StasisState {
     uint32_t writePos;
     uint32_t prevOn;
     uint32_t frozen;
-    float    capBase;           /* absolute ring position the capture starts at */
-    int32_t  capLen;
+    float    capEnd;            /* ring position the capture ENDS at (the stomp) */
     float    pos;               /* single read head; the seam is crossfaded */
     float    lp;
     float    level;
@@ -158,8 +163,7 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
         st->writePos = 0u;
         st->prevOn = (params[0] >= 0.5f) ? 1u : 0u;   /* don't fire on load */
         st->frozen = 0u;
-        st->capBase = 0.0f;
-        st->capLen = SS_CAP_MIN;
+        st->capEnd = 0.0f;
         st->pos = 0.0f;
         st->lp = 0.0f;
         st->level = 0.0f;
@@ -182,21 +186,34 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
     float tn  = zoom_param_norm01(params[STASIS_TONE_SLOT],   STASIS_TONE_DEFAULT_NORM);
     float mix = zoom_param_norm01(params[STASIS_MIX_SLOT],    STASIS_MIX_DEFAULT_NORM);
 
-    /* Blur is the CROSSFADE length at the loop seam, not a grain size.
-     *
-     * v1 played overlapping grains that each jumped to a RANDOM offset inside
-     * the capture. That is fine for smearing noise and wrong for everything
-     * else: consecutive grains were uncorrelated, so every grain boundary was a
-     * phase discontinuity, and a sustained note -- the material that should hold
-     * most cleanly -- came out chopped. Playback is now a plain loop read with a
-     * short crossfade hiding the wrap, which is what a freeze actually wants.
-     * Powers of two so each reciprocal is a literal; if/else, never switch. */
-    int32_t F; float invF;
-    if      (bl < 0.20f) { F = 256;  invF = 3.90625e-3f; }
-    else if (bl < 0.40f) { F = 512;  invF = 1.953125e-3f; }
-    else if (bl < 0.60f) { F = 1024; invF = 9.765625e-4f; }
-    else if (bl < 0.80f) { F = 2048; invF = 4.8828125e-4f; }
-    else                 { F = 4096; invF = 2.44140625e-4f; }
+    /* Loop length, live. */
+    int32_t L = SS_CAP_MIN + (int32_t)(ln * ln * (float)SS_CAP_SPAN);
+    if (L < SS_CAP_MIN) L = SS_CAP_MIN;
+    else if (L > SS_CAP_MAX) L = SS_CAP_MAX;
+
+    /* Blur is the crossfade at the loop seam, expressed as a FRACTION of the
+     * loop rather than an absolute count. As absolute samples its whole sweep
+     * moved the crossfade from 0.4% to 6.5% of the loop at long Lengths, which
+     * is nothing; scaling it means the knob does the same audible thing at every
+     * Length. Kept exact and divide-free by picking the largest power of two at
+     * or below L/2 through a compare ladder, then shifting down -- the
+     * reciprocal of a power of two is a literal, and halving F doubles it. */
+    int32_t Fmax; float invFmax;
+    if      (L >= 32768) { Fmax = 16384; invFmax = 6.103515625e-5f; }
+    else if (L >= 16384) { Fmax = 8192;  invFmax = 1.220703125e-4f; }
+    else if (L >= 8192)  { Fmax = 4096;  invFmax = 2.44140625e-4f; }
+    else if (L >= 4096)  { Fmax = 2048;  invFmax = 4.8828125e-4f; }
+    else if (L >= 2048)  { Fmax = 1024;  invFmax = 9.765625e-4f; }
+    else                 { Fmax = 512;   invFmax = 1.953125e-3f; }
+    int32_t j;
+    if      (bl > 0.80f) j = 0;
+    else if (bl > 0.60f) j = 1;
+    else if (bl > 0.40f) j = 2;
+    else if (bl > 0.20f) j = 3;
+    else                 j = 4;
+    int32_t F = Fmax >> j;
+    float invF = invFmax * (float)(1 << j);
+    if (F < 32) { F = 32; invF = 3.125e-2f; }
 
     /* Decay: 1.0 is genuinely infinite. Below that, a per-sample multiplier
      * shaped so the knob's top half stays usefully long. */
@@ -222,27 +239,22 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
 
     /* --- the trigger --- */
     if (nowOn && !st->prevOn) {
-        int32_t cap = SS_CAP_MIN + (int32_t)(ln * ln * (float)SS_CAP_SPAN);
-        if (cap < SS_CAP_MIN) cap = SS_CAP_MIN;
-        if (cap > (int32_t)(SS_BUF - 1024u)) cap = (int32_t)(SS_BUF - 1024u);
-        st->capLen = cap;
-        {   /* keep the base positive so the seam read never goes negative */
-            float cb = (float)((int32_t)st->writePos - cap);
-            if (cb < 0.0f) cb += (float)SS_BUF;
-            st->capBase = cb;
-        }
+        /* Always capture the MAXIMUM. Length used to be latched here, which made
+         * it dead exactly when you would reach for it -- while the hold is
+         * running. Capturing everything and letting Length choose how much of it
+         * loops makes the knob live, and it reads naturally: winding Length down
+         * closes in on the last instant before the stomp. */
+        st->capEnd = (float)st->writePos;
         st->frozen = 1u;
         st->level = 1.0f;
-        st->pos = st->capBase;
+        st->pos = -1.0f;                 /* force a re-seat on the first sample */
         st->lp = 0.0f;
     } else if (!nowOn && st->prevOn) {
         st->frozen = 0u;
     }
     st->prevOn = nowOn;
 
-    /* The crossfade has to fit twice inside the loop or the seam never resolves. */
-    int32_t L = st->capLen;
-    while (F * 2 > L && F > 64) { F >>= 1; invF *= 2.0f; }
+
 
     uint32_t wp = st->writePos;
     uint32_t frozen = st->frozen;
@@ -261,14 +273,18 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
 
         float wet = 0.0f;
         if (frozen) {
+            /* Loop window ends at the capture point and extends L back, so
+             * changing Length slides the START while the end stays put. */
+            float loopBase = st->capEnd - (float)L;
+            if (loopBase < 0.0f) loopBase += (float)SS_BUF;
+            float endp = loopBase + (float)L;
+
             float pos = st->pos;
-            float endp = st->capBase + (float)L;
+            if (pos < loopBase || pos >= endp) pos = loopBase;   /* Length moved */
+
             float dist = endp - pos;
             wet = ss_read(buf, pos);
             if (dist < (float)F) {
-                /* approaching the seam: fade into the same point one loop back,
-                 * which is exactly where the head is about to jump to, so the
-                 * join is continuous instead of a click */
                 float t = ((float)F - dist) * invF;
                 if (t < 0.0f) t = 0.0f; else if (t > 1.0f) t = 1.0f;
                 t = t * t * (3.0f - 2.0f * t);
