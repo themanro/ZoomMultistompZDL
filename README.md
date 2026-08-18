@@ -135,6 +135,14 @@ newer.
 Back up your current effect list before writing. Experimental builds can
 freeze a pedal until power-cycled.
 
+**If the effect browser says "No data to display, check filters":** step 3 is
+not optional -- choosing the folder only tells Effect Manager where to look, and
+the browser's `From Folder` source has to be ticked separately. Connect the
+pedal before launching, and check no category filter is set (everything here is
+in **Delay**). If it still shows nothing, verify the files really are ZDLs and
+not saved HTML pages -- see
+[docs/INSTALLING-ZDLS.md](docs/INSTALLING-ZDLS.md#check-that-your-download-is-real-windows-especially).
+
 **Gotchas learned the hard way:**
 
 - Effect Manager does **not replace** an installed effect with the same fxid —
