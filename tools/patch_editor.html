@@ -153,8 +153,42 @@
   html[data-theme="p4"] button.primary:hover, html[data-theme="p3"] button.primary:hover{
     background:var(--ink-bright); color:var(--paper);
   }
+  /* Toolbar keys were AmberConsole's full 10px/22px soft-key size, which on this
+     toolbar wrapped to two rows and dominated the window. Tightened; still a
+     soft key, just not a slab. */
+  html[data-theme="p4"] .bar>button, html[data-theme="p3"] .bar>button{
+    padding:5px 12px; font-size:17px; letter-spacing:0.06em;
+  }
+  html[data-theme="p4"] .bar select, html[data-theme="p3"] .bar select{
+    padding:4px 8px; font-size:16px;
+  }
+
+  /* Slot on/off. The plain two-tone rectangle gave no cue which end was which --
+     on a monochrome phosphor palette "filled" and "unfilled" read almost the
+     same. AmberConsole's answer is a travelling knob plus an explicit word, so
+     position and label agree instead of relying on brightness alone. */
   html[data-theme="p4"] .toggle, html[data-theme="p3"] .toggle{
     border-radius:var(--radius); box-shadow:var(--halo-box);
+    width:46px; height:22px; overflow:visible; background:transparent;
+    border:var(--b) solid var(--ink-soft);
+  }
+  html[data-theme="p4"] .toggle::after, html[data-theme="p3"] .toggle::after{
+    top:2px; left:2px; width:16px; height:14px; background:var(--ink-soft);
+    transition:left .08s, background .08s;
+  }
+  html[data-theme="p4"] .toggle.on, html[data-theme="p3"] .toggle.on{
+    background:transparent; border-color:var(--ink-bright);
+  }
+  html[data-theme="p4"] .toggle.on::after, html[data-theme="p3"] .toggle.on::after{
+    left:auto; right:2px; background:var(--ink-bright);
+  }
+  html[data-theme="p4"] .toggle::before, html[data-theme="p3"] .toggle::before{
+    content:"OFF"; position:absolute; right:100%; margin-right:9px; top:50%;
+    transform:translateY(-50%); font-size:14px; letter-spacing:0.08em;
+    color:var(--ink-soft); pointer-events:none;
+  }
+  html[data-theme="p4"] .toggle.on::before, html[data-theme="p3"] .toggle.on::before{
+    content:"ON"; color:var(--ink-bright);
   }
 
   /* CRT dressing, only on the phosphor themes. Fixed overlay, never interactive. */
@@ -189,7 +223,28 @@
   button:active{transform:translate(3px,3px); box-shadow:0 0 0 var(--ink);}
   button.primary{background:var(--ink); color:var(--paper);}
   button.primary:hover{background:var(--primary-hi);}
-  .main{display:flex; gap:14px; align-items:flex-start; flex-wrap:wrap;}
+  /* Patches and My Library are full-width strips ABOVE the slots, not a fixed
+     left column: the slot grid is what the window is for, and a 276px sidebar
+     cost it a whole column on narrow screens. Both collapse. */
+  .main{display:flex; flex-direction:column; gap:14px; align-items:stretch;}
+  .strip{width:auto; flex:none;}
+  .strip h2{display:flex; align-items:center; gap:8px;}
+  .strip h2 .psub{margin:0; text-transform:none; letter-spacing:0;}
+  .collapse{padding:0; width:22px; height:22px; line-height:18px; text-align:center; flex:none;}
+  .strip.collapsed .stripbody{display:none;}
+  .strip.collapsed .collapse{transform:rotate(-90deg);}
+  .striptools{display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px;}
+  /* rows flow left-to-right and wrap, instead of one tall column */
+  /* Capped and scrollable: 50 patches wrapped across the full width is still
+     ~10 rows, which pushed the slot grid off-screen entirely. */
+  #librows, #locrows{display:flex; flex-wrap:wrap; gap:4px;
+                     max-height:190px; overflow-y:auto; align-content:flex-start;}
+  #librows.hint, #locrows.hint{display:block;}
+  .strip .librow{width:210px; flex:0 0 auto; border-bottom:none;
+                 border:2px solid var(--lcd-deep); border-radius:2px;}
+  /* Row buttons only on hover, so the name gets the width the rest of the time. */
+  .strip .librow button{opacity:0; transition:opacity .08s;}
+  .strip .librow:hover button, .strip .librow:focus-within button{opacity:1;}
   .slots{display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px; flex:1;}
   .slot{padding:12px; background:var(--lcd-lit); border:var(--b) solid var(--ink); box-shadow:5px 5px 0 var(--ink);}
   .slot h3{margin:0 0 10px; font-size:13px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:1.5px;
@@ -206,7 +261,7 @@
             text-align:center; max-width:72px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
   .knob canvas{cursor:ns-resize; touch-action:none;}
   .knob .kv{font-size:14px; color:var(--ink);}
-  .lib{width:276px; flex:none;}
+  .lib{width:276px; flex:none;}   /* legacy: unused now that both panels are strips */
   .lib h2{font-size:13px; color:var(--ink-soft); margin:0 0 10px; text-transform:uppercase; letter-spacing:1.5px;
           border-bottom:2px solid var(--ink); padding-bottom:6px; font-weight:400;}
   .librow{display:flex; gap:5px; align-items:center; padding:5px 4px; border-bottom:2px solid var(--lcd-deep); cursor:pointer;}
@@ -295,34 +350,38 @@ Serve over <code>http://localhost</code> — see the comments in this file.</p>
 
 
 <div class="main">
-  <div class="lib panel">
-    <h2>My Library</h2><div class="hint psub">saved in this browser · drag ⇄ pedal</div>
-    <div id="locpanel">
-      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
-        <select id="locfolder" style="max-width:150px"></select>
-        <button id="locnew" title="new folder">+ folder</button>
-        <button id="locren" title="rename folder">✎</button>
-        <button id="locdel" title="delete folder">✕</button>
+  <section class="strip panel" id="libpanel">
+    <h2><button class="collapse" id="libcol" title="collapse / expand">▾</button>My Library
+      <span class="hint psub">saved in this browser · drag ⇄ pedal</span></h2>
+    <div class="stripbody">
+      <div id="locpanel">
+        <div class="striptools">
+          <select id="locfolder" style="max-width:150px"></select>
+          <button id="locnew" title="new folder">+ folder</button>
+          <button id="locren" title="rename folder">✎</button>
+          <button id="locdel" title="delete folder">✕</button>
+          <button id="locsaveall" title="read the whole pedal bank and save every patch into this folder">⇩ Bank → folder</button>
+          <button id="locwriteall" title="write this folder's patches to pedal slots 1..N (OVERWRITES those slots)">⇪ Folder → pedal</button>
+          <button id="locexp" title="download the whole library as a JSON file (real backup)">Export…</button>
+          <button id="locimpBtn" title="import a library JSON file (folders are appended)">Import…</button>
+          <input type="file" id="locimp" accept=".json" style="display:none">
+        </div>
+        <div id="locrows" class="hint">empty — drag a pedal patch here, or ⇩ Bank → folder</div>
       </div>
-      <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
-        <button id="locsaveall" title="read the whole pedal bank and save every patch into this folder">⇩ Bank → folder</button>
-        <button id="locwriteall" title="write this folder's patches to pedal slots 1..N (OVERWRITES those slots)">⇪ Folder → pedal</button>
-        <button id="locexp" title="download the whole library as a JSON file (real backup)">Export…</button>
-        <button id="locimpBtn" title="import a library JSON file (folders are appended)">Import…</button>
-        <input type="file" id="locimp" accept=".json" style="display:none">
+    </div>
+  </section>
+  <section class="strip panel" id="patpanel">
+    <h2><button class="collapse" id="patcol" title="collapse / expand">▾</button>Patches
+      <span class="hint psub">click to load · drag to reorder · hover a row for ✎ rename · ✕ erase</span></h2>
+    <div class="stripbody">
+      <div class="striptools">
+        <button id="backup">Backup bank</button>
+        <button id="restoreBtn">Restore…</button>
+        <input type="file" id="restore" accept=".syx" style="display:none">
       </div>
-      <div id="locrows" class="hint">empty — drag a pedal patch here, or ⇩ Bank → folder</div>
+      <div id="librows" class="hint">Connect loads the current patch. Click <b>Reload bank</b> to list all 50 (pedal cycles out loud — mute your amp).</div>
     </div>
-  </div>
-  <div class="lib panel">
-    <h2>Patches</h2><div class="hint psub">click to load · drag to reorder · ✎ rename · ✕ erase</div>
-    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
-      <button id="backup">Backup bank</button>
-      <button id="restoreBtn">Restore…</button>
-      <input type="file" id="restore" accept=".syx" style="display:none">
-    </div>
-    <div id="librows" class="hint">Connect loads the current patch. Click <b>Reload bank</b> to list all 50 (pedal cycles out loud — mute your amp).</div>
-  </div>
+  </section>
   <div class="slots" id="slots"></div>
 </div>
 <div id="log" hidden></div>
@@ -11832,6 +11891,19 @@ $("autoapply").onchange=e=>{ AUTOAPPLY_LATE=e.target.checked;
   log("auto-apply for slots 4-6: "+(AUTOAPPLY_LATE?"ON":"off — those knobs need the Apply button"));
   if(patch) render();                       // slot labels state the current behaviour
 };
+// Collapse state persists: a panel you folded away should stay folded next time.
+function wireCollapse(panelId, btnId, key){
+  const panel=$(panelId), btn=$(btnId);
+  const set=v=>{ panel.classList.toggle("collapsed",v);
+                 btn.textContent=v?"\u25b8":"\u25be";
+                 try{localStorage.setItem(key,v?"1":"0");}catch(e){} };
+  set(localStorage.getItem(key)==="1");
+  btn.onclick=e=>{ e.stopPropagation(); set(!panel.classList.contains("collapsed")); };
+  panel.querySelector("h2").onclick=()=>set(!panel.classList.contains("collapsed"));
+}
+wireCollapse("libpanel","libcol","ms70_lib_collapsed");
+wireCollapse("patpanel","patcol","ms70_pat_collapsed");
+
 $("readall").onclick=readAll;
 $("backup").onclick=backupBank;
 $("restoreBtn").onclick=()=>$("restore").click();
