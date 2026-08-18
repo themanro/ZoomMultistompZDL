@@ -38,7 +38,7 @@
       "name": "Mix",
       "max": 100,
       "default": 50,
-      "comment": "Dry/wet crossfade."
+      "comment": "Level of the held layer. NOT a dry/wet crossfade -- the dry always passes at unity so you can play over the hold at full strength. As a crossfade this cost 6 dB just for having Stasis in the patch, because the wet side is silent until you stomp."
     }
   ]
 }

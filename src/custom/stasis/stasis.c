@@ -35,7 +35,16 @@
  *                   texture, large grains keep the chord recognisable.
  *   Decay  (knob 3) how the hold fades. Fully up is genuinely infinite.
  *   Tone   (knob 4) low-pass on the held layer only; the dry stays open.
- *   Mix    (knob 5) dry/wet.
+ *   Mix    (knob 5) LEVEL of the held layer. Not a dry/wet crossfade -- the one
+ *                   deliberate exception to the pack's convention. As a
+ *                   crossfade it ducked the dry by (1 - Mix) even with nothing
+ *                   frozen, so adding Stasis to a patch cost 6 dB at the default.
+ *
+ * Which knobs work AFTER the freeze: Blur, Decay, Tone and Mix are read every
+ * block, so they shape a hold that is already running. Length is latched at the
+ * moment of capture and cannot change it afterwards. Note that on slots 4-6 the
+ * editor reaches knobs by bypass-bouncing the slot, which Stasis sees as a fresh
+ * trigger -- so live knob control of a running hold wants slots 1-3.
  *
  * Safe-DSP: no switch (jump tables are unreachable in a ZDL and hard-freeze the
  * DSP), no CALLs or helper calls, no runtime divide (grain lengths are powers of
@@ -91,6 +100,13 @@ typedef struct StasisState {
     float    lp;
     float    level;
 } StasisState;
+
+static inline float ss_soft(float x)
+{
+    if (x > 1.0f) return 1.0f;
+    if (x < -1.0f) return -1.0f;
+    return 1.5f * x - 0.5f * x * x * x;
+}
 
 static inline float ss_flush(float x)
 {
@@ -193,7 +209,15 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
     }
 
     float lpCoef = 0.02f + tn * 0.55f;
-    float wetLvl = mix, dryLvl = 1.0f - mix;
+    /* Mix is a HOLD LEVEL here, not a dry/wet crossfade -- the one deliberate
+     * exception to the pack's convention.
+     *
+     * As a crossfade it attenuated the dry by (1 - Mix) at all times, so simply
+     * adding Stasis to a patch cost 6 dB at the default Mix of 50 even with
+     * nothing frozen, because the wet side is silent until you stomp. It is also
+     * wrong musically: the whole point is to play over the held chord at full
+     * strength, so the dry must not duck to make room for it. */
+    float wetLvl = mix;
 
     uint32_t nowOn = (params[0] >= 0.5f) ? 1u : 0u;
 
@@ -269,7 +293,10 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
             wet *= level;
         }
 
-        float out = dryLvl * dry + wetLvl * wet;
+        /* dry at unity, hold added on top; soft-clipped so a loud hold under
+         * loud playing cannot fold over. */
+        float out = dry + wetLvl * wet;
+        out = ss_soft(out);
         fxBuf[i]     = out;
         fxBuf[i + 8] = out;
     }
