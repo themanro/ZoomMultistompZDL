@@ -115,7 +115,7 @@
       "comment": "Nominally the head-bump frequency (25..200 Hz) but in this reduced core it only scales the lift AMOUNT inversely -- it does not move a filter, because there is no filter. Fidelity gap vs ToTape9."
     },
     {
-      "name": "Output",
+      "name": "Mix",
       "type": "knob",
       "max": 100,
       "default": 50,
@@ -125,7 +125,7 @@
       "audio_default": 0.5,
       "source_default": 0.5,
       "source_formula": "I * 2.0",
-      "comment": "Output gain, 0..2x, unity at 50. NOT a dry/wet mix. Default was 1, which with correct 0..1 scaling is 0.02x -- effectively silent."
+      "comment": "Dry/wet crossfade. Renamed from 'Output' so every effect in the pack ends with the same control."
     }
   ],
   "audio_nop": false

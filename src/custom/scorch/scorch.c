@@ -40,6 +40,7 @@ SCORCH_CODE_SECTION(SCORCH_AUDIO_FUNC)
 
 #define SC_HP_COEF  0.0135f      /* pre high-pass ~95 Hz */
 #define SC_LP_COEF  0.575f       /* interstage low-pass ~6 kHz */
+#define SC_WET_TRIM   0.55f   /* by-ear level match against the rest of the pack */
 #define SC_BIAS     0.18f
 
 /* Baked cab+tone biquads (b0,b1,b2,a1,a2), generated offline. */
@@ -129,11 +130,16 @@ void SCORCH_AUDIO_FUNC(unsigned int *ctx)
     }
 
     float gain  = zoom_param_norm01(params[SCORCH_GAIN_SLOT], SCORCH_GAIN_DEFAULT_NORM);
-    float level = zoom_param_norm01(params[SCORCH_LEVEL_SLOT], SCORCH_LEVEL_DEFAULT_NORM);
+    float level = zoom_param_norm01(params[SCORCH_MIX_SLOT], SCORCH_MIX_DEFAULT_NORM);
 
     float pre = 1.0f + gain * 45.0f;
     float g2  = 1.0f + gain * 6.0f;
-    float outGain = 0.08f + level * 0.42f;   /* lower range; no 1.5x soft-clip boost */
+    /* Mix is now a dry/wet crossfade, and the wet path runs at unity. The old
+     * law was 0.08 + level*0.42, i.e. a gain that TOPPED OUT AT 0.5 -- Scorch
+     * could never reach unity however far you turned it, which is a large part
+     * of why levels across the pack did not match. */
+    float wetLvl = level;
+    float dryLvl = 1.0f - level;
     float biasOut = sc_soft(SC_BIAS);
 
     float hp = st->hp, lp = st->lp;
@@ -165,14 +171,18 @@ void SCORCH_AUDIO_FUNC(unsigned int *ctx)
         x = sc_bq(x, SC_B0_3, SC_B1_3, SC_B2_3, SC_A1_3, SC_A2_3, &s1d, &s2d);
         x = sc_bq(x, SC_B0_4, SC_B1_4, SC_B2_4, SC_A1_4, SC_A2_4, &s1e, &s2e);
 
-        /* output level (plain gain — NOT sc_soft, which boosts 1.5x at low
-         * level) + hard safety clamp */
-        x = x * outGain;
-        if (x > 1.0f) x = 1.0f;
-        else if (x < -1.0f) x = -1.0f;
+        /* Wet trim before the crossfade. A high-gain amp saturates, so its
+         * output RMS sits near the clip ceiling almost regardless of input --
+         * blending it in at a literal 1.0 would make Scorch far louder than
+         * every other effect at the same Mix. This is a by-ear calibration
+         * point, not a derived constant. */
+        x = x * SC_WET_TRIM;
+        float out = dryLvl * in + wetLvl * x;
+        if (out > 1.0f) out = 1.0f;
+        else if (out < -1.0f) out = -1.0f;
 
-        fxBuf[i]     = x;
-        fxBuf[i + 8] = x;
+        fxBuf[i]     = out;
+        fxBuf[i + 8] = out;
     }
 
     st->hp = hp; st->lp = lp;

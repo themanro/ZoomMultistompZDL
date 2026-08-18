@@ -62,17 +62,17 @@
       "comment": "Airwindows D. Delay-network size."
     },
     {
-      "name": "DryWet",
+      "name": "Mix",
       "type": "knob",
       "max": 100,
-      "default": 1,
+      "default": 50,
       "scale": "source_cubed_wet",
       "audio_min": 0.0,
       "audio_max": 1.0,
       "audio_default": 1.0,
       "source_default": 1.0,
       "source_formula": "wet = 1.0 - pow(1.0 - E, 3.0)",
-      "comment": "Airwindows E. Dry/wet mix."
+      "comment": "Dry/wet crossfade. Renamed from 'DryWet' so every effect in the pack ends with the same control."
     }
   ],
   "audio_nop": false

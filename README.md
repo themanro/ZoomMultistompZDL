@@ -102,9 +102,12 @@ Full knob layouts, caveats and sound demos are in
 | **Oxide** | Airwindows ToTape9 saturation — drive, tilt, bias, flutter, head bump |
 | **Spool** | tempo-locked tape echo with flutter, wow, head wear, drive and a spring tail |
 
+> Every effect ends with a **Mix** knob (dry/wet, default 50), so levels and
+> controls are consistent across the pack.
+>
 > Not all hardware-verified yet, and the pedal can't hold/run all 18 at once
 > (storage + DSP limits) — install a subset, back up first, flash one at a
-> time. All volume knobs default to **1** so nothing is loud at patch select.
+> time. All Mix knobs default to **50**, so an effect is audible as soon as it is selected.
 
 ## Download Effects
 

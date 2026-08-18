@@ -36,7 +36,7 @@
     {
       "name": "Mix",
       "max": 100,
-      "default": 40,
+      "default": 50,
       "comment": "params[9]. Dry/wet. Default 40 so it's audible on load (custom effects read params as 0 until a knob is touched, so this default is the on-load value). Push it up; high mix + high Time/Depth lets PEAK/GONG self-oscillate."
     }
   ],

@@ -46,6 +46,9 @@ GENLOSS_CODE_SECTION(GENLOSS_AUDIO_FUNC)
 #define GL_RW_AMP     120.0f
 #define GL_RW_COEF    0.0012f
 #define GL_HP_COEF    0.012f      /* sub high-pass (~80 Hz) */
+/* By-ear level match: the tape path is driven and band-limited, so it needs a
+ * small trim before being crossfaded against dry. */
+#define GL_WET_TRIM   1.15f
 #define GL_DRIVE      1.8f
 #define GL_HISS       0.006f
 
@@ -146,6 +149,11 @@ void GENLOSS_AUDIO_FUNC(unsigned int *ctx)
     float hiss = zoom_param_norm01(params[GENLOSS_HISS_SLOT], GENLOSS_HISS_DEFAULT_NORM);
     float lpCoef = 0.03f + tone * 0.5f;     /* one-pole cutoff ~210 Hz .. ~3.7 kHz */
     float hissLvl = hiss * 0.03f;           /* 0 .. ~0.03 noise floor */
+    /* Dry/wet crossfade. Every other effect in the pack ends with one; GenLoss
+     * shipped with none, so it could only ever be heard fully wet. */
+    float mix = zoom_param_norm01(params[GENLOSS_MIX_SLOT], GENLOSS_MIX_DEFAULT_NORM);
+    float wetLvl = mix;
+    float dryLvl = 1.0f - mix;
 
     uint32_t wp = st->writePos;
     float wowPh = st->wowPhase, flutPh = st->flutPhase, rwLP = st->rwLP;
@@ -176,7 +184,8 @@ void GENLOSS_AUDIO_FUNC(unsigned int *ctx)
         hp += GL_HP_COEF * (warb - hp);
         float wh = warb - hp;            /* high-passed */
         lp += lpCoef * (wh - lp);        /* low-passed (Tone) */
-        float out = lp + gl_rand(&rng) * hissLvl;
+        float wet = lp + gl_rand(&rng) * hissLvl;
+        float out = dryLvl * in + wetLvl * wet * GL_WET_TRIM;
 
         fxBuf[i]     = out;
         fxBuf[i + 8] = out;

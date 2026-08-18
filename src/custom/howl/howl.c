@@ -102,7 +102,7 @@ void HOWL_AUDIO_FUNC(unsigned int *ctx)
         st->y1L = st->y2L = st->y1R = st->y2R = 0.0f;
         st->accKnob[0] = HOWL_TUNE_DEFAULT_NORM;
         st->accKnob[1] = HOWL_ANNIHIL_DEFAULT_NORM;
-        st->accKnob[2] = HOWL_LEVEL_DEFAULT_NORM;
+        st->accKnob[2] = HOWL_MIX_DEFAULT_NORM;
         st->prevRaw[0] = st->prevRaw[1] = st->prevRaw[2] = -1.0f;
         st->initialized = 1u;
     }
@@ -115,7 +115,7 @@ void HOWL_AUDIO_FUNC(unsigned int *ctx)
         int k, changed = -1, nch = 0;
         raw[0] = params[HOWL_TUNE_SLOT];
         raw[1] = params[HOWL_ANNIHIL_SLOT];
-        raw[2] = params[HOWL_LEVEL_SLOT];
+        raw[2] = params[HOWL_MIX_SLOT];
         for (k = 0; k < 3; k++) {
             float d = raw[k] - st->prevRaw[k];
             if (d > 1.0e-6f || d < -1.0e-6f) { changed = k; nch++; }
@@ -137,7 +137,11 @@ void HOWL_AUDIO_FUNC(unsigned int *ctx)
     float tune   = st->accKnob[0];
     float annih  = st->accKnob[1];
     float level  = st->accKnob[2];
-    float wetLvl = level * 0.45f;           /* Level knob: 0 .. 0.45 howl level */
+    /* True dry/wet crossfade. This was a wet SEND: dry sat at a fixed HOWL_DRY
+     * and the knob only scaled the howl to a 0.45 ceiling, so the effect could
+     * never reach full wet and its level never matched the rest of the pack. */
+    float wetLvl = level;
+    float dryLvl = 1.0f - level;
 
     float fc = HOWL_FC_MIN + tune * HOWL_FC_SPAN;
     float oma = 1.0f - annih;
@@ -164,8 +168,8 @@ void HOWL_AUDIO_FUNC(unsigned int *ctx)
         float wetL = howl_soft(yL * HOWL_DRIVE);
         float wetR = howl_soft(yR * HOWL_DRIVE);
 
-        fxBuf[i]     = HOWL_DRY * inL + wetLvl * wetL;
-        fxBuf[i + 8] = HOWL_DRY * inR + wetLvl * wetR;
+        fxBuf[i]     = dryLvl * inL + wetLvl * wetL;
+        fxBuf[i + 8] = dryLvl * inR + wetLvl * wetR;
     }
 
     st->y1L = y1L; st->y2L = y2L; st->y1R = y1R; st->y2R = y2R;

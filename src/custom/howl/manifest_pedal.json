@@ -22,10 +22,10 @@
       "comment": "params[6]. Pole radius: short ring -> long howl."
     },
     {
-      "name": "Level",
+      "name": "Mix",
       "max": 100,
-      "default": 1,
-      "comment": "Level default 1 (quiet-safe). The editor materialises patches on load (full-patch send), so audible-on-load no longer needs a hot default."
+      "default": 50,
+      "comment": "Dry/wet crossfade. Renamed from 'Level' so every effect in the pack ends with the same control."
     }
   ],
   "audio_nop": false,

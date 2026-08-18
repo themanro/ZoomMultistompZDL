@@ -18,8 +18,8 @@
     {
       "name": "Mix",
       "max": 100,
-      "default": 45,
-      "comment": "params[6]. Dry/wet. Default 45 (not ~0) so the effect is AUDIBLE the moment a patch loads — custom effects read params as 0 until a knob is touched, so this default is the on-load value."
+      "default": 50,
+      "comment": "params[6]. Dry/wet. Default 45 (not ~0) so the effect is AUDIBLE the moment a patch loads \u2014 custom effects read params as 0 until a knob is touched, so this default is the on-load value."
     }
   ],
   "audio_nop": false,

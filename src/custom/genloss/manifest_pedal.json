@@ -26,6 +26,12 @@
       "max": 100,
       "default": 2,
       "comment": "params[7]. Tape hiss / noise-floor level."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 50,
+      "comment": "Dry/wet crossfade. GenLoss previously had NO level or mix control at all -- its last knob was Hiss, a noise amount -- so it was the one effect you could not sit against the dry signal."
     }
   ],
   "audio_nop": false,

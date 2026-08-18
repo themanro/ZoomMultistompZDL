@@ -76,18 +76,33 @@ richer `manifest.json` is the desktop-preview version and has more controls.
 | Arrakis | `Arrakis` | Detune, Mix | original | Dune-style detuned sub-octave drone — two sub voices beat against each other |
 | Corrupt | `Corrupt` | Sub, Tone, Wave, Mix | original | EQD Data Corrupter-style PLL square-wave synth with a tracked sub and a divided harmony |
 | Klang | `Klang` | Freq, Sweep, Mix | original | swept-carrier ring modulator — sirens, dive bombs, clangorous metal |
-| GenLoss | `GenLoss` | Wow, Tone, Hiss | original | tape/VHS generation loss: wow, head-bump tone shift and hiss, as if dubbed too many times |
-| Scorch | `Scorch` | Gain, Level | original | aggressive high-gain amp with a cab-style filter |
-| Howl | `Howl` | Tune, Annihil, Level | original | DBA Total Sonic Annihilation-style feedback loop that self-oscillates on demand |
+| GenLoss | `GenLoss` | Wow, Tone, Hiss, Mix | original | tape/VHS generation loss: wow, head-bump tone shift and hiss, as if dubbed too many times |
+| Scorch | `Scorch` | Gain, Mix | original | aggressive high-gain amp with a cab-style filter |
+| Howl | `Howl` | Tune, Annihil, Mix | original | DBA Total Sonic Annihilation-style feedback loop that self-oscillates on demand |
 | Taffy | `Taffy` | Speed, Chance, Depth, Glide, Mix | original | Red Panda Tensor-style tape warp — Speed anchors the head (reverse / stop / double), Depth and Chance add random slips, Glide sets motor smoothness |
 | Dissolve | `Dissolve` | Chance, Smear, Glitch, Mix | original | OBNE Parting-style glitch delay that dissolves its repeats into a reverb wash |
 | Mangle | `Mangle` | Time, Feedbk, Crush, Tremolo, Pitch, Mix | original | delay with three blendable per-repeat mutations: Crush and Tremolo compound inside the feedback, Pitch drops an octave-down grain on the output |
 | Rooms | `Rooms` | Mode, Time, Freq, Depth, Mix | original | DBA Rooms-inspired multi-mode reverb. Mode picks ROOM / DIGIT / PEAK / GATE / WAVE / GONG and Freq + Depth are re-purposed per mode. Time is the global decay, 0.65 s to 12 s, spaced so each 10 clicks is roughly 1.33x the last |
 | Hydra | `Hydra` | Div, Tempo, Fast, Slow, Tone, Mix | original | two extra playback heads on one delay ring: a 2x head (octave up, double-time) and a 0.5x head (octave down, half-time), both re-triggered every window. **Tempo-locked** — Div sets the window as a division of Tempo so the ghosts land on the beat. Div at 0 is Grain, a free-running 5.8 ms window, which is the granular octave-shifter mode instead. Built for drums |
 | Spiral | `Spiral` | Div, Tempo, Feedbk, Rise, Glide, Span, Tone, Mix | original | delay whose repeats climb or sink in pitch. The shift sits *inside* the feedback loop so it compounds: repeat 1 is one step away, repeat 2 two steps, an endless staircase fading out. **Tempo-locked** — Div and Tempo set the delay musically. Rise is the per-repeat staircase (bipolar, unity at centre); Glide and Span are a ramp that resets at the start of a phrase and climbs over 0.2–8 s, so repeats begin at pitch and drift away across bars |
-| Galactic | `Galactic` | Replace, Bright, Detune, Bigness, DryWet | port | lush Airwindows reverb with the wet path boosted for pedal levels |
-| Oxide | `Oxide` | Input, Tilt, Shape, Flutter, FlutSpd, Bias, HeadBmp, HeadFrq, Output | port | Airwindows ToTape9 saturation. Input is a 0–4x drive (unity at 50), Tilt is the Dolby-style encode/decode balance, Bias is an asymmetric even-harmonic drive whose character genuinely changes across the knob, Output is a gain — not a mix. See the caveat below |
+| Galactic | `Galactic` | Replace, Bright, Detune, Bigness, Mix | port | lush Airwindows reverb with the wet path boosted for pedal levels |
+| Oxide | `Oxide` | Input, Tilt, Shape, Flutter, FlutSpd, Bias, HeadBmp, HeadFrq, Mix | port | Airwindows ToTape9 saturation. Input is a 0–4x drive (unity at 50), Tilt is the Dolby-style encode/decode balance, Bias is an asymmetric even-harmonic drive whose character genuinely changes across the knob. Its old `Output` gain is now `Mix`, a real crossfade against the untouched input; Tilt's own encode/decode balance stays internal to the tape character. See the caveat below |
 | Spool | `Spool` | Tempo, Div, Feed, Flutter, Wow, Wear, Drive, Spring, Mix | port | tape echo with a tempo-locked delay (Tempo + Div) plus flutter, wow, head wear, drive and a spring tail |
+
+### Level control
+
+Every effect ends with a **Mix** knob: a dry/wet crossfade, defaulting to 50 so
+the effect is audible as soon as you select it. That was not always true --
+Galactic called it DryWet, Howl and Scorch called it Level, Oxide called it
+Output, and GenLoss had no level control at all. Worse, the ones called Level or
+Output were not crossfades: Howl's only scaled a wet send to a 0.45 ceiling and
+Scorch's was an output gain that topped out at 0.5x, so Scorch could never reach
+unity however far it was turned. That is most of why levels across the pack did
+not match.
+
+Effects that saturate lift RMS regardless of input, so a few carry a named wet
+trim (`SC_WET_TRIM`, `TOTAPE9_WET_TRIM`, `GL_WET_TRIM`) applied before the
+crossfade. Those are by-ear calibration points, not derived constants.
 
 ### Known gaps
 

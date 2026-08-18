@@ -157,6 +157,10 @@ TOTAPE9_CODE_SECTION(TOTAPE9_AUDIO_FUNC)
  * syntax-checking) the compiler will warn; those warnings are expected and safe
  * to ignore.
  */
+/* By-ear level match against the rest of the pack: tape saturation lifts RMS,
+ * so the wet path needs trimming before it is crossfaded in. */
+#define TOTAPE9_WET_TRIM 0.7f
+
 #define ZDL_PTR(type, word)  ((type)(uintptr_t)(word))
 
 /* -------------------------------------------------------------------------
@@ -273,7 +277,7 @@ static inline void start_lazy_init(ToTape9State *st)
     st->criticalParamCacheReady = 1u;
     st->cachedInput = TOTAPE9_INPUT_DEFAULT_NORM;
     st->cachedBias = TOTAPE9_BIAS_DEFAULT_NORM;
-    st->cachedOutput = TOTAPE9_OUTPUT_DEFAULT_NORM;
+    st->cachedOutput = TOTAPE9_MIX_DEFAULT_NORM;
 }
 
 static inline void clear_state_chunk(ToTape9State *st)
@@ -306,7 +310,7 @@ static inline void clear_state_chunk(ToTape9State *st)
         st->criticalParamCacheReady = 1u;
         st->cachedInput = TOTAPE9_INPUT_DEFAULT_NORM;
         st->cachedBias = TOTAPE9_BIAS_DEFAULT_NORM;
-        st->cachedOutput = TOTAPE9_OUTPUT_DEFAULT_NORM;
+        st->cachedOutput = TOTAPE9_MIX_DEFAULT_NORM;
         st->initialized = 1u;
     }
 }
@@ -418,7 +422,7 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
     float pBias    = zoom_param_norm01(params[TOTAPE9_BIAS_SLOT],    TOTAPE9_BIAS_DEFAULT_NORM);
     float pHeadBmp = zoom_param_norm01(params[TOTAPE9_HEADBMP_SLOT], TOTAPE9_HEADBMP_DEFAULT_NORM);
     float pHeadFrq = zoom_param_norm01(params[TOTAPE9_HEADFRQ_SLOT], TOTAPE9_HEADFRQ_DEFAULT_NORM);
-    float pOutput  = zoom_param_norm01(params[TOTAPE9_OUTPUT_SLOT],  TOTAPE9_OUTPUT_DEFAULT_NORM);
+    float pMix     = zoom_param_norm01(params[TOTAPE9_MIX_SLOT],  TOTAPE9_MIX_DEFAULT_NORM);
 
     float inputGain = pInput * 2.0f;
     inputGain *= inputGain;
@@ -446,7 +450,6 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
     float headBumpDrive = pHeadBmp * 0.1f;
     float headBumpMix = pHeadBmp * 0.5f;
     float headHz = pHeadFrq * pHeadFrq * 175.0f + 25.0f;
-    float outputGain = pOutput * 2.0f;
 
     /* Stateless approximations of ToTape9's stateful blocks. These keep the
      * same source-derived knob tapers while avoiding large persistent memory. */
@@ -456,13 +459,24 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
     float headLift = 1.0f + headBumpMix * (1.0f + (200.0f - headHz) * (1.0f / 175.0f));
     float flutterTrim = 1.0f - flutterDepth * flutFrequency * 0.1f;
     float biasCurve = bias * (0.12f + underBias * 0.18f + overBias * 0.018f);
-    float wet = 0.35f + encodeAmt * 0.25f + decodeAmt * 0.15f;
-    if (wet > 0.9f) wet = 0.9f;
-    float dry = 1.0f - wet;
+    /* Tilt's own encode/decode balance. This is INTERNAL to the tape character
+     * -- how much saturated path against clean path the machine itself runs --
+     * and is not the user's Mix. */
+    float tapeWet = 0.35f + encodeAmt * 0.25f + decodeAmt * 0.15f;
+    if (tapeWet > 0.9f) tapeWet = 0.9f;
+    float tapeDry = 1.0f - tapeWet;
+
+    /* Mix is a real dry/wet crossfade against the untouched input, matching
+     * every other effect in the pack. It replaces an output GAIN (pOutput*2),
+     * which blended nothing and so gave no way to sit the tape against the dry
+     * signal -- part of why levels across the pack never matched. */
+    float wetLvl = pMix;
+    float dryLvl = 1.0f - pMix;
 
     int i;
     for (i = 0; i < 16; i++) {
-        float x = fxBuf[i] * inputGain;
+        float clean = fxBuf[i];              /* untouched, for the Mix crossfade */
+        float x = clean * inputGain;
         float biased = x + biasCurve * x * x;
         float driven = biased * tapeDrive * flutterTrim * headLift;
         if (driven >  2.305929f) driven =  2.305929f;
@@ -481,7 +495,8 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
             sat += p * 0.00000444473f;
             p *= x2;
             sat -= p * 0.000000100208f;
-            fxBuf[i] = (x * dry + sat * wet) * outputGain;
+            float tape = x * tapeDry + sat * tapeWet;
+            fxBuf[i] = dryLvl * clean + wetLvl * tape * TOTAPE9_WET_TRIM;
         }
     }
     return;
@@ -575,7 +590,7 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
     float rawBias = params[TOTAPE9_BIAS_SLOT];
     float rawHeadBmp = params[TOTAPE9_HEADBMP_SLOT];
     float rawHeadFrq = params[TOTAPE9_HEADFRQ_SLOT];
-    float rawOutput = params[TOTAPE9_OUTPUT_SLOT];
+    float rawOutput = params[TOTAPE9_MIX_SLOT];
 
     /* Bypass = clean dry passthrough, same off-gate as every other effect.
      * (An earlier build kept processing while "off" whenever the param block
@@ -592,7 +607,7 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
     float pBias = TOTAPE9_PARAM_NORM(rawBias, TOTAPE9_BIAS_DEFAULT_NORM);
     float pHeadBmp = TOTAPE9_PARAM_NORM(rawHeadBmp, TOTAPE9_HEADBMP_DEFAULT_NORM);
     float pHeadFrq = TOTAPE9_PARAM_NORM(rawHeadFrq, TOTAPE9_HEADFRQ_DEFAULT_NORM);
-    float pOutput = TOTAPE9_PARAM_NORM(rawOutput, TOTAPE9_OUTPUT_DEFAULT_NORM);
+    float pOutput = TOTAPE9_PARAM_NORM(rawOutput, TOTAPE9_MIX_DEFAULT_NORM);
 
     if (!TOTAPE9_PARAM_MISSING(rawInput)) st->cachedInput = pInput;
     else if (st->criticalParamCacheReady && st->cachedInput == st->cachedInput) pInput = zoom_clamp01(st->cachedInput);
@@ -600,6 +615,11 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
     else if (st->criticalParamCacheReady && st->cachedBias == st->cachedBias) pBias = zoom_clamp01(st->cachedBias);
     if (!TOTAPE9_PARAM_MISSING(rawOutput)) st->cachedOutput = pOutput;
     else if (st->criticalParamCacheReady && st->cachedOutput == st->cachedOutput) pOutput = zoom_clamp01(st->cachedOutput);
+
+    /* Dead-code path only (the full Airwindows body, kept for future state-ABI
+     * work). The RELEASE core above no longer has an output gain -- that knob
+     * became Mix, a real dry/wet crossfade. */
+    float outputGain = pOutput * 2.0f;
 
     /* --- Derive algorithm parameters (matching ToTape9 formulas exactly)
      *     overallscale = 1.0 throughout                                  --- */
@@ -653,7 +673,6 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
     computeHDB(hdbA, hfA, reso);
     computeHDB(hdbB, hfB, reso);
 
-    float outputGain = pOutput * 2.0f;
 
 #ifdef TOTAPE9_DSP_NO_LOOP
     /* Diagnostic build: run derived-params + computeHDB (which uses tanf

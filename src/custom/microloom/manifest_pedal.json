@@ -30,7 +30,7 @@
     {
       "name": "Mix",
       "max": 100,
-      "default": 1,
+      "default": 50,
       "comment": "Mix default 1 (quiet-safe). The editor materialises patches on load (full-patch send), so audible-on-load no longer needs a hot default."
     }
   ],
