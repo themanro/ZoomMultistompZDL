@@ -11333,9 +11333,35 @@ async function libDelete(i){
   busy=false; renderLibrary(); await refreshCurrent();
   log(`erased #${i+1}`);
 }
+// Exchange the write-only "NZ" bits of two slots inside an encode base.
+//
+// encodePatch restores every NZ bit from `base`, because they are bits PE does
+// not understand and must not invent. That is right while a slot stays put and
+// WRONG the moment its contents move: a swap carried the effect type and params
+// across but left the flags behind, so a slot ended up holding one effect's
+// values with another effect's flags. Slots whose flags happened to match were
+// unaffected, which is why the symptom was "some slots go empty, not all" and
+// why it resisted reproduction -- it depends entirely on which effects were
+// where. Any editor that models the format partially and swaps by re-encoding
+// has the same hole.
+function swapNZBits(raw,a,b){
+  const d=raw.slice();
+  for(let k=0;k<11;k++){
+    const na=BITS[a][k].filter(x=>x[2]==="NZ");
+    const nb=BITS[b][k].filter(x=>x[2]==="NZ");
+    for(let i=0;i<Math.min(na.length,nb.length);i++){
+      const [ba,ma]=na[i], [bb,mb]=nb[i];
+      const va=(raw[ba]&ma)?1:0, vb=(raw[bb]&mb)?1:0;
+      d[ba]=(d[ba]&~ma)|(vb?ma:0);
+      d[bb]=(d[bb]&~mb)|(va?mb:0);
+    }
+  }
+  return d;
+}
 function slotSwap(a,b){
   if(a===b||!patch)return;
   const t=patch.fx[a]; patch.fx[a]=patch.fx[b]; patch.fx[b]=t;
+  if(rawFromPedal&&rawFromPedal.length===146) rawFromPedal=swapNZBits(rawFromPedal,a,b);
   sendFullPatch(); render();
   log(`swapped slot ${a+1} ⇄ ${b+1}`);
 }
