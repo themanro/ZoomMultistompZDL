@@ -86,7 +86,7 @@ richer `manifest.json` is the desktop-preview version and has more controls.
 | Hydra | `Hydra` | Div, Tempo, Fast, Slow, Tone, Mix | original | two extra playback heads on one delay ring: a 2x head (octave up, double-time) and a 0.5x head (octave down, half-time), both re-triggered every window. **Tempo-locked** — Div sets the window as a division of Tempo so the ghosts land on the beat. Div at 0 is Grain, a free-running 5.8 ms window, which is the granular octave-shifter mode instead. Built for drums |
 | Spiral | `Spiral` | Div, Tempo, Feedbk, Rise, Glide, Span, Tone, Mix | original | delay whose repeats climb or sink in pitch. The shift sits *inside* the feedback loop so it compounds: repeat 1 is one step away, repeat 2 two steps, an endless staircase fading out. **Tempo-locked** — Div and Tempo set the delay musically. Rise is the per-repeat staircase (bipolar, unity at centre); Glide and Span are a ramp that resets at the start of a phrase and climbs over 0.2–8 s, so repeats begin at pitch and drift away across bars |
 | Galactic | `Galactic` | Replace, Bright, Detune, Bigness, Mix | port | lush Airwindows reverb with the wet path boosted for pedal levels |
-| Oxide | `Oxide` | Input, Tilt, Shape, Flutter, FlutSpd, Bias, HeadBmp, HeadFrq, Mix | port | Airwindows ToTape9 saturation. Input is a 0–4x drive (unity at 50), Tilt is the Dolby-style encode/decode balance, Bias is an asymmetric even-harmonic drive whose character genuinely changes across the knob. Its old `Output` gain is now `Mix`, a real crossfade against the untouched input; Tilt's own encode/decode balance stays internal to the tape character. See the caveat below |
+| Oxide | `Oxide` | Input, Tilt, Shape, Flutter, FlutSpd, Bias, HeadBmp, Output, Mix | port | Airwindows ToTape9 saturation. Input is a 0–4x drive (unity at 50), Tilt is the Dolby-style encode/decode balance, Bias is an asymmetric even-harmonic drive whose character genuinely changes across the knob. Its old `Output` gain is now `Mix`, a real crossfade against the untouched input; Tilt's own encode/decode balance stays internal to the tape character. See the caveat below |
 | Spool | `Spool` | Tempo, Div, Feed, Flutter, Wow, Wear, Drive, Spring, Mix | port | tape echo with a tempo-locked delay (Tempo + Div) plus flutter, wow, head wear, drive and a spring tail |
 
 ### Level control
@@ -106,10 +106,12 @@ crossfade. Those are by-ear calibration points, not derived constants.
 
 ### Known gaps
 
-* **Oxide `HeadBmp` / `HeadFrq`.** In this reduced core HeadBmp is a broadband
-  drive + level lift, not a low-frequency resonance, and HeadFrq only scales that
-  lift's amount — there is no filter behind either. So HeadBmp is not a bass
-  control and HeadFrq is not a bass frequency, however they read by ear.
+* **Oxide `HeadBmp`.** In this reduced core it is a broadband
+  drive + level lift, not a low-frequency resonance — there is no filter behind
+  it, so it is not a bass control however it reads by ear. `HeadFrq` used to sit
+  beside it and controlled no frequency either: it only scaled the same lift, so
+  two knobs adjusted one quantity. Its slot became `Output`, a makeup gain the
+  pack was otherwise missing.
 * Some features are deferred on the originals (Klang's frequency-shifter modes,
   GenLoss dropouts, Scorch's full cab IR). Compare each effect's `manifest.json`
   against its `manifest_pedal.json` to see what was cut for the pedal build.

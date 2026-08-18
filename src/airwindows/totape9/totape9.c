@@ -421,7 +421,7 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
     float pFlutSpd = zoom_param_norm01(params[TOTAPE9_FLUTSPD_SLOT], TOTAPE9_FLUTSPD_DEFAULT_NORM);
     float pBias    = zoom_param_norm01(params[TOTAPE9_BIAS_SLOT],    TOTAPE9_BIAS_DEFAULT_NORM);
     float pHeadBmp = zoom_param_norm01(params[TOTAPE9_HEADBMP_SLOT], TOTAPE9_HEADBMP_DEFAULT_NORM);
-    float pHeadFrq = zoom_param_norm01(params[TOTAPE9_HEADFRQ_SLOT], TOTAPE9_HEADFRQ_DEFAULT_NORM);
+    float pOutput  = zoom_param_norm01(params[TOTAPE9_OUTPUT_SLOT], TOTAPE9_OUTPUT_DEFAULT_NORM);
     float pMix     = zoom_param_norm01(params[TOTAPE9_MIX_SLOT],  TOTAPE9_MIX_DEFAULT_NORM);
 
     float inputGain = pInput * 2.0f;
@@ -449,14 +449,21 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
 
     float headBumpDrive = pHeadBmp * 0.1f;
     float headBumpMix = pHeadBmp * 0.5f;
-    float headHz = pHeadFrq * pHeadFrq * 175.0f + 25.0f;
 
     /* Stateless approximations of ToTape9's stateful blocks. These keep the
      * same source-derived knob tapers while avoiding large persistent memory. */
     float encodeAmt = dublyAmount * (0.35f + iirEncFreq * 0.65f);
     float decodeAmt = -outlyAmount * (0.35f + iirDecFreq * 0.65f);
     float tapeDrive = 1.0f + encodeAmt * 0.35f + headBumpDrive * 12.0f;
-    float headLift = 1.0f + headBumpMix * (1.0f + (200.0f - headHz) * (1.0f / 175.0f));
+    /* HeadBmp alone now spans the whole lift range. HeadFrq used to scale this
+     * same value by (200 - headHz)/175 -- it controlled no frequency, there is
+     * no filter here, so the two knobs were adjusting one quantity between
+     * them. Its slot went to Output, which the pack actually lacked. */
+    float headLift = 1.0f + headBumpMix * 2.0f;
+    /* Makeup gain after the tape stage, before the Mix crossfade: drive hard
+     * with Input, then compensate. Losing this was a regression when Output
+     * became Mix. */
+    float outGain = pOutput * 2.0f;
     float flutterTrim = 1.0f - flutterDepth * flutFrequency * 0.1f;
     float biasCurve = bias * (0.12f + underBias * 0.18f + overBias * 0.018f);
     /* Tilt's own encode/decode balance. This is INTERNAL to the tape character
@@ -496,7 +503,7 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
             p *= x2;
             sat -= p * 0.000000100208f;
             float tape = x * tapeDry + sat * tapeWet;
-            fxBuf[i] = dryLvl * clean + wetLvl * tape * TOTAPE9_WET_TRIM;
+            fxBuf[i] = dryLvl * clean + wetLvl * tape * outGain * TOTAPE9_WET_TRIM;
         }
     }
     return;
@@ -589,7 +596,7 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
     float rawFlutSpd = params[TOTAPE9_FLUTSPD_SLOT];
     float rawBias = params[TOTAPE9_BIAS_SLOT];
     float rawHeadBmp = params[TOTAPE9_HEADBMP_SLOT];
-    float rawHeadFrq = params[TOTAPE9_HEADFRQ_SLOT];
+    float rawHeadFrq = params[TOTAPE9_OUTPUT_SLOT];   /* dead block: slot reused */
     float rawOutput = params[TOTAPE9_MIX_SLOT];
 
     /* Bypass = clean dry passthrough, same off-gate as every other effect.
@@ -606,7 +613,7 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
     float pFlutSpd = TOTAPE9_PARAM_NORM(rawFlutSpd, TOTAPE9_FLUTSPD_DEFAULT_NORM);
     float pBias = TOTAPE9_PARAM_NORM(rawBias, TOTAPE9_BIAS_DEFAULT_NORM);
     float pHeadBmp = TOTAPE9_PARAM_NORM(rawHeadBmp, TOTAPE9_HEADBMP_DEFAULT_NORM);
-    float pHeadFrq = TOTAPE9_PARAM_NORM(rawHeadFrq, TOTAPE9_HEADFRQ_DEFAULT_NORM);
+    float pHeadFrq = TOTAPE9_PARAM_NORM(rawHeadFrq, TOTAPE9_OUTPUT_DEFAULT_NORM);
     float pOutput = TOTAPE9_PARAM_NORM(rawOutput, TOTAPE9_MIX_DEFAULT_NORM);
 
     if (!TOTAPE9_PARAM_MISSING(rawInput)) st->cachedInput = pInput;

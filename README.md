@@ -99,7 +99,7 @@ Full knob layouts, caveats and sound demos are in
 | **Hydra** | **tempo-locked** double-time and half-time ghost layers on one delay ring; built for drums |
 | **Spiral** | **tempo-locked** delay whose repeats climb or sink in pitch, compounding every repeat |
 | **Galactic** | lush Airwindows reverb, wet path boosted for pedal levels |
-| **Oxide** | Airwindows ToTape9 saturation — drive, tilt, bias, flutter, head bump |
+| **Oxide** | Airwindows ToTape9 saturation — drive, tilt, bias, flutter, head bump, makeup gain |
 | **Spool** | tempo-locked tape echo with flutter, wow, head wear, drive and a spring tail |
 
 > Every effect ends with a **Mix** knob (dry/wet, default 50), so levels and

@@ -368,7 +368,7 @@
      "default": 50
     },
     {
-     "name": "HeadFrq",
+     "name": "Output",
      "max": 100,
      "default": 50
     },

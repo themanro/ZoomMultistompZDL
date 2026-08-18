@@ -98,10 +98,10 @@
       "audio_default": 0.5,
       "source_default": 0.5,
       "source_formula": "headBumpDrive = G * 0.1; headBumpMix = G * 0.5",
-      "comment": "Head bump. In this reduced core it is a BROADBAND drive+level lift, not a low-frequency resonance -- there is no filter behind it. Reads as 'more bass' mostly because it is lifting level into saturation."
+      "comment": "Head bump: a broadband drive + level lift, not a low-frequency resonance -- there is no filter behind it. Now covers the full lift range that HeadBmp and HeadFrq used to split between them."
     },
     {
-      "name": "HeadFrq",
+      "name": "Output",
       "type": "knob",
       "max": 100,
       "default": 50,
@@ -112,7 +112,7 @@
       "audio_default": 0.5,
       "source_default": 0.5,
       "source_formula": "((H * H) * 175.0) + 25.0",
-      "comment": "Nominally the head-bump frequency (25..200 Hz) but in this reduced core it only scales the lift AMOUNT inversely -- it does not move a filter, because there is no filter. Fidelity gap vs ToTape9."
+      "comment": "Makeup gain after the tape stage and before Mix, 0..2x, unity at 50. Replaces HeadFrq, which controlled no frequency -- it only scaled the same head-bump lift HeadBmp already sets, so the two knobs were adjusting one thing. HeadBmp now spans that whole range on its own."
     },
     {
       "name": "Mix",
