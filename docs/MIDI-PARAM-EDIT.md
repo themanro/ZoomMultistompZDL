@@ -135,7 +135,21 @@ Run on slot 4, 2026-08-14:
 | Apply, i.e. the same write WITH the bounce | **1 blip = `ctx[1]`, the params table** |
 
 So a plain `0x28` to a slot-4 effect changes nothing the running DSP can see --
-not `params[]`, and not any other watched word. That much is solid.
+not the knob params, and not any other watched word.
+
+**Narrowed by EdgeWatch, 2026-08-18.** The single blip that Apply produced was
+attributed here to re-instantiation. It was not: Apply's bypass bounce flips
+`params[0]`, and THAT is what changed `ctx[1]`. EdgeWatch confirms a running
+effect sees `params[0]` change from a plain patch write, on every slot. So the
+rule is narrower and more useful than "a patch write is invisible":
+
+> A patch write DOES update `params[0]` (bypass). It does NOT refresh the knob
+> params.
+
+Which explains the whole shape of this file: bypass toggling always worked, knob
+edits on slots 4-6 never did, and ToneLib's forced reload worked because a reload
+re-reads everything. It is also what makes a footswitch-triggered effect possible
+at all -- see `src/custom/stasis/`.
 
 **The conclusion originally drawn from it was WRONG.** This section used to end
 "the bypass bounce is the mechanism, not a workaround, and no effect can avoid

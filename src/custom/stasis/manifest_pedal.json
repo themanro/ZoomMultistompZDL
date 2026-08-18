@@ -1,0 +1,44 @@
+{
+  "effect_name": "Stasis",
+  "comment": "Footswitch-triggered freeze. Stomp the slot ON and whatever you just played is held indefinitely while the dry keeps passing, so you play over your own sustained chord. Only possible because EdgeWatch proved on hardware that the effect keeps running while bypassed, sees params[0] change from the footswitch, and still receives input audio while bypassed -- so the ring is already full at the moment you stomp and the capture is instantaneous. Sustain is granular rather than looped, because a loop of any length betrays itself as a period.",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category, matching the rest of the release pack.",
+  "fxid": 440,
+  "fxid_comment": "0x1B8. Free: unused by stock effects, not a retired custom alias, and clear of the fxid collisions audited on 2026-08-18.",
+  "fxid_version": "1.00",
+  "flags_byte": 1,
+  "audio_func_name": "Fx_DLY_Stasis",
+  "audio_nop": false,
+  "params": [
+    {
+      "name": "Length",
+      "max": 100,
+      "default": 35,
+      "comment": "How much of the past is captured, ~60 ms .. ~1.4 s. Short is one grain of a chord; long is a whole phrase."
+    },
+    {
+      "name": "Blur",
+      "max": 100,
+      "default": 50,
+      "comment": "Grain size, 1024..16384 samples. Small grains smear into texture; large ones keep the chord recognisable."
+    },
+    {
+      "name": "Decay",
+      "max": 100,
+      "default": 100,
+      "comment": "How the hold fades. Fully up is genuinely infinite."
+    },
+    {
+      "name": "Tone",
+      "max": 100,
+      "default": 55,
+      "comment": "Low-pass on the held layer only; the dry stays open."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 50,
+      "comment": "Dry/wet crossfade."
+    }
+  ]
+}

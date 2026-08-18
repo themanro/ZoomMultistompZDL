@@ -4,8 +4,8 @@
   "audio_func_name": "Fx_DLY_Reel",
   "gid": 8,
   "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_. Grouped under DLY (fewest stock effects = easy to find).",
-  "fxid": 459,
-  "fxid_comment": "0x01CB. Verify uniqueness before flashing.",
+  "fxid": 443,
+  "fxid_comment": "0x1BB. Reassigned from 459, which collided with a SHIPPED effect -- flashing this alongside it would have had two entries claiming one id.",
   "fxid_version": "1.00",
   "flags_byte": 1,
   "params": [
