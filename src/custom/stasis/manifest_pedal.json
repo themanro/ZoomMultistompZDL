@@ -14,13 +14,13 @@
       "name": "Length",
       "max": 100,
       "default": 35,
-      "comment": "How much of the past is captured, ~60 ms .. ~1.4 s. Short is one grain of a chord; long is a whole phrase."
+      "comment": "How much of the past is captured AND the loop length, ~60 ms .. ~1.4 s. The capture looks BACKWARDS from the moment you stomp -- Stasis records continuously while the slot is off and stops when it is on, so it holds what you just played rather than making you play into it."
     },
     {
       "name": "Blur",
       "max": 100,
       "default": 50,
-      "comment": "Grain size, 1024..16384 samples. Small grains smear into texture; large ones keep the chord recognisable."
+      "comment": "Crossfade length at the loop seam, 5.8..93 ms. Short is a tighter, more defined hold; long smears the join away. Clamped so it always fits twice inside the loop. Was a grain size in v1, when playback used random grain offsets and chopped sustained notes."
     },
     {
       "name": "Decay",

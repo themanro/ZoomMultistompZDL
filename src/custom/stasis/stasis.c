@@ -21,18 +21,25 @@
  * Recording stops while frozen, which is what protects the captured region from
  * being overwritten by the playing you do on top of it.
  *
- * Sustain is granular, not looped. A loop of any length betrays itself as a
- * period; overlapping windowed grains taken from random offsets inside the
- * capture do not. Two voices, half a grain apart, so one is always fading in
- * while the other fades out and the seam never lands in silence.
+ * Sustain is a crossfade loop: the capture is read straight through, and a short
+ * crossfade at the wrap fades into the same point one loop earlier so the join
+ * is continuous rather than a click.
+ *
+ * The first version played overlapping grains from RANDOM offsets inside the
+ * capture, on the theory that a loop betrays itself as a period while scattered
+ * grains do not. That was the wrong trade. Consecutive grains were uncorrelated,
+ * so every grain boundary was a phase discontinuity, and a sustained note -- the
+ * material a freeze should hold most cleanly -- came out chopped. Audible
+ * periodicity is a far smaller sin than chop.
  *
  * 5 knobs. Length and Blur sit on knobs 1-2, the verbatim-stock LineSel edit
  * handlers -- the most reliable pair in the pack, and the two that shape the
  * sound most:
  *   Length (knob 1) how much of the past is captured, ~60 ms .. ~1.4 s. Short
  *                   is a single grain of a chord; long is a whole phrase.
- *   Blur   (knob 2) grain size, 1024..16384 samples. Small grains smear into
- *                   texture, large grains keep the chord recognisable.
+ *   Blur   (knob 2) crossfade length at the loop seam, 5.8..93 ms. Short is a
+ *                   tighter, more defined hold; long smears the join away
+ *                   entirely. Clamped so it always fits twice inside the loop.
  *   Decay  (knob 3) how the hold fades. Fully up is genuinely infinite.
  *   Tone   (knob 4) low-pass on the held layer only; the dry stays open.
  *   Mix    (knob 5) LEVEL of the held layer. Not a dry/wet crossfade -- the one
@@ -73,16 +80,14 @@ STASIS_CODE_SECTION(STASIS_AUDIO_FUNC)
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
 #define SS_MAGIC   0x53545341u   /* 'STSA' */
-#define SS_VERSION 1u
+#define SS_VERSION 2u   /* playback rewritten: crossfade loop, not random grains */
 
 #define SS_BUF      65536u       /* 256 KB, ~1.49 s -- the capture ceiling */
 #define SS_MASK     (SS_BUF - 1u)
 #define SS_CAP_MIN  2646         /* ~60 ms */
 #define SS_CAP_SPAN 60000        /* max capture 62646, inside the ring */
-#define SS_VOICES   2
 #define SS_DENORM   1.0e-18f
-#define SS_WET_TRIM 0.62f        /* two overlapping windowed voices sum above
-                                  * unity; by-ear match against the pack */
+#define SS_WET_TRIM 0.9f
 
 typedef struct StasisState {
     uint32_t magic;
@@ -92,11 +97,9 @@ typedef struct StasisState {
     uint32_t writePos;
     uint32_t prevOn;
     uint32_t frozen;
-    uint32_t rng;
     float    capBase;           /* absolute ring position the capture starts at */
     int32_t  capLen;
-    float    gpos[SS_VOICES];
-    int32_t  gph[SS_VOICES];
+    float    pos;               /* single read head; the seam is crossfaded */
     float    lp;
     float    level;
 } StasisState;
@@ -112,15 +115,6 @@ static inline float ss_flush(float x)
 {
     if (x < SS_DENORM && x > -SS_DENORM) return 0.0f;
     return x;
-}
-
-/* xorshift; returns 0..1. No library call, no divide (the scale is a literal). */
-static inline float ss_rand(uint32_t *s)
-{
-    uint32_t x = *s;
-    x ^= x << 13; x ^= x >> 17; x ^= x << 5;
-    *s = x;
-    return (float)(int32_t)(x & 0x00FFFFFFu) * 5.9604645e-8f;
 }
 
 static inline float ss_read(const float *buf, float pos)
@@ -164,11 +158,9 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
         st->writePos = 0u;
         st->prevOn = (params[0] >= 0.5f) ? 1u : 0u;   /* don't fire on load */
         st->frozen = 0u;
-        st->rng = 0x9E3779B9u;
         st->capBase = 0.0f;
         st->capLen = SS_CAP_MIN;
-        int v;
-        for (v = 0; v < SS_VOICES; v++) { st->gpos[v] = 0.0f; st->gph[v] = 0; }
+        st->pos = 0.0f;
         st->lp = 0.0f;
         st->level = 0.0f;
         st->clearPos = 0u;
@@ -190,14 +182,21 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
     float tn  = zoom_param_norm01(params[STASIS_TONE_SLOT],   STASIS_TONE_DEFAULT_NORM);
     float mix = zoom_param_norm01(params[STASIS_MIX_SLOT],    STASIS_MIX_DEFAULT_NORM);
 
-    /* Grain length ladder. Powers of two so the window reciprocal is a literal;
-     * if/else, never switch. */
-    int32_t G; float invG;
-    if      (bl < 0.20f) { G = 1024;  invG = 9.765625e-4f; }
-    else if (bl < 0.40f) { G = 2048;  invG = 4.8828125e-4f; }
-    else if (bl < 0.60f) { G = 4096;  invG = 2.44140625e-4f; }
-    else if (bl < 0.80f) { G = 8192;  invG = 1.220703125e-4f; }
-    else                 { G = 16384; invG = 6.103515625e-5f; }
+    /* Blur is the CROSSFADE length at the loop seam, not a grain size.
+     *
+     * v1 played overlapping grains that each jumped to a RANDOM offset inside
+     * the capture. That is fine for smearing noise and wrong for everything
+     * else: consecutive grains were uncorrelated, so every grain boundary was a
+     * phase discontinuity, and a sustained note -- the material that should hold
+     * most cleanly -- came out chopped. Playback is now a plain loop read with a
+     * short crossfade hiding the wrap, which is what a freeze actually wants.
+     * Powers of two so each reciprocal is a literal; if/else, never switch. */
+    int32_t F; float invF;
+    if      (bl < 0.20f) { F = 256;  invF = 3.90625e-3f; }
+    else if (bl < 0.40f) { F = 512;  invF = 1.953125e-3f; }
+    else if (bl < 0.60f) { F = 1024; invF = 9.765625e-4f; }
+    else if (bl < 0.80f) { F = 2048; invF = 4.8828125e-4f; }
+    else                 { F = 4096; invF = 2.44140625e-4f; }
 
     /* Decay: 1.0 is genuinely infinite. Below that, a per-sample multiplier
      * shaped so the knob's top half stays usefully long. */
@@ -227,26 +226,26 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
         if (cap < SS_CAP_MIN) cap = SS_CAP_MIN;
         if (cap > (int32_t)(SS_BUF - 1024u)) cap = (int32_t)(SS_BUF - 1024u);
         st->capLen = cap;
-        st->capBase = (float)((int32_t)st->writePos - cap);
+        {   /* keep the base positive so the seam read never goes negative */
+            float cb = (float)((int32_t)st->writePos - cap);
+            if (cb < 0.0f) cb += (float)SS_BUF;
+            st->capBase = cb;
+        }
         st->frozen = 1u;
         st->level = 1.0f;
-        int v;
-        for (v = 0; v < SS_VOICES; v++) {
-            st->gph[v] = (v * G) >> 1;               /* half a grain apart */
-            st->gpos[v] = st->capBase;
-        }
+        st->pos = st->capBase;
         st->lp = 0.0f;
     } else if (!nowOn && st->prevOn) {
         st->frozen = 0u;
     }
     st->prevOn = nowOn;
 
-    int32_t maxOff = st->capLen - G;
-    if (maxOff < 0) maxOff = 0;
+    /* The crossfade has to fit twice inside the loop or the seam never resolves. */
+    int32_t L = st->capLen;
+    while (F * 2 > L && F > 64) { F >>= 1; invF *= 2.0f; }
 
     uint32_t wp = st->writePos;
     uint32_t frozen = st->frozen;
-    uint32_t rng = st->rng;
     float lp = st->lp, level = st->level;
 
     int i;
@@ -262,28 +261,24 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
 
         float wet = 0.0f;
         if (frozen) {
-            int v;
-            for (v = 0; v < SS_VOICES; v++) {
-                int32_t ph = st->gph[v];
-                /* triangular window, smoothstepped -- no cosine, no pow */
-                float e;
-                if (ph < (G >> 1)) e = (float)ph * (2.0f * invG);
-                else               e = (float)(G - ph) * (2.0f * invG);
-                if (e < 0.0f) e = 0.0f;
-                else if (e > 1.0f) e = 1.0f;
-                e = e * e * (3.0f - 2.0f * e);
-
-                wet += ss_read(buf, st->gpos[v]) * e;
-
-                st->gpos[v] += 1.0f;
-                ph++;
-                if (ph >= G) {
-                    ph = 0;
-                    /* new offset inside the capture: multiply, never modulo */
-                    st->gpos[v] = st->capBase + (float)maxOff * ss_rand(&rng);
-                }
-                st->gph[v] = ph;
+            float pos = st->pos;
+            float endp = st->capBase + (float)L;
+            float dist = endp - pos;
+            wet = ss_read(buf, pos);
+            if (dist < (float)F) {
+                /* approaching the seam: fade into the same point one loop back,
+                 * which is exactly where the head is about to jump to, so the
+                 * join is continuous instead of a click */
+                float t = ((float)F - dist) * invF;
+                if (t < 0.0f) t = 0.0f; else if (t > 1.0f) t = 1.0f;
+                t = t * t * (3.0f - 2.0f * t);
+                float q = pos - (float)L;
+                if (q < 0.0f) q += (float)SS_BUF;
+                wet = wet * (1.0f - t) + ss_read(buf, q) * t;
             }
+            pos += 1.0f;
+            if (pos >= endp) pos -= (float)L;
+            st->pos = pos;
             wet *= SS_WET_TRIM;
 
             lp += lpCoef * (wet - lp);
@@ -302,7 +297,6 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
     }
 
     st->writePos = wp;
-    st->rng = rng;
     st->lp = ss_flush(lp);
     st->level = ss_flush(level);
 }
