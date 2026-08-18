@@ -40,15 +40,15 @@ browser can edit patches, but it cannot install effects.
 
 ## Custom effect pack
 
-This fork ships a curated **library of 18 effects** — all grouped under the
-Delay category, each with a custom on-device cover. Fifteen originals plus three
+This fork ships a curated **library of 19 effects** — all grouped under the
+Delay category, each with a custom on-device cover. Sixteen originals plus three
 Airwindows-derived ports (Galactic reverb, Oxide tape, Spool tape echo).
 Full knob layouts, caveats and sound demos are in
 [CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md).
 
 <table>
 <tr>
-<td align="center"><img src="graphics/microloom.png" width="220" alt="Microlm"></td>
+<td align="center"><img src="graphics/microlm.png" width="220" alt="Microlm"></td>
 <td align="center"><img src="graphics/flower.png" width="220" alt="Flower"></td>
 <td align="center"><img src="graphics/shatter.png" width="220" alt="Shatter"></td>
 <td align="center"><img src="graphics/arrakis.png" width="220" alt="Arrakis"></td>
@@ -74,7 +74,7 @@ Full knob layouts, caveats and sound demos are in
 <tr>
 <td align="center"><img src="graphics/hydra.png" width="220" alt="Hydra"></td>
 <td align="center"><img src="graphics/spiral.png" width="220" alt="Spiral"></td>
-<td></td>
+<td align="center"><img src="graphics/stasis.png" width="220" alt="Stasis"></td>
 <td></td>
 </tr>
 </table>
@@ -98,6 +98,7 @@ Full knob layouts, caveats and sound demos are in
 | **Rooms** | DBA Rooms-inspired multi-mode reverb: ROOM / DIGIT / PEAK / GATE / WAVE / GONG |
 | **Hydra** | **tempo-locked** double-time and half-time ghost layers on one delay ring; built for drums |
 | **Spiral** | **tempo-locked** delay whose repeats climb or sink in pitch, compounding every repeat |
+| **Stasis** | footswitch-triggered freeze — stomp and the note you just played is held while you play over it |
 | **Galactic** | lush Airwindows reverb, wet path boosted for pedal levels |
 | **Oxide** | Airwindows ToTape9 saturation — drive, tilt, bias, flutter, head bump, makeup gain |
 | **Spool** | tempo-locked tape echo with flutter, wow, head wear, drive and a spring tail |
@@ -105,7 +106,7 @@ Full knob layouts, caveats and sound demos are in
 > Every effect ends with a **Mix** knob (dry/wet, default 50), so levels and
 > controls are consistent across the pack.
 >
-> Not all hardware-verified yet, and the pedal can't hold/run all 18 at once
+> Not all hardware-verified yet, and the pedal can't hold/run all 19 at once
 > (storage + DSP limits) — install a subset, back up first, flash one at a
 > time. All Mix knobs default to **50**, so an effect is audible as soon as it is selected.
 

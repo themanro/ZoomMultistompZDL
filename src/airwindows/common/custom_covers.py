@@ -331,6 +331,33 @@ def _em_spiral(c):                        # Spiral — echoes climbing a stairca
     _line(c, 42 + 5 * 9, tip, 42 + 5 * 9 + 3, tip + 4)
 
 
+def _em_stasis(c):                        # Stasis — a note seized mid-flight and held
+    # left: the incoming note, decaying the way it actually would
+    prev = None
+    for x in range(36, 61):
+        t = (x - 36) / 4.6
+        amp = 7.0 * math.exp(-(x - 36) / 42.0)   # still ringing when seized
+        y = int(CY - amp * math.sin(t))
+        if prev is not None:
+            _line(c, x - 1, prev, x, y)
+        prev = y
+    # the stomp: a dashed vertical marking the instant of capture
+    for y in range(CY - 9, CY + 10, 3):
+        _line(c, 63, y, 63, y + 1)
+    # right: that seized segment repeated at CONSTANT amplitude -- held, not
+    # decaying, and identical each time, which is what a crossfade loop is
+    seg = 9
+    for k in range(3):
+        x0 = 66 + k * seg
+        prev = None
+        for x in range(x0, x0 + seg + 1):
+            t = (x - x0) / 1.43
+            y = int(CY - 4.0 * math.sin(t))
+            if prev is not None:
+                _line(c, x - 1, prev, x, y)
+            prev = y
+
+
 EMBLEMS = {
     "Microlm": _em_shimmer, "Flower": _em_flower, "Shatter": _em_bars,
     "Arrakis": _em_dunes, "Corrupt": _em_square, "Klang": _em_rings,
@@ -339,7 +366,7 @@ EMBLEMS = {
     "Lush": _em_swirl, "Room": _em_room,
     "Galactic": _em_stars, "OTT": _em_arrows, "TapeHack": _em_tapehack,
     "Taffy": _em_taffy, "Dissolve": _em_dissolve, "Mangle": _em_mangle,
-    "Hydra": _em_hydra, "Spiral": _em_spiral,
+    "Hydra": _em_hydra, "Spiral": _em_spiral, "Stasis": _em_stasis,
 }
 
 

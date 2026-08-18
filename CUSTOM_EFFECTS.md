@@ -23,7 +23,7 @@ custom on-device cover, and all compile clean (`.fardata 0`, `0 relocations`).
 
 <table>
 <tr>
-<td align="center"><img src="graphics/microloom.png" width="220" alt="Microlm"></td>
+<td align="center"><img src="graphics/microlm.png" width="220" alt="Microlm"></td>
 <td align="center"><img src="graphics/flower.png" width="220" alt="Flower"></td>
 <td align="center"><img src="graphics/shatter.png" width="220" alt="Shatter"></td>
 <td align="center"><img src="graphics/arrakis.png" width="220" alt="Arrakis"></td>
@@ -85,14 +85,18 @@ richer `manifest.json` is the desktop-preview version and has more controls.
 | Rooms | `Rooms` | Mode, Time, Freq, Depth, Mix | original | DBA Rooms-inspired multi-mode reverb. Mode picks ROOM / DIGIT / PEAK / GATE / WAVE / GONG and Freq + Depth are re-purposed per mode. Time is the global decay, 0.65 s to 12 s, spaced so each 10 clicks is roughly 1.33x the last |
 | Hydra | `Hydra` | Div, Tempo, Fast, Slow, Tone, Mix | original | two extra playback heads on one delay ring: a 2x head (octave up, double-time) and a 0.5x head (octave down, half-time), both re-triggered every window. **Tempo-locked** — Div sets the window as a division of Tempo so the ghosts land on the beat. Div at 0 is Grain, a free-running 5.8 ms window, which is the granular octave-shifter mode instead. Built for drums |
 | Spiral | `Spiral` | Div, Tempo, Feedbk, Rise, Glide, Span, Tone, Mix | original | delay whose repeats climb or sink in pitch. The shift sits *inside* the feedback loop so it compounds: repeat 1 is one step away, repeat 2 two steps, an endless staircase fading out. **Tempo-locked** — Div and Tempo set the delay musically. Rise is the per-repeat staircase (bipolar, unity at centre); Glide and Span are a ramp that resets at the start of a phrase and climbs over 0.2–8 s, so repeats begin at pitch and drift away across bars |
+| Stasis | `Stasis` | Length, Blur, Decay, Tone, Mix | original | footswitch-triggered freeze. Stomp the slot ON and the last 60 ms .. 1.4 s is held indefinitely while the dry keeps passing, so you play over your own sustained chord. The capture looks BACKWARDS: it records continuously while the slot is OFF and stops when it is ON, so it holds what you just played. Sustain is a crossfade loop, and Mix is a HOLD LEVEL rather than a dry/wet crossfade -- the one exception in the pack, because a crossfade would duck the dry you are playing over |
 | Galactic | `Galactic` | Replace, Bright, Detune, Bigness, Mix | port | lush Airwindows reverb with the wet path boosted for pedal levels |
 | Oxide | `Oxide` | Input, Tilt, Shape, Flutter, FlutSpd, Bias, HeadBmp, Output, Mix | port | Airwindows ToTape9 saturation. Input is a 0–4x drive (unity at 50), Tilt is the Dolby-style encode/decode balance, Bias is an asymmetric even-harmonic drive whose character genuinely changes across the knob. Its old `Output` gain is now `Mix`, a real crossfade against the untouched input; Tilt's own encode/decode balance stays internal to the tape character. See the caveat below |
 | Spool | `Spool` | Tempo, Div, Feed, Flutter, Wow, Wear, Drive, Spring, Mix | port | tape echo with a tempo-locked delay (Tempo + Div) plus flutter, wow, head wear, drive and a spring tail |
 
 ### Level control
 
-Every effect ends with a **Mix** knob: a dry/wet crossfade, defaulting to 50 so
-the effect is audible as soon as you select it. That was not always true --
+Every effect ends with a **Mix** knob defaulting to 50, so it is audible as soon
+as you select it. In all but one it is a dry/wet crossfade; Stasis is the
+exception, where Mix is the level of the held layer and the dry always passes at
+unity -- a crossfade there would duck the signal you are playing over the hold,
+and cost 6 dB even with nothing frozen. That was not always true --
 Galactic called it DryWet, Howl and Scorch called it Level, Oxide called it
 Output, and GenLoss had no level control at all. Worse, the ones called Level or
 Output were not crossfades: Howl's only scaled a wet send to a 0.45 ceiling and
