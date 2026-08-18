@@ -11109,6 +11109,21 @@ function handleSysex(m){
     log("bad dump ("+m.length+"B, expected 146) — ignored","warn");   // reject misaligned
   }else if(m[1]===0x7e){
     log("identity: "+hex(m));
+    // Check the model rather than just printing it. Every byte offset in this
+    // editor's bit tables was reverse-engineered on an MS-70CDR (device 0x61);
+    // a sibling MS pedal can answer on the same port with a different patch
+    // layout, and rewriting it at MS-70CDR offsets is how you scramble slots.
+    // PE assumed 0x61 everywhere and never once looked at the reply.
+    if(m.length>=7 && m[5]===0x52 && m[6]!==DEVID){
+      const id="0x"+m[6].toString(16);
+      const fw=m.length>=14 ? String.fromCharCode(m[10],m[11],m[12],m[13]) : "?";
+      log(`pedal reports device ${id} (firmware ${fw}), not 0x61 — this editor's `
+         +`patch layout is reverse-engineered on the MS-70CDR. Reading is `
+         +`harmless; WRITING may corrupt patches on a different model.`,"warn");
+      banner(`This pedal reports device ${id}, not the MS-70CDR (0x61). `
+            +`Patch writes are unsafe on a model this editor has not been mapped `
+            +`against — read only, or check docs/MIDI-PARAM-EDIT.md.`);
+    }
   }
 }
 
