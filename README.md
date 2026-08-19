@@ -136,6 +136,13 @@ newer.
 Back up your current effect list before writing. Experimental builds can
 freeze a pedal until power-cycled.
 
+**Effects must be installed with Zoom Effect Manager first.** The patch editor
+only *references* effects by id — it cannot install them. Its dropdown is the
+full catalogue from every MS/G1/B1 model, not the subset on your pedal, so
+selecting something Effect Manager has never written leaves that slot blank. The
+editor warns when you pick an effect it has not seen in any of your patches, and
+tells you if the pedal drops one after a write.
+
 **If the effect browser says "No data to display, check filters":** step 3 is
 not optional -- choosing the folder only tells Effect Manager where to look, and
 the browser's `From Folder` source has to be ticked separately. Connect the

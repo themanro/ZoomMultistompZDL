@@ -11085,7 +11085,7 @@ function onMidi(ev){
 }
 function handleSysex(m){
   if(m[1]===0x52 && m[3]===DEVID && m[4]===0x28 && m.length===146){
-    rawPatch=m.slice(0,146);
+    rawPatch=m.slice(0,146); noteSeenIds(rawPatch);
     if(pendingDump){clearTimeout(pendingDump.t);const r=pendingDump.res;pendingDump=null;r(rawPatch);return;}
     // Only pair the encode base with the patch we actually DISPLAY. Setting it for
     // every dump would let a bank read leave the base pointing at patch #50 while
@@ -11183,6 +11183,18 @@ let lastEditedSlot=null;              // so Apply can leave the pedal on the eff
 // the pedal and re-applies ONLY these, so a model that has drifted (pedal-side knob
 // moves, live 0x31 edits, another slot's state) can never be pushed back over the
 // pedal's own values. Writing all six slots blind is what made Apply clobber things.
+// Effect ids this pedal has actually reported. PE's dropdown is the full 233-effect
+// catalogue built from stock_zdls/, and it never consults the pedal -- so it happily
+// offers effects that were never installed via Effect Manager. Writing one of those
+// leaves the slot blank, which reads as the editor breaking the patch. Ids seen in a
+// dump are definitely installed; that is an incomplete signal (an installed effect
+// you have never used in a patch will not appear) so it warns rather than blocks.
+const seenOnPedal=new Set();
+function noteSeenIds(raw){
+  if(!raw||raw.length!==146) return;
+  const p=decodePatch(raw);
+  for(let s=0;s<6;s++){ const id=p.fx[s][1]>>>0; if(id) seenOnPedal.add(id); }
+}
 const dirty=new Set();
 const markDirty=(s,k)=>dirty.add(s+","+k);
 function knobOffWarn(s){
@@ -11236,13 +11248,13 @@ async function readAll(){
   // comes from a small settle; render each slot so the list fills live.
   for(let i=0;i<50;i++){
     const d=await readOnce(i,45,900);
-    libraryRaw[i]=d; library[i]=d?decodePatch(d):null;
+    libraryRaw[i]=d; library[i]=d?decodePatch(d):null; noteSeenIds(d);
     renderLibrary();                          // progressive fill
     if(!d) miss.push(i);
   }
   for(const i of miss){                        // patient retry for no-shows
     const d=await readOnce(i,90,1400);
-    if(d){ libraryRaw[i]=d; library[i]=decodePatch(d); renderLibrary(); }
+    if(d){ libraryRaw[i]=d; library[i]=decodePatch(d); noteSeenIds(d); renderLibrary(); }
   }
   send([0xc0,cur]); await sleep(40);
   busy=false;
@@ -11772,6 +11784,16 @@ function render(){
       await sleep(60);
       materialize();
       log("wrote patch to buffer — effect set to "+(ne?ne.name:"empty"));
+      const nid=f[1]>>>0;
+      if(nid && !seenOnPedal.has(nid) && library.filter(Boolean).length>0){
+        log(`"${ne?ne.name:"?"}" has not appeared in any patch on this pedal. The list `
+           +`here is the full catalogue from every MS/G1/B1 model, not what is `
+           +`installed on YOUR unit — if Effect Manager has not written it, the slot `
+           +`will come back empty. Reload bank first if you are unsure.`,"warn");
+        banner(`"${ne?ne.name:"?"}" may not be installed on this pedal. `
+              +`Effects are installed with Zoom Effect Manager; this editor only `
+              +`references them.`);
+      }
     };
     div.appendChild(sel);
     if(eid){
