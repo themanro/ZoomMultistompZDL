@@ -176,6 +176,30 @@ More detailed install notes live in [docs/INSTALLING-ZDLS.md](docs/INSTALLING-ZD
 | Other ZDL-based Zoom MultiStomp pedals (MS-50G, MS-60B, G1on/G1Xon, B1on/B1Xon) | Should load compatible ZDLs, but unconfirmed — hardware reports welcome. |
 | Newer Zoom ZD2-based pedals | Not supported by these ZDL builds. |
 
+**The "+" models (MS-50G+, MS-60B+, MS-70CDR+) use ZD2, not ZDL**, so nothing
+here loads on them. Whether they could ever be targeted turns on one question:
+is the payload analysable, or is it signed/encrypted? The evidence so far is
+encouraging — `docs/STATE-ABI-PROGRESS.md` records a hand-decoded ZD2
+`Fx_SFX_LineSel`, which means somebody read ZD2 machine code and understood it.
+
+Two things anyone with a "+" pedal can check, neither of which risks the
+hardware:
+
+* `python3 build/inspect_zd2.py Effect.ZD2` — reports entropy and structure.
+  Uneven per-block entropy means plain code; flat and high everywhere means
+  encrypted or compressed. Validated against a known-plain ZDL, random bytes and
+  a gzip stream.
+* Open the patch editor and click Connect. It reads the identity reply, adopts
+  the device id so dumps are addressed correctly, and switches to READ-ONLY on
+  any model but the MS-70CDR — every byte offset here was mapped against that
+  one pedal, so writing elsewhere would scramble patches. If a "+" pedal answers
+  `Reload bank` with a patch dump, that alone is worth reporting.
+
+Worth being clear about why the MS-70CDR is hackable at all: Zoom themselves
+ship a tool that writes effect binaries to it. None of this is an exploit. The
+question for the "+" models is whether an official write path still exists, not
+whether the format can be understood.
+
 ## What We Learned (field notes)
 
 Hard-won findings from getting these effects stable on real hardware. The

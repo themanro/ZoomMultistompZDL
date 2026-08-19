@@ -10899,7 +10899,15 @@ const BYID={};
 for(const e of DB.custom.concat(DB.stock, DB.legacy||[], DB.probes||[])) BYID[e.id]=e;
 
 /* ---------- MIDI ------------------------------------------------------- */
-const DEVID=0x61;                       // MS-70CDR
+// Learned from the identity reply, not assumed. Defaults to the MS-70CDR, which
+// is the only model this editor's byte tables were mapped against.
+let DEVID=0x61;                         // MS-70CDR
+// Set when the pedal answers with a different device id. Everything here --
+// every byte offset, every bit field -- was reverse-engineered on an MS-70CDR,
+// so writing to another model would scramble it. Reads are harmless and are
+// exactly the data needed to find out whether a model is compatible at all, so
+// an unknown pedal becomes READ-ONLY rather than unusable.
+let READ_ONLY=false;
 let midiIn=null, midiOut=null, patch=null, rawPatch=null;
 // Pristine last dump AS THE PEDAL SENT IT. encodePatch() uses this as its base so the
 // 65 bytes the bit tables don't cover are preserved instead of being zeroed. Kept
@@ -10945,8 +10953,18 @@ let RENAME_CLEAR_COLLECTORS=true;   // diagnostic toggle for the name-garble bug
 // corrupt the WHOLE patch (garbled names, cracking DSP). Big SysEx gets extra
 // room to digest. Uses Web MIDI's timestamp arg so JS never blocks.
 let nextSend=0;
+// Commands that MODIFY the pedal. Blocked outright in read-only mode: a warning
+// is not enough when the consequence is a scrambled patch on hardware nobody has
+// mapped.
+const WRITE_CMDS=new Set([0x28,0x31,0x32,0x33]);
 function send(bytes){
   if(!midiOut) return;
+  if(READ_ONLY && bytes.length>4 && bytes[0]===0xf0 && bytes[1]===0x52 && WRITE_CMDS.has(bytes[4])){
+    log(`blocked a write (cmd 0x${bytes[4].toString(16)}) — this pedal reports device `
+       +`0x${DEVID.toString(16)}, and the patch layout here is mapped only for the `
+       +`MS-70CDR (0x61). Reading is safe and useful; writing is not.`,"warn");
+    return;
+  }
   const now=performance.now();
   const t=Math.max(now, nextSend);
   try{ midiOut.send(bytes, t); }catch(e){ midiOut.send(bytes); }
@@ -11117,12 +11135,19 @@ function handleSysex(m){
     if(m.length>=7 && m[5]===0x52 && m[6]!==DEVID){
       const id="0x"+m[6].toString(16);
       const fw=m.length>=14 ? String.fromCharCode(m[10],m[11],m[12],m[13]) : "?";
-      log(`pedal reports device ${id} (firmware ${fw}), not 0x61 — this editor's `
-         +`patch layout is reverse-engineered on the MS-70CDR. Reading is `
-         +`harmless; WRITING may corrupt patches on a different model.`,"warn");
-      banner(`This pedal reports device ${id}, not the MS-70CDR (0x61). `
-            +`Patch writes are unsafe on a model this editor has not been mapped `
-            +`against — read only, or check docs/MIDI-PARAM-EDIT.md.`);
+      // Adopt the id so reads are addressed correctly -- otherwise the pedal
+      // ignores every request and the editor looks simply broken on any model
+      // but one. This is what makes it useful for finding out whether a NEW
+      // pedal speaks the same protocol at all.
+      DEVID=m[6];
+      READ_ONLY=true;
+      log(`pedal reports device ${id} (firmware ${fw}), not 0x61. Adopting that id `
+         +`for READS so dumps work, and blocking all writes: every byte offset in `
+         +`this editor was mapped on an MS-70CDR. Reload bank / Re-read patch are `
+         +`safe — if you get a patch dump, that alone is worth reporting.`,"warn");
+      banner(`Device ${id} — read-only. Writes are blocked because this editor's `
+            +`patch layout is only mapped for the MS-70CDR. Reads work; a dump `
+            +`from an unmapped model is genuinely useful data.`);
     }
   }
 }
