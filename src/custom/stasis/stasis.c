@@ -50,11 +50,12 @@
  *                   crossfade it ducked the dry by (1 - Mix) even with nothing
  *                   frozen, so adding Stasis to a patch cost 6 dB at the default.
  *
- * Which knobs work AFTER the freeze: Blur, Decay, Tone and Mix are read every
- * block, so they shape a hold that is already running. Length is latched at the
- * moment of capture and cannot change it afterwards. Note that on slots 4-6 the
- * editor reaches knobs by bypass-bouncing the slot, which Stasis sees as a fresh
- * trigger -- so live knob control of a running hold wants slots 1-3.
+ * Which knobs work AFTER the freeze: all five. Blur, Decay, Tone and Mix are read
+ * every block, and Length too since the capture became fixed-size -- winding it
+ * down closes in on the last instant before the stomp while the hold runs. Note
+ * that on slots 4-6 the editor reaches knobs by bypass-bouncing the slot, which
+ * Stasis sees as a fresh trigger, so live knob control of a running hold wants
+ * slots 1-3.
  *
  * Safe-DSP: no switch (jump tables are unreachable in a ZDL and hard-freeze the
  * DSP), no CALLs or helper calls, no runtime divide (grain lengths are powers of
