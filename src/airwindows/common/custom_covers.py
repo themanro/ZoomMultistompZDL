@@ -358,6 +358,23 @@ def _em_stasis(c):                        # Stasis — a note seized mid-flight 
             prev = y
 
 
+def _em_rooms(c):                         # Rooms — a strike and its reverb tail
+    # Reflections that get shorter AND closer together. The densifying is the
+    # point: evenly spaced decaying repeats read as a DELAY, and it is the
+    # build-up of density that says reverb instead. A first attempt drew a
+    # perspective room with six evenly spaced bars and read as a fence.
+    base = CY + 9
+    c.hline(38, 92, base)                  # floor, to sit the tail on
+    x, h, gap = 41.0, 17.0, 10.5
+    while x < 91 and h > 1.2:
+        c.vline(int(x), int(base - h), base)
+        x += gap
+        h *= 0.76
+        gap *= 0.80
+        if gap < 2.0:
+            gap = 2.0
+
+
 EMBLEMS = {
     "Microlm": _em_shimmer, "Flower": _em_flower, "Shatter": _em_bars,
     "Arrakis": _em_dunes, "Corrupt": _em_square, "Klang": _em_rings,
@@ -367,6 +384,7 @@ EMBLEMS = {
     "Galactic": _em_stars, "OTT": _em_arrows, "TapeHack": _em_tapehack,
     "Taffy": _em_taffy, "Dissolve": _em_dissolve, "Mangle": _em_mangle,
     "Hydra": _em_hydra, "Spiral": _em_spiral, "Stasis": _em_stasis,
+    "Rooms": _em_rooms,
 }
 
 
