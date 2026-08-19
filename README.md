@@ -182,6 +182,7 @@ is the payload analysable, or is it signed/encrypted? The evidence so far is
 encouraging — `docs/STATE-ABI-PROGRESS.md` records a hand-decoded ZD2
 `Fx_SFX_LineSel`, which means somebody read ZD2 machine code and understood it.
 
+**Step-by-step guide: [docs/PROBING-A-NEW-PEDAL.md](docs/PROBING-A-NEW-PEDAL.md).**
 Two things anyone with a "+" pedal can check, neither of which risks the
 hardware:
 
@@ -372,6 +373,7 @@ them beside the repo, treat them as read-only references.
 | [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | Hardware-test asks and contribution notes. |
 | [build/ABI.md](build/ABI.md) | Low-level linker/runtime ABI reference for developers. |
 | [docs/TI-PDF-NOTES.md](docs/TI-PDF-NOTES.md) + TI PDFs | TI C6000 toolchain references. |
+| [docs/PROBING-A-NEW-PEDAL.md](docs/PROBING-A-NEW-PEDAL.md) | How to find out whether a pedal this project has never seen — the `+` models especially — is analysable, talks MIDI, and hands over patches. |
 
 ## Contributing
 
