@@ -46,7 +46,7 @@
   /* P4 -- television white blend. Values are AmberConsole's measured emitter
      stops, not an approximation: screen/raised/well plus emit-100/90/70/50 and
      on-fill, mapped to this editor's tokens the same way it maps them. */
-  html[data-theme="p4"]{
+  html[data-theme="p4"]{ --grain:0.055;
     --lcd:#08090b; --lcd-lit:#121516; --lcd-deep:#040405;
     --ink:#7f9db0; --ink-bright:#9dc1d8; --ink-soft:#6c8696; --ink-faint:#536874;
     --paper:#121618; --good:#9dc1d8; --err:#ff9d8c;
@@ -56,7 +56,7 @@
     --halo:176,211,234;
   }
   /* P3 -- the classic amber terminal AmberConsole is named for. */
-  html[data-theme="p3"]{
+  html[data-theme="p3"]{ --grain:0.055;
     --lcd:#0d0700; --lcd-lit:#170e02; --lcd-deep:#060200;
     --ink:#ffae1e; --ink-bright:#ffd052; --ink-soft:#cd8817; --ink-faint:#8d5b10;
     --paper:#1a0e00; --good:#ffd052; --err:#ff6b3d;
@@ -206,6 +206,44 @@
         rgba(0,0,0,0.00) 1px, rgba(0,0,0,0.00) 3px),
       radial-gradient(ellipse at center,
         rgba(0,0,0,0) 55%, rgba(0,0,0,0.45) 100%);
+  }
+  /* Film grain, ported from holo.ui8.dev's look.
+     That site runs three.js through pmndrs/postprocessing, and its grain stage
+     is two lines of GLSL:
+         vec3 noise = vec3(rand(uv * (1.0 + time)));
+         outputColor = vec4(noise, inputColor.a);      // BlendFunction.SCREEN
+     i.e. a white-noise field scrolled over time and SCREEN-blended. None of the
+     rest of that stack belongs here -- bloom, depth of field and chromatic
+     aberration over a working patch editor would cost legibility and a WebGL
+     context for decoration -- but the grain itself needs neither. A tiled noise
+     texture with mix-blend-mode:screen is the same operation, at no runtime cost.
+     96x96 at four grey levels: big enough not to read as a repeat, and four
+     levels is past what the eye resolves at this opacity. */
+  html[data-theme="p4"] body::before, html[data-theme="p3"] body::before{
+    content:""; position:fixed; inset:-50%; pointer-events:none; z-index:9997;
+    background-image:url("data:image/png;base64,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");
+    background-repeat:repeat;
+    mix-blend-mode:screen;
+    opacity:var(--grain, 0.055);
+    animation:crt-grain 0.7s steps(6) infinite;
+  }
+  /* Stepped, not smooth: real film grain resamples per frame rather than
+     sliding, and steps() is cheaper than compositing a moving layer. inset:-50%
+     gives the translate room to move without exposing an edge. */
+  @keyframes crt-grain{
+    0%  {transform:translate(0,0);}
+    20% {transform:translate(-6%,4%);}
+    40% {transform:translate(5%,-5%);}
+    60% {transform:translate(-4%,-3%);}
+    80% {transform:translate(6%,5%);}
+    100%{transform:translate(0,0);}
+  }
+  /* THIS is the thing that gets gated -- the animation is motion, the texture is
+     not. The comment below explains why the static layers deliberately are not. */
+  @media (prefers-reduced-motion: reduce){
+    html[data-theme="p4"] body::before, html[data-theme="p3"] body::before{
+      animation:none;
+    }
   }
   /* No prefers-reduced-motion suppression here on purpose: the scanlines and
      vignette are STATIC, and that query is about motion. Killing them made the
