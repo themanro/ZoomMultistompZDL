@@ -42,6 +42,13 @@ It does NOT and cannot cover the following, which are owned by others:
   * Airwindows-derived DSP (src/airwindows/): MIT, Copyright (c) Chris Johnson
     / Airwindows. Its own terms apply.
 
+  * Dustbox (src/custom/dustbox/): MIT, Copyright (c) 2026 Marcelo Fuentes,
+    from https://github.com/marcfuentes/dustbox-zdl . Folded into this pack
+    under its own licence, which is kept alongside the source at
+    src/custom/dustbox/LICENSE. The DSP is unmodified; only the Power knob's
+    default was raised from 1 to 50 so it is audible on select, matching this
+    pack's convention.
+
   * Zoom firmware, stock effect binaries under stock_zdls/, decoded stock cover
     images, and the TI C6000 toolchain: owned by Zoom Corporation and Texas
     Instruments respectively. Not licensed here. They are referenced solely for

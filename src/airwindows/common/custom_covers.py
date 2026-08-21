@@ -375,6 +375,33 @@ def _em_rooms(c):                         # Rooms — a strike and its reverb ta
             gap = 2.0
 
 
+def _em_dustbox(c):                       # Dustbox — fuzz over a divided sub-octave
+    # A square wave drawn as a CONTINUOUS path: horizontal run, vertical
+    # transition, horizontal run at the other level. Drawing tops and verticals
+    # without the connecting bottoms leaves detached blocks, which is what the
+    # first two attempts looked like.
+    def square(x0, x1, ycen, half, amp):
+        y = ycen - amp
+        x = x0
+        while x < x1:
+            xe = min(x + half, x1)
+            c.hline(x, xe, y)
+            if xe >= x1:
+                break
+            ny = ycen + amp if y < ycen else ycen - amp
+            c.vline(xe, min(y, ny), max(y, ny))
+            y = ny
+            x = xe
+    # top: the Grunge branch, hard-clipped.
+    # Kept clear of the title banner, which is solid down to row 15 -- the first
+    # attempt centred this at CY-6 with amp 4, putting its high level at row 13,
+    # underneath the banner, so only the verticals and the low runs showed.
+    square(38, 90, CY - 3, 6, 3)
+    # bottom: the flip-flop octave at a QUARTER of the rate. Two octaves down is
+    # the whole point of the circuit, so the emblem shows the ratio.
+    square(38, 90, CY + 8, 24, 3)   # rows 28..34, clear of the knob labels
+
+
 EMBLEMS = {
     "Microlm": _em_shimmer, "Flower": _em_flower, "Shatter": _em_bars,
     "Arrakis": _em_dunes, "Corrupt": _em_square, "Klang": _em_rings,
@@ -384,7 +411,7 @@ EMBLEMS = {
     "Galactic": _em_stars, "OTT": _em_arrows, "TapeHack": _em_tapehack,
     "Taffy": _em_taffy, "Dissolve": _em_dissolve, "Mangle": _em_mangle,
     "Hydra": _em_hydra, "Spiral": _em_spiral, "Stasis": _em_stasis,
-    "Rooms": _em_rooms,
+    "Rooms": _em_rooms, "Dustbox": _em_dustbox,
 }
 
 

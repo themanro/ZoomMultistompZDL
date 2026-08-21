@@ -1,7 +1,7 @@
 {
   "effect_name": "HELLO",
   "gid": 2,
-  "fxid": 463,
+  "fxid": 464,
   "params": [
     {
       "name": "Knob 1",
@@ -21,5 +21,5 @@
   ],
   "fxid_version": "1.01",
   "flags_byte": 1,
-  "fxid_comment": "0x1CF. Reassigned from 400 to clear the last fxid collision (with GAIN). Every fxid in the tree is now unique."
+  "fxid_comment": "0x1D0. Moved off 463 to make room for Dustbox, a third-party MIT effect folded into this pack that already used it. HELLO is an unshipped test."
 }

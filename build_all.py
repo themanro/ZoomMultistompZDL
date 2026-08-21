@@ -43,6 +43,7 @@ RELEASE_PLUGINS = [
     ("mangle",      CUSTOM_DIR / "mangle"      / "build.py"),
     ("rooms",       CUSTOM_DIR / "rooms"       / "build.py"),
     ("hydra",       CUSTOM_DIR / "hydra"       / "build.py"),
+    ("dustbox",    CUSTOM_DIR / "dustbox"    / "build.py"),
     ("stasis",     CUSTOM_DIR / "stasis"     / "build.py"),
     ("spiral",      CUSTOM_DIR / "spiral"      / "build.py"),
 ]

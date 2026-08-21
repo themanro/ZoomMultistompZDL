@@ -40,9 +40,10 @@ browser can edit patches, but it cannot install effects.
 
 ## Custom effect pack
 
-This fork ships a curated **library of 19 effects** — all grouped under the
-Delay category, each with a custom on-device cover. Sixteen originals plus three
-Airwindows-derived ports (Galactic reverb, Oxide tape, Spool tape echo).
+This fork ships a curated **library of 20 effects** — all grouped under the
+Delay category, each with a custom on-device cover. Sixteen originals, three
+Airwindows-derived ports (Galactic reverb, Oxide tape, Spool tape echo), and one
+contributed effect (Dustbox).
 Full knob layouts, caveats and sound demos are in
 [CUSTOM_EFFECTS.md](CUSTOM_EFFECTS.md).
 
@@ -99,6 +100,7 @@ Full knob layouts, caveats and sound demos are in
 | **Hydra** | **tempo-locked** double-time and half-time ghost layers on one delay ring; built for drums |
 | **Spiral** | **tempo-locked** delay whose repeats climb or sink in pitch, compounding every repeat |
 | **Stasis** | footswitch-triggered freeze — stomp and the note you just played is held while you play over it |
+| **Dustbox** | DOD FX33 Buzz Box-style fuzz with a flip-flop sub-octave — contributed, MIT |
 | **Galactic** | lush Airwindows reverb, wet path boosted for pedal levels |
 | **Oxide** | Airwindows ToTape9 saturation — drive, tilt, bias, flutter, head bump, makeup gain |
 | **Spool** | tempo-locked tape echo with flutter, wow, head wear, drive and a spring tail |
@@ -106,7 +108,7 @@ Full knob layouts, caveats and sound demos are in
 > Every effect ends with a **Mix** knob (dry/wet, default 50), so levels and
 > controls are consistent across the pack.
 >
-> Not all hardware-verified yet, and the pedal can't hold/run all 19 at once
+> Not all hardware-verified yet, and the pedal can't hold/run all 20 at once
 > (storage + DSP limits) — install a subset, back up first, flash one at a
 > time. All Mix knobs default to **50**, so an effect is audible as soon as it is selected.
 
