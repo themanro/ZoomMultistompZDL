@@ -6,16 +6,20 @@ patch layout, every bit offset in the editor's tables — all of it is specific 
 that machine.
 
 The `+` models (**MS-50G+, MS-60B+, MS-70CDR+**) use a different container,
-`ZD2`, so nothing here loads on them. People ask fairly often whether they could
-ever be targeted, and the honest answer is that nobody in this project has held
-one. What follows is how to find out, in about an evening, without risking your
-pedal.
+`ZD2`, so nothing here loads on them. What follows is how to find out whether one
+could ever be targeted, in about an evening and without risking your pedal.
+
+**One report is in.** An MS-60B+ owner ran all three checks in August 2026 and the
+results are at the bottom of this page. Short version: the ZD2 container is the
+same `ZDLF` family as ZDL and wraps a plain ELF, so nothing is encrypted -- but
+the patch dump command is different, so the editor cannot read a `+` patch yet.
 
 ## The question that actually decides it
 
-Not "can the format be understood" — it probably can. `docs/STATE-ABI-PROGRESS.md`
-records a **hand-decoded ZD2 `Fx_SFX_LineSel`**, meaning someone has already read
-ZD2 machine code and made sense of it. It is not an opaque blob.
+Not "can the format be understood" — it can. `docs/STATE-ABI-PROGRESS.md` records
+a **hand-decoded ZD2 `Fx_SFX_LineSel`**, and the MS-60B+ report below confirms it
+from the other direction: the container carries the `ZDLF` tag and a plain ELF
+object. It is not an opaque blob.
 
 The real question is different:
 
@@ -142,6 +146,58 @@ point, not the interpretation.
 | Silence | The command differs or is gone. |
 
 ---
+
+## Confirmed so far: MS-60B+ (device 0x6e, firmware 1.20)
+
+First real report, August 2026. It settles the format question and reframes the
+MIDI one.
+
+**Check 1 — the ZD2 payload is not protected.** Three effects inspected, and the
+result is stronger than "analysable":
+
+```
+first 32 bytes: 5a 44 4c 46 78 00 00 00 ...
+FOUND b'ZDLF' at offset 0 — ZDL-family tag
+FOUND b'\x7fELF' at offset 467 — ELF object
+entropy, whole file: 5.28 bits/byte
+per-block (1024B, 14 blocks): min 1.03  max 6.35  spread 5.32
+-> UNEVEN. Typical of real code and data. Analysable.
+zero-run bytes: 27.3%
+```
+
+`5a 44 4c 46` is the ASCII tag **`ZDLF`** — the same container family as the ZDL
+files this repo builds — wrapping an ordinary **ELF object**. Consistent across
+all three files, entropy in the 5.3 range with a wide per-block spread and around
+27% zero runs. Nothing is encrypted, signed or packed.
+
+**Check 2 — it answers, on a different device id.** `f0 7e 00 06 02 52 6e 00 27
+00 31 2e 32 30 f7`: Zoom, device **0x6e**, firmware **1.20**. The editor detected
+the mismatch, adopted the id so reads address correctly, and blocked writes, all
+as intended.
+
+**Check 3 — the dump command is different.** `0x29` does not return a patch. The
+pedal replies with six bytes, `f0 52 00 6e 00 00 f7`, which is presumably a "no"
+of some kind. So the patch protocol is NOT shared, and the editor cannot read a
+`+` patch until the real command is found.
+
+What the pedal volunteers instead is more interesting than what it refused:
+
+| Message | Meaning |
+| --- | --- |
+| `f0 52 00 6e 64 26 00 00 <bank> 00 <prog> 00 f7` | current patch, as bank + program |
+| `f0 52 00 6e 64 20 00 64 02 <lo> <hi> 00 00 00 f7` | unidentified, one 14-bit value that varies per patch |
+| `b0 00 00`, `b0 20 <bank>`, `c0 <prog>` | bank select + program change, emitted by the pedal |
+
+Cross-checking every program change sent against the bank/program reported back
+confirms **banks of ten**: PC 37 answers bank 3 program 7, PC 40 answers bank 4
+program 0. So the `+` series addresses patches as `bank * 10 + program`, and
+`0x64` looks to be its notification namespace.
+
+**Do not go hunting for the dump command by trying command bytes.** On the
+MS-70CDR an unknown command byte (`0x33`) erased all fifty patches. The safe route
+is to MIDI-capture Zoom's own editor for the `+` series and read the request it
+sends -- the same approach that settled how ToneLib drives slots 4-6, documented
+in [MIDI-PARAM-EDIT.md](MIDI-PARAM-EDIT.md).
 
 ## Reporting
 

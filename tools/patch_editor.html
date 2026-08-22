@@ -11318,9 +11318,21 @@ async function readAll(){
     renderLibrary();                          // progressive fill
     if(!d) miss.push(i);
   }
-  for(const i of miss){                        // patient retry for no-shows
-    const d=await readOnce(i,90,1400);
-    if(d){ libraryRaw[i]=d; library[i]=decodePatch(d); noteSeenIds(d); renderLibrary(); }
+  // Retry the no-shows -- but only if SOME patch answered. If none did, the pedal
+  // does not implement 0x29 as a 146-byte dump at all, and retrying all fifty
+  // just walks the whole bank a second time. An MS-60B+ owner reported exactly
+  // that: "it gets to 50 and then starts over". One futile pass is a result; two
+  // is a bug.
+  if(miss.length >= 50){
+    log("no patch dumps at all -- this pedal never answered the dump request (0x29) "
+       +"with a 146-byte patch, so there is nothing to retry. On a model other than "
+       +"the MS-70CDR that is expected: the dump command differs. The MIDI trace is "
+       +"the useful part here -- please report it.","warn");
+  } else {
+    for(const i of miss){                      // patient retry for no-shows
+      const d=await readOnce(i,90,1400);
+      if(d){ libraryRaw[i]=d; library[i]=decodePatch(d); noteSeenIds(d); renderLibrary(); }
+    }
   }
   send([0xc0,cur]); await sleep(40);
   busy=false;
