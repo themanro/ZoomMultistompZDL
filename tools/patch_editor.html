@@ -243,12 +243,19 @@
     100%{transform:translate(0,0);}
   }
   /* THIS is the thing that gets gated -- the animation is motion, the texture is
-     not. The comment below explains why the static layers deliberately are not. */
+     not. The comment below explains why the static layers deliberately are not.
+     But the OS setting is a DEFAULT, not a veto: someone who has asked for the
+     grain to move has overridden it on purpose, so data-motion="on" wins. The
+     first version had only the media query, which meant anyone with macOS
+     "Reduce motion" enabled saw a still texture with no way to say otherwise --
+     and reported, reasonably, that the grain was not moving. */
   @media (prefers-reduced-motion: reduce){
-    html[data-theme="p4"] body::before, html[data-theme="p3"] body::before{
+    html[data-theme="p4"]:not([data-motion="on"]) body::before,
+    html[data-theme="p3"]:not([data-motion="on"]) body::before{
       animation:none;
     }
   }
+  html[data-motion="off"] body::before{ animation:none !important; }
   /* No prefers-reduced-motion suppression here on purpose: the scanlines and
      vignette are STATIC, and that query is about motion. Killing them made the
      CRT themes silently plain on any machine reporting "reduce". If an animated
@@ -367,6 +374,9 @@ Serve over <code>http://localhost</code> — see the comments in this file.</p>
     <option value="p4">P4 television</option>
     <option value="p3">P3 amber</option>
   </select></label>
+  <label class="hint" id="motionwrap" style="display:none;gap:4px;align-items:center"
+         title="The grain animates unless your system asks for reduced motion. Tick this to make it move anyway.">
+    <input type="checkbox" id="grainmotion"> grain motion</label>
   <button id="diagtoggle" title="Show the log, MIDI trace, auto-apply and the param probe">Show diagnostics</button>
 </div>
 <!-- Everything below is diagnostics / advanced: hidden behind "Show diagnostics"
@@ -11946,6 +11956,8 @@ function setTheme(t){
   else document.documentElement.setAttribute("data-theme",t);
   try{ localStorage.setItem("ms70_theme",t); }catch(_){}
   $("theme").value=t;
+  // the grain-motion control only belongs on the phosphor themes
+  if(typeof syncMotionControl==="function") syncMotionControl();
   if(typeof patch!=="undefined" && patch) render();
 }
 $("theme").onchange=e=>setTheme(e.target.value);
@@ -12153,6 +12165,29 @@ function wireCollapse(panelId, btnId, opts){
 }
 wireCollapse("libpanel","libcol",{key:"ms70_lib_collapsed", startCollapsed:true});
 wireCollapse("patpanel","patcol",{startCollapsed:false});
+
+// Grain motion. Only offered on the phosphor themes, where the grain exists, and
+// only worth showing at all when the OS has asked for reduced motion -- otherwise
+// it already moves and the control is noise.
+function syncMotionControl(){
+  // Shown on ANY phosphor theme, not only when the OS asks for reduced motion.
+  // Gating it on that hid the escape hatch in exactly the case where someone
+  // reports "the grain is not moving" for some other reason -- a throttled
+  // background tab, say -- and then has no control to reach for.
+  const th=document.documentElement.getAttribute("data-theme");
+  $("motionwrap").style.display = (th==="p4"||th==="p3") ? "flex" : "none";
+}
+(function(){
+  const saved=localStorage.getItem("ms70_grain_motion");
+  if(saved==="1") document.documentElement.setAttribute("data-motion","on");
+  $("grainmotion").checked = saved==="1";
+  $("grainmotion").onchange=e=>{
+    if(e.target.checked) document.documentElement.setAttribute("data-motion","on");
+    else document.documentElement.removeAttribute("data-motion");
+    try{ localStorage.setItem("ms70_grain_motion", e.target.checked?"1":"0"); }catch(err){}
+  };
+  syncMotionControl();
+})();
 
 $("readall").onclick=readAll;
 $("backup").onclick=backupBank;
