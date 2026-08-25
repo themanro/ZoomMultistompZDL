@@ -1,0 +1,56 @@
+{
+  "effect_name": "Rewire",
+  "comment": "Alesis ModFX Bitrman-inspired lo-fi chain whose blocks can be REORDERED. Four blocks -- bitcrush+decimate, drive, ring mod, comb -- one knob each, plus a Route knob that permutes them. The reordering is the point: crush before a comb is a different pedal from a comb before crush, and slot order in a patch reorders whole effects, never stages inside one.",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category, matching the rest of the release pack.",
+  "fxid": 465,
+  "fxid_comment": "0x1D1. Free as of the 2026-08-18 fxid audit; every id in the tree is unique.",
+  "fxid_version": "1.00",
+  "flags_byte": 1,
+  "audio_func_name": "Fx_DLY_Rewire",
+  "audio_nop": false,
+  "params": [
+    {
+      "name": "Route",
+      "max": 100,
+      "default": 10,
+      "comment": "Block order: BDRC, CRDB, DBCR, RCBD, BRDC. On knob 1 deliberately -- it is the control this effect exists for, and knobs 1-2 use the verbatim-stock edit handlers."
+    },
+    {
+      "name": "Bits",
+      "max": 100,
+      "default": 30,
+      "comment": "Word length and sample-rate decimation together, 12-bit down to 3-bit with the hold rising alongside."
+    },
+    {
+      "name": "Drive",
+      "max": 100,
+      "default": 35,
+      "comment": "Asymmetric soft clip, gain-compensated so turning it up does not just get louder."
+    },
+    {
+      "name": "Ring",
+      "max": 100,
+      "default": 0,
+      "comment": "Ring modulator carrier, 30 Hz to ~2.2 kHz. Depth fades in from silence at 0 so the block is genuinely absent when down."
+    },
+    {
+      "name": "Comb",
+      "max": 100,
+      "default": 25,
+      "comment": "Short feedback comb, depth and length together. The only feedback path here, clamped below unity so no routing can make it run away."
+    },
+    {
+      "name": "Tone",
+      "max": 100,
+      "default": 55,
+      "comment": "Low-pass on the wet path."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 50,
+      "comment": "Dry/wet crossfade."
+    }
+  ]
+}

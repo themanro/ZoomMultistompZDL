@@ -402,6 +402,27 @@ def _em_dustbox(c):                       # Dustbox — fuzz over a divided sub-
     square(38, 90, CY + 8, 24, 3)   # rows 28..34, clear of the knob labels
 
 
+def _em_rewire(c):                        # Rewire — a chain that can be re-ordered
+    # Four blocks in series, plus a bracket carrying the signal from the LAST
+    # back over to the second. Everything else in this pack is a fixed chain;
+    # the re-route is the whole point, so it is what the emblem draws.
+    # An earlier attempt crossed the wires between the middle boxes and read as
+    # a scribble at 128x64 -- a bracket over the top survives the squash.
+    y = CY + 3
+    xs = [40, 54, 68, 82]
+    for x in xs:
+        c.rect(x, y - 4, x + 8, y + 4)
+    c.hline(35, 40, y)                     # in
+    for x in xs[:-1]:
+        c.hline(x + 8, x + 14, y)          # block to block
+    c.hline(90, 95, y)                     # out
+    # the re-route: up from the last block, back across, down into the second
+    top = y - 11
+    c.vline(90, top, y - 4)
+    c.hline(58, 90, top)
+    c.vline(58, top, y - 4)
+
+
 EMBLEMS = {
     "Microlm": _em_shimmer, "Flower": _em_flower, "Shatter": _em_bars,
     "Arrakis": _em_dunes, "Corrupt": _em_square, "Klang": _em_rings,
@@ -411,7 +432,7 @@ EMBLEMS = {
     "Galactic": _em_stars, "OTT": _em_arrows, "TapeHack": _em_tapehack,
     "Taffy": _em_taffy, "Dissolve": _em_dissolve, "Mangle": _em_mangle,
     "Hydra": _em_hydra, "Spiral": _em_spiral, "Stasis": _em_stasis,
-    "Rooms": _em_rooms, "Dustbox": _em_dustbox,
+    "Rooms": _em_rooms, "Dustbox": _em_dustbox, "Rewire": _em_rewire,
 }
 
 
