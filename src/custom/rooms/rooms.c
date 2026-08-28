@@ -222,6 +222,24 @@ void ROOMS_AUDIO_FUNC(unsigned int *ctx)
     damp += enRoom * ((0.05f + 0.9f * freq) - damp);   /* ROOM: bright..dark */
     float dampInv = 1.0f - damp;
 
+    /* --- ROOM size, from DEPTH ---
+     *
+     * Depth is documented at the top of this file as per-mode, with "size" as its
+     * job in ROOM. Every other mode used it -- DIGIT for bit depth, PEAK for
+     * resonance, GATE for threshold, WAVE for mod depth, GONG for regen -- and
+     * ROOM alone never read it, so at Mode 0, which is the DEFAULT, the knob did
+     * nothing at all. Emulator sweeps put the output bit-identical across the
+     * whole travel at Mode 0 and clearly moving at all five others.
+     *
+     * Size scales the comb tunings. Shortening the delays packs the echo density
+     * tighter and raises the modal pitch, which is what a smaller room does; the
+     * Freeverb tunings stay the ratio they are so it stays coherent rather than
+     * turning metallic. Only ever a FRACTION of the allocated span, never more,
+     * so the reads stay inside the buffer that was sized for full length.
+     * Other modes are pinned at 1.0 and behave exactly as before. */
+    float sizeN = 1.0f;
+    sizeN += enRoom * ((0.45f + 0.55f * depth) - sizeN);   /* ROOM: 0.45 .. 1.0 */
+
     /* --- DIGIT crush params (from FREQ = rate, DEPTH = bit depth) --- */
     uint32_t srN = 1u + (uint32_t)(int)(freq * 24.0f);
     int bits = 8 - (int)(depth * 5.0f);
@@ -269,8 +287,14 @@ void ROOMS_AUDIO_FUNC(unsigned int *ctx)
              * the input dither keeps it out of denormals -- no per-comb clip so
              * the combs sum to a full-level reverb. */
             buf[idx] = fin + lp * fb;
+            /* Effective length is the tuning scaled by ROOM's size; clamped low so
+             * a small room cannot collapse a comb into a buzzing few samples, and
+             * it never exceeds combLen so it stays inside the allocated span. */
+            uint32_t clen = (uint32_t)(int)((float)(int)st->combLen[c] * sizeN);
+            if (clen < 160u) clen = 160u;
+            if (clen > st->combLen[c]) clen = st->combLen[c];
             uint32_t p = st->combPos[c] + 1u;
-            if (p >= st->combLen[c]) p = 0u;
+            if (p >= clen) p = 0u;
             st->combPos[c] = p;
             combSum += y;
         }

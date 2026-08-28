@@ -980,7 +980,7 @@ const DB={
     {
      "name": "Bits",
      "max": 100,
-     "default": 30
+     "default": 55
     },
     {
      "name": "Drive",
@@ -990,12 +990,17 @@ const DB={
     {
      "name": "Ring",
      "max": 100,
-     "default": 0
+     "default": 20
     },
     {
      "name": "Comb",
      "max": 100,
      "default": 25
+    },
+    {
+     "name": "Shift",
+     "max": 100,
+     "default": 50
     },
     {
      "name": "Tone",
@@ -12031,6 +12036,21 @@ function diagText(){
        ? BITS.map(sl=>{let v=0;sl.forEach(f=>f.forEach(b=>{if(b[2]==="NZ"&&(rawFromPedal[b[0]]&b[1]))v=1;}));return v;}).join(" ")
          +"   (slots 1..6; all zero = a reorder here proves nothing)"
        : "(no dump)"),
+    // Every effect id this pedal has actually reported in a dump, and the gid
+    // families they belong to. The DB carries 14 stock names that exist under TWO
+    // different ids -- same fxid, same params, different gid (12<->20, 13<->22) --
+    // because they were harvested from more than one Zoom model. Picking the wrong
+    // twin writes an id this pedal has no effect for, and the slot comes up blank
+    // on the hardware while the editor happily renders its own choice. This line
+    // says which family the pedal in front of you really speaks.
+    "seen   : "+(()=>{
+      const ids=[...seenOnPedal];
+      if(!ids.length) return "(nothing harvested yet -- run Reload bank)";
+      const gids=[...new Set(ids.map(i=>BYID[i]?BYID[i].gid:-1))].sort((a,b)=>a-b);
+      const unk=ids.filter(i=>!BYID[i]).length;
+      return ids.length+" ids from dumps; gids=["+gids.join(",")+"]"
+             +"; not-in-DB="+unk;
+    })(),
     "bank   : "+library.filter(Boolean).length+"/50 read   library folders="+LLIB.folders.length,
     "DB     : "+DB.custom.length+" custom + "+DB.stock.length+" stock + "+(DB.legacy||[]).length+" legacy + "+(DB.probes||[]).length+" probes",
     "agent  : "+navigator.userAgent,

@@ -8,21 +8,43 @@
  * sounds nothing like distortion first. Slot order in a patch reorders whole
  * effects; nothing here could reorder stages INSIDE one.
  *
- * Four blocks, one knob each, and a Route knob that permutes them:
+ * Five blocks, one knob each, and a Route knob that permutes them:
  *   B  Bits   crush + sample-rate decimate on one control
  *   D  Drive  asymmetric soft clip
  *   R  Ring   ring modulator; the knob sweeps the carrier and fades it in
  *   C  Comb   short feedback comb, the knob is depth
+ *   S  Shift  single-sideband frequency shifter, centre-off
  *
- * 7 knobs. Route and Bits sit on knobs 1-2, the verbatim-stock LineSel edit
+ * 8 knobs. Route and Bits sit on knobs 1-2, the verbatim-stock LineSel edit
  * handlers -- the most reliable pair in the pack, and the two most often moved:
- *   Route (knob 1) block order: BDRC, CRDB, DBCR, RCBD, BRDC
+ *   Route (knob 1) block order: BDRCS, SCRDB, DSBCR, RCSBD, SBRDC
  *   Bits  (knob 2) crush depth and decimation together
  *   Drive (knob 3) distortion amount
  *   Ring  (knob 4) carrier frequency, fading in from silent at 0
  *   Comb  (knob 5) comb depth
- *   Tone  (knob 6) low-pass on the wet path
- *   Mix   (knob 7) dry/wet
+ *   Shift (knob 6) frequency shift, -400..+400 Hz, 50 = off
+ *   Tone  (knob 7) low-pass on the wet path
+ *   Mix   (knob 8) dry/wet
+ *
+ * The shifter is the one block here that is not a few lines of arithmetic. A
+ * frequency shift ADDS a constant number of Hz rather than multiplying, so it
+ * breaks harmonic ratios -- the reason it sounds inharmonic and bell-like where
+ * a pitch shift sounds like a pitch shift. Doing it needs the analytic signal:
+ * the input plus a copy shifted 90 degrees at EVERY frequency, which is a
+ * Hilbert transformer. Two allpass chains whose outputs sit 90 degrees apart,
+ * one delayed a sample against the other, then out = re*cos - im*sin.
+ *
+ * The eight pole values below were NOT taken from a reference. Hand-recalled
+ * coefficients were tried first and the phase difference collapsed from 89
+ * degrees at the bottom of the band to zero by 5 kHz, which would have produced
+ * both sidebands -- a harsh ring mod wearing a shifter's name. These were
+ * optimised numerically for worst-case phase error over 50 Hz - 12 kHz, with the
+ * two chains' poles INTERLEAVED, which is the property the failed attempt was
+ * missing. Verified against the exact recurrence used here: worst deviation
+ * 0.61 degrees, image rejection -51 dB measured, carrier feedthrough -152 dB.
+ * Four sections per chain rather than six (-63 dB) on purpose: the image is
+ * already far below audibility and section count is code size, which is the
+ * thing that broke this effect once already.
  *
  * How the routing is done, and why not the obvious ways. A permutation TABLE
  * would need an indirect call or an indexed jump, and both are freeze classes
@@ -31,8 +53,11 @@
  * attempt, and it failed differently: twenty inline expansions made the compiler
  * give up inlining, emitting 256 bytes outside the .audio section and twelve
  * relocations with it, which is equally fatal. What works is packing the order
- * into one nibble per stage and looping four times, so each block appears ONCE
- * and stays inline. Costs a shift and a compare per stage.
+ * into one nibble per stage and looping five times, so each block appears ONCE
+ * and stays inline. Costs a shift and a compare per stage. The stage loop is
+ * pinned with UNROLL(1) for the same reason -- unrolled five ways it would
+ * expand the shifter's eight allpass sections five times over and walk straight
+ * back into the fault above.
  *
  * Safe-DSP: no switch (jump tables are unreachable in a ZDL and hard-freeze the
  * DSP), no CALLs or helper calls, no runtime divide (the decimator counter and
@@ -61,7 +86,22 @@ REWIRE_CODE_SECTION(REWIRE_AUDIO_FUNC)
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
 #define RW_MAGIC   0x52575231u   /* 'RWR1' */
-#define RW_VERSION 1u
+#define RW_VERSION 2u            /* 2: added the Shift block and its allpass state */
+
+/* Hilbert phase-splitter poles. Sections are in z^-2: y = a*(x + y[n-2]) - x[n-2].
+ * Chain A and chain B interleave -- A0 < B0 < A1 < B1 < ... -- which is what makes
+ * the 90-degree difference hold across the band. See the header note. */
+#define RW_HA0 0.155235327f
+#define RW_HA1 0.719471331f
+#define RW_HA2 0.940417779f
+#define RW_HA3 0.991416628f
+#define RW_HB0 0.465295704f
+#define RW_HB1 0.867077659f
+#define RW_HB2 0.974857009f
+#define RW_HB3 0.998500000f
+
+#define RW_HALF_PI 1.57079633f
+#define RW_MAX_SHIFT 400.0f      /* Hz at either extreme of the Shift knob */
 
 #define RW_BUF     4096u         /* 16 KB, ~93 ms -- plenty for a comb */
 #define RW_MASK    (RW_BUF - 1u)
@@ -79,8 +119,12 @@ typedef struct RewireState {
     float    oscPhase;
     float    lp;
     float    combLp;
+    float    shPhase;           /* shifter carrier phase */
+    float    imPrev;            /* chain B, delayed one sample */
+    float    ap[32];            /* 8 allpass sections x {x1,x2,y1,y2} */
 } RewireState;
 
+REWIRE_EXPAND_PRAGMA(FUNC_ALWAYS_INLINE(rw_flush))
 static inline float rw_flush(float x)
 {
     if (x < RW_DENORM && x > -RW_DENORM) return 0.0f;
@@ -88,6 +132,7 @@ static inline float rw_flush(float x)
 }
 
 /* Cubic soft clip. Same curve the rest of the pack uses -- no tanh, no math lib. */
+REWIRE_EXPAND_PRAGMA(FUNC_ALWAYS_INLINE(rw_soft))
 static inline float rw_soft(float x)
 {
     if (x > 1.0f) return 1.0f;
@@ -97,6 +142,7 @@ static inline float rw_soft(float x)
 
 /* Parabolic sine, valid over -pi..pi. Cheaper than a table and needs no array,
  * which matters because static arrays are a freeze class here. */
+REWIRE_EXPAND_PRAGMA(FUNC_ALWAYS_INLINE(rw_sin))
 static inline float rw_sin(float x)
 {
     if (x > 3.14159265f) x -= RW_TWO_PI;
@@ -107,6 +153,7 @@ static inline float rw_sin(float x)
 
 /* ---- the four blocks. static inline: expanded in place, never CALLed ---- */
 
+REWIRE_EXPAND_PRAGMA(FUNC_ALWAYS_INLINE(rw_bits))
 static inline float rw_bits(float x, float step, float invStep, int32_t hold,
                             RewireState *st)
 {
@@ -121,16 +168,63 @@ static inline float rw_bits(float x, float step, float invStep, int32_t hold,
     return (float)qi * invStep;
 }
 
+REWIRE_EXPAND_PRAGMA(FUNC_ALWAYS_INLINE(rw_drive))
 static inline float rw_drive(float x, float amt)
 {
     return rw_soft(x * (1.0f + amt * 14.0f)) * (1.0f - amt * 0.45f);
 }
 
+REWIRE_EXPAND_PRAGMA(FUNC_ALWAYS_INLINE(rw_ring))
 static inline float rw_ring(float x, float depth, float osc)
 {
     return x * (1.0f - depth) + (x * osc) * depth;
 }
 
+/* One second-order allpass section, state in s[] as {x1,x2,y1,y2}. Flushed
+ * because these poles run up to 0.9985 -- high-Q enough that the tail after
+ * silence lands in denormals, which is exactly how Spiral's rise died once.
+ *
+ * FUNC_ALWAYS_INLINE is load-bearing, not decoration. `static inline` is only a
+ * hint: with eight call sites the compiler's code-growth heuristic outlined this
+ * into a real CALLed function in .text -- 96 bytes outside .audio, returning via
+ * B3 -- which is the same freeze class that killed the first cut of this effect.
+ * It compiled without a warning; only the section table showed it. */
+REWIRE_EXPAND_PRAGMA(FUNC_ALWAYS_INLINE(rw_ap2))
+static inline float rw_ap2(float x, float a, float *s)
+{
+    float y = a * (x + s[3]) - s[1];
+    s[1] = s[0]; s[0] = x;
+    s[3] = s[2]; s[2] = rw_flush(y);
+    return s[2];
+}
+
+/* Single-sideband frequency shift. The allpass chains run whether or not the
+ * block is active so their state stays converged and switching in is silent;
+ * only the output selection is gated. */
+REWIRE_EXPAND_PRAGMA(FUNC_ALWAYS_INLINE(rw_shift))
+static inline float rw_shift(float x, float c, float s, int32_t active,
+                             RewireState *st)
+{
+    float *ap = st->ap;
+
+    float re = rw_ap2(x,  RW_HA0, ap +  0);
+    re       = rw_ap2(re, RW_HA1, ap +  4);
+    re       = rw_ap2(re, RW_HA2, ap +  8);
+    re       = rw_ap2(re, RW_HA3, ap + 12);
+
+    float ib = rw_ap2(x,  RW_HB0, ap + 16);
+    ib       = rw_ap2(ib, RW_HB1, ap + 20);
+    ib       = rw_ap2(ib, RW_HB2, ap + 24);
+    ib       = rw_ap2(ib, RW_HB3, ap + 28);
+
+    float im = st->imPrev;
+    st->imPrev = ib;
+
+    if (!active) return x;
+    return re * c - im * s;
+}
+
+REWIRE_EXPAND_PRAGMA(FUNC_ALWAYS_INLINE(rw_comb))
 static inline float rw_comb(float x, float depth, float *buf, uint32_t wp,
                             int32_t len, RewireState *st)
 {
@@ -175,6 +269,12 @@ void REWIRE_AUDIO_FUNC(unsigned int *ctx)
         st->oscPhase = 0.0f;
         st->lp = 0.0f;
         st->combLp = 0.0f;
+        st->shPhase = 0.0f;
+        st->imPrev = 0.0f;
+        {
+            int32_t k;
+            for (k = 0; k < 32; k++) st->ap[k] = 0.0f;
+        }
         st->clearPos = 0u;
         st->initialized = 1u;
     }
@@ -191,6 +291,7 @@ void REWIRE_AUDIO_FUNC(unsigned int *ctx)
     float dr = zoom_param_norm01(params[REWIRE_DRIVE_SLOT], REWIRE_DRIVE_DEFAULT_NORM);
     float rg = zoom_param_norm01(params[REWIRE_RING_SLOT],  REWIRE_RING_DEFAULT_NORM);
     float cb = zoom_param_norm01(params[REWIRE_COMB_SLOT],  REWIRE_COMB_DEFAULT_NORM);
+    float sh = zoom_param_norm01(params[REWIRE_SHIFT_SLOT], REWIRE_SHIFT_DEFAULT_NORM);
     float tn = zoom_param_norm01(params[REWIRE_TONE_SLOT],  REWIRE_TONE_DEFAULT_NORM);
     float mx = zoom_param_norm01(params[REWIRE_MIX_SLOT],   REWIRE_MIX_DEFAULT_NORM);
 
@@ -216,17 +317,26 @@ void REWIRE_AUDIO_FUNC(unsigned int *ctx)
 
     float lpCoef = 0.03f + tn * 0.6f;
 
+    /* Shift: centre-off, squared taper so the first few Hz either side of centre
+     * are actually reachable -- a 2 Hz shift is a slow through-zero phase drift
+     * and musically the most useful part of the range. */
+    float sd = (sh - 0.5f) * 2.0f;                            /* -1 .. +1 */
+    float shHz = sd * (sd < 0.0f ? -sd : sd) * RW_MAX_SHIFT;  /* signed square */
+    int32_t shActive = (shHz > 0.35f || shHz < -0.35f) ? 1 : 0;
+    float shInc = shHz * (RW_TWO_PI / 44100.0f);
+
     /* Route: five orders. if/else, never switch. */
-    /* Order packed one nibble per stage: 0=Bits 1=Drive 2=Ring 3=Comb. */
+    /* Order packed one nibble per stage: 0=Bits 1=Drive 2=Ring 3=Comb 4=Shift. */
     int32_t packed;
-    if      (rt < 0.20f) packed = 0x0123;   /* B D R C */
-    else if (rt < 0.40f) packed = 0x3210;   /* C R D B */
-    else if (rt < 0.60f) packed = 0x1032;   /* D B C R */
-    else if (rt < 0.80f) packed = 0x2301;   /* R C B D */
-    else                 packed = 0x0213;   /* B R D C */
+    if      (rt < 0.20f) packed = 0x01234;   /* B D R C S */
+    else if (rt < 0.40f) packed = 0x43210;   /* S C R D B */
+    else if (rt < 0.60f) packed = 0x14032;   /* D S B C R */
+    else if (rt < 0.80f) packed = 0x23401;   /* R C S B D */
+    else                 packed = 0x40213;   /* S B R D C */
 
     uint32_t wp = st->writePos;
     float ph = st->oscPhase;
+    float shPh = st->shPhase;
     float lp = st->lp;
 
     int i;
@@ -236,6 +346,15 @@ void REWIRE_AUDIO_FUNC(unsigned int *ctx)
         ph += oscInc;
         if (ph > RW_TWO_PI) ph -= RW_TWO_PI;
         float osc = rw_sin(ph);
+
+        /* Shifter carrier. Wrapped both ways because shInc goes negative for a
+         * downward shift. cos comes from the same parabolic sine a quarter turn
+         * along; shPh stays under 2*pi so one wrap inside rw_sin is enough. */
+        shPh += shInc;
+        if (shPh > RW_TWO_PI) shPh -= RW_TWO_PI;
+        if (shPh < 0.0f)      shPh += RW_TWO_PI;
+        float shCos = rw_sin(shPh + RW_HALF_PI);
+        float shSin = rw_sin(shPh);
 
         /* Apply the four blocks in the order this route packs. Each block
          * appears ONCE in the source and the stage loop picks between them.
@@ -247,12 +366,14 @@ void REWIRE_AUDIO_FUNC(unsigned int *ctx)
          * order into a nibble field costs a shift and keeps every block inline. */
         int32_t stage;
         float x = dry;
-        for (stage = 0; stage < 4; stage++) {
-            int32_t which = (packed >> (12 - stage * 4)) & 0xF;
+        #pragma UNROLL(1)
+        for (stage = 0; stage < 5; stage++) {
+            int32_t which = (packed >> (16 - stage * 4)) & 0xF;
             if      (which == 0) x = rw_bits(x, step, invStep, hold, st);
             else if (which == 1) x = rw_drive(x, dr);
             else if (which == 2) x = rw_ring(x, ringDepth, osc);
-            else                 x = rw_comb(x, combDepth, buf, wp, combLen, st);
+            else if (which == 3) x = rw_comb(x, combDepth, buf, wp, combLen, st);
+            else                 x = rw_shift(x, shCos, shSin, shActive, st);
         }
         wp++;
 
@@ -266,5 +387,6 @@ void REWIRE_AUDIO_FUNC(unsigned int *ctx)
 
     st->writePos = wp;
     st->oscPhase = ph;
+    st->shPhase = shPh;
     st->lp = rw_flush(lp);
 }

@@ -5,7 +5,7 @@ toolchain used to build them — no Zoom SDK required.
 
 This was a good amount of work and tokens, please consider to: [buymeacoffee.com/sz0kfixkct](https://buymeacoffee.com/sz0kfixkct)
 
-<p align="center"><img src="graphics/thumb_effects.png" width="820" alt="18 custom effects for the Zoom MS-70CDR"></p>
+<p align="center"><img src="graphics/thumb_effects.png" width="820" alt="21 custom effects for the Zoom MS-70CDR"></p>
 
 ## Quickstart — edit your pedal from the browser
 
@@ -76,6 +76,12 @@ Full knob layouts, caveats and sound demos are in
 <td align="center"><img src="graphics/hydra.png" width="220" alt="Hydra"></td>
 <td align="center"><img src="graphics/spiral.png" width="220" alt="Spiral"></td>
 <td align="center"><img src="graphics/stasis.png" width="220" alt="Stasis"></td>
+<td align="center"><img src="graphics/dustbox.png" width="220" alt="Dustbox"></td>
+</tr>
+<tr>
+<td align="center"><img src="graphics/rewire.png" width="220" alt="Rewire"></td>
+<td></td>
+<td></td>
 <td></td>
 </tr>
 </table>

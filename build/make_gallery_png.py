@@ -33,14 +33,18 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "build"))
 
 from decode_picture import decode_picture  # noqa: E402
+from make_thumb_png import vhs  # noqa: E402
 
 try:
     from PIL import Image
 except ImportError:
     raise SystemExit("Pillow is required: pip install pillow")
 
-BG = (18, 20, 24)
-LIT = (180, 230, 255)
+# P4 "television white blend" -- the editor's TV phosphor theme, so the gallery,
+# the hero and the editor all look like the same machine. The June palette was the
+# light-blue LCD skin and clashed the moment the hero went to tape.
+BG = (8, 9, 11)
+LIT = (157, 193, 216)
 CANVAS = (640, 416)
 INNER = (630, 404)
 ORIGIN = (5, 6)
@@ -60,6 +64,10 @@ def render(zdl: Path, out: Path) -> None:
     cover = cover.resize(INNER, Image.NEAREST)
     canvas = Image.new("RGB", CANVAS, BG)
     canvas.paste(cover, ORIGIN)
+    # Gentler than the hero: these render at 220px in the README table, where the
+    # full tape pass turns knob labels into texture. Seeded per effect so each one
+    # gets its own dropouts instead of 21 identically-damaged frames.
+    canvas = vhs(canvas, strength=0.45, seed=abs(hash(out.stem)) % 100000)
     out.parent.mkdir(parents=True, exist_ok=True)
     canvas.save(out)
 

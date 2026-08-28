@@ -181,7 +181,26 @@ def main(argv: list[str]) -> int:
     if failures:
         print(f"\nFAILED: {failures}")
         return 1
-    return name_check_rc or probe_check_rc
+
+    # Re-extract the effect database into the patch editor.
+    #
+    # This used to be a separate step somebody had to remember, and twice it was
+    # not remembered: the editor shipped Rewire without its Shift knob after the
+    # shifter was added, and again with Rewire's old Bits/Ring defaults after they
+    # were changed. Both times the ZDL on disk was correct and the editor's inline
+    # copy silently was not, which is invisible until you go looking for a knob
+    # that is not there. A build that changes an effect should update the tool that
+    # drives it, in the same pass.
+    db_rc = 0
+    try:
+        db_rc = subprocess.call([sys.executable, str(ROOT / "build" / "extract_effect_db.py")])
+        if db_rc:
+            print("\neffect DB sync FAILED -- the patch editor is now stale", file=sys.stderr)
+    except Exception as exc:                       # pragma: no cover
+        db_rc = 1
+        print(f"\neffect DB sync could not run: {exc}", file=sys.stderr)
+
+    return name_check_rc or probe_check_rc or db_rc
 
 
 if __name__ == "__main__":
