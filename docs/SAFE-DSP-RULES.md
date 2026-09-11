@@ -63,6 +63,22 @@ experiment, not a port.
   other than `B B3` (the return). This freeze is insidious because if the
   switch result is unused the compiler deletes it (so a pass-through smoke build
   looks fine) — it only appears once the result is actually consumed.
+* **The general rule behind that one: never materialize a code address as an
+  absolute constant.** A jump table is just the compiler doing it for you. The
+  same freeze is available by hand — `MVKL/MVKH` a link-time address into a
+  register and `B` through it is byte-for-byte the same defect, and the
+  hand-written `_init` in `build/init_materialize.asm` shipped exactly that for
+  four hardware attempts. `TEXT_VA` is `0x00000000` in the linker, so an
+  "absolute" target is really a section offset that is correct **only** while
+  text loads at zero. Use a PC-relative `B` to a symbol so call and return both
+  follow the load base.
+
+  This inverts the usual reading of the zero-relocation rule. `Applied 0 .obj
+  relocations` is normally the success line; here the *missing* relocation was
+  the bug. When you emit a branch target yourself, "there is no relocation for
+  it" means "this only works at link base", not "this is clean". Check
+  `.rela.dyn` for your own emitted calls, and test at a nonzero text base —
+  the emulator loads at zero, so it cannot see this class at all.
 
 ## Known Freeze Patterns
 
@@ -75,6 +91,13 @@ experiment, not a port.
   freezes the pedal" because the knob changed the switch index. Every red
   herring (granular reads, feedback, denormals) was ruled out only after
   disassembly showed the `.switch:Fx_DLY_Mangle` section + `BNOP.S2X A5`.
+* Hand-written absolute call targets — the same defect without a compiler.
+  `build/init_materialize.asm` loaded a link-time handler address with
+  `MVKL/MVKH` and branched through it, with no `.rela.dyn` entry. Four
+  hardware attempts froze on boot. A zero-call variant of the same frame booted
+  fine, which is what eventually localised it: no calls, no absolute targets.
+  Fixed by branching PC-relative to the handler. See
+  [PARAM-INIT-INVESTIGATION.md](PARAM-INIT-INVESTIGATION.md).
 * New external `__c6xabi_*` helpers beyond the tiny set already handled by
   the linker.
 * Helper-heavy DSP paths in the first executable build. `ToTape9` cleared

@@ -206,10 +206,10 @@ void DUSTBOX_AUDIO_FUNC(unsigned int *ctx)
         st->hiLP = 0.0f;
         st->sign = 0;
         st->ff1 = st->ff2 = 0;
-        st->accKnob[0] = DUSTBOX_DUST_DEFAULT_NORM;
-        st->accKnob[1] = DUSTBOX_MOTOR_DEFAULT_NORM;
-        st->accKnob[2] = DUSTBOX_FILTER_DEFAULT_NORM;
-        st->accKnob[3] = DUSTBOX_POWER_DEFAULT_NORM;
+        st->accKnob[0] = zoom_param_norm01(params[DUSTBOX_DUST_SLOT], DUSTBOX_DUST_DEFAULT_NORM);
+        st->accKnob[1] = zoom_param_norm01(params[DUSTBOX_MOTOR_SLOT], DUSTBOX_MOTOR_DEFAULT_NORM);
+        st->accKnob[2] = zoom_param_norm01(params[DUSTBOX_FILTER_SLOT], DUSTBOX_FILTER_DEFAULT_NORM);
+        st->accKnob[3] = zoom_param_norm01(params[DUSTBOX_POWER_SLOT], DUSTBOX_POWER_DEFAULT_NORM);
         st->prevRaw[0] = st->prevRaw[1] = st->prevRaw[2] = st->prevRaw[3] = -1.0f;
         st->initialized = 1u;
     }
@@ -231,13 +231,7 @@ void DUSTBOX_AUDIO_FUNC(unsigned int *ctx)
         }
         if (nch == 1) {
             float v = raw[changed];
-            float n;
-            if (v <= 0.0001f) n = 0.0f;             /* genuine knob zero */
-            else if (v <= 1.0f) n = v;              /* proven 0..1 edit path */
-            else if (v <= 100.0f) n = v * 0.01f;    /* UI-scale fallback */
-            else n = st->accKnob[changed];          /* implausible: hold */
-            if (n < 0.0f) n = 0.0f;
-            if (n > 1.0f) n = 1.0f;
+            float n = zoom_param_norm01(v, st->accKnob[changed]);
             st->accKnob[changed] = n;
         }
     }

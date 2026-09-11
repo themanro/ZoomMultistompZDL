@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
-"""Build Stasis.ZDL from stasis.c + manifest_pedal.json (5-knob pedal build).
+"""Build the six-control Stasis release from manifest_pedal.json.
 
-manifest.json drives the desktop renderer; manifest_pedal.json drives this
-build. They share the same 5 knobs, differing only in the quiet-safe Mix
-default.
-
-Requires the TI C6000 compiler at the TI_ROOT path below (edit if yours
-differs). Run from the repo root:  python3 build_all.py stasis
+Run from repo root: python3 build_all.py stasis
 """
 
 from __future__ import annotations
@@ -71,6 +66,7 @@ def main() -> None:
             p.unlink()
 
     cfg = LinkerConfig(
+        materialize_init=True,
         effect_name=effect_name,
         screen_image=make_cover(effect_name, [p["name"] for p in manifest["params"]]),
         audio_func_name=audio_func,

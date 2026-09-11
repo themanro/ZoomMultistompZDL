@@ -54,6 +54,7 @@ def main() -> None:
     )
 
     cfg = LinkerConfig(
+        materialize_init=True,
         effect_name=manifest["effect_name"],
         audio_func_name=manifest.get("audio_func_name"),
         gid=manifest["gid"],

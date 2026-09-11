@@ -47,6 +47,7 @@ RELEASE_PLUGINS = [
     ("dustbox",    CUSTOM_DIR / "dustbox"    / "build.py"),
     ("stasis",     CUSTOM_DIR / "stasis"     / "build.py"),
     ("spiral",      CUSTOM_DIR / "spiral"      / "build.py"),
+    ("gyre",        CUSTOM_DIR / "gyre"        / "build.py"),
 ]
 
 # Dropped from the release set 2026-06-29 after hardware listening (user
@@ -69,6 +70,7 @@ DIAGNOSTIC_PLUGINS = [
     ("initprobe",   PROBE_DIR / "initprobe"   / "build.py"),
     ("ctxwatch",    PROBE_DIR / "ctxwatch"    / "build.py"),
     ("edgewatch",   PROBE_DIR / "edgewatch"   / "build.py"),
+    ("matprobe",    PROBE_DIR / "matprobe"    / "build.py"),
 ]
 
 PLUGINS = RELEASE_PLUGINS + DIAGNOSTIC_PLUGINS

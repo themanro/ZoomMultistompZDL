@@ -423,6 +423,29 @@ def _em_rewire(c):                        # Rewire — a chain that can be re-or
     c.vline(58, top, y - 4)
 
 
+
+def _em_gyre(c):                          # Gyre -- a closed loop that spirals inward
+    # A ring, drawn as a spiral that does not quite close: the loop is sealed
+    # (Feed at 0) yet the pitch keeps winding, so the path circles and steps in.
+    # Two turns is enough to read as "spiral" at 128x64; three turns into mud.
+    import math
+    cx, cy = 64, CY + 6
+    prev = None
+    steps = 46
+    for i in range(steps):
+        t = i / (steps - 1.0)
+        ang = t * 2.0 * math.pi * 1.85 - math.pi * 0.5
+        r = 15.0 - 8.5 * t                 # winding inward
+        x = int(round(cx + math.cos(ang) * r * 1.55))   # wider than tall: the
+        y = int(round(cy + math.sin(ang) * r * 0.72))   # device pixels are not square
+        if prev is not None:
+            _line(c, prev[0], prev[1], x, y)
+        prev = (x, y)
+    # an arrow head on the inner end, pointing along the travel
+    if prev is not None:
+        _line(c, prev[0], prev[1], prev[0] + 4, prev[1] - 2)
+        _line(c, prev[0], prev[1], prev[0] + 3, prev[1] + 3)
+
 EMBLEMS = {
     "Microlm": _em_shimmer, "Flower": _em_flower, "Shatter": _em_bars,
     "Arrakis": _em_dunes, "Corrupt": _em_square, "Klang": _em_rings,
@@ -432,6 +455,7 @@ EMBLEMS = {
     "Galactic": _em_stars, "OTT": _em_arrows, "TapeHack": _em_tapehack,
     "Taffy": _em_taffy, "Dissolve": _em_dissolve, "Mangle": _em_mangle,
     "Hydra": _em_hydra, "Spiral": _em_spiral, "Stasis": _em_stasis,
+    "Gyre": _em_gyre,
     "Rooms": _em_rooms, "Dustbox": _em_dustbox, "Rewire": _em_rewire,
 }
 

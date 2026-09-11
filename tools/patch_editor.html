@@ -111,6 +111,10 @@
   /* Slots use the framework's OTHER title treatment: a full-width inverse strip,
      the machine's own heading. */
   html[data-theme="p4"] .slot, html[data-theme="p3"] .slot{ padding-top:0; overflow:hidden; }
+  /* Which slot the controller's knobs are currently pointed at. Without this
+     the eight knobs silently change meaning and nothing on screen says so. */
+  .slot.padactive{ outline:2px solid var(--ink); outline-offset:2px; }
+  .slot.padactive h3{ background:var(--ink); color:var(--paper); }
   html[data-theme="p4"] .slot h3, html[data-theme="p3"] .slot h3{
     margin:0 -16px 12px; padding:4px 16px;
     background:var(--ink); color:var(--paper); text-shadow:none;
@@ -347,28 +351,51 @@
   .dsp{letter-spacing:3px; color:var(--ink); font-size:15px; margin-left:auto;}
   .hint{color:var(--ink-soft); font-size:12px;}
   label{color:var(--ink-soft);}
-  /* dismissable error band */
-  .errband{display:flex; align-items:center; gap:12px; background:var(--err); color:var(--paper);
-           border:var(--b) solid var(--ink); box-shadow:5px 5px 0 var(--ink); padding:10px 12px; margin-bottom:14px; font-size:15px;}
-  .errband .errx{margin-left:auto; background:var(--paper); color:var(--err); border:2px solid var(--ink);
-                 box-shadow:2px 2px 0 var(--ink); width:26px; height:26px; font-size:15px; cursor:pointer;
-                 flex:none; text-transform:none; letter-spacing:0; padding:0;}
-  .errband .errx:active{transform:translate(2px,2px); box-shadow:0 0 0 var(--ink);}
+  /* A reserved bottom strip keeps notices away from the editing surface. */
+  body{padding-bottom:88px!important}
+  dialog.drawer,#patchPasteDialog,#reloadBankDialog{padding-bottom:88px}
+  #noticeBar{position:fixed;inset:auto 0 0 0;z-index:10000;box-sizing:border-box;
+    height:72px;display:flex;align-items:center;gap:14px;padding:12px 18px;
+    background:var(--panel);color:var(--ink);border-top:var(--b) solid var(--ink);
+    font-size:14px;box-shadow:none;text-align:left}
+  #noticeText{flex:1;min-width:0;max-height:44px;overflow:auto;overflow-wrap:anywhere;line-height:1.4}
+  #noticeBar button{flex:none} #noticeBar .hint{flex:none}
+  @media(max-width:640px){#noticeBar{gap:8px;padding:10px}#noticeBar>.hint{display:none}}
+  button:disabled,input:disabled,select:disabled{opacity:.45;cursor:not-allowed;}
+  [role="slider"]:focus-visible,[role="button"]:focus-visible,button:focus-visible{outline:3px solid var(--ink);outline-offset:3px;}
+  #operationStatus{margin:10px 16px;font-size:14px;}
+
+  [hidden]{display:none!important}
+  .patch-display{background:var(--screen-bg);color:var(--screen-fg);padding:10px 14px;min-width:160px;flex:1;letter-spacing:1px}
+  #mainToolbar{gap:10px} #saveHelp{margin-bottom:4px} #operationStatus{margin-top:4px}
+  .drawer{position:fixed;inset:0 0 0 auto;margin:0;width:min(760px,94vw);max-width:94vw;height:100dvh;max-height:100dvh;box-sizing:border-box;overflow:auto;background:var(--panel);color:var(--ink);border:var(--b) solid var(--ink);padding:20px;box-shadow:-8px 0 0 var(--ink-soft)}
+  dialog::backdrop{background:rgba(0,0,0,.55)}
+  .drawer-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
+  .drawer .bar{padding:12px 0;flex-wrap:wrap} .drawer details{border-top:1px solid var(--ink-soft);padding:18px 0}
+  .drawer summary{cursor:pointer;font-size:18px}.drawer .strip{margin:12px 0}.drawer #log{max-height:260px}
+  .drawer [role="tab"][aria-selected="true"]{background:var(--ink);color:var(--panel)}
+  .drawer #librows{grid-template-columns:repeat(2,minmax(0,1fr));max-height:52vh}
+  .drawer .stripbody{display:block!important}.drawer h2 .collapse{display:none}
+  .slot-state{font-size:12px} #emptyEditor{padding:48px 20px;text-align:center}
+  @media(max-width:640px){#mainToolbar .patch-display{order:-1;flex-basis:100%}.drawer{width:100%;max-width:100%;padding:14px}#mainToolbar button{flex:1}.slots{grid-template-columns:1fr!important}}
 </style>
 </head>
 <body>
 <h1>MS-70CDR Patch Editor</h1>
-<p class="sub">Sees and controls this repo's custom effects (plus every stock ZDL pedal's).
-Serve over <code>http://localhost</code> — see the comments in this file.</p>
+<p class="sub">Your pedal, six effects, one place to shape your sound.</p>
 
-<div class="bar panel">
+<div class="bar panel" id="mainToolbar">
   <button id="connect" class="primary">Connect</button>
+  <span id="connectionState" class="hint">● Offline</span>
+  <span id="currentPatch" class="patch-display">No patch loaded</span>
+  <span id="editStatus" class="hint" role="status"></span>
   <span id="devname" class="hint">not connected</span>
   <button id="readall" title="Read all 50 patches. The pedal cycles through every patch OUT LOUD (~8s) — mute your amp.">Reload bank 🔊</button>
   <button id="reread">Re-read patch</button>
-  <button id="store" title="Write the patch, store it, and force the pedal to reload it — this is what makes PE knob edits audible. Overwrites the current slot.">Apply → pedal</button>
+  <button id="store" title="Apply changed fields to the edit buffer and verify them. Does not save to pedal memory; use Save to pedal to keep changes.">Apply changes</button>
+  <button id="storebtn" title="Save the current patch to this pedal slot, then reload it. Overwrites the stored patch.">Save to pedal</button>
   <button id="expsyx">Export .syx</button>
-  <input type="file" id="impsyx" accept=".syx" style="max-width:180px">
+  <input aria-label="Import patch .syx" type="file" id="impsyx" accept=".syx" style="max-width:180px">
   <label class="hint" style="display:flex;gap:4px;align-items:center" title="Screen style. P4 = television white phosphor and P3 = amber terminal, both with CRT scanlines, glow and vignette (after AmberConsole). Remembered between sessions."><select id="theme" style="font:inherit">
     <option value="lcd">LCD</option>
     <option value="p4">P4 television</option>
@@ -377,6 +404,11 @@ Serve over <code>http://localhost</code> — see the comments in this file.</p>
   <label class="hint" id="motionwrap" style="display:none;gap:4px;align-items:center"
          title="The grain animates unless your system asks for reduced motion. Tick this to make it move anyway.">
     <input type="checkbox" id="grainmotion"> grain motion</label>
+  <label class="seg" title="A second MIDI input whose CCs drive this editor's knobs — e.g. a MiniLab, or any controller. The pedal itself stays on the Connect port above.">ctrl
+    <select id="ctrlin"><option value="">(none)</option></select></label>
+  <button id="cclearn" title="Arm MIDI learn: move a knob on your controller and it binds to the next unbound knob of the slot you last touched. Move nine knobs, then six pads, to map the controls.">MIDI learn</button>
+  <button id="pastehex" title="Paste a patch someone shared as a hex string (f0 52 00 61 28 ... f7, 146 bytes). Loads it into the edit buffer so you hear it straight away; nothing is written to flash until you Store.">Paste patch</button>
+  <button id="copyhex" title="Copy the current patch as a hex string, to paste to someone else.">Copy patch hex</button>
   <button id="diagtoggle" title="Show the log, MIDI trace, auto-apply and the param probe">Show diagnostics</button>
 </div>
 <!-- Everything below is diagnostics / advanced: hidden behind "Show diagnostics"
@@ -390,6 +422,7 @@ Serve over <code>http://localhost</code> — see the comments in this file.</p>
   <button id="sendall" title="Blind-write PE's WHOLE model to the edit buffer: no re-read, no merge, and it will overwrite slots you never touched plus any knob you moved on the pedal. A buffer write alone does NOT make params take effect (see docs/MIDI-PARAM-EDIT.md) — use Apply instead. Kept for recovery only.">Send patch (blind)</button>
   <button id="sync" title="Same blind whole-model buffer write as Send patch. Added when we believed a buffer write 'materialised' params; it does not. Superseded by Apply.">Sync pedal (blind)</button>
   <span class="hint" style="margin-left:12px">repair:</span>
+  <button id="bwtest" title="Measure whether a 0x28 buffer write actually carries PARAMETER values, slot by slot. Sends NO 0x31 at all -- writes the buffer, re-reads, and reports which slots kept the value. This is the one thing never measured: slots 1-3 may only ever have worked via live 0x31, with the write path broken all along.">Buffer-write test</button>
   <button id="repair" title="Clear ALL SIX slots of the current patch and restore maxfx to 6, so every slot is usable again. For a patch that has been truncated -- effects missing, slots that will not hold an effect. Buffer only; Store to keep.">Repair patch</button>
   <span class="hint" style="margin-left:12px" title="patch.dsp bits, shown as filled/empty. Assumed to mean DSP-full per slot but never verified against hardware.">dsp?</span>
   <span class="dsp" id="dsp" title="patch.dsp bits — meaning UNVERIFIED"></span>
@@ -419,6 +452,8 @@ Serve over <code>http://localhost</code> — see the comments in this file.</p>
 </div>
 
 
+<p class="hint" id="saveHelp">Apply to hear changes. Save to keep them after switching patches.</p>
+<p id="operationStatus" role="status" aria-live="polite">Offline — import a patch to explore</p>
 <div class="main">
   <section class="strip panel" id="libpanel">
     <h2><button class="collapse" id="libcol" title="collapse / expand">▾</button>My Library
@@ -456,6 +491,44 @@ Serve over <code>http://localhost</code> — see the comments in this file.</p>
 </div>
 <div id="log" hidden></div>
 
+<dialog id="libraryDrawer" class="drawer" aria-labelledby="libraryTitle">
+  <div class="drawer-head"><h2 id="libraryTitle">Library</h2><button type="button" data-close="libraryDrawer" aria-label="Close library">✕</button></div>
+  <div class="bar" role="tablist" aria-label="Patch libraries">
+    <button id="pedalTab" role="tab" aria-selected="true" aria-controls="pedalPane">Pedal memory</button>
+    <button id="browserTab" role="tab" aria-selected="false" aria-controls="browserPane" tabindex="-1">My Library</button>
+  </div>
+  <div id="pedalPane" role="tabpanel" aria-labelledby="pedalTab"></div>
+  <div id="browserPane" role="tabpanel" aria-labelledby="browserTab" hidden></div>
+  <section><h3>Share a patch</h3><p class="hint">Import into the editor, or export the patch you are editing. Saving to pedal is a separate action.</p><div id="shareTools" class="bar"></div></section>
+</dialog>
+<dialog id="settingsDrawer" class="drawer" aria-labelledby="settingsTitle">
+  <div class="drawer-head"><h2 id="settingsTitle">Settings</h2><button type="button" data-close="settingsDrawer" aria-label="Close settings">✕</button></div>
+  <details open><summary>Appearance</summary><div id="appearanceTools" class="bar"></div></details>
+  <details><summary>MIDI controller</summary><p class="hint">Use an external controller to move knobs and select effect slots.</p><div id="controllerTools" class="bar"></div></details>
+  <details><summary>Advanced</summary><div id="advancedTools" class="bar"></div><h3>Pedal bank backup</h3><p class="hint">Back up before replacing stored patches. Restore overwrites pedal memory.</p><div id="bankTools" class="bar"></div></details>
+  <details id="diagnosticsSection"><summary>Diagnostics</summary><p class="hint">Troubleshooting and recovery tools. Blind writes replace the whole edit buffer.</p><label><input type="checkbox" id="showProbes"> Show diagnostic probes in effect lists</label><div id="diagnosticTools"></div></details>
+</dialog>
+<dialog id="patchPasteDialog" aria-labelledby="patchPasteTitle">
+  <form method="dialog">
+    <h2 id="patchPasteTitle">Paste patch</h2>
+    <label for="patchHexInput">Patch hex (146 bytes)</label>
+    <textarea id="patchHexInput" rows="8" style="display:block;width:min(70vw,640px);margin:12px 0" spellcheck="false"></textarea>
+    <button value="cancel">Cancel</button><button value="load">Load patch</button>
+  </form>
+</dialog>
+<dialog id="reloadBankDialog" aria-labelledby="reloadBankTitle" aria-describedby="reloadBankHelp">
+  <form method="dialog">
+    <h2 id="reloadBankTitle">Reload bank?</h2>
+    <p id="reloadBankHelp">Load all 50 pedal patches into the Library?<br>Mute your amp first—the pedal cycles through every patch.</p>
+    <button value="no" autofocus>No</button>
+    <button value="yes">Yes</button>
+  </form>
+</dialog>
+<footer id="noticeBar" aria-label="Editor notifications">
+  <span class="hint">Latest update</span>
+  <span id="noticeText" role="status" aria-live="polite" aria-atomic="true">Ready.</span>
+  <button id="clearNotice" aria-label="Clear notification" title="Clear notification">✕</button>
+</footer>
 <script>
 "use strict";
 /* ---------- patch codec (bit tables ported from g200kg/zoom-ms-utility, MIT) */
@@ -519,13 +592,15 @@ function encodePatch(p, base){
   const d=(base&&base.length===146)?base.slice():EMPTY146.slice();
   const nm=(p.name||"").padEnd(10," ").slice(0,10);
   // Force 7-bit: a byte >0x7F is illegal in SysEx and corrupts the patch.
-  for(let i=0;i<10;i++)d[NAMIDX[i]]=(nm.charCodeAt(i)||0x20)&0x7f;
+  const nameChanged=!(base&&base.length===146)||p.name!==decodePatch(base).name;
+  if(nameChanged) for(let i=0;i<10;i++)d[NAMIDX[i]]=(nm.charCodeAt(i)||0x20)&0x7f;
   // Bytes 133/141 (and 125 bit6) are Zoom 7-in-8 COLLECTORS carrying bit 7 of the
   // name characters. With the old EMPTY146 base they were always zero, so nothing
   // cleared them; now that we write on top of the pedal's own dump, a stale bit
   // here ORs 0x80 into a name char and the name comes back garbled. libRename
-  // already did this — encodePatch has to as well, for the same reason.
-  d[125]&=~0x40; d[133]=0; d[141]&=~0x03;
+  // already did this. Only clear them on an actual rename: parameter edits
+  // must preserve the complete name region byte-for-byte.
+  if(nameChanged){ d[125]&=~0x40; d[133]=0; d[141]&=~0x03; }
   for(let s=0;s<6;s++)for(let k=0;k<11;k++)setBits(d,BITS[s][k],p.fx[s][k]);
   if(base&&base.length===146)
     for(const [byte,mask] of NZBITS) d[byte]=(d[byte]&~mask)|(base[byte]&mask);
@@ -751,6 +826,56 @@ const DB={
    "cover": "AAAAAAAAAAAAAAAAAAAAAH////////////////////5////////////////////+f////////////////////n////////////////////5//////8IEyfz4cP/////+f//////CBMn8+HD//////n//////PnwJ8yfP//////5//////zIcCfM58//////+f/////8yHAnzOfP//////n//////MnzJ8z58//////5//////wIEyBAgQP/////+f//////CBMgc4cP//////n////////////////////5////////////////////+f////////////////////kAAAAAAAAIAACAAAAAAAAJAAAAAAAANgADYAAAAAAACQAAAAAAAMmADJgAAAAAAAkAAAAAAAEIQBCEAAAAAAAJAAAAAAABHEARxAAAAAAACQAAAAAAA35gN+YAAAAAAAkAAAAAAAGJQBiUAAAAAAAJAAAAAAAAgIAICAAAAAAACQAAAAAAAEEABBAAAAAAAAkAAAAAAAA+AAPgAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAA8AAgAAAAAAAJAAAAAAAgAQwA2AAAAAAACQAAAAAAGAICAwYAAAAAAAkAAAAAAAecAdwB4AAAAAAJAAAAAAAAYAAgAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAFJQAAAA5K4AAABXMwAJAABVUAAAAEroAAAAUkQACQAAdXAAAABK7AAAAHIiAAkAAHVwAAAASqgAAABSEQAJAABSUAAAAESuAAAAV2YACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAgAAAAABAAAAAACAAAkAAA+AAAAAB8AAAAAD4AAJAAASQAAAAAkgAAAABJAACQAAYjAAAAAxGAAAABiMAAkAAEIQAAAAIQgAAAAQhAAJAACCCAAAAEEEAAAAIIIACQAAQBAAAAAgCAAAABAEAAkAAGAwAAAAMBgAAAAYDAAJAAAQQAAAAAggAAAABBAACQAADYAAAAAGwAAAAANgAAkAAAIAAAAAAQAAAAAAgAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJ////////////////////+AAAAAAAAAAAAAAAAAAAAAA=="
   },
   {
+   "name": "Gyre",
+   "fxid": 484,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1078461200,
+   "params": [
+    {
+     "name": "Size",
+     "max": 100,
+     "default": 45
+    },
+    {
+     "name": "Feed",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "Decay",
+     "max": 100,
+     "default": 0
+    },
+    {
+     "name": "Rise",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Glide",
+     "max": 100,
+     "default": 0
+    },
+    {
+     "name": "Span",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Tone",
+     "max": 100,
+     "default": 55
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 50
+    }
+   ],
+   "cover": "AAAAAAAAAAAAAAAAAAAAAH////////////////////5////////////////////+f////////////////////n////////////////////5////////wmQ4H///////+f///////8JkOB////////n///////8/nMn////////5////////M5w4f///////+f///////zOcOH////////n///////8znMn////////5////////A5zIH///////+f///////8OcyB////////n////////////////////5////////////////////+f////////////////////kAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAA4AAAAAAAAAJAAAAAAAAAAB+AAAAAAAACQAAAAAAAAAeAfgAAAAAAAkAAAAAAAAB4fwGAAAAAAAJAAAAAAAAHgADAYAAAAAACQAAAAAAAOBgAIBAAAAAAAkAAAAAAAMHgABwMAAAAAAJAAAAAAAECQAACBAAAAAACQAAAAAABBCAAAgQAAAAAAkAAAAAAAgQQAAIEAAAAAAJAAAAAAAICAAAEBAAAAAACQAAAAAABAYAABAgAAAAAAkAAAAAAAYB4AfgwAAAAAAJAAAAAAABgB/4AwAAAAAACQAAAAAAAHAAAAwAAAAAAAkAAAAAAAAPAAHwAAAAAAAJAAAAAAAAAP/+AAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAN3cAAAA7uwAAAGcyUAJAAEIUAAAAIiKAAABURSACQAAiJgAAADMygAAAVkcgAkAAEkQAAAAiIoAAAFRFIAJAAGd3AAAAI7sAAABnNSACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAgAAAAABAAAAAACAAAkAAA+AAAAAB8AAAAAD4AAJAAASQAAAAAkgAAAABJAACQAAYjAAAAAxGAAAABiMAAkAAEIQAAAAIQgAAAAQhAAJAACCCAAAAEEEAAAAIIIACQAAQBAAAAAgCAAAABAEAAkAAGAwAAAAMBgAAAAYDAAJAAAQQAAAAAggAAAABBAACQAADYAAAAAGwAAAAANgAAkAAAIAAAAAAQAAAAAAgAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJ////////////////////+AAAAAAAAAAAAAAAAAAAAAA=="
+  },
+  {
    "name": "Howl",
    "fxid": 458,
    "gid": 8,
@@ -935,7 +1060,7 @@ const DB={
     {
      "name": "Flutter",
      "max": 100,
-     "default": 50
+     "default": 30
     },
     {
      "name": "FlutSpd",
@@ -950,7 +1075,7 @@ const DB={
     {
      "name": "HeadBmp",
      "max": 100,
-     "default": 50
+     "default": 25
     },
     {
      "name": "Output",
@@ -1190,7 +1315,7 @@ const DB={
     {
      "name": "Mix",
      "max": 100,
-     "default": 50
+     "default": 35
     }
    ],
    "cover": "AAAAAAAAAAAAAAAAAAAAAH////////////////////5////////////////////+f////////////////////n////////////////////5///////+EPnzn///////+f///////hD585////////n///////nzJkyf///////5///////+cOZMn///////+f///////nDmTJ////////n///////+T5kyf///////5///////4E+BAgf//////+f//////+HP584H///////n////////////////////5////////////////////+f////////////////////kAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAB////////AAAAAAkAAAAABxHAAAABycAAAAAJAAAAAAwQYAAAAwhgAAAACQAAABMYEDAAAAQIEQAAAAkAAAAiMBAYAAAMCBjAAAAJAAAAYiB8CAAAGD4MSAAACQAAAEZAxgQAABBjBEQAAAkAAABEQYMEAAAQwYREAAAJAAAARH8R/AAAH4j8RAAACQAAAERBgwQAABDBhEwAAAkAAABGQMYEH/wQYwRIAAAJAAAAIiB8CBAEGD4MQAAACQAAADMwEBh1V4wIGYAAAAkAAAAxGBAx3/zECBEAAAAJAAAAAAwQbwAAewhgAAAACQAAAAAHEfgAAA/JwAAAAAkAAAAAAP4AAAAA/wAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAB3ViAAAAM6gAAAB3dgAJAAJHVQAAACkoAAAAREUACQACZ2UAAAApKAAAAGZlAAkAAkVFAAAAKRAAAABERQAJAAJ1QgAAADOQAAAAR3YACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAgAAAAABAAAAAACAAAkAAA+AAAAAB8AAAAAD4AAJAAASQAAAAAkgAAAABJAACQAAYjAAAAAxGAAAABiMAAkAAEIQAAAAIQgAAAAQhAAJAACCCAAAAEEEAAAAIIIACQAAQBAAAAAgCAAAABAEAAkAAGAwAAAAMBgAAAAYDAAJAAAQQAAAAAggAAAABBAACQAADYAAAAAGwAAAAANgAAkAAAIAAAAAAQAAAAAAgAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJ////////////////////+AAAAAAAAAAAAAAAAAAAAAA=="
@@ -1226,6 +1351,11 @@ const DB={
      "name": "Mix",
      "max": 100,
      "default": 50
+    },
+    {
+     "name": "Capture",
+     "max": 2,
+     "default": 0
     }
    ],
    "cover": "AAAAAAAAAAAAAAAAAAAAAH////////////////////5////////////////////+f////////////////////n////////////////////5///////hA58IHD//////+f//////4QOfCBw///////n//////5/OZP5z///////5///////nzgc+fP//////+f//////584HPnz///////n///////nOZ85/P//////5//////+BzmQIED//////+f//////h85kOBD///////n////////////////////5////////////////////+f////////////////////kAAAAAAAAABAAAAAAAAAAJAAAAAAAAAAQAAAAAAAAACQAAAAAB8AAEAAAAAAAAAAkAAAAAAggABAAAAAAAAAAJAAAAAAQEAAAwGAwAAAAACQAAAAAYAwAESCQSAAAAAAkAAAAAEACAAIhEIhAAAAAJAAAAACAAQASEQiEQAAAACQAAAAAAACAEBIJBIAAAAAkAAAAAAAAcZAOBwOAAAAAJAAAAAAAAA4QAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAABAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAEAAAAAAAAAAkAAAAAAAAABAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAEdTdQAAAyKwAAAGcyUAJABEdCUAAAKiqAAABURSACQARnUnAAADIrAAAAVkcgAkAERVJQAAAqKoAAAFRFIAJAB3UyUAAAM5qAAABnNSACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAgAAAAABAAAAAACAAAkAAA+AAAAAB8AAAAAD4AAJAAASQAAAAAkgAAAABJAACQAAYjAAAAAxGAAAABiMAAkAAEIQAAAAIQgAAAAQhAAJAACCCAAAAEEEAAAAIIIACQAAQBAAAAAgCAAAABAEAAkAAGAwAAAAMBgAAAAYDAAJAAAQQAAAAAggAAAABBAACQAADYAAAAAGwAAAAANgAAkAAAIAAAAAAQAAAAAAgAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJ////////////////////+AAAAAAAAAAAAAAAAAAAAAA=="
@@ -10357,6 +10487,26 @@ const DB={
     }
    ],
    "cover": "AAAAAAAAAAAAAAAAAAAAAH////////////////////5////////////////////+f////////////////////n////////////////////5/////gQ+ECZzgcJn////+f////4EPhAmc4HCZ/////n////+fMnz5kznPmf////5/////hzJkOBA5z4H////+f////4cyZDgQOc+B/////n////+fMmT4EznPmf////5/////gQIECBM5wJn////+f////4EPhAmTOfCZ/////n////////////////////5////////////////////+f////////////////////kAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAFVTdgAAAAFVTdmAAAJAAABXVEUAAAABXVEUQAACQAAAV1JlAAAAAV1JlIAAAkAAAFVRRQAAAAFVRRUAAAJAAAA1NnYAAAAA1NnZwAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAgAAAAAAAAIAAAAAkAAAAA+AAAAAAAAPgAAAAJAAAAASQAAAAAAAEkAAAACQAAAAYjAAAAAAAGIwAAAAkAAAAEIQAAAAAABCEAAAAJAAAACCCAAAAAAAgggAAACQAAAAQBAAAAAAAEAQAAAAkAAAAGAwAAAAAABgMAAAAJAAAAAQQAAAAAAAEEAAAACQAAAADYAAAAAAAA2AAAAAkAAAAAIAAAAAAAACAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJ////////////////////+AAAAAAAAAAAAAAAAAAAAAA=="
+  },
+  {
+   "name": "MatProb",
+   "fxid": 496,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1080034064,
+   "params": [
+    {
+     "name": "Gain",
+     "max": 100,
+     "default": 0
+    },
+    {
+     "name": "Tone",
+     "max": 100,
+     "default": 50
+    }
+   ],
+   "cover": "AAAAAAAAAAAAAAAAAAAAAH////////////////////5////////////////////+f////////////////////n////////////////////5//////zOcCHD5w//////+f/////8znAhw+cP//////n//////Amc5kyZM//////5//////wIHOHDmQ//////+f/////8CBzhw5kP//////n//////Mmc58yZM//////5//////zJnOfMgQP/////+f/////8yZznzOcP//////n////////////////////5////////////////////+f////////////////////kAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAMnUAAAAAAHJXAAAAJAAAAEUnAAAAAAAldAAAACQAAABXJwAAAAAAJXYAAAAkAAAAVSUAAAAAACVUAAAAJAAAADV1AAAAAAAiVwAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAgAAAAAAAAIAAAAAkAAAAA+AAAAAAAAPgAAAAJAAAAASQAAAAAAAEkAAAACQAAAAYjAAAAAAAGIwAAAAkAAAAEIQAAAAAABCEAAAAJAAAACCCAAAAAAAgggAAACQAAAAQBAAAAAAAEAQAAAAkAAAAGAwAAAAAABgMAAAAJAAAAAQQAAAAAAAEEAAAACQAAAADYAAAAAAAA2AAAAAkAAAAAIAAAAAAAACAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJ////////////////////+AAAAAAAAAAAAAAAAAAAAAA=="
   }
  ],
  "legacy": [
@@ -10968,31 +11118,90 @@ let library=new Array(50).fill(null), libraryRaw=new Array(50).fill(null), pendi
 let curProg=0;                                 // currently-loaded program (was the top-bar dropdown)
 const $=id=>document.getElementById(id);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-// Wait for any in-flight MIDI op to finish, but NEVER block forever: after the
-// timeout, proceed anyway (a stuck busy/syncing flag must not brick the UI).
-async function waitIdle(ms){ const t=performance.now(); while((busy||syncing)&&performance.now()-t<(ms||3000)) await sleep(100); }
+// One user transaction owns MIDI until its reads and scheduled writes finish.
+let busySince=0, midiActionActive=false, actionCancelled=false, patchGeneration=0;
+let expectedProgram=null, dumpCooldownUntil=0;
+function cancelDump(){
+  const req=pendingDump;
+  if(!req)return;
+  pendingDump=null; clearTimeout(req.t); req.res(null);
+}
+function midiAction(fn){
+  return async function(...args){
+    if(midiActionActive||busy||syncing){ banner("Pedal operation in progress — wait for it to finish."); return false; }
+    midiActionActive=true; actionCancelled=false; updateActionState();
+    try{ return await fn.apply(this,args); }
+    catch(e){ cancelDump(); banner("Operation stopped: "+(e.message||e)); return false; }
+    finally{
+      await sleep(Math.max(0,nextSend-performance.now()));
+      cancelDump(); busy=false; syncing=false; midiActionActive=false; updateActionState();
+      if(autoApplyPending){ autoApplyPending=false; autoApplyMaybe(); }
+    }
+  };
+}
+async function waitIdle(ms){
+  const until=performance.now()+(ms||3000);
+  while(busy||syncing){
+    if(performance.now()>=until) throw new Error("Pedal is still busy; no new operation was started.");
+    await sleep(50);
+  }
+}
+function updateEditorHeading(){
+  if(!$("currentPatch"))return;
+  const connected=!!midiOut&&midiOut.state!=="disconnected";
+  $("connectionState").textContent=connected?"● Connected":"○ Offline";
+  $("currentPatch").textContent=patch?((connected?String(curProg+1).padStart(2,"0")+" · ":"")+(patch.name||"Untitled")):"No patch loaded";
+  $("editStatus").textContent=hasLocalEdits&&editPatchGeneration===patchGeneration?"Unsaved changes":"";
+  if($("emptyEditor"))$("emptyEditor").hidden=!!patch;
+}
+function updateActionState(){
+  updateEditorHeading();
+  const active=midiActionActive||busy||syncing;
+  const connected=!!midiOut && midiOut.state!=="disconnected";
+  const writable=connected&&!READ_ONLY;
+  for(const id of ["readall","backup","reread","snapA","snapB","locsaveall"]){
+    const el=$(id); if(el)el.disabled=active||!connected;
+  }
+  for(const id of ["store","storebtn","sendall","sync","repair","bwtest","pbSend","pbSweep"]){
+    const el=$(id); if(el)el.disabled=active||!writable||!patch;
+  }
+  for(const id of ["restoreBtn","locwriteall"]){const el=$(id);if(el)el.disabled=active||!writable;}
+  for(const id of ["pastehex","impsyx","connect"]){const el=$(id);if(el)el.disabled=active;}
+  for(const id of ["copyhex","expsyx"]){const el=$(id);if(el)el.disabled=!patch;}
+  const status=$("operationStatus");
+  if(status)status.textContent=active?"Working…":!connected?(patch?"Offline — editing locally":"Offline — import a patch to explore"):READ_ONLY?"Read-only pedal":"Apply edits to hear them · Store to keep them";
+  for(const el of document.querySelectorAll("#slots select, #slots button")) el.disabled=active||(connected&&READ_ONLY);
+  for(const el of document.querySelectorAll('#librows button, #librows [role="button"]')){
+    el.disabled=active||!writable;el.setAttribute("aria-disabled",String(active||!writable));
+  }
+  for(const el of document.querySelectorAll('#slots [role="slider"]')){
+    el.setAttribute("aria-disabled",String(active||(connected&&READ_ONLY)));
+  }
+}
+function editingBlocked(){return midiActionActive||busy||syncing||READ_ONLY;}
 const LOGBUF=[], MIDIBUF=[];                    // always-on capture for the diag button
 const _ts=()=>(performance.now()/1000).toFixed(2).padStart(7);
 function log(s,cls){const el=$("log");
   LOGBUF.push(_ts()+"  "+(cls?`[${cls}] `:"")+s); if(LOGBUF.length>500)LOGBUF.shift();
-  el.innerHTML+=(cls?`<span class="${cls}">`:"")+s+(cls?"</span>":"")+"\n";el.scrollTop=el.scrollHeight;}
+  const line=document.createElement("span"); if(cls)line.className=cls;
+  line.textContent=s+"\n"; el.appendChild(line); el.scrollTop=el.scrollHeight;}
 function midiRec(dir,bytes){                    // record EVERY MIDI msg (in + out), regardless of the trace checkbox
   MIDIBUF.push(_ts()+" "+dir+" "+hex(Array.from(bytes).slice(0,32))+(bytes.length>32?` …(${bytes.length}B)`:""));
   if(MIDIBUF.length>400)MIDIBUF.shift();}
-// Banners clear themselves after a few seconds — they stacked up and pushed the
-// editor down the page otherwise. Hovering pauses the countdown so a long message
-// can't vanish mid-read, and the message is always in the log regardless.
-const BANNER_MS=6000;
-function banner(msg){const b=document.createElement("div"); b.className="errband";
-  const t=document.createElement("span"); t.textContent=msg; b.appendChild(t);
-  const x=document.createElement("button"); x.className="errx"; x.textContent="\u2715"; x.title="dismiss";
-  let timer=null;
-  const kill=()=>{ if(timer){clearTimeout(timer); timer=null;} b.remove(); };
-  const arm=()=>{ if(timer) clearTimeout(timer); timer=setTimeout(kill,BANNER_MS); };
-  x.onclick=kill; b.appendChild(x);
-  b.addEventListener("mouseenter",()=>{ if(timer){clearTimeout(timer); timer=null;} });
-  b.addEventListener("mouseleave",arm);
-  document.body.insertBefore(b,document.body.children[2]); log(msg,"warn"); arm();}
+// Keep the latest notice in a stable bottom bar; the log keeps the history.
+function banner(msg){
+  $("noticeText").textContent=msg;
+  log(msg,"warn");
+}
+$("clearNotice").onclick=()=>{$("noticeText").textContent="Ready.";};
+// Modal dialogs occupy the browser's top layer. Carry the same bar into the
+// active dialog so notices remain visible, then return it on close.
+const noticeObserver=new MutationObserver(()=>{
+  const dialogs=Array.from(document.querySelectorAll("dialog[open]"));
+  const owner=dialogs[dialogs.length-1]||document.body;
+  if($("noticeBar").parentElement!==owner)owner.appendChild($("noticeBar"));
+});
+for(const dialog of document.querySelectorAll("dialog"))noticeObserver.observe(dialog,{attributes:true,attributeFilter:["open"]});
 function hex(a){return Array.from(a,x=>x.toString(16).padStart(2,"0")).join(" ");}
 
 let TRACE=false, lastEnable=0, editModeActive=false, syncing=false, rxCount=0;
@@ -11009,15 +11218,17 @@ let nextSend=0;
 const WRITE_CMDS=new Set([0x28,0x31,0x32,0x33]);
 function send(bytes){
   if(!midiOut) return;
+  if(actionCancelled&&midiActionActive) throw new Error("Patch changed on the pedal during this operation. Re-read before retrying.");
+  if(bytes[0]===0xc0){expectedProgram=bytes[1]; patchGeneration++; cancelDump();}
   if(READ_ONLY && bytes.length>4 && bytes[0]===0xf0 && bytes[1]===0x52 && WRITE_CMDS.has(bytes[4])){
     log(`blocked a write (cmd 0x${bytes[4].toString(16)}) — this pedal reports device `
        +`0x${DEVID.toString(16)}, and the patch layout here is mapped only for the `
        +`MS-70CDR (0x61). Reading is safe and useful; writing is not.`,"warn");
-    return;
+    throw new Error("Writes are disabled for this pedal model.");
   }
   const now=performance.now();
   const t=Math.max(now, nextSend);
-  try{ midiOut.send(bytes, t); }catch(e){ midiOut.send(bytes); }
+  midiOut.send(bytes, t);
   nextSend = t + (bytes.length>=64 ? 22 : 3);   // ms gap after this message
   if(bytes.length===146) lastTxPatch=Array.from(bytes);   // keep for byte-level diffing
   midiRec("→",bytes);
@@ -11053,12 +11264,22 @@ async function materialize(){
 function editEnable(){                             // called before any live edit
   const t=performance.now();
   if(t-lastEnable>1000){ send(zx([0x50])); lastEnable=t; }
-  if(!editModeActive){ editModeActive=true; materialize(); }
+  editModeActive=true;
 }
 
+async function offerBankReload(){
+  const reload=await new Promise(resolve=>{
+    const dialog=$("reloadBankDialog");
+    dialog.returnValue="no";
+    dialog.onclose=()=>resolve(dialog.returnValue==="yes");
+    dialog.showModal();
+  });
+  if(reload)await readAll();
+}
 async function connect(){
   try{
     const acc=await navigator.requestMIDIAccess({sysex:true});
+    midiAccess=acc;
     let inp=null,out=null;
     for(const i of acc.inputs.values()) if(/zoom ms/i.test(i.name)) inp=i;
     for(const o of acc.outputs.values()) if(/zoom ms/i.test(o.name)) out=o;
@@ -11068,17 +11289,24 @@ async function connect(){
     }
     if(!inp||!out){ banner("No MIDI ports found. Pedal on USB and powered? Effect Manager closed?"); return; }
     midiIn=inp; midiOut=out; rxCount=0;
+    refreshCtrlInputs();
+    if($("ctrlin") && $("ctrlin").value) bindCtrlInput($("ctrlin").value);
     const ins=[...acc.inputs.values()].map(i=>i.name), outs=[...acc.outputs.values()].map(o=>o.name);
     log("IN  ports: "+(ins.join(" | ")||"(none)"));
     log("OUT ports: "+(outs.join(" | ")||"(none)"));
     log("using IN=\""+inp.name+"\"  OUT=\""+out.name+"\"");
     midiIn.onmidimessage=onMidi;
+    // Assigning onmidimessage is meant to open the port implicitly. Do it
+    // explicitly too: it is one await, and it turns a silent no-input failure
+    // into something with a state we can actually report.
+    try { await midiIn.open(); } catch(e){ log("input open() failed: "+e.message, "warn"); }
     log("IN port state: "+inp.state+"/"+inp.connection+"  OUT: "+out.state+"/"+out.connection);
     // If the pedal is unplugged/replugged (or Effect Manager grabs and releases
     // it), the old port object goes stale and rxCount stays 0 forever. Re-bind
     // automatically when the device comes back.
     acc.onstatechange=ev=>{
       const p=ev.port;
+      if(p===midiIn || p===midiOut){if(p.state==="disconnected"){actionCancelled=true;cancelDump();}updateActionState();}
       log("MIDI "+p.type+" \""+p.name+"\" -> "+p.state+"/"+p.connection);
       if(p.state==="connected"&&/zoom ms/i.test(p.name)){
         if(p.type==="input"){ midiIn=p; midiIn.onmidimessage=onMidi; log("re-bound IN to "+p.name); }
@@ -11093,28 +11321,45 @@ async function connect(){
     // program-change to it, which makes the pedal AUDIBLY load+play each of the
     // 50 patches (the "cracking on connect"). Leave the full read to an explicit
     // "Reload bank" so it only happens when the user wants it (amp muted).
-    log('connected — current patch loaded. Click "Reload bank" to list all 50 '
-      + '(heads-up: the pedal cycles through every patch out loud — mute your amp first).');
+    await offerBankReload();
   }catch(e){
     banner("MIDI access failed: "+e.message+" — check: Chrome/Edge? localhost? Did you allow the MIDI permission prompt? Is Zoom Effect Manager closed (it locks the port)?");
   }
 }
-function requestPatch(){ send(zx([0x29])); }
+function requestPatch(){ return midiAction(reread)(); }
 async function reread(){                        // explicit: await the dump and report
   if(!midiOut){banner("Connect MIDI first.");return;}
   send(zx([0x50])); await sleep(20);            // edit-enable: the pedal only dumps patches in this mode
-  send(zx([0x29]));
   const d=await awaitDump(1300);
-  if(d){ rawPatch=d.slice(0,146); rawFromPedal=d.slice(0,146); patch=decodePatch(rawPatch); editModeActive=false; render();
+  if(d){ dirty.clear(); rawPatch=d.slice(0,146); rawFromPedal=d.slice(0,146); patch=decodePatch(rawPatch); editModeActive=false; render();
     log("re-read OK: "+patch.name);
+    // EVERY patch switch in PE lands here, not in handleSysex's unsolicited-dump
+    // branch: reread() awaits the dump, so handleSysex takes its `pendingDump`
+    // early return and never reaches the replay. Hooking only that branch meant
+    // the replay fired on connect and on a pedal-side edit -- and never on the one
+    // action it exists for. Replay unconditionally here: a re-read is always an
+    // explicit reload of pedal state, and it is far too infrequent to need a gate.
+    lastMaterializedProg = curProg;
+    replayParams([0,1,2], `on re-read of patch ${curProg+1}`);
     banner("Re-read \u201c"+patch.name+"\u201d from the pedal \u2014 PE now matches the hardware."); }
   else log("re-read: NO dump. MIDI msgs received since connect = "+rxCount
            +(rxCount===0?" (0 = we're not receiving — wrong IN port, or Effect Manager has the port)"
                         :" (>0 = pedal talks but sent no patch dump — try power-cycling the pedal)"),"warn");
 }
-function awaitDump(timeout){
-  return new Promise(res=>{
-    pendingDump={res,t:setTimeout(()=>{pendingDump=null;sxAccum=null;res(null);},timeout||900)};
+async function awaitDump(timeout){
+  if(pendingDump) throw new Error("A patch read is already pending.");
+  await sleep(Math.max(0,dumpCooldownUntil-performance.now(),nextSend-performance.now()));
+  if(pendingDump) throw new Error("A patch read is already pending.");
+  return new Promise((res,reject)=>{
+    const req={res,t:null,generation:patchGeneration};
+    pendingDump=req; sxAccum=null;
+    req.t=setTimeout(()=>{
+      if(pendingDump!==req)return;
+      pendingDump=null; sxAccum=null; dumpCooldownUntil=performance.now()+200;
+      res(null);
+    },timeout||900);
+    try{ send(zx([0x29])); }
+    catch(e){clearTimeout(req.t);if(pendingDump===req)pendingDump=null;reject(e);}
   });
 }
 
@@ -11138,8 +11383,14 @@ function onMidi(ev){
   }else if(sxAccum){
     for(const b of d){ if(b<=0x7f || b===0xf7) sxAccum.push(b); }  // drop interleaved status bytes
   }else if(b0===0xC0){                   // standalone program-change echo
+    if(expectedProgram===d[1]){ expectedProgram=null; }
+    else {
+      patchGeneration++; cancelDump(); actionCancelled=true;
+      if(midiOut&&midiOut.clear) midiOut.clear();
+      nextSend=performance.now();
+    }
     curProg=d[1]; renderLibrary(); log("program change -> "+d[1]);
-    if(!busy) requestPatch();
+    if(!busy&&!midiActionActive) requestPatch();
     return;
   }else{
     return;                              // other channel bytes: ignore
@@ -11153,15 +11404,35 @@ function onMidi(ev){
 }
 function handleSysex(m){
   if(m[1]===0x52 && m[3]===DEVID && m[4]===0x28 && m.length===146){
-    rawPatch=m.slice(0,146); noteSeenIds(rawPatch);
-    if(pendingDump){clearTimeout(pendingDump.t);const r=pendingDump.res;pendingDump=null;r(rawPatch);return;}
+    const received=m.slice(0,146); noteSeenIds(received);
+    if(pendingDump){
+      const req=pendingDump; pendingDump=null; clearTimeout(req.t);
+      req.res(req.generation===patchGeneration?received:null); return;
+    }
+    if(midiActionActive||busy||performance.now()<dumpCooldownUntil)return;
+    rawPatch=received;
     // Only pair the encode base with the patch we actually DISPLAY. Setting it for
     // every dump would let a bank read leave the base pointing at patch #50 while
     // `patch` is #2 — writes would then splice PE's fields onto the wrong bytes.
     rawFromPedal=m.slice(0,146);
-    patch=decodePatch(rawPatch); editModeActive=false; focusedSlot=-1; offWarned={}; dirty.clear();
-    render();
+    editModeActive=false; focusedSlot=-1; offWarned={}; dirty.clear();
+    reconcilePatch(decodePatch(rawPatch));
     log("patch received: "+patch.name);
+    // A loaded patch arrives with its param block ZEROED as far as the DSP is
+    // concerned -- params[0] included, so an effect returns on its first
+    // instruction and the slot passes dry audio while the screen shows the saved
+    // knobs. That is the load-materialization bug (docs/INIT-MATERIALIZATION.md);
+    // the real fix belongs in each effect's _init and two attempts at it froze
+    // the pedal.
+    //
+    // But the values ARE in the patch, and 0x31 is the one message that reaches a
+    // running effect. So replay them: it is exactly the "wiggle a knob" cure,
+    // done for every knob automatically, from the editor, with no flashing and no
+    // freeze risk. Slots 1-3 only -- 0x31 is ignored on 4-6.
+    if (curProg !== lastMaterializedProg) {
+      lastMaterializedProg = curProg;
+      replayParams([0, 1, 2], `on loading patch ${curProg + 1}`);
+    }
   }else if(m[1]===0x52 && m[3]===DEVID && m[4]===0x31 && m.length>=9){
     // The pedal REPORTS its own knob moves with the very same 0x31 form PE sends
     // (slot, param index, 7-bit lo/hi). Proof that PE's addressing is right — and
@@ -11171,7 +11442,10 @@ function handleSysex(m){
     log(`pedal moved: slot ${s+1} (${nm}) param idx ${pi} = ${v}`);
     if(patch&&patch.fx[s]&&pi>=0&&pi<=10){
       patch.fx[s][pi]= pi===0 ? (v?1:0) : v;
-      render();
+      if(pi>=2) {
+        const knob=(KNOBREG[s]||[])[pi-2];
+        if(knob) knob._receive(v);
+      } else render(); // on/off or effect identity changes the slot structure
     }
   }else if(m[1]===0x52 && m[3]===DEVID && m[4]===0x28){
     log("bad dump ("+m.length+"B, expected 146) — ignored","warn");   // reject misaligned
@@ -11203,7 +11477,236 @@ function handleSysex(m){
 }
 
 /* ---------- edits ------------------------------------------------------ */
+
+/* ---------------------------------------------------------------------------
+ * Control surface: drive this editor's knobs from a hardware MIDI controller.
+ *
+ * The pedal does NOT take CC for parameters -- it wants SysEx 0x31. So a
+ * controller cannot talk to it directly; the editor bridges. A CC arrives here,
+ * finds the on-screen knob it is bound to, and drives that knob's own setter,
+ * which is the same path a mouse drag takes: same send, same dirty marking,
+ * same auto-apply on release. Nothing about the write is reimplemented, so the
+ * two can never drift apart.
+ *
+ * IMPORTANT, and not a bug in this code: slots 4-6 do not sound a live 0x31 --
+ * see LIVE_EDIT_SLOTS. A CC bound there moves the pedal's display and the knob
+ * on screen, and you will hear it only after the auto-apply commits. Slots 1-3
+ * respond immediately. Binding to 4-6 is allowed but warned about once.
+ * ------------------------------------------------------------------------- */
+// Which program PE has already materialized, so a re-read of the SAME patch
+// does not replay on every apply -- only a genuine patch change does.
+let lastMaterializedProg = -1;
+const KNOBREG = [];                 // [slot][knobIndex] -> knob element
+let midiAccess = null;              // kept so the controller list can be rebuilt
+let ctrlIn = null;                  // the controller's MIDIInput
+let ccLearn = false;
+let CCMAP = {};                     // ccNumber  -> {k}  (knob index, slot-relative)
+let PADMAP = {};                    // noteNumber-> {s}  (slot index)
+let activeSlot = 0;                 // the slot the mapped knobs currently address
+const CCKEY = "ms70cdr.ccmap.v2";
+let ccApplyTimer = null;
+let ccWarned4to6 = false;
+
+try {
+  const st = JSON.parse(localStorage.getItem(CCKEY) || "{}") || {};
+  CCMAP = st.cc || {}; PADMAP = st.pad || {};
+} catch(_) { CCMAP = {}; PADMAP = {}; }
+function ccSave(){
+  try { localStorage.setItem(CCKEY, JSON.stringify({cc:CCMAP, pad:PADMAP})); } catch(_){}
+}
+
+/* Knob bindings are SLOT-RELATIVE, and a pad chooses the slot.
+ *
+ * Binding each CC to one fixed slot would spend all eight knobs on a sixth of
+ * the patch. Binding them to a knob INDEX instead, and letting a pad move which
+ * slot they point at, turns eight knobs and six pads into control of the whole
+ * chain -- which is also how every other controller-driven editor behaves, so
+ * it is what a player expects. */
+function setActiveSlot(s){
+  if (s < 0 || s > 5) return;
+  activeSlot = s;
+  lastEditedSlot = s;
+  focusSlot(s);                       // pull the PEDAL's screen to it as well
+  markActiveSlot();
+  const f = patch && patch.fx[s];
+  const nm = f && f[1] && BYID[f[1]] ? BYID[f[1]].name : "empty";
+  log(`pad -> slot ${s+1} (${nm})`);
+  banner(`slot ${s+1} — ${nm}`);
+}
+
+function markActiveSlot(){
+  document.querySelectorAll("#slots .slot").forEach((el,i)=>{
+    el.classList.toggle("padactive", i === activeSlot);
+  });
+}
+
+/* Guided learn. The queue walks every knob index this pedal can show, then the
+ * six pads, naming each one as it goes -- so what you are asked to move and what
+ * it binds to cannot get out of step. Nine knob indices because Oxide has nine
+ * parameters; a MiniLab has eight knobs, so the last one lands on a fader, which
+ * is exactly what the prompt tells you to move. */
+let learnQueue = [];
+let learnIdx = 0;
+// Every control already claimed in THIS pass. A knob sweep is not one message,
+// it is a burst of them: the first bound and advanced the queue, and the rest of
+// the same sweep then claimed the following steps, so one knob could swallow
+// three or four and the whole map came out shuffled. A control gets one step.
+let learnSeenCC = new Set();
+let learnSeenNote = new Set();
+
+function learnLabel(k){
+  const row = KNOBREG[activeSlot] || [];
+  const el = row[k];
+  if (el){ const kl = el.querySelector(".kl"); if (kl && kl.textContent) return kl.textContent; }
+  return "knob " + (k + 1);
+}
+
+function learnPrompt(){
+  const step = learnQueue[learnIdx];
+  const st = $("cclearn");
+  if (!step){ learnStop(true); return; }
+  if (step.type === "knob"){
+    const human = step.k < 8 ? `knob ${step.k+1}` : `fader ${step.k-7}`;
+    st.textContent = `move ${human}`;
+    banner(`MIDI learn ${learnIdx+1}/${learnQueue.length}: move controller ${human}`
+         + `  ->  ${learnLabel(step.k)}`);
+  } else {
+    st.textContent = `hit pad ${step.s+1}`;
+    banner(`MIDI learn ${learnIdx+1}/${learnQueue.length}: hit pad ${step.s+1}`
+         + `  ->  slot ${step.s+1}`);
+  }
+}
+
+function learnAdvance(){
+  learnIdx++;
+  if (learnIdx >= learnQueue.length){ learnStop(true); return; }
+  learnPrompt();
+}
+
+function learnStart(){
+  // Wipe first. Leftovers from an earlier pass survive by CC number, so a knob
+  // you do not happen to move again keeps pointing wherever it used to.
+  CCMAP = {}; PADMAP = {}; ccSave();
+  learnSeenCC = new Set(); learnSeenNote = new Set();
+  learnQueue = [];
+  // Nine knob indices: the widest effect in the pack (Oxide) has nine knobs, and
+  // a map that stopped at eight would leave its last parameter unreachable.
+  for (let k = 0; k < 9; k++) learnQueue.push({type:"knob", k});
+  for (let sl = 0; sl < 6; sl++) learnQueue.push({type:"pad", s: sl});
+  learnIdx = 0;
+  ccLearn = true;
+  $("cclearn").classList.add("on");
+  learnPrompt();
+}
+
+function learnStop(done){
+  ccLearn = false;
+  learnQueue = []; learnIdx = 0;
+  const st = $("cclearn");
+  st.textContent = "MIDI learn";
+  st.classList.remove("on");
+  if (Object.keys(CCMAP).length){
+    const rows = Object.entries(CCMAP)
+      .sort((a,b)=>a[1].k-b[1].k)
+      .map(([c,v])=>`${v.k<8?"knob "+(v.k+1):"fader "+(v.k-7)} = CC${c} -> ${learnLabel(v.k)}`);
+    log("mapping: " + rows.join("  |  "));
+  }
+  banner(done ? "MIDI learn complete — knobs 1-9 and pads 1-6 mapped."
+              : "MIDI learn stopped. What you mapped so far is kept.");
+}
+
+function onCtrlMidi(ev){
+  const d = ev.data;
+  if (d.length < 3) return;
+  const status = d[0] & 0xf0;
+
+  // ---- pads: note on (a note off arrives as 0x80, or 0x90 with velocity 0) ----
+  if (status === 0x90 && d[2] > 0){
+    const note = d[1];
+    if (ccLearn){
+      const step = learnQueue[learnIdx];
+      if (!step || step.type !== "pad"){ return; }       // still on the knobs
+      if (learnSeenNote.has(note)) return;               // pad re-hit / note repeat
+      learnSeenNote.add(note);
+      for (const n of Object.keys(PADMAP)) if (+n === note) delete PADMAP[n];
+      PADMAP[note] = {s: step.s};
+      ccSave();
+      log(`MIDI learn: pad note ${note} -> slot ${step.s+1}`);
+      learnAdvance();
+      return;
+    }
+    const m = PADMAP[note];
+    if (m) setActiveSlot(m.s);
+    return;
+  }
+
+  if (status !== 0xb0) return;                   // control change only
+  const cc = d[1], val = d[2];
+
+  if (ccLearn){
+    // Guided, not first-come. Binding to "the next unbound index" only produces a
+    // 1-to-1 map if you happen to sweep in order -- move knob 3 before knob 2 and
+    // the whole map is off by one for good. The queue names the control to move,
+    // so the pairing cannot drift.
+    const step = learnQueue[learnIdx];
+    if (!step || step.type !== "knob"){ return; }        // waiting for a pad
+    if (learnSeenCC.has(cc)) return;                     // same knob still moving
+    learnSeenCC.add(cc);
+    for (const c of Object.keys(CCMAP)) if (+c === cc) delete CCMAP[c];
+    CCMAP[cc] = {k: step.k};
+    ccSave();
+    log(`MIDI learn: CC ${cc} -> knob ${step.k+1}`);
+    learnAdvance();
+    return;
+  }
+
+  if(editingBlocked())return;
+  const m = CCMAP[cc];
+  if (!m) return;
+  // A binding made before pads existed pinned its own slot; honour it.
+  const s = (m.s === undefined || m.s === null) ? activeSlot : m.s;
+  const el = (KNOBREG[s] || [])[m.k];
+  if (!el || !el._setNorm) return;                // that slot has fewer knobs
+  if (!liveEditable(s) && !ccWarned4to6){
+    ccWarned4to6 = true;
+    log(`CC is driving slot ${s+1}: slots ${LIVE_EDIT_SLOTS+1}-6 don't sound a live edit, `
+      + `so this lands only when auto-apply commits`, "warn");
+  }
+  el._setNorm(val / 127);
+  // A controller has no "released" event, so treat a pause as the end of the
+  // gesture. Without this, slots 4-6 would never commit and would stay silent.
+  if (ccApplyTimer) clearTimeout(ccApplyTimer);
+  ccApplyTimer = setTimeout(() => { ccApplyTimer = null; if (el._release) el._release(); }, 260);
+}
+
+function refreshCtrlInputs(){
+  const sel = $("ctrlin");
+  if (!sel || !midiAccess) return;
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">(none)</option>';
+  for (const inp of midiAccess.inputs.values()){
+    // The pedal is driven by the Connect port; listing it here would let it
+    // fight itself.
+    if (midiIn && inp.id === midiIn.id) continue;
+    const o = document.createElement("option");
+    o.value = inp.id; o.textContent = inp.name;
+    sel.appendChild(o);
+  }
+  sel.value = prev;
+}
+
+function bindCtrlInput(id){
+  if (ctrlIn){ try { ctrlIn.onmidimessage = null; } catch(_){} ctrlIn = null; }
+  if (!id || !midiAccess) return;
+  for (const inp of midiAccess.inputs.values()){
+    if (inp.id === id){ ctrlIn = inp; ctrlIn.onmidimessage = onCtrlMidi;
+      log("controller IN: " + inp.name); break; }
+  }
+}
+
 function sendParam(slot,paramIdx,val){       // paramIdx: 0=on/off, 2..10 knobs
+  // Later slots use verified full-buffer Apply, never unsupported live writes.
+  if(!liveEditable(slot)) return;
   editEnable();
   send(zx([0x31,slot,paramIdx,val&0x7f,(val>>7)&0x7f]));
 }
@@ -11216,7 +11719,7 @@ let focusedSlot=-1;
 // so this is a best guess. Harmless either way (it re-sends a value the slot
 // already has), but if the pedal's screen doesn't follow, that's why.
 function focusSlot(s,force){
-  if(!patch)return;
+  if(!patch||editingBlocked())return;
   const f=patch.fx[s];
   if(!f||!f[1])return;                       // empty slot: nothing to display
   if(!force&&focusedSlot===s)return;         // already focused — don't spam MIDI
@@ -11270,14 +11773,18 @@ function noteSeenIds(raw){
   const p=decodePatch(raw);
   for(let s=0;s<6;s++){ const id=p.fx[s][1]>>>0; if(id) seenOnPedal.add(id); }
 }
+let hasLocalEdits=false, editPatchGeneration=-1;
 const dirty=new Set();
-const markDirty=(s,k)=>dirty.add(s+","+k);
+const dirtyVersions=new Map(); let editRevision=0;
+const markDirty=(s,k)=>{const key=s+","+k;dirty.add(key);dirtyVersions.set(key,++editRevision);hasLocalEdits=true;editPatchGeneration=patchGeneration;updateEditorHeading();};
 function knobOffWarn(s){
   if(offWarned[s])return; offWarned[s]=true;
   banner(`Slot ${s+1} is switched OFF — knob moves won't be audible. Click its toggle (top-right of the slot) to turn it on.`);
   log(`slot ${s+1} is OFF — knob edits stay inaudible until you switch it on`,"warn");
 }
 function sendFullPatch(){
+  if(!midiOut){log("Patch loaded locally — connect MIDI to send it.");return;}
+  if(READ_ONLY)throw new Error("This pedal is read-only.");
   if(!patch){log("nothing to send — read a patch first","warn");return;}
   if(performance.now()-lastEnable>1000){ send(zx([0x50])); lastEnable=performance.now(); }
   editModeActive=true;                       // full patch already carries every value
@@ -11300,21 +11807,19 @@ function storeTo(slotNum){
 // applies appeared to reset each other's values.
 async function readCurrent(settle,timeout){
   send(zx([0x50]));
-  send(zx([0x29]));
   const d=await awaitDump(timeout);
   return (d&&d.length>=146) ? d.slice(0,146) : null;
 }
 async function readOnce(i,settle,timeout){   // PC to slot i, request, await one dump
   send([0xc0,i]); await sleep(settle);
   send(zx([0x50]));                            // re-assert edit-enable (a PC can drop it) so the dump comes
-  send(zx([0x29]));
   const d=await awaitDump(timeout);
   return (d&&d.length>=146) ? d.slice(0,146) : null;
 }
 async function readAll(){
   if(!midiOut){banner("Connect MIDI first.");return;}
   log("reading bank — the pedal will cycle through all 50 patches OUT LOUD (mute your amp). ~8s…","warn");
-  busy=true;
+  busy=true; busySince=performance.now();
   const cur=curProg;
   const miss=[];
   const t0=performance.now();
@@ -11345,7 +11850,7 @@ async function readAll(){
   }
   send([0xc0,cur]); await sleep(40);
   busy=false;
-  requestPatch();
+  await reread();
   renderLibrary();
   const stillMiss=miss.filter(i=>!library[i]).map(i=>i+1);
   log(`bank read in ${((performance.now()-t0)/1000).toFixed(1)}s`
@@ -11387,7 +11892,7 @@ async function restoreBank(file){
   }
   if(!patches.length){banner("no MS-70CDR patches found in that .syx");return;}
   if(!confirm(`Restore ${patches.length} patches — OVERWRITES slots 1..${Math.min(patches.length,50)} on the pedal. Continue?`))return;
-  busy=true;
+  busy=true; busySince=performance.now();
   for(let k=0;k<patches.length&&k<50;k++){
     await writeRaw(k,patches[k]);
     libraryRaw[k]=patches[k].slice(); library[k]=decodePatch(patches[k]);
@@ -11397,12 +11902,12 @@ async function restoreBank(file){
   log(`bank restored: ${Math.min(patches.length,50)} patches`);
 }
 async function refreshCurrent(){
-  send([0xc0,curProg]); await sleep(60); requestPatch();
+  send([0xc0,curProg]); await sleep(60); await reread();
 }
 async function libSwap(i,j){
   if(j<0||j>49||!library[i]||!library[j])return;
   await waitIdle(3000);
-  busy=true;
+  busy=true; busySince=performance.now();
   // Read both slots fresh (never the cache — stale would overwrite edits).
   const ra=await readOnce(i,80,1600);
   const rb=await readOnce(j,80,1600);
@@ -11430,7 +11935,7 @@ async function libRename(i){
   const clean=n.replace(/[^\x20-\x7e]/g,"").slice(0,10);
   const want=clean.replace(/ +$/,"");
   await waitIdle(3000);          // wait out any in-flight op, then take the lock (never blocks forever)
-  busy=true;
+  busy=true; busySince=performance.now();
   // ONE clean write (no retry-flood: hammering the pedal is what corrupts it).
   // This used to start with readOnce() "so no edits are lost" -- but readOnce
   // sends a PROGRAM CHANGE, which makes the pedal reload the slot from flash and
@@ -11476,7 +11981,7 @@ async function libRename(i){
 async function libDelete(i){
   if(!library[i])return;
   if(!confirm(`Erase patch #${i+1} "${library[i].name}" (writes an Empty patch)?`))return;
-  busy=true;
+  busy=true; busySince=performance.now();
   library[i]=emptyPatch();
   await writeSlot(i,library[i]);
   busy=false; renderLibrary(); await refreshCurrent();
@@ -11544,13 +12049,64 @@ async function verifySlots(sentBytes, what){
           +`${changed.length} altered). See the log.`);
   else log(`${what}: verified — all six slots match what was written`);
 }
-function slotSwap(a,b){
+async function slotSwap(a,b){
   if(a===b||!patch)return;
   const t=patch.fx[a]; patch.fx[a]=patch.fx[b]; patch.fx[b]=t;
   if(rawFromPedal&&rawFromPedal.length===146) rawFromPedal=swapNZBits(rawFromPedal,a,b);
   sendFullPatch(); render();
   log(`swapped slot ${a+1} ⇄ ${b+1}`);
-  verifySlots(rawPatch, `swap ${a+1}⇄${b+1}`);
+  await verifySlots(rawPatch, `swap ${a+1}⇄${b+1}`);
+  await replayParams([a,b], "after swap");
+}
+
+/* Replay a slot's knob values as live 0x31 edits.
+ *
+ * A 0x28 patch write moves the effect ids and the values PE displays, but the
+ * pedal's parameter store does not take them -- measured: PE wrote p3=100 and
+ * the pedal's own dump still read 90. So after a drag the moved effect is
+ * running with whatever its new slot held before, and the sound does not match
+ * the knobs until something forces the values through. Wiggling a knob "fixed"
+ * it precisely because a wiggle sends 0x31, which is the one message that does
+ * reach a running effect.
+ *
+ * So: send them ourselves. Only slots 1-3 -- 0x31 is ignored on 4-6, and firing
+ * it there would be noise on the wire pretending to be a fix. */
+/* Pacing WITHOUT setTimeout, deliberately.
+ *
+ * The obvious loop is `sendParam(...); await sleep(12)`. Measured, that is a trap:
+ * browsers clamp setTimeout to 1000 ms in a hidden tab, so the moment you switch
+ * away from the editor a 22-knob replay stretches from 0.3 s to 22 s, dripping
+ * stale values into whatever patch you loaded next. (This cost most of an evening
+ * to find, because every "the replay stops early" symptom was really the clamp.)
+ *
+ * Web MIDI already schedules by timestamp, and send() maintains `nextSend` for
+ * exactly that. So fire the whole burst synchronously and let the MIDI scheduler
+ * space it on the wire: no timers, no clamp, no window where a second replay can
+ * interleave with this one. Uninterruptible, therefore always coherent. */
+function replayParams(slots, why){
+  if(!patch) return;
+  // Arm edit mode by hand before the burst. Otherwise the FIRST sendParam calls
+  // editEnable(), which -- because a re-read clears editModeActive -- kicks off
+  // materialize(): an async 146-byte 0x28 write that lands ~20 ms in, right in the
+  // middle of our 0x31 stream. Sending the enable ourselves keeps the burst clean.
+  send(zx([0x50])); lastEnable=performance.now(); editModeActive=true;
+  let sent=0, skipped=0;
+  for(const s of slots){
+    if(s<0||s>5) continue;
+    const f=patch.fx[s];
+    if(!f||!f[1]) continue;                       // empty slot
+    if(!liveEditable(s)){ skipped++; continue; }
+    const e=BYID[f[1]];
+    const n=e&&e.params?e.params.length:9;
+    for(let k=0;k<n;k++){
+      sendParam(s,k+2,f[k+2]|0);
+      sent++;
+      nextSend += 9;                              // 3 ms from send() + 9 = 12 ms
+    }
+  }
+  if(sent) log(`replayed ${sent} param(s) as live edits ${why} — slots 1-${LIVE_EDIT_SLOTS} only`);
+  if(skipped) log(`slot(s) 4-6 not replayed ${why}: the pedal ignores live 0x31 there, `
+                + `so those keep their old sound until a knob is moved ON THE PEDAL`, "warn");
 }
 function renderLibrary(){
   const root=$("librows"); root.innerHTML=""; root.classList.remove("hint");
@@ -11561,10 +12117,10 @@ function renderLibrary(){
     // local-library patch into this slot (works on empty slots too)
     row.ondragover=ev=>{ev.preventDefault();row.style.outline="2px dashed var(--accent)";};
     row.ondragleave=()=>{row.style.outline="";};
-    row.ondrop=ev=>{ev.preventDefault();row.style.outline="";
+    row.ondrop=midiAction(ev=>{ev.preventDefault();row.style.outline="";
       const t=ev.dataTransfer.getData("text/plain");
-      if(t&&t[0]==="L"){const a=+t.slice(1);if(a!==i)libSwap(a,i);}
-      else if(t&&t[0]==="P"){const m=t.slice(1).split(":");llWriteToSlot(+m[0],+m[1],i);}};
+      if(t&&t[0]==="L"){const a=+t.slice(1);if(a!==i)return libSwap(a,i);}
+      else if(t&&t[0]==="P"){const m=t.slice(1).split(":");return llWriteToSlot(+m[0],+m[1],i);}});
     if(p){
       row.draggable=true;
       row.ondragstart=ev=>{ev.dataTransfer.setData("text/plain","L"+i);ev.dataTransfer.effectAllowed="move";};
@@ -11572,22 +12128,24 @@ function renderLibrary(){
     const num=document.createElement("span");num.className="num";num.textContent=(i+1);
     const nm=document.createElement("span");nm.className="nm";
     nm.textContent=p?(p.name||"(unnamed)"):"…";
-    nm.onclick=async()=>{ await waitIdle(2500); curProg=i;
+    nm.tabIndex=0;nm.setAttribute("role","button");nm.setAttribute("aria-label",`Load patch ${i+1}: ${p?p.name:"unread"}`);
+    nm.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();nm.click();}};
+    nm.onclick=midiAction(async()=>{ if(!midiOut){banner("Connect MIDI first.");return;} await waitIdle(2500); curProg=i;
       send([0xc0,i]); await sleep(80);
       await reread();                    // load + read the stored patch
       await materialize();               // push it back so it PLAYS (not silent-on-load)
       renderLibrary();
-    };
+    });
     row.append(num,nm);
     if(p){
       const up=document.createElement("button");up.textContent="↑";up.title="swap with previous";
-      up.onclick=e=>{e.stopPropagation();libSwap(i,i-1);};
+      up.onclick=midiAction(e=>{e.stopPropagation();return libSwap(i,i-1);});
       const dn=document.createElement("button");dn.textContent="↓";dn.title="swap with next";
-      dn.onclick=e=>{e.stopPropagation();libSwap(i,i+1);};
+      dn.onclick=midiAction(e=>{e.stopPropagation();return libSwap(i,i+1);});
       const rn=document.createElement("button");rn.textContent="✎";rn.title="rename";
-      rn.onclick=e=>{e.stopPropagation();libRename(i);};
+      rn.onclick=midiAction(e=>{e.stopPropagation();return libRename(i);});
       const del=document.createElement("button");del.textContent="✕";del.title="erase";
-      del.onclick=e=>{e.stopPropagation();libDelete(i);};
+      del.onclick=midiAction(e=>{e.stopPropagation();return libDelete(i);});
       row.append(up,dn,rn,del);
     }
     root.appendChild(row);
@@ -11626,7 +12184,7 @@ async function llWriteToSlot(fi,k,slot){       // library -> pedal slot (verifie
   if(!midiOut){banner("Connect MIDI first.");return;}
   const cur=library[slot]?` (overwrites "${library[slot].name}")`:"";
   if(!confirm(`Write "${ent.name}" to pedal slot #${slot+1}${cur}?`))return;
-  busy=true;
+  busy=true; busySince=performance.now();
   const raw=bytesFromB64(ent.raw); raw[3]=DEVID;
   await writeRaw(slot,raw);
   const back=await readOnce(slot,60,1200);
@@ -11638,13 +12196,13 @@ async function llWriteToSlot(fi,k,slot){       // library -> pedal slot (verifie
   }else log(`library: wrote "${ent.name}" → slot #${slot+1} (no read-back; Reload bank to confirm)`,"warn");
   busy=false; renderLibrary(); await refreshCurrent();
 }
-function llLoadToEditor(fi,k){                 // library -> edit buffer (not stored)
+async function llLoadToEditor(fi,k){                 // library -> edit buffer (not stored)
   const ent=(LLIB.folders[fi]||{}).patches?.[k]; if(!ent)return;
   const raw=bytesFromB64(ent.raw); raw[3]=DEVID;
   rawPatch=raw; rawFromPedal=raw.slice(); patch=decodePatch(raw); editModeActive=false; render();
   if(midiOut){
     send(zx([0x50])); lastEnable=performance.now(); editModeActive=true;
-    send(rawPatch); setTimeout(materialize,60);
+    send(rawPatch); await sleep(60); await materialize();
   }
   log(`library: loaded "${ent.name}" into the editor${midiOut?" + pedal buffer":""} — Store to keep it on the pedal`);
 }
@@ -11667,7 +12225,7 @@ async function llWriteFolder(){                // current folder -> pedal slots 
   if(!midiOut){banner("Connect MIDI first.");return;}
   const n=Math.min(ps.length,50);
   if(!confirm(`Write ${n} patches from "${LLIB.folders[curFolder].name}" to pedal slots 1–${n}?\nThis OVERWRITES those slots. Backup bank first if unsure.`))return;
-  busy=true; let ok=0;
+  busy=true; busySince=performance.now(); let ok=0;
   for(let k=0;k<n;k++){
     const raw=bytesFromB64(ps[k].raw); raw[3]=DEVID;
     await writeRaw(k,raw);
@@ -11711,7 +12269,7 @@ function renderLocalLib(){
     const num=document.createElement("span");num.className="num";num.textContent=k+1;
     const nm=document.createElement("span");nm.className="nm";nm.textContent=p.name;
     nm.title="click: load into the editor (not stored) · drag onto a pedal slot to write it there";
-    nm.onclick=()=>llLoadToEditor(curFolder,k);
+    nm.onclick=midiAction(()=>llLoadToEditor(curFolder,k));
     const rn=document.createElement("button");rn.textContent="✎";rn.title="rename (library entry only)";
     rn.onclick=e=>{e.stopPropagation();const n=prompt("Library name:",p.name);if(n===null)return;p.name=(n||p.name).slice(0,24);llSave();renderLocalLib();};
     const del=document.createElement("button");del.textContent="✕";del.title="remove from library";
@@ -11742,18 +12300,13 @@ function drawCover(cv,b64){
 function effectOptions(sel,unknownId){
   sel.innerHTML="";
   const mk=(v,t)=>{const o=document.createElement("option");o.value=v;o.textContent=t;return o;};
-  sel.appendChild(mk(0,"— empty —"));
-  if(unknownId) sel.appendChild(mk(unknownId,"unknown effect 0x"+unknownId.toString(16)));
+  sel.appendChild(mk(0,"+ Add effect"));
+  if(unknownId) sel.appendChild(mk(unknownId,BYID[unknownId]?BYID[unknownId].name:"unknown effect 0x"+unknownId.toString(16)));
   const gC=document.createElement("optgroup");gC.label="★ Custom (this repo)";
   for(const e of DB.custom) gC.appendChild(mk(e.id,e.name));
   sel.appendChild(gC);
-  if((DB.probes||[]).length){
+  if((DB.probes||[]).length && ($("showProbes")?.checked)){
     const gP=document.createElement("optgroup");gP.label="\u2699 Probes (diagnostics — not release effects)";
-    for(const e of DB.probes) gP.appendChild(mk(e.id,e.name));
-    sel.appendChild(gP);
-  }
-  if((DB.probes||[]).length){
-    const gP=document.createElement('optgroup'); gP.label='hardware probes';
     for(const e of DB.probes) gP.appendChild(mk(e.id,e.name));
     sel.appendChild(gP);
   }
@@ -11765,7 +12318,7 @@ function effectOptions(sel,unknownId){
   const cats={};
   for(const e of DB.stock)(cats[e.category]=cats[e.category]||[]).push(e);
   for(const c of Object.keys(cats).sort()){
-    const g=document.createElement("optgroup");g.label=c;
+    const g=document.createElement("optgroup");g.label="Stock · "+c;
     for(const e of cats[c]) g.appendChild(mk(e.id,e.name));
     sel.appendChild(g);
   }
@@ -11778,6 +12331,9 @@ function makeKnob(label, raw, max, onchange, onrelease){
   const cv=document.createElement("canvas");
   const S=54, dpr=window.devicePixelRatio||1;
   cv.width=S*dpr; cv.height=S*dpr; cv.style.width=S+"px"; cv.style.height=S+"px";
+  cv.tabIndex=0;cv.setAttribute("role","slider");cv.setAttribute("aria-label",label);
+  cv.setAttribute("aria-valuemin","0");cv.setAttribute("aria-valuemax",String(max));
+  cv.setAttribute("aria-valuenow",String(raw));
   const ctx=cv.getContext("2d"); ctx.scale(dpr,dpr);
   const kv=document.createElement("div"); kv.className="kv";
   const ACC=tok("--knob-fg","#0b1a27"), DIMt=tok("--knob-dim","rgba(11,26,39,0.22)"),
@@ -11795,9 +12351,9 @@ function makeKnob(label, raw, max, onchange, onrelease){
     ctx.save(); ctx.translate(cx,cy); ctx.rotate(pa);
     ctx.fillStyle=ACC; ctx.fillRect(-1.25,-S*0.31,2.5,S*0.30); ctx.restore();
   }
-  function setNorm(nv){ nv=Math.max(0,Math.min(1,nv)); val=nv;
+  function setNorm(nv){ if(editingBlocked())return; nv=Math.max(0,Math.min(1,nv)); val=nv;
     const rv=Math.round(nv*max);
-    if(rv!==raw){ raw=rv; kv.textContent=raw; onchange(raw); }
+    if(rv!==raw){ raw=rv; kv.textContent=raw; cv.setAttribute("aria-valuenow",String(raw)); onchange(raw); }
     draw(); }
   kv.textContent=raw; draw();
   let startY=0, startVal=0, dragging=false, activeId=null;
@@ -11818,12 +12374,48 @@ function makeKnob(label, raw, max, onchange, onrelease){
   cv.addEventListener("pointercancel",endDrag);
   cv.addEventListener("lostpointercapture",endDrag);
   cv.addEventListener("wheel",e=>{e.preventDefault(); setNorm(val+(e.deltaY<0?1:-1)/(max||100)); if(onrelease)onrelease();},{passive:false});
-  wrap.append(kl,cv,kv); return wrap;
+  cv.addEventListener("keydown",e=>{
+    const step=e.shiftKey?10:1;
+    let next=raw;
+    if(e.key==="ArrowUp"||e.key==="ArrowRight")next+=step;
+    else if(e.key==="ArrowDown"||e.key==="ArrowLeft")next-=step;
+    else if(e.key==="Home")next=0;else if(e.key==="End")next=max;else return;
+    e.preventDefault();setNorm(next/(max||1));if(onrelease)onrelease();
+  });
+  wrap.append(kl,cv,kv);
+  // Exposed so a hardware CC can drive the EXACT path a mouse drag takes --
+  // same onchange, same onrelease, same on-screen movement. Anything that
+  // reimplemented the send would drift from the drag behaviour over time.
+  // Receive an echo without firing onchange or replacing the captured canvas.
+  wrap._receive = value => {
+    if(dragging || value===raw) return;
+    raw=value; val=max>0?raw/max:0;
+    kv.textContent=raw; cv.setAttribute("aria-valuenow",String(raw)); draw();
+  };
+  wrap._setNorm = setNorm;
+  wrap._release = onrelease;
+  return wrap;
+}
+function reconcilePatch(next){
+  if(!patch || next.fx.length!==patch.fx.length ||
+     next.fx.some((f,s)=>f[0]!==patch.fx[s][0]||f[1]!==patch.fx[s][1])){
+    patch=next; render(); return;
+  }
+  for(let s=0;s<next.fx.length;s++)for(let k=0;k<next.fx[s].length;k++){
+    patch.fx[s][k]=next.fx[s][k];
+    if(k>=2){const knob=(KNOBREG[s]||[])[k-2];if(knob)knob._receive(next.fx[s][k]);}
+  }
+  patch.name=next.name; patch.maxfx=next.maxfx; patch.curfx=next.curfx; patch.dsp=next.dsp;
+  $("dsp").textContent=Array.from({length:6},(_,i)=>(patch.dsp>>i)&1?"●":"○").join("");
+  updateActionState();
 }
 function render(){
+  updateActionState();
   if(!patch)return;
   $("dsp").textContent=Array.from({length:6},(_,i)=>(patch.dsp>>i)&1?"●":"○").join("");
   const root=$("slots"); root.innerHTML="";
+  KNOBREG.length=0;                      // elements below are about to be replaced
+  setTimeout(()=>{markActiveSlot();updateActionState();}, 0);         // re-mark after this render replaces the slots
   patch.fx.forEach((f,s)=>{
     const eid=f[1], on=f[0], e=BYID[eid];
     const div=document.createElement("div");
@@ -11836,26 +12428,29 @@ function render(){
     grip.ondragstart=ev=>{ev.dataTransfer.setData("text/plain","S"+s);ev.dataTransfer.effectAllowed="move";};
     h.appendChild(grip);
     const ttl=document.createElement("span");ttl.textContent=`slot ${s+1}`;ttl.style.flex="1";
-    ttl.style.cursor="pointer"; ttl.title="click: show this effect on the pedal";
-    ttl.onclick=()=>focusSlot(s,true);
+    ttl.style.cursor="pointer";
+    ttl.title="click: select this slot — the pedal shows it and the controller's knobs address it";
+    ttl.onclick=()=>setActiveSlot(s);
     h.appendChild(ttl);
-    const st=document.createElement("div");
+    const st=document.createElement("button");
+    st.setAttribute("aria-label",`Slot ${s+1} on/off`);st.setAttribute("aria-pressed",String(!!on));
     st.className="toggle"+(on?" on":""); st.title="effect on / off";
-    st.onclick=async()=>{ await waitIdle(2500); const nv=on?0:1; f[0]=nv; markDirty(s,0); offWarned[s]=false; render();
+    st.onclick=midiAction(async()=>{ await waitIdle(2500); const nv=on?0:1; f[0]=nv; markDirty(s,0); offWarned[s]=false; render();
       // On/off is carried in the full patch — flip the bit in the model and push
       // the whole patch (0x28). One reliable write instead of a live 0x31 + flood.
       await materialize();
-    };
-    h.appendChild(st);
+    });
+    const stateLabel=document.createElement("span");stateLabel.className="slot-state";stateLabel.textContent=on?"On":"Off";h.append(stateLabel,st);
     div.appendChild(h);
     div.ondragover=ev=>{ev.preventDefault();div.style.outline="2px dashed var(--accent)";};
     div.ondragleave=()=>{div.style.outline="";};
-    div.ondrop=ev=>{ev.preventDefault();div.style.outline="";
+    div.ondrop=midiAction(ev=>{ev.preventDefault();div.style.outline="";
       const t=ev.dataTransfer.getData("text/plain");
-      if(t&&t[0]==="S") slotSwap(+t.slice(1), s);};
+      if(t&&t[0]==="S") return slotSwap(+t.slice(1), s);});
     const sel=document.createElement("select");
-    effectOptions(sel, e?0:eid); sel.value=eid;
-    sel.onchange=async()=>{
+    sel.setAttribute("aria-label",`Slot ${s+1} effect`);
+    effectOptions(sel, e && !(DB.probes||[]).some(p=>p.id===eid)?0:eid); sel.value=eid;
+    sel.onchange=midiAction(async()=>{
       const ne=BYID[+sel.value];
       f[1]=+sel.value;
       for(let k=0;k<9;k++)f[k+2]=ne&&ne.params[k]?ne.params[k].default:0;
@@ -11869,7 +12464,7 @@ function render(){
       await sleep(20);
       sendFullPatch();
       await sleep(60);
-      materialize();
+      await materialize();
       log("wrote patch to buffer — effect set to "+(ne?ne.name:"empty"));
       const nid=f[1]>>>0;
       if(nid && !seenOnPedal.has(nid) && library.filter(Boolean).length>0){
@@ -11881,7 +12476,7 @@ function render(){
               +`Effects are installed with Zoom Effect Manager; this editor only `
               +`references them.`);
       }
-    };
+    });
     div.appendChild(sel);
     if(eid){
       const cv=document.createElement("canvas");
@@ -11915,14 +12510,16 @@ function render(){
     if(params.length){
       const kc=document.createElement("div");kc.className="knobs";
       params.forEach((pd,k)=>{
-        kc.appendChild(makeKnob(pd.name, f[k+2], pd.max||100,
+        const _kn = makeKnob(pd.name, f[k+2], pd.max||100,
           // touching a knob pulls the pedal's display to this slot first
           v=>{ if(!f[0]) knobOffWarn(s); lastEditedSlot=s; markDirty(s,k+2); focusSlot(s); f[k+2]=v; sendParam(s,k+2,v); },
           // On release commit the whole patch — the only write this pedal
           // actually materialises. Every slot, not just 4-6: the last knob
           // (Mix / Hiss / Level) was dead from PE on all of them.
           // Slots 1-3 already took effect live via 0x31; slots 4-6 only land via Apply.
-          ()=>{ if(!liveEditable(s)) autoApplyMaybe(); }));
+          ()=>{ if(!liveEditable(s)) autoApplyMaybe(); });
+        (KNOBREG[s] || (KNOBREG[s] = []))[k] = _kn;
+        kc.appendChild(_kn);
       });
       div.appendChild(kc);
     }
@@ -11933,12 +12530,12 @@ function render(){
 
 /* ---------- bar wiring ------------------------------------------------- */
 let snapA=null, snapB=null;
-$("snapA").onclick=async()=>{ await reread();          // re-read for you, so the capture can't be stale
+$("snapA").onclick=midiAction(async()=>{ await reread();          // re-read for you, so the capture can't be stale
   snapA=rawFromPedal?rawFromPedal.slice():null;
-  log(snapA?"snapshot A captured (re-read done automatically)":"no dump — is the pedal connected?","warn"); };
-$("snapB").onclick=async()=>{ await reread();
+  log(snapA?"snapshot A captured (re-read done automatically)":"no dump — is the pedal connected?","warn"); });
+$("snapB").onclick=midiAction(async()=>{ await reread();
   snapB=rawFromPedal?rawFromPedal.slice():null;
-  log(snapB?"snapshot B captured (re-read done automatically)":"no dump — is the pedal connected?","warn"); };
+  log(snapB?"snapshot B captured (re-read done automatically)":"no dump — is the pedal connected?","warn"); });
 $("snapDiff").onclick=()=>{
   if(!snapA||!snapB){ log("need both A and B (re-read the patch before each snapshot)","warn"); return; }
   let n=0;
@@ -11948,17 +12545,17 @@ $("snapDiff").onclick=()=>{
         +`   [PE's table calls this: ${ownersFor(i,snapA[i]^snapB[i])||"UNMAPPED"}]`); }
   if(!n) log("  identical — did you Re-read patch between the two snapshots?","warn");
 };
-$("pbSend").onclick=()=>{
+$("pbSend").onclick=midiAction(()=>{
   const s=+$("pbSlot").value-1, i=+$("pbIdx").value, v=+$("pbVal").value;
   sendParam(s,i,v); log(`probe: slot ${s+1} param idx ${i} = ${v}`);
-};
-$("pbSweep").onclick=async()=>{
+});
+$("pbSweep").onclick=midiAction(async()=>{
   const s=+$("pbSlot").value-1, v=+$("pbVal").value;
   log(`probe sweep, slot ${s+1}: setting param idx 2..10 to ${v}, 800ms apart —`);
   log(`  listen for WHICH index moves the knob you care about, then report that number`);
   for(let i=2;i<=10;i++){ sendParam(s,i,v); log(`  → param idx ${i} = ${v}`); await sleep(800); }
   log(`sweep done — click "Re-read patch" to pull the real values back from the pedal`);
-};
+});
 // Diagnostics live behind one toggle so the toolbar stays about playing, not debugging.
 // The choice is remembered — someone mid-investigation shouldn't have to re-open it
 // after every reload.
@@ -11983,9 +12580,9 @@ function setTheme(t){
 }
 $("theme").onchange=e=>setTheme(e.target.value);
 try{ setTheme(localStorage.getItem("ms70_theme")||"lcd"); }catch(_){ setTheme("lcd"); }
-$("connect").onclick=connect;
-$("reread").onclick=reread;
-$("sync").onclick=materialize;
+$("connect").onclick=midiAction(connect);
+$("reread").onclick=midiAction(reread);
+$("sync").onclick=midiAction(materialize);
 $("trace").onchange=e=>{TRACE=e.target.checked;log("MIDI trace "+(TRACE?"ON":"off"));};
 // ---- diagnostics snapshot (one click -> clipboard, or download if blocked) ----
 // Which patch field owns a given byte/bit — so a byte diff reads as "s4.p3" instead
@@ -12070,65 +12667,196 @@ async function copyDiag(){
     a.href=URL.createObjectURL(new Blob([t],{type:"text/plain"})); a.click();
     log("clipboard blocked — diagnostics downloaded as ms70cdr_diag.txt instead","warn"); }
 }
+$("storebtn").onclick=midiAction(async()=>{
+  if(!midiOut){banner("Connect MIDI first.");return;}
+  if(!patch){banner("No patch loaded.");return;}
+  const n=curProg+1;
+  if(!confirm("Save "+JSON.stringify(patch.name)+" to pedal slot "+n+"?\n\nThis replaces the stored patch. Your changes will survive patch changes and power cycling.")) return;
+  await waitIdle(3000);
+  busy=true; busySince=performance.now();
+  try{
+  editEnable();
+  const d=encodePatch(patch, rawFromPedal); d[3]=DEVID;
+  send(d); await sleep(60);
+  storeTo(curProg);
+  log("stored patch "+n+" to flash");
+  // A store is a flash write: the pedal goes quiet for a couple of seconds.
+  await sleep(2200);
+  // Reload it so the effects re-instantiate from what was just stored -- that
+  // re-instantiation is the part slots 4-6 need, and the whole point of the store.
+  send([0xB0,0x00,0x00]); send([0xB0,0x20,0x00]); send([0xC0,curProg]);
+  await sleep(300);
+  }finally{ busy=false; }
+  const fresh=await readCurrent(80,1600);
+  if(fresh){ rawFromPedal=fresh.slice(); rawPatch=fresh.slice(); patch=decodePatch(fresh); render(); }
+  banner(fresh?"Saved and reloaded pedal patch "+n+".":"Save sent, but the pedal did not confirm the reload. Re-read to check.");
+});
+$("bwtest").onclick=midiAction(async()=>{
+  if(!midiOut){banner("Connect MIDI first.");return;}
+  await waitIdle(3000);
+  busy=true; busySince=performance.now();
+  log("buffer-write test: 0x28 only, NO 0x31 sent — does a patch write carry params?");
+  log("  this takes ~20s (two reads per slot). The editor is unresponsive until it finishes.");
+  banner("Buffer-write test running — about 20 seconds…");
+  const results=[];
+  try{
+  for(let s=0;s<6;s++){
+    const fresh=await readCurrent(80,1600);
+    if(!fresh){ results.push(`slot ${s+1}: no dump`); continue; }
+    const pt=decodePatch(fresh);
+    if(!pt.fx[s][1]){ results.push(`slot ${s+1}: empty — skipped`); continue; }
+    const before=pt.fx[s][2]|0;                 // first knob
+    const target=(before>50)?(before-25):(before+25);
+    pt.fx[s][2]=target;
+    const d=encodePatch(pt, fresh); d[3]=DEVID;
+    // edit-enable + the patch write, and nothing else. No focusSlot, no sendParam,
+    // no bypass bounce: this measures the write path alone.
+    send(zx([0x50])); lastEnable=performance.now(); await sleep(30);
+    send(d); await sleep(220);
+    const after=await readCurrent(80,1600);
+    if(!after){ results.push(`slot ${s+1}: no dump after write`); continue; }
+    const got=decodePatch(after).fx[s][2]|0;
+    const ok=(got===target);
+    results.push(`slot ${s+1}: wrote ${target} (was ${before}) -> pedal says ${got}  ${ok?"KEPT":"REJECTED"}`);
+    // put it back so the test leaves nothing behind
+    const undo=decodePatch(after); undo.fx[s][2]=before;
+    const du=encodePatch(undo, after); du[3]=DEVID;
+    send(zx([0x50])); await sleep(20); send(du); await sleep(160);
+  }
+  }finally{
+    // Whatever happens, release the lock. A stuck `busy` makes every later action
+    // sit through waitIdle(3000) and quietly fail its reads -- which reads as
+    // "patches will not load and everything is slow", far from its real cause.
+    busy=false;
+  }
+  for(const r of results) log("  "+r);
+  const kept=results.filter(r=>r.includes("KEPT")).length;
+  log(`buffer-write test done: ${kept} of 6 slots kept the written value`);
+  banner("Buffer-write test done — see the log, then Copy diag.");
+  const fresh=await readCurrent(80,1600);
+  if(fresh){ rawFromPedal=fresh.slice(); rawPatch=fresh.slice(); patch=decodePatch(fresh); render(); }
+});
+/* Patch hex in and out.
+ *
+ * A shared patch usually arrives as a bare hex string rather than a .syx file --
+ * pasted into a forum post or a chat -- and there was no way to get one of those
+ * into the pedal. This accepts it in any of the shapes people actually send:
+ * spaced, unspaced, 0x-prefixed, newline-wrapped. */
+function patchFromHex(txt){
+  const hex = String(txt||"").replace(/0x/gi,"").replace(/[^0-9a-fA-F]/g,"").toLowerCase();
+  if(hex.length !== 292) return {err:`expected 146 bytes (292 hex digits), got ${hex.length/2}`};
+  const b = new Uint8Array(146);
+  for(let i=0;i<146;i++) b[i] = parseInt(hex.substr(i*2,2),16);
+  if(b[0]!==0xF0 || b[1]!==0x52 || b[4]!==0x28 || b[145]!==0xF7)
+    return {err:"not a Zoom patch dump (expects f0 52 .. 28 ... f7)"};
+  return {bytes:b, dev:b[3]};
+}
+$("pastehex").onclick=midiAction(async()=>{
+  const txt = await new Promise(resolve=>{
+    const dialog=$("patchPasteDialog"),input=$("patchHexInput");input.value="";
+    dialog.onclose=()=>resolve(dialog.returnValue==="load"?input.value:null);
+    dialog.showModal();input.focus();
+  });
+  if(txt===null) return;
+  const r = patchFromHex(txt);
+  if(r.err){ banner("Not a patch: "+r.err); log("paste patch failed: "+r.err,"warn"); return; }
+  if(midiOut && r.dev !== DEVID) throw new Error("Patch device does not match the connected pedal.");
+  const b = r.bytes.slice(); b[3] = DEVID;
+  const pp = decodePatch(b);
+  log("pasted patch: " + JSON.stringify(pp.name) + " [" +
+      pp.fx.map((f,i)=>f[1]?`s${i+1}:${BYID[f[1]]?BYID[f[1]].name:"0x"+(f[1]>>>0).toString(16)}`:null)
+        .filter(Boolean).join(", ") + "]");
+  noteSeenIds(b);
+  if(midiOut){
+    await waitIdle(2000);
+    editEnable(); send(b);
+    // Buffer only, like everything else here: nothing reaches flash until Store.
+    log("sent to the edit buffer — press Store to pedal to keep it");
+  }
+  patch = pp; rawPatch = b.slice(); rawFromPedal = b.slice();
+  hasLocalEdits=true;editPatchGeneration=patchGeneration;
+  dirty.clear(); render();
+  banner("Loaded " + JSON.stringify(pp.name) + (midiOut?" into the edit buffer — Store to keep it.":" locally."));
+});
+$("copyhex").onclick=async()=>{
+  const src = (rawFromPedal && rawFromPedal.length===146) ? rawFromPedal
+            : (patch ? encodePatch(patch, rawFromPedal) : null);
+  if(!src){ banner("No patch loaded."); return; }
+  const hex = Array.from(src).map(x=>x.toString(16).padStart(2,"0")).join("");
+  try{ await navigator.clipboard.writeText(hex);
+       banner("Patch hex copied ("+hex.length+" chars) — paste it to share."); }
+  catch(_){ log("clipboard blocked; here it is:"); log(hex); banner("Clipboard blocked — the hex is in the log."); }
+};
+/* Nothing at all is arriving, which is a different failure from "the pedal did not
+ * answer that request" and deserves to be named.
+ *
+ * Chrome 152 ships a Web MIDI build whose INPUT delivers nothing: ports open, sends
+ * reach the pedal, and no message ever comes back. Confirmed against this pedal with
+ * a bare 30-line page and cross-checked outside the browser, where the same port
+ * answers instantly. It is not the pedal, the cable, the port or this editor, and
+ * there is nothing here that can work around it -- so say so, and name a browser
+ * that works, rather than leaving someone to re-diagnose it from scratch. */
+let noInputWarned = false;
+function noInputHint(){
+  if (noInputWarned) return;
+  noInputWarned = true;
+  const m = (navigator.userAgent.match(/Chrome\/(\d+)/) || [])[1];
+  const chromeVer = m ? +m : 0;
+  if (chromeVer >= 152) {
+    log(`Chrome ${chromeVer} has a Web MIDI INPUT fault: sends work, nothing is ever `
+      + `received. Use Opera, Edge or another Chromium browser — this editor cannot `
+      + `work around it. tools/midi_check.html confirms it in ten seconds.`, "warn");
+    banner(`Chrome ${chromeVer} can send MIDI but not receive it — open this in Opera or Edge instead.`);
+  } else {
+    log("nothing received at all. Check the pedal is in normal mode with Effect Manager "
+      + "CLOSED, and try tools/midi_check.html to see whether ANY port delivers.", "warn");
+  }
+}
 $("diag").onclick=copyDiag;
+$("ctrlin").onchange=e=>{ bindCtrlInput(e.target.value); if(!e.target.value) log("controller IN: none"); };
+$("cclearn").onclick=()=>{ if(ccLearn) learnStop(false); else learnStart(); };
 window.addEventListener("error",e=>log("JS ERROR: "+(e.message||e.error)+"  @"+(e.filename||"").split("/").pop()+":"+e.lineno,"warn"));
 window.addEventListener("unhandledrejection",e=>log("PROMISE REJECT: "+((e.reason&&e.reason.message)||e.reason),"warn"));
-$("sendall").onclick=sendFullPatch;
-// APPLY, ToneLib-style (from a MIDI capture of ToneLib editing slot 4 successfully):
-//   0x50            edit enable
-//   0x28 <146B>     write the edit buffer
-//   CC 0  = 0       Bank Select MSB
-//   CC 32 = 0       Bank Select LSB
-//   0xCn            program change to the SAME program
-// A bare program change to the current program is a no-op, but preceded by the two
-// bank-select CCs the pedal DOES reload — which is how ToneLib live-edits slots 4-6.
-// No 0x32 store, so this writes nothing to flash, is non-destructive, and does not
-// blip through a neighbouring patch the way the old bounce did. Use "Store to slot"
-// when you want it kept; until then the stored patch is untouched.
-async function applyToPedal(){const n=curProg;
-  if(!patch){banner("No patch loaded.");return;}
-  if(!dirty.size){ log("nothing changed in PE — nothing to apply"); return; }
+$("sendall").onclick=midiAction(sendFullPatch);
+// Merge changed fields into a fresh pedal dump, write the buffer, and verify.
+// Store to pedal remains the explicit flash operation.
+async function applyToPedal(){
+  if(!patch||!midiOut||READ_ONLY){banner("Connect a writable pedal and load a patch first.");return;}
+  if(!dirty.size){log("No changed fields to apply.");return;}
   await waitIdle(3000);
-  busy=true;
-  // Re-read FIRST: the pedal is the source of truth for everything except the fields
-  // you actually touched. Writing PE's whole model blind is what pushed stale values
-  // over slots you never edited.
-  const fresh=await readCurrent(80,1600);   // no PC: a reload pulls flash and drops buffer edits
-  if(!fresh){ busy=false; log("apply aborted — pedal didn't respond; nothing written","warn"); return; }
-  const live=decodePatch(fresh);
-  for(const key of dirty){
-    const [si,ki]=key.split(",").map(Number);
-    live.fx[si][ki]=patch.fx[si][ki];
-  }
-  live.name=patch.name;
-  const d=encodePatch(live, fresh); d[3]=DEVID;
-  send(zx([0x50])); lastEnable=performance.now(); editModeActive=true; await sleep(20);
-  // Write the new values into the buffer FIRST, then re-instantiate the slot.
-  //
-  // The re-instantiation is a 0x31 param-0 (on/off) pair, NOT a patch write. The
-  // only action ever confirmed to make a slot 4-6 edit audible is toggling that
-  // slot's bypass ON THE PEDAL. Doing the same thing by writing the bypass BIT into
-  // the patch never worked -- the probe showed a patch write is invisible to a
-  // running effect, and a bypass bit is just more patch data. 0x31 param 0 is the
-  // message the pedal itself uses for that toggle. We had only ever established
-  // that 0x31 is ignored for KNOB params (index 2+); on/off is a different
-  // parameter and had never been tested on slots 4-6.
-  send(d); await sleep(40);
-  const bs=lastEditedSlot;
-  if(bs!==null && live.fx[bs] && live.fx[bs][0]){
-    sendParam(bs,0,0); await sleep(110);       // bypass the slot  -> tear down
-    sendParam(bs,0,1); await sleep(90);        // un-bypass        -> rebuild, re-read
-  }
-  patch=live; rawFromPedal=fresh.slice(); rawPatch=d.slice();
-  // Deliberately NOT cleared. The PC-led read reloads the patch from flash, so any
-  // edit that only ever lived in the edit buffer is thrown away by the next apply --
-  // that is what made successive applies appear to reset each other. Keeping every
-  // edit of this session and re-writing the whole set each time makes the reload
-  // harmless: it can no longer lose anything PE still knows about. Cleared on an
-  // explicit re-read, patch change or bank load, where the pedal IS the truth.
-  busy=false; render();
-  log("applied to pedal — only your changed fields, nothing written to flash");
-  verifySlots(d, "apply");
+  busy=true; busySince=performance.now();
+  const generation=patchGeneration;
+  const edits=new Map(Array.from(dirty,key=>{const [si,ki]=key.split(",").map(Number);return [key,patch.fx[si][ki]];}));
+  const versions=new Map(Array.from(edits.keys(),key=>[key,dirtyVersions.get(key)]));
+  try{
+    const fresh=await readCurrent(80,1600);
+    if(!fresh||generation!==patchGeneration)throw new Error("Patch read failed or patch changed; edits retained.");
+    const live=decodePatch(fresh);
+    for(const [key,value] of edits){const [si,ki]=key.split(",").map(Number);live.fx[si][ki]=value;}
+    const d=encodePatch(live,fresh);d[3]=DEVID;
+    send(zx([0x50]));lastEnable=performance.now();editModeActive=true;
+    send(d);await sleep(40);
+    const bs=lastEditedSlot;
+    if(bs!==null&&live.fx[bs]&&live.fx[bs][0]){
+      const off={...live,fx:live.fx.map((f,i)=>i===bs?[0].concat(f.slice(1)):f)};
+      send(encodePatch(off,fresh));await sleep(110);send(d);await sleep(90);
+    }
+    const back=await readCurrent(80,1600);
+    if(!back||generation!==patchGeneration)throw new Error("Could not verify Apply; edits retained for retry.");
+    const got=decodePatch(back);
+    let failures=0;
+    for(const [key,value] of edits){
+      const [si,ki]=key.split(",").map(Number);
+      if(got.fx[si][ki]!==value){failures++;continue;}
+      if(dirtyVersions.get(key)===versions.get(key))dirty.delete(key);
+    }
+    // Keep any edits made while awaiting the pedal, including changes back to
+    // the same value: revision counters distinguish them from this transaction.
+    for(const key of dirty){const [si,ki]=key.split(",").map(Number);got.fx[si][ki]=patch.fx[si][ki];}
+    rawFromPedal=back.slice();rawPatch=encodePatch(got,back);reconcilePatch(got);
+    if(failures)banner(`Pedal did not keep ${failures} changed field(s). Edits retained; check the slot and retry.`);
+    else log("Applied and verified changed fields. Store to pedal to keep them after a reload.");
+  }finally{busy=false;}
 }
 // Rebuild a truncated patch. A patch whose maxfx got written down to 1 keeps
 // re-asserting the truncation on every read/write cycle, and slots past the limit
@@ -12139,7 +12867,7 @@ async function repairPatch(){
   const nm=(patch&&patch.name)?patch.name:"-";
   if(!confirm("Repair patch "+(curProg+1)+"?\n\nClears ALL SIX slots to empty and restores maxfx to 6 so every slot is usable again. The name \""+nm+"\" is kept.\n\nWritten to the edit buffer only \u2014 press Store if you want it kept.")) return;
   await waitIdle(3000);
-  busy=true;
+  busy=true; busySince=performance.now();
   const p={name:nm,fx:Array.from({length:6},()=>Array(11).fill(0)),maxfx:6,curfx:0,dsp:0};
   const d=encodePatch(p,null); d[3]=DEVID;
   d[130]=(d[130]&~0x1c)|(6<<2);          // force all six slots addressable again
@@ -12153,10 +12881,10 @@ async function repairPatch(){
   log("repaired patch "+(curProg+1)+" — all slots cleared, maxfx restored to 6 (buffer only; Store to keep)","warn");
   banner("Patch cleared and all six slots restored. Rebuild your effects, then Store to keep it.");
 }
-$("repair").onclick=repairPatch;
-$("store").onclick=applyToPedal;
+$("repair").onclick=midiAction(repairPatch);
+$("store").onclick=midiAction(applyToPedal);
 // Optional zero-click: apply once the knob has been still for a moment. Debounced so
-// a drag produces ONE store, not one per pixel — each apply writes flash and blips.
+// a drag produces one verified buffer update, not one per pixel.
 // Trailing scheduler, not a plain debounce. One apply is in flight at a time; any
 // knob movement during it sets a pending flag and re-fires the moment it lands. That
 // tracks a drag continuously (ToneLib managed ~300 ms per reload) without queueing up
@@ -12166,12 +12894,12 @@ let autoApplyT=null, autoApplyPending=false;
 const AUTOAPPLY_MS=260;
 function autoApplyMaybe(){
   if(!AUTOAPPLY_LATE) return;
-  if(busy||syncing){ autoApplyPending=true; return; }
+  if(midiActionActive||busy||syncing){ autoApplyPending=true; return; }
   clearTimeout(autoApplyT);
   autoApplyT=setTimeout(async()=>{
-    if(busy||syncing){ autoApplyPending=true; return; }
+    if(midiActionActive||busy||syncing){ autoApplyPending=true; return; }
     autoApplyPending=false;
-    await applyToPedal();
+    await midiAction(applyToPedal)();
     if(autoApplyPending){ autoApplyPending=false; autoApplyMaybe(); }
   }, AUTOAPPLY_MS);
 }
@@ -12225,10 +12953,10 @@ function syncMotionControl(){
   syncMotionControl();
 })();
 
-$("readall").onclick=readAll;
-$("backup").onclick=backupBank;
+$("readall").onclick=midiAction(readAll);
+$("backup").onclick=midiAction(backupBank);
 $("restoreBtn").onclick=()=>$("restore").click();
-$("restore").onchange=ev=>{const f=ev.target.files[0];if(f)restoreBank(f);ev.target.value="";};
+$("restore").onchange=midiAction(ev=>{const f=ev.target.files[0];ev.target.value="";if(f)return restoreBank(f);});
 /* ---- local library wiring ---- */
 $("locfolder").onchange=e=>{curFolder=+e.target.value;renderLocalLib();};
 $("locnew").onclick=()=>{const n=prompt("Folder name:","New folder");if(n===null)return;
@@ -12240,8 +12968,8 @@ $("locdel").onclick=()=>{const f=LLIB.folders[curFolder];
   LLIB.folders.splice(curFolder,1);
   if(!LLIB.folders.length)LLIB.folders.push({name:"Default",patches:[]});
   curFolder=0;llSave();renderLocalLib();};
-$("locsaveall").onclick=llSaveBank;
-$("locwriteall").onclick=llWriteFolder;
+$("locsaveall").onclick=midiAction(llSaveBank);
+$("locwriteall").onclick=midiAction(llWriteFolder);
 $("locexp").onclick=llExport;
 $("locimpBtn").onclick=()=>$("locimp").click();
 $("locimp").onchange=ev=>{const f=ev.target.files[0];if(f)llImport(f);ev.target.value="";};
@@ -12249,9 +12977,9 @@ $("locimp").onchange=ev=>{const f=ev.target.files[0];if(f)llImport(f);ev.target.
   const lp=$("locpanel");
   lp.ondragover=ev=>{ev.preventDefault();lp.style.outline="2px dashed var(--accent)";};
   lp.ondragleave=()=>{lp.style.outline="";};
-  lp.ondrop=ev=>{ev.preventDefault();lp.style.outline="";
+  lp.ondrop=midiAction(ev=>{ev.preventDefault();lp.style.outline="";
     const t=ev.dataTransfer.getData("text/plain");
-    if(t&&t[0]==="L") llSaveFromPedal(+t.slice(1),curFolder);};
+    if(t&&t[0]==="L") return llSaveFromPedal(+t.slice(1),curFolder);});
 }
 renderLocalLib();
 $("expsyx").onclick=()=>{
@@ -12260,25 +12988,65 @@ $("expsyx").onclick=()=>{
   const a=document.createElement("a");a.download=(patch.name||"patch")+".syx";
   a.href=URL.createObjectURL(blob);a.click();
 };
-$("impsyx").onchange=ev=>{
-  const file=ev.target.files[0];if(!file)return;
-  const rd=new FileReader();
-  rd.onload=()=>{const d=Array.from(new Uint8Array(rd.result));
-    if(d.length!==146){log("not a 146-byte MS-70CDR patch","warn");return;}
-    d[3]=DEVID; rawPatch=d; rawFromPedal=d.slice(); patch=decodePatch(d); render(); sendFullPatch();};
-  rd.readAsArrayBuffer(file);
-};
+$("impsyx").onchange=midiAction(async ev=>{
+  const file=ev.target.files[0];ev.target.value="";if(!file)return;
+  const d=Array.from(new Uint8Array(await file.arrayBuffer()));
+  const parsed=patchFromHex(d.map(x=>x.toString(16).padStart(2,"0")).join(""));
+  if(parsed.err)throw new Error(parsed.err);
+  if(midiOut&&parsed.dev!==DEVID)throw new Error("Patch device does not match the connected pedal.");
+  d[3]=DEVID;rawPatch=d;rawFromPedal=d.slice();patch=decodePatch(d);dirty.clear();hasLocalEdits=true;editPatchGeneration=patchGeneration;render();
+  if(midiOut)sendFullPatch();
+});
 
+function setupNavigation(){
+  const move=(id,to,parent=false)=>$(to).appendChild(parent?$(id).closest("label"):$(id));
+  const toolbar=$("mainToolbar");
+  for(const [id,label,target] of [["openLibrary","Library","libraryDrawer"],["openSettings","⚙ Settings","settingsDrawer"]]){
+    const b=document.createElement("button");b.id=id;b.textContent=label;b.setAttribute("aria-haspopup","dialog");b.setAttribute("aria-controls",target);
+    b.onclick=()=>$(target).showModal();toolbar.appendChild(b);
+  }
+  move("libpanel","browserPane");move("patpanel","pedalPane");
+  for(const id of ["libpanel","patpanel"]){$(id).classList.remove("collapsed");$(id).querySelector("h2").onclick=null;}
+  $("libcol").hidden=true;$("patcol").hidden=true;
+  move("readall","pedalPane");move("reread","pedalPane");
+  for(const id of ["pastehex","copyhex","expsyx","impsyx"])move(id,"shareTools");
+  const fileLabel=document.createElement("label");fileLabel.htmlFor="impsyx";fileLabel.textContent="Import .syx ";$("impsyx").before(fileLabel);
+  move("theme","appearanceTools",true);$("theme").setAttribute("aria-label","Screen style");
+  const themeLabel=document.createElement("span");themeLabel.textContent="Screen style ";$("theme").before(themeLabel);
+  move("motionwrap","appearanceTools");move("ctrlin","controllerTools",true);move("cclearn","controllerTools");move("devname","controllerTools");
+  move("autoapply","advancedTools",true);
+  for(const id of ["backup","restoreBtn","restore"])move(id,"bankTools");
+  move("diagpanel","diagnosticTools");move("log","diagnosticTools");$("diagpanel").hidden=false;$("log").hidden=false;$("diagtoggle").hidden=true;
+  const selectLibrary=local=>{
+    $("pedalPane").hidden=local;$("browserPane").hidden=!local;
+    for(const [id,selected] of [["pedalTab",!local],["browserTab",local]]){$(id).setAttribute("aria-selected",String(selected));$(id).tabIndex=selected?0:-1;}
+  };
+  $("pedalTab").onclick=()=>selectLibrary(false);$("browserTab").onclick=()=>selectLibrary(true);
+  for(const [id,local] of [["pedalTab",false],["browserTab",true]]){
+    $(id).ondragenter=()=>selectLibrary(local);$(id).ondragover=e=>e.preventDefault();
+    $(id).title="Drag a patch over this tab to move between libraries";
+  }
+  for(const id of ["pedalTab","browserTab"])$(id).onkeydown=e=>{if(["ArrowLeft","ArrowRight","Home","End"].includes(e.key)){e.preventDefault();const local=e.key==="End"||((e.key==="ArrowLeft"||e.key==="ArrowRight")&&id==="pedalTab");selectLibrary(local);$(local?"browserTab":"pedalTab").focus();}};
+  for(const b of document.querySelectorAll("[data-close]"))b.onclick=()=>$(b.dataset.close).close();
+  $("pastehex").addEventListener("click",()=>$("libraryDrawer").close(),true);
+  $("showProbes").onchange=()=>render();
+  const empty=document.createElement("section");empty.id="emptyEditor";empty.className="panel";
+  const title=document.createElement("h2");title.textContent="Make room for your next sound";
+  const hint=document.createElement("p");hint.textContent="Connect your pedal to load its current patch, or open Library to import a patch and explore offline.";
+  empty.append(title,hint);$("slots").before(empty);updateEditorHeading();
+}
+setupNavigation();
 window.addEventListener("error",e=>banner("Script error: "+e.message));
 if(!navigator.requestMIDIAccess)
   banner("This browser has no Web MIDI. Use Chrome, Edge, or Opera (Safari and Firefox won't work).");
 else if(location.protocol==="file:")
   banner("Opened as file:// — Web MIDI needs localhost. From the repo root run: python3 -m http.server 8000  then open http://localhost:8000/tools/patch_editor.html");
 log(`effect DB: ${DB.custom.length} custom + ${DB.stock.length} stock (incl. other MS/G1/B1 pedals)`);
-log("custom: Arrakis, Corrupt, Dissolve, Dustbox, Flower, Galactic, GenLoss, Howl, Hydra, Klang, Mangle, Microlm, Oxide, Rewire, Rooms, Scorch, Shatter, Spiral, Spool, Stasis, Taffy");
+log("custom: Arrakis, Corrupt, Dissolve, Dustbox, Flower, Galactic, GenLoss, Gyre, Howl, Hydra, Klang, Mangle, Microlm, Oxide, Rewire, Rooms, Scorch, Shatter, Spiral, Spool, Stasis, Taffy");
 // Build stamp: if this line is missing you are looking at a CACHED old copy of
 // the page — hard-reload (Cmd-Shift-R) before reporting a fix as not working.
-log("PE build 2026-08-14a — CRT: compact row controls so patch names show");
+log("PE build 2026-09-10i — Yes/No bank prompt after Connect, bottom notification bar, Library drawer and grouped Settings; legacy slots 1–3 replay retained");
+updateActionState();
 log("ready — click Connect MIDI (pedal on USB, normal mode, Effect Manager CLOSED)");
 </script>
 </body>

@@ -50,6 +50,7 @@ def main() -> None:
             p.unlink()
 
     cfg = LinkerConfig(
+        materialize_init=True,
         effect_name=effect_name, audio_func_name=audio_func,
         screen_image=make_cover(effect_name, [p["name"] for p in manifest["params"]]),
         gid=manifest["gid"], fxid=manifest["fxid"],

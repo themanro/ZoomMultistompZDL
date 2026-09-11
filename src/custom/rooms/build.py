@@ -8,6 +8,7 @@ Requires the TI C6000 compiler at TI_ROOT below. Run from repo root:
 
 from __future__ import annotations
 
+import argparse
 import json
 import subprocess
 import sys
@@ -36,12 +37,18 @@ CFLAGS = [
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-dir", type=Path, default=ROOT / "dist",
+                        help="destination for an isolated hardware-test build")
+    parser.add_argument("--materialize-init", action=argparse.BooleanOptionalAction, default=True,
+                        help="enable the corrected init for hardware validation")
+    args = parser.parse_args()
     manifest = json.loads((HERE / "manifest_pedal.json").read_text())
     write_param_header(manifest, HERE / "rooms_params.h", "ROOMS")
 
     src_c = HERE / "rooms.c"
-    out_dir = ROOT / "dist"
-    out_dir.mkdir(exist_ok=True)
+    out_dir = args.output_dir.resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     effect_name = manifest["effect_name"]
     audio_func = manifest["audio_func_name"]
@@ -80,6 +87,7 @@ def main() -> None:
         flags_byte=manifest.get("flags_byte", 0x01),
         audio_nop=manifest.get("audio_nop", False),
         knob_positions=[(2, 14, 46), (3, 55, 46), (4, 96, 46)],
+        materialize_init=args.materialize_init,
         use_object_edit_handlers=False,
         synthesize_linesel_edit_handlers=True,
         synth_edit_start_index=2,

@@ -18,6 +18,8 @@
 #include <stdint.h>
 
 #include "tapeecho4_params.h"
+#include "../common/zoom_params.h"
+#include "../common/tape_controls.h"
 
 #ifndef TAPEECHO4_AUDIO_FUNC
 #define TAPEECHO4_AUDIO_FUNC Fx_DLY_TapeEcho4
@@ -91,18 +93,7 @@ static inline float te4_clampf(float x, float lo, float hi)
     return x;
 }
 
-TAPEECHO4_ALWAYS_INLINE(te4_param_norm)
-static inline float te4_param_norm(float raw, float fallback_norm, int group_empty)
-{
-    if (raw != raw) return te4_clampf(fallback_norm, 0.0f, 1.0f);
-    if (raw < 0.0f) return te4_clampf(fallback_norm, 0.0f, 1.0f);
-    if (raw <= 0.0001f) return group_empty ? te4_clampf(fallback_norm, 0.0f, 1.0f) : 0.0f;
-    if (raw <= (TAPEECHO4_RAW_MAX * 1.1f)) return te4_clampf(raw * TAPEECHO4_RAW_TO_NORM, 0.0f, 1.0f);
-    if (raw <= 1.0f) return te4_clampf(raw, 0.0f, 1.0f);
-    if (raw <= 100.0f) return te4_clampf(raw * 0.01f, 0.0f, 1.0f);
-    if (raw <= 240.0f) return te4_clampf(raw * 0.0041666667f, 0.0f, 1.0f);
-    return te4_clampf(fallback_norm, 0.0f, 1.0f);
-}
+
 
 TAPEECHO4_ALWAYS_INLINE(recip_approx_pos)
 static inline float recip_approx_pos(float x)
@@ -405,31 +396,21 @@ void TAPEECHO4_AUDIO_FUNC(unsigned int *ctx)
         return;
     }
 
-    int page1Empty = (params[TAPEECHO4_TEMPO_SLOT] <= 0.0001f &&
-                      params[TAPEECHO4_DIV_SLOT] <= 0.0001f &&
-                      params[TAPEECHO4_FEED_SLOT] <= 0.0001f);
-    int page2Empty = (params[TAPEECHO4_FLUTTER_SLOT] <= 0.0001f &&
-                      params[TAPEECHO4_WOW_SLOT] <= 0.0001f &&
-                      params[TAPEECHO4_WEAR_SLOT] <= 0.0001f);
-    int page3Empty = (params[TAPEECHO4_DRIVE_SLOT] <= 0.0001f &&
-                      params[TAPEECHO4_SPRING_SLOT] <= 0.0001f &&
-                      params[TAPEECHO4_MIX_SLOT] <= 0.0001f);
-
-    float tempoNorm = te4_param_norm(params[TAPEECHO4_TEMPO_SLOT], TAPEECHO4_TEMPO_DEFAULT_NORM, page1Empty);
-    float divNorm = te4_param_norm(params[TAPEECHO4_DIV_SLOT], TAPEECHO4_DIV_DEFAULT_NORM, page1Empty);
-    float feedNorm = te4_param_norm(params[TAPEECHO4_FEED_SLOT], TAPEECHO4_FEED_DEFAULT_NORM, page1Empty);
-    float flutter = te4_param_norm(params[TAPEECHO4_FLUTTER_SLOT], TAPEECHO4_FLUTTER_DEFAULT_NORM, page2Empty);
-    float wow = te4_param_norm(params[TAPEECHO4_WOW_SLOT], TAPEECHO4_WOW_DEFAULT_NORM, page2Empty);
-    float wear = te4_param_norm(params[TAPEECHO4_WEAR_SLOT], TAPEECHO4_WEAR_DEFAULT_NORM, page2Empty);
-    float drive = te4_param_norm(params[TAPEECHO4_DRIVE_SLOT], TAPEECHO4_DRIVE_DEFAULT_NORM, page3Empty);
-    float spring = te4_param_norm(params[TAPEECHO4_SPRING_SLOT], TAPEECHO4_SPRING_DEFAULT_NORM, page3Empty);
-    float mix = te4_param_norm(params[TAPEECHO4_MIX_SLOT], TAPEECHO4_MIX_DEFAULT_NORM, page3Empty);
+    float tempoNorm = zoom_param_norm01(params[TAPEECHO4_TEMPO_SLOT], TAPEECHO4_TEMPO_DEFAULT_NORM);
+    float divNorm = zoom_param_norm01(params[TAPEECHO4_DIV_SLOT], TAPEECHO4_DIV_DEFAULT_NORM);
+    float feedNorm = zoom_param_norm01(params[TAPEECHO4_FEED_SLOT], TAPEECHO4_FEED_DEFAULT_NORM);
+    float flutter = zoom_param_norm01(params[TAPEECHO4_FLUTTER_SLOT], TAPEECHO4_FLUTTER_DEFAULT_NORM);
+    float wow = zoom_param_norm01(params[TAPEECHO4_WOW_SLOT], TAPEECHO4_WOW_DEFAULT_NORM);
+    float wear = zoom_param_norm01(params[TAPEECHO4_WEAR_SLOT], TAPEECHO4_WEAR_DEFAULT_NORM);
+    float drive = zoom_param_norm01(params[TAPEECHO4_DRIVE_SLOT], TAPEECHO4_DRIVE_DEFAULT_NORM);
+    float spring = zoom_param_norm01(params[TAPEECHO4_SPRING_SLOT], TAPEECHO4_SPRING_DEFAULT_NORM);
+    float mix = zoom_param_norm01(params[TAPEECHO4_MIX_SLOT], TAPEECHO4_MIX_DEFAULT_NORM);
 
     float bpm = 40.0f + tempoNorm * 160.0f;
     float beatSamples = 2646000.0f * recip_approx_pos(bpm);
     float baseDelay = beatSamples * te4_division(divNorm);
     baseDelay = te4_clampf(baseDelay, TAPEECHO4_MIN_DELAY_F, TAPEECHO4_MAX_DELAY_F);
-    float feedback = feedNorm * feedNorm * 0.92f;
+    float feedback = spool_feedback(feedNorm);
 
     int i;
     for (i = 0; i < 8; i++) {

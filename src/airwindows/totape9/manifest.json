@@ -1,12 +1,12 @@
 {
   "effect_name": "Oxide",
-  "comment": "Hardware-loading ctx[3]-backed Airwindows ToTape9 full-kernel probe. Persistent state is host-allocated; float32/helper approximations and numerical validation still need work.",
+  "comment": "Custom ToTape9-derived Oxide voicing with input-drive compensation. Uses the ctx[3] full kernel with float32/helper approximations; not an exact upstream port. New voicing needs hardware listening checks.",
   "audio_func_name": "Fx_DLY_Oxide",
   "gid": 8,
   "gid_comment": "0x08 = Delay -> Fx_DLY_; consolidated under DLY.",
   "fxid": 403,
   "fxid_comment": "0x0193, adjacent to GAIN/PurestDr/TapeHack.",
-  "fxid_version": "1.00",
+  "fxid_version": "1.01",
   "flags_byte": 1,
   "params": [
     {
@@ -20,7 +20,7 @@
       "audio_default": 0.5,
       "source_default": 0.5,
       "source_formula": "pow(A * 2.0, 2.0)",
-      "comment": "Airwindows A. Input gain; 50 = unity, 100 = 4x."
+      "comment": "Input drive: 50 = unity, 100 = 4x into tape. Above unity, automatic compensation reduces level lift; Output independently trims the wet signal."
     },
     {
       "name": "Tilt",
@@ -52,11 +52,11 @@
       "name": "Flutter",
       "type": "knob",
       "max": 100,
-      "default": 50,
+      "default": 30,
       "scale": "source_pow6",
       "audio_min": 0.0,
       "audio_max": 50.0,
-      "audio_default": 0.5,
+      "audio_default": 0.3,
       "source_default": 0.5,
       "source_formula": "pow(D, 6.0) * 50.0",
       "comment": "Airwindows D. Flutter depth in samples at 44.1 kHz."
@@ -91,28 +91,28 @@
       "name": "HeadBmp",
       "type": "knob",
       "max": 100,
-      "default": 50,
+      "default": 25,
       "scale": "source_head_bump",
       "audio_min": 0.0,
       "audio_max": 1.0,
-      "audio_default": 0.5,
+      "audio_default": 0.25,
       "source_default": 0.5,
       "source_formula": "headBumpDrive = G * 0.1; headBumpMix = G * 0.5",
-      "comment": "Head bump: a broadband drive + level lift, not a low-frequency resonance -- there is no filter behind it. Now covers the full lift range that HeadBmp and HeadFrq used to split between them."
+      "comment": "Low-frequency head-bump resonance amount; frequency fixed near 60 Hz in the active full kernel."
     },
     {
       "name": "Output",
       "type": "knob",
       "max": 100,
       "default": 50,
-      "scale": "source_squared_hz",
-      "unit": "Hz",
-      "audio_min": 25.0,
-      "audio_max": 200.0,
+      "scale": "linear",
+      "unit": "gain",
+      "audio_min": 0.0,
+      "audio_max": 2.0,
       "audio_default": 0.5,
       "source_default": 0.5,
-      "source_formula": "((H * H) * 175.0) + 25.0",
-      "comment": "Makeup gain after the tape stage and before Mix, 0..2x, unity at 50. Replaces HeadFrq, which controlled no frequency -- it only scaled the same head-bump lift HeadBmp already sets, so the two knobs were adjusting one thing. HeadBmp now spans that whole range on its own."
+      "source_formula": "I * 2.0",
+      "comment": "Wet output trim 0..2x, unity at 50, after automatic input-drive compensation and before Mix."
     },
     {
       "name": "Mix",

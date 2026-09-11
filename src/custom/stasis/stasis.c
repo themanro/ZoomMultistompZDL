@@ -1,71 +1,10 @@
-/*
- * stasis.c -- Stasis: footswitch-triggered freeze, MS-70CDR.
- *
- * Stomp the slot ON and whatever you just played is held indefinitely while the
- * dry signal keeps passing, so you play over your own sustained chord. Stomp it
- * OFF and the hold stops.
- *
- * The trigger is the slot's own bypass bit. That is only possible because of two
- * things EdgeWatch established on hardware (2026-08-18), both of which had to be
- * measured rather than assumed:
- *
- *   1. The effect keeps running while the slot is bypassed, its output is still
- *      audible, and it SEES params[0] change -- from the footswitch and from an
- *      editor's patch write alike, on slots 1-3 and 4-6 equally. So the
- *      footswitch is a real, performable trigger.
- *   2. Input audio still reaches the effect while bypassed. That is what makes
- *      the capture instantaneous: the ring is ALREADY FULL when you stomp, so
- *      Stasis holds the note you just played rather than starting to record
- *      after you ask it to.
- *
- * Recording stops while frozen, which is what protects the captured region from
- * being overwritten by the playing you do on top of it.
- *
- * Sustain is a crossfade loop: the capture is read straight through, and a short
- * crossfade at the wrap fades into the same point one loop earlier so the join
- * is continuous rather than a click.
- *
- * The first version played overlapping grains from RANDOM offsets inside the
- * capture, on the theory that a loop betrays itself as a period while scattered
- * grains do not. That was the wrong trade. Consecutive grains were uncorrelated,
- * so every grain boundary was a phase discontinuity, and a sustained note -- the
- * material a freeze should hold most cleanly -- came out chopped. Audible
- * periodicity is a far smaller sin than chop.
- *
- * 5 knobs. Length and Blur sit on knobs 1-2, the verbatim-stock LineSel edit
- * handlers -- the most reliable pair in the pack, and the two that shape the
- * sound most:
- *   Length (knob 1) loop length, ~60 ms .. ~1.4 s, and LIVE -- the stomp always
- *                   captures the full 1.4 s, and Length then chooses how much of
- *                   it loops, ending at the moment you stomped. Winding it down
- *                   closes in on the last instant before the press.
- *   Blur   (knob 2) crossfade at the loop seam, as a FRACTION of the loop
- *                   (~2%..40%) so it does the same audible thing at any Length.
- *                   Short is a tighter, more defined hold; long smears the join
- *                   away entirely.
- *   Decay  (knob 3) how the hold fades. Fully up is genuinely infinite.
- *   Tone   (knob 4) low-pass on the held layer only; the dry stays open.
- *   Mix    (knob 5) LEVEL of the held layer. Not a dry/wet crossfade -- the one
- *                   deliberate exception to the pack's convention. As a
- *                   crossfade it ducked the dry by (1 - Mix) even with nothing
- *                   frozen, so adding Stasis to a patch cost 6 dB at the default.
- *
- * Which knobs work AFTER the freeze: all five. Blur, Decay, Tone and Mix are read
- * every block, and Length too since the capture became fixed-size -- winding it
- * down closes in on the last instant before the stomp while the hold runs. Note
- * that on slots 4-6 the editor reaches knobs by bypass-bouncing the slot, which
- * Stasis sees as a fresh trigger, so live knob control of a running hold wants
- * slots 1-3.
- *
- * Safe-DSP: no switch (jump tables are unreachable in a ZDL and hard-freeze the
- * DSP), no CALLs or helper calls, no runtime divide (grain lengths are powers of
- * two chosen through an if/else ladder so each reciprocal is a literal), no
- * modulo (power-of-two ring mask), no static arrays, no .fardata, no
- * float->unsigned casts, denormals flushed. There is no feedback path: grains
- * are read from a frozen buffer and never written back, so the hold cannot run
- * away however long it is held.
+/* Stasis v1.02: per-instance freeze with stomp or explicit Capture control.
+ * Capture 0 = stomp; 1 = live/release; 2 = hold. Explicit mode ignores bypass
+ * edges, including PE cache-refresh bounces. No capture fires on patch load.
+ * Idle audio is untouched stereo; the held mono layer blends only while active.
+ * Loop tail crossfades into its beginning, then skips that overlapped beginning.
+ * All state and capture memory belong to the firmware instance descriptor.
  */
-
 #include <stdint.h>
 
 #include "../../airwindows/common/zoom_params.h"
@@ -84,7 +23,7 @@ STASIS_CODE_SECTION(STASIS_AUDIO_FUNC)
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
 #define SS_MAGIC   0x53545341u   /* 'STSA' */
-#define SS_VERSION 3u   /* Length is live; Blur scales with the loop */
+#define SS_VERSION 5u   /* Length is live; Blur scales with the loop */
 
 #define SS_BUF      65536u       /* 256 KB, ~1.49 s -- the capture ceiling */
 #define SS_MASK     (SS_BUF - 1u)
@@ -103,19 +42,14 @@ typedef struct StasisState {
     uint32_t clearPos;          /* lazy clear cursor */
     uint32_t writePos;
     uint32_t prevOn;
+    uint32_t prevCapture;
+    float    gate;
     uint32_t frozen;
     float    capEnd;            /* ring position the capture ENDS at (the stomp) */
     float    pos;               /* single read head; the seam is crossfaded */
     float    lp;
     float    level;
 } StasisState;
-
-static inline float ss_soft(float x)
-{
-    if (x > 1.0f) return 1.0f;
-    if (x < -1.0f) return -1.0f;
-    return 1.5f * x - 0.5f * x * x * x;
-}
 
 static inline float ss_flush(float x)
 {
@@ -163,6 +97,8 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
         st->version = SS_VERSION;
         st->writePos = 0u;
         st->prevOn = (params[0] >= 0.5f) ? 1u : 0u;   /* don't fire on load */
+        st->prevCapture = (uint32_t)(int32_t)(zoom_param_norm01(params[STASIS_CAPTURE_SLOT], 0.0f) * 100.0f + 0.5f);
+        st->gate = 0.0f;
         st->frozen = 0u;
         st->capEnd = 0.0f;
         st->pos = 0.0f;
@@ -226,20 +162,16 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
     }
 
     float lpCoef = 0.02f + tn * 0.55f;
-    /* Mix is a HOLD LEVEL here, not a dry/wet crossfade -- the one deliberate
-     * exception to the pack's convention.
-     *
-     * As a crossfade it attenuated the dry by (1 - Mix) at all times, so simply
-     * adding Stasis to a patch cost 6 dB at the default Mix of 50 even with
-     * nothing frozen, because the wet side is silent until you stomp. It is also
-     * wrong musically: the whole point is to play over the held chord at full
-     * strength, so the dry must not duck to make room for it. */
-    float wetLvl = mix;
-
     uint32_t nowOn = (params[0] >= 0.5f) ? 1u : 0u;
 
-    /* --- the trigger --- */
-    if (nowOn && !st->prevOn) {
+    /* LineSel clones materialize UI integers in hundredths, even max=2. */
+    uint32_t capture = (uint32_t)(int32_t)(zoom_param_norm01(params[STASIS_CAPTURE_SLOT], 0.0f) * 100.0f + 0.5f);
+    uint32_t fire = capture == 0u ? (nowOn && !st->prevOn) :
+                    (capture == 2u && st->prevCapture != 2u);
+    uint32_t release = capture == 0u ? (!nowOn && st->prevOn) : (capture == 1u);
+    /* Switching back to stomp mode adopts its current off state. */
+    if (capture == 0u && st->prevCapture != 0u && !nowOn) release = 1u;
+    if (fire) {
         /* Always capture the MAXIMUM. Length used to be latched here, which made
          * it dead exactly when you would reach for it -- while the hold is
          * running. Capturing everything and letting Length choose how much of it
@@ -250,10 +182,11 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
         st->level = 1.0f;
         st->pos = -1.0f;                 /* force a re-seat on the first sample */
         st->lp = 0.0f;
-    } else if (!nowOn && st->prevOn) {
+    } else if (release) {
         st->frozen = 0u;
     }
     st->prevOn = nowOn;
+    st->prevCapture = capture;
 
 
 
@@ -267,13 +200,15 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
 
         /* Record only while NOT frozen: this is what stops the audio you play
          * over the hold from overwriting the hold itself. */
-        if (!frozen) {
+        if (!frozen && st->gate <= 0.0f) {
             buf[wp & SS_MASK] = dry;
-            wp++;
+            wp = (wp + 1u) & SS_MASK;
         }
 
+        if (frozen) { st->gate += 0.004f; if (st->gate > 1.0f) st->gate = 1.0f; }
+        else { st->gate -= 0.004f; if (st->gate < 0.0f) st->gate = 0.0f; }
         float wet = 0.0f;
-        if (frozen) {
+        if (st->gate > 0.0f) {
             /* Loop window ends at the capture point and extends L back, so
              * changing Length slides the START while the end stays put. */
             float loopBase = st->capEnd - (float)L;
@@ -289,12 +224,12 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
                 float t = ((float)F - dist) * invF;
                 if (t < 0.0f) t = 0.0f; else if (t > 1.0f) t = 1.0f;
                 t = t * t * (3.0f - 2.0f * t);
-                float q = pos - (float)L;
+                float q = pos - (float)(L - F);
                 if (q < 0.0f) q += (float)SS_BUF;
                 wet = wet * (1.0f - t) + ss_read(buf, q) * t;
             }
             pos += 1.0f;
-            if (pos >= endp) pos -= (float)L;
+            if (pos >= endp) pos -= (float)(L - F);
             st->pos = pos;
             wet *= SS_WET_TRIM;
 
@@ -305,12 +240,11 @@ void STASIS_AUDIO_FUNC(unsigned int *ctx)
             wet *= level;
         }
 
-        /* dry at unity, hold added on top; soft-clipped so a loud hold under
-         * loud playing cannot fold over. */
-        float out = dry + wetLvl * wet;
-        out = ss_soft(out);
-        fxBuf[i]     = out;
-        fxBuf[i + 8] = out;
+        /* No clipping, gain curve or mono sum on the dry path. A convex blend
+         * is bounded for bounded input; Mix=100 contains only the held layer. */
+        float blend = mix * st->gate;
+        fxBuf[i]     = fxBuf[i]     * (1.0f - blend) + wet * blend;
+        fxBuf[i + 8] = fxBuf[i + 8] * (1.0f - blend) + wet * blend;
     }
 
     st->writePos = wp;

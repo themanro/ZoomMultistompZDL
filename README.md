@@ -1,11 +1,13 @@
 # Zoom MultiStomp ZDL
 
+<p align="center"><img src="graphics/13-ivory-console-film.png" width="900" alt="A Zoom MS-70CDR mounted in a vintage lab console, running the browser patch editor"></p>
+
 Custom `.ZDL` effects for Zoom MultiStomp pedals, plus the reverse-engineered
 toolchain used to build them — no Zoom SDK required.
 
 This was a good amount of work and tokens, please consider to: [buymeacoffee.com/sz0kfixkct](https://buymeacoffee.com/sz0kfixkct)
 
-<p align="center"><img src="graphics/thumb_effects.png" width="820" alt="21 custom effects for the Zoom MS-70CDR"></p>
+<p align="center"><img src="graphics/thumb_effects.png" width="820" alt="22 custom effects for the Zoom MS-70CDR"></p>
 
 ## Quickstart — edit your pedal from the browser
 
@@ -15,12 +17,17 @@ Plug the MS-70CDR in over USB, click **Connect**, and edit patches live — no
 install, no clone, nothing sent anywhere (it is one self-contained HTML file and
 your patch library lives in your own browser).
 
-* **Chrome, Edge or Opera.** Safari and Firefox do not implement Web MIDI; the
-  editor will tell you if you are on one of them.
-* **Close Zoom Effect Manager first** — it holds the MIDI port.
+* **Opera or Edge.** Safari and Firefox do not implement Web MIDI; the editor
+  will tell you if you are on one of them. **Chrome 152 is currently broken** —
+  a Web MIDI *input* regression means output works, no dump ever arrives, and no
+  error is raised. `tools/midi_check.html` confirms it in isolation.
+* **Close Zoom Effect Manager first** — it holds the MIDI port. "The pedal did
+  not respond" is usually this.
 * Slots 1–3 respond to knob moves instantly. Slots 4–6 cannot be edited live by
   this hardware, so the editor applies those for you — see
-  [docs/MIDI-PARAM-EDIT.md](docs/MIDI-PARAM-EDIT.md).
+  [docs/MIDI-PARAM-EDIT.md](docs/MIDI-PARAM-EDIT.md). Effects built before
+  2026-09-10 also load with their knobs inert until nudged; **rebuild or
+  reinstall from [dist/](dist/)** and that goes away.
 
 <p align="center"><img src="graphics/thumb_editors.png" width="820" alt="Patch Editor and Cover Editor"></p>
 
@@ -40,8 +47,8 @@ browser can edit patches, but it cannot install effects.
 
 ## Custom effect pack
 
-This fork ships a curated **library of 21 effects** — all grouped under the
-Delay category, each with a custom on-device cover. Seventeen originals, three
+This fork ships a curated **library of 22 effects** — all grouped under the
+Delay category, each with a custom on-device cover. Eighteen originals, three
 Airwindows-derived ports (Galactic reverb, Oxide tape, Spool tape echo), and one
 contributed effect (Dustbox).
 Full knob layouts, caveats and sound demos are in
@@ -80,7 +87,7 @@ Full knob layouts, caveats and sound demos are in
 </tr>
 <tr>
 <td align="center"><img src="graphics/rewire.png" width="220" alt="Rewire"></td>
-<td></td>
+<td align="center"><img src="graphics/gyre.png" width="220" alt="Gyre"></td>
 <td></td>
 <td></td>
 </tr>
@@ -88,36 +95,41 @@ Full knob layouts, caveats and sound demos are in
 
 ### What each one does
 
-| | |
-|---|---|
-| **Microlm** | granular pitch-shimmer cloud; grains are pitched and fed back, so it builds rather than repeats |
-| **Flower** | Korg-style random sample-and-hold step filter — the "Digital Bath" sound |
-| **Shatter** | stutter / beat-repeat glitch for drums |
-| **Arrakis** | Dune-style detuned sub-octave drone, two subs beating against each other |
-| **Corrupt** | EQD Data Corrupter-style PLL square synth with tracked sub and divided harmony |
-| **Klang** | swept-carrier ring modulator — sirens, dive bombs, clangorous metal |
-| **GenLoss** | tape/VHS generation loss: wow, head-bump tone shift, hiss |
-| **Scorch** | aggressive high-gain amp with a cab-style filter |
-| **Howl** | DBA Total Sonic Annihilation-style feedback loop that self-oscillates on demand |
-| **Taffy** | Red Panda Tensor-style tape warp — reverse, stop, double-speed, random slips |
-| **Dissolve** | OBNE Parting-style glitch delay dissolving into a reverb wash |
-| **Mangle** | delay with three blendable per-repeat mutations (crush, tremolo, octave-down grain) |
-| **Rooms** | DBA Rooms-inspired multi-mode reverb: ROOM / DIGIT / PEAK / GATE / WAVE / GONG |
-| **Hydra** | **tempo-locked** double-time and half-time ghost layers on one delay ring; built for drums |
-| **Spiral** | **tempo-locked** delay whose repeats climb or sink in pitch, compounding every repeat |
-| **Stasis** | footswitch-triggered freeze — stomp and the note you just played is held while you play over it |
-| **Dustbox** | DOD FX33 Buzz Box-style fuzz with a flip-flop sub-octave — contributed, MIT |
-| **Rewire** | four lo-fi blocks — crush, drive, ring mod, comb — in a chain you can **reorder** |
-| **Galactic** | lush Airwindows reverb, wet path boosted for pedal levels |
-| **Oxide** | Airwindows ToTape9 saturation — drive, tilt, bias, flutter, head bump, makeup gain |
-| **Spool** | tempo-locked tape echo with flutter, wow, head wear, drive and a spring tail |
+Knob lists are read from the shipped `dist/` binaries, so they match what the
+pedal actually shows.
+
+| Effect | Knobs | What it is |
+|---|---|---|
+| **Microlm** | Pitch, Regen, Tone, Mix | granular pitch-shimmer cloud; grains are pitched and fed back, so it builds rather than repeats |
+| **Flower** | Rate, Mix | Korg-style random sample-and-hold step filter — the "Digital Bath" sound |
+| **Shatter** | Chance, Mix | stutter / beat-repeat glitch for drums |
+| **Arrakis** | Detune, Mix | Dune-style detuned sub-octave drone, two subs beating against each other |
+| **Corrupt** | Sub, Tone, Wave, Mix | EQD Data Corrupter-style PLL square synth with tracked sub and divided harmony |
+| **Klang** | Freq, Sweep, Mix | swept-carrier ring modulator — sirens, dive bombs, clangorous metal |
+| **GenLoss** | Wow, Tone, Hiss, Mix | tape/VHS generation loss: wow, head-bump tone shift, hiss |
+| **Scorch** | Gain, Mix | aggressive high-gain amp with a cab-style filter (cab baked as biquads, not an FIR) |
+| **Howl** | Tune, Annihil, Mix | DBA Total Sonic Annihilation-style feedback loop that self-oscillates on demand |
+| **Taffy** | Speed, Chance, Depth, Glide, Mix | Red Panda Tensor-style tape warp — reverse, stop, double-speed, random slips |
+| **Dissolve** | Chance, Smear, Glitch, Mix | OBNE Parting-style glitch delay dissolving into a reverb wash |
+| **Mangle** | Time, Feedbk, Crush, Tremolo, Pitch, Mix | delay with three blendable per-repeat mutations; all three at 0 is a clean delay |
+| **Rooms** | Mode, Time, Freq, Depth, Mix | DBA Rooms-inspired multi-mode reverb: ROOM / DIGIT / PEAK / GATE / WAVE / GONG. Freq and Depth are re-purposed per mode |
+| **Hydra** | Div, Tempo, Fast, Slow, Tone, Mix | **tempo-locked** double-time and half-time ghost layers on one delay ring; built for drums |
+| **Spiral** | Div, Tempo, Feedbk, Rise, Glide, Span, Tone, Mix | **tempo-locked** delay whose repeats climb or sink in pitch, compounding every repeat |
+| **Stasis** | Length, Blur, Decay, Tone, Mix, Capture | footswitch-triggered freeze — the note you just played is held while you play over it. Capture selects stomp or explicit capture |
+| **Dustbox** | Dust, Motor, Filter, Power | DOD FX33 Buzz Box-style fuzz with a flip-flop sub-octave — contributed, MIT |
+| **Rewire** | Route, Bits, Drive, Ring, Comb, Shift, Tone, Mix | five lo-fi blocks — crush, drive, ring mod, comb, frequency shift — in a chain you can **reorder**. Shift is a true single-sideband shifter (−51 dB image), so it moves partials off the harmonic series |
+| **Gyre** | Size, Feed, Decay, Rise, Glide, Span, Tone, Mix | granular feedback loop; two grains half a window apart with complementary windows, so the loop is unity-throughput and holds instead of running away |
+| **Galactic** | Replace, Bright, Detune, Bigness, Mix | lush Airwindows reverb, wet path boosted for pedal levels |
+| **Oxide** | Input, Tilt, Shape, Flutter, FlutSpd, Bias, HeadBmp, Output, Mix | Airwindows ToTape9 saturation. Input is a 0–4× drive compensated above unity, Tilt the Dolby-style encode/decode balance, Bias an asymmetric even-harmonic drive |
+| **Spool** | Tempo, Div, Feed, Flutter, Wow, Wear, Drive, Spring, Mix | tempo-locked tape echo with flutter, wow, head wear, drive and a spring tail. Feed reaches self-oscillation above ~90 |
 
 > Every effect ends with a **Mix** knob (dry/wet, default 50), so levels and
-> controls are consistent across the pack.
+> controls are consistent across the pack — an effect is audible as soon as it is
+> selected. Dustbox is the exception; its fourth knob is Power.
 >
-> Not all hardware-verified yet, and the pedal can't hold/run all 21 at once
-> (storage + DSP limits) — install a subset, back up first, flash one at a
-> time. All Mix knobs default to **50**, so an effect is audible as soon as it is selected.
+> The pedal can't hold or run all 22 at once (storage + DSP limits) — install a
+> subset, back up first, and flash one at a time. Run heavy effects (Microlm,
+> Galactic, Spool) one per patch.
 
 ## Download Effects
 
@@ -244,9 +256,17 @@ deep versions live in [docs/](docs/) and [build/ABI.md](build/ABI.md).
 
 - The proven knob path delivers **normalized 0..1 floats** (an earlier ×7.14
   scaling assumption made every knob saturate at ~14% travel).
-- At **patch load**, stored values are *not* materialized — params read 0
-  until the knob is wiggled. Defaults are therefore what you hear first:
-  every volume-type knob in this pack defaults to **1** (quiet).
+- **Saved parameters now initialize at patch load.** The former freeze came
+  from absolute handler call targets that lacked relocation records; the linker
+  now emits PC-relative calls. All 22 release effects enable the corrected init.
+  MatProb and Rooms are hardware-confirmed in all six slots, across patch changes
+  and power cycles with the editor disconnected. The remaining effects are built
+  and statically checked, with hardware listening still pending. See
+  [docs/PARAM-INIT-INVESTIGATION.md](docs/PARAM-INIT-INVESTIGATION.md).
+- The editor retains live-parameter replay for slots 1–3 for compatibility with
+  older installed binaries. It cannot identify the installed build from its
+  effect ID alone. Slots 4–6 still lack live `0x31` edits; initialization and
+  editor-side update behavior are separate concerns.
 - **Refocusing an effect in the chain UI clobbers its param block with
   garbage** until wiggled. The fix (piloted in Howl v3) is an edit-driven
   knob latch: a real knob turn changes one slot at a time, so bulk rewrites
@@ -312,13 +332,28 @@ per-effect `build.py` if yours differs):
 ```
 
 ```bash
-python3 -B build_all.py            # all 14 release effects -> dist/
+python3 -B build_all.py            # all 22 release effects, with load initialization -> dist/
 python3 -B build_all.py taffy      # one effect
 python3 -B build_all.py --all      # + diagnostic/probe builds (-> build/probes/)
 ```
 
+`build_all.py` also re-extracts the patch editor's inline effect database at the
+end, so the editor cannot go stale against `dist/`. It silently did, twice.
+
 Desktop listening previews for the originals (no compiler, no pedal) are in
 [tools/audio_preview/README.md](tools/audio_preview/README.md).
+
+### Testing without a pedal
+
+There is a headless C674x emulator (Ziddle) that runs these ZDLs, plus a test rig
+in [tools/emulator/](tools/emulator/) that reports whether `_init` completes and
+whether params materialized. It is authoritative about instruction semantics and
+**cannot see firmware readiness** — it passed four `_init` builds that froze the
+pedal. Setup and limits: [docs/EMULATOR-TESTING.md](docs/EMULATOR-TESTING.md).
+
+`build/disassemble_zdl.py` disassembles any ZDL, ours or one of the ~830 in
+[stock_zdls/](stock_zdls/). Diffing a generated handler against the stock
+equivalent has been the most productive debugging tool in the project.
 
 ## Technical Notes
 
@@ -374,6 +409,14 @@ them beside the repo, treat them as read-only references.
 
 | Doc | What it covers |
 |---|---|
+| [HANDOFF.md](HANDOFF.md) | **Start here** if you are picking this project up: current state, how to test, and what has already been ruled out. |
+| [docs/PARAM-INIT-INVESTIGATION.md](docs/PARAM-INIT-INVESTIGATION.md) | How the param-materialization bug was actually diagnosed — unrelocated absolute call targets — and the firmware tracing behind it. |
+| [docs/RELEASE-INIT-AUDIT.md](docs/RELEASE-INIT-AUDIT.md) | Rolling the fix out across all 22 effects, plus four follow-up defects found in the audit. |
+| [docs/INIT-MATERIALIZATION.md](docs/INIT-MATERIALIZATION.md) | Investigation record for the same bug, including four `_init` attempts that froze the pedal and the reasoning that went wrong. |
+| [docs/EMULATOR-TESTING.md](docs/EMULATOR-TESTING.md) | Running ZDLs headlessly against an emulated C674x, and the firmware behaviour it cannot see. |
+| [docs/EDIT-HANDLER-ABI.md](docs/EDIT-HANDLER-ABI.md) | How generated edit handlers work, and why they delegate to `ctx[7]`. |
+| [docs/MIDI-PARAM-EDIT.md](docs/MIDI-PARAM-EDIT.md) | SysEx protocol for live param edits; the slots 1–3 rule. |
+| [docs/LOADER-SAFETY.md](docs/LOADER-SAFETY.md) | Catalogued freeze causes mapped to their triggers. |
 | [docs/INSTALLING-ZDLS.md](docs/INSTALLING-ZDLS.md) | Step-by-step Zoom Effect Manager folder install. |
 | [docs/SAFE-DSP-RULES.md](docs/SAFE-DSP-RULES.md) | Pedal-safe DSP/linking constraints learned from hardware failures. |
 | [docs/ZDL-REVERSE-ENGINEERING-STATUS.md](docs/ZDL-REVERSE-ENGINEERING-STATUS.md) | Current map of the ZDL wrapper, runtime ABI, and known state fields. |

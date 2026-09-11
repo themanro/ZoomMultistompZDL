@@ -7,7 +7,7 @@
   "gid_comment": "0x08 = Delay -> Fx_DLY_; consolidated under DLY.",
   "fxid": 409,
   "fxid_comment": "0x0199 in the custom Airwindows range.",
-  "fxid_version": "1.00",
+  "fxid_version": "1.01",
   "flags_byte": 1,
   "params": [
     {
@@ -38,11 +38,11 @@
       "type": "knob",
       "max": 100,
       "default": 35,
-      "scale": "linear",
+      "scale": "custom_feedback",
       "audio_min": 0.0,
       "audio_max": 1.4,
       "audio_default": 0.35,
-      "comment": "Feedback amount. Top of knob is firmly in self-oscillation territory; tape_saturate in the feedback path limits the runaway so it sustains rather than explodes."
+      "comment": "Progressive repeats through 80; loop coefficient crosses unity near 92, reaching 1.4 at 100. Actual sustain depends on Wear, Drive and signal spectrum; record saturation bounds the loop."
     },
     {
       "name": "Flutter",
@@ -103,11 +103,11 @@
       "name": "Mix",
       "type": "knob",
       "max": 100,
-      "default": 50,
+      "default": 35,
       "scale": "linear",
       "audio_min": 0.0,
       "audio_max": 1.0,
-      "audio_default": 0.4,
+      "audio_default": 0.35,
       "comment": "Dry/wet crossfade."
     }
   ],

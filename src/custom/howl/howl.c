@@ -48,6 +48,21 @@ HOWL_CODE_SECTION(HOWL_AUDIO_FUNC)
 #define HOWL_GIN       0.12f        /* input excitation into the resonator */
 #define HOWL_DRIVE     2.4f         /* out-of-loop grit */
 #define HOWL_DETUNE    1.012f       /* R resonator detune for stereo width */
+/* Wet trim.
+ *
+ * The resonator's peak gain is GIN/(2*(1-r)), and r runs to 0.99997 at full
+ * Annihil -- about 109x at the default setting and far more above it. Every
+ * ring therefore slams howl_soft into its ceiling, so the wet path sits at FULL
+ * SCALE whatever you play, while the dry it is mixed against sits nearer -14 dB.
+ * The result measured +5.2 dB hotter than its own input and lifted the level of
+ * the whole patch the moment the slot came on.
+ *
+ * Trimming the wet AFTER the clip keeps the saturation that makes this effect
+ * what it is -- the timbre is unchanged, it is the same clipped waveform -- and
+ * only brings its level into line with the rest of the pack. Fixing it at the
+ * resonator input instead would have un-saturated it and made it a different,
+ * politer effect. */
+#define HOWL_WET_TRIM  0.42f
 #define HOWL_WET       0.35f       /* howl rides at full scale -> keep it tame */
 #define HOWL_DRY       0.30f
 
@@ -100,9 +115,9 @@ void HOWL_AUDIO_FUNC(unsigned int *ctx)
         st->magic = HOWL_MAGIC;
         st->version = HOWL_VERSION;
         st->y1L = st->y2L = st->y1R = st->y2R = 0.0f;
-        st->accKnob[0] = HOWL_TUNE_DEFAULT_NORM;
-        st->accKnob[1] = HOWL_ANNIHIL_DEFAULT_NORM;
-        st->accKnob[2] = HOWL_MIX_DEFAULT_NORM;
+        st->accKnob[0] = zoom_param_norm01(params[HOWL_TUNE_SLOT], HOWL_TUNE_DEFAULT_NORM);
+        st->accKnob[1] = zoom_param_norm01(params[HOWL_ANNIHIL_SLOT], HOWL_ANNIHIL_DEFAULT_NORM);
+        st->accKnob[2] = zoom_param_norm01(params[HOWL_MIX_SLOT], HOWL_MIX_DEFAULT_NORM);
         st->prevRaw[0] = st->prevRaw[1] = st->prevRaw[2] = -1.0f;
         st->initialized = 1u;
     }
@@ -123,13 +138,7 @@ void HOWL_AUDIO_FUNC(unsigned int *ctx)
         }
         if (nch == 1) {
             float v = raw[changed];
-            float n;
-            if (v <= 0.0001f) n = 0.0f;             /* genuine knob zero */
-            else if (v <= 1.0f) n = v;              /* proven 0..1 edit path */
-            else if (v <= 100.0f) n = v * 0.01f;    /* UI-scale fallback */
-            else n = st->accKnob[changed];          /* implausible: hold */
-            if (n < 0.0f) n = 0.0f;
-            if (n > 1.0f) n = 1.0f;
+            float n = zoom_param_norm01(v, st->accKnob[changed]);
             st->accKnob[changed] = n;
         }
     }
@@ -165,8 +174,8 @@ void HOWL_AUDIO_FUNC(unsigned int *ctx)
         float yR = inR * HOWL_GIN + a1R * y1R + a2 * y2R;
         y2R = y1R; y1R = yR;
 
-        float wetL = howl_soft(yL * HOWL_DRIVE);
-        float wetR = howl_soft(yR * HOWL_DRIVE);
+        float wetL = howl_soft(yL * HOWL_DRIVE) * HOWL_WET_TRIM;
+        float wetR = howl_soft(yR * HOWL_DRIVE) * HOWL_WET_TRIM;
 
         fxBuf[i]     = dryLvl * inL + wetLvl * wetL;
         fxBuf[i + 8] = dryLvl * inR + wetLvl * wetR;

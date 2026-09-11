@@ -319,7 +319,19 @@ class LinkerConfig:
     synthesize_linesel_edit_handlers: bool = False
     synth_edit_start_index: int = 2
 
+    # Emit an _init that calls every edit handler, so params[5..N] hold the
+    # patch's saved values from the first audio block instead of zeros. Without
+    # it, a reloaded patch plays each knob's DEFAULT until the knob is touched --
+    # see docs/INIT-MATERIALIZATION.md and _init_materialize_body above.
+    materialize_init: bool = False
+
     def __post_init__(self) -> None:
+        # ZDL_MATERIALIZE_INIT=1 flips this on for EVERY effect in one build, so a
+        # candidate _init can be run through the emulator (matcheck) across the
+        # whole pack without editing 22 build.py files. Off by default: this is an
+        # unproven _init and two earlier versions froze the pedal on boot.
+        if os.environ.get("ZDL_MATERIALIZE_INIT") == "1":
+            self.materialize_init = True
         if self.audio_func_name is None:
             self.audio_func_name = f"Fx_FLT_{self.effect_name}"
         if self.gid not in GID_PREFIX:
@@ -773,6 +785,61 @@ _NOP_RETURN = bytes([
 
 
 
+
+# ---------------------------------------------------------------------------
+# _init that MATERIALIZES params on load
+#
+# THE BUG (docs/INIT-MATERIALIZATION.md): after a patch load the audio function
+# reads params[5..N] as ZEROS until a knob is touched, so zoom_param_norm01 falls
+# back to every knob's default and the user's saved values are silently ignored --
+# while the pedal's screen shows them correctly the whole time. Stock effects
+# escape it because their _init calls their own edit handlers at load. Ours has
+# always emitted a NOP_RETURN, which is why every custom effect has it.
+#
+# Confirmed in emulation with `matcheck` (2026-09-03): params read 0.000 before
+# the handlers run and exactly the knob values afterwards, so calling them is
+# sufficient -- the coefficient-table setup call stock also makes is not needed.
+#
+# The bytes come from build/init_materialize.asm through TI's own assembler
+# rather than being hand-encoded. A wrong _init hard-freezes the DSP on boot and
+# needs an Effect Manager rewrite to recover -- that is how the May 2026 attempt
+# (InitProbe stage 3) ended -- and hand-punched machine code is how you get one.
+#
+# Three 32-byte, 32-byte-aligned chunks: prologue + one call block per knob +
+# epilogue. The alignment is load-bearing: ADDKPC resolves against the FETCH
+# PACKET base, not the instruction, so "return to the next block" is only a
+# constant if every block starts on a packet boundary.
+_INIT_MAT_PROLOGUE = bytes.fromhex(
+    "f6543c07c4353c07c6353c06c4353c06c6353c05c4353c05c6353c01f4543c020080000000000000000000000000000000000000000000000000000000000000")
+_INIT_MAT_CALL_BLOCK = bytes.fromhex(
+    "e4423c0200000000000000000020000064e2930000600000120800900080000012fcff0f62018801006000000000000000000000000000000000000000000000")
+_INIT_MAT_EPILOGUE = bytes.fromhex(
+    "e4523c02e6333c01e4333c05e6333c05e4333c06e6333c06e4333c07e6523c070060000062030c00008000000000000000000000000000000000000000000000")
+# Direct B.S2 at block+0x20. It is fetch-packet aligned, so the instruction
+# address is also the C674x PC-relative branch base. No load-time fixup needed.
+_INIT_MAT_BRANCH_OFF = 0x20
+# Derived, never hardcoded: adding the ctx[31] guard grew the call block from one
+# packet to two, and a stale 32 here would have under-reserved the _init body and
+# quietly overwritten the Dll entry that follows it.
+_INIT_MAT_STRIDE = len(_INIT_MAT_CALL_BLOCK)
+
+
+
+def _init_materialize_body(handler_vas: list[int], init_va: int) -> bytes:
+    """Emit calls that remain valid when the loader rebases the text segment."""
+    if init_va % 32:
+        raise ValueError("materializing init must be fetch-packet aligned")
+    out = bytearray(_INIT_MAT_PROLOGUE)
+    for va in handler_vas:
+        blk = bytearray(_INIT_MAT_CALL_BLOCK)
+        branch_va = init_va + len(out) + _INIT_MAT_BRANCH_OFF
+        if va % 4 or branch_va % 32:
+            raise ValueError("unaligned materializing init branch/handler")
+        _patch_pcr_s21(blk, _INIT_MAT_BRANCH_OFF, va, branch_va)
+        out += blk
+    out += _INIT_MAT_EPILOGUE
+    return bytes(out)
+
 # ---------------------------------------------------------------------------
 # Dll_<Name> entry function  [v1-empirical]
 #
@@ -985,7 +1052,17 @@ def link(cfg: LinkerConfig) -> None:
     NOP_RET_OFF       = _align_up(DIVF_OFF + DIVF_SIZE, 32)
     NOP_RET_STUB_SIZE = 32
     NOP_RET_SIZE      = NOP_RET_STUB_SIZE * NOP_RETURN_COUNT
-    DLL_OFF           = NOP_RET_OFF + NOP_RET_SIZE
+    # Reserved before the handler VAs are known: the SIZE only depends on the
+    # knob count, and the body is written in once the VAs exist. Measure the
+    # prologue and epilogue rather than assuming one packet each -- saving the
+    # full callee-saved set made both of them two packets, and an assumed 32
+    # would have silently under-reserved and overwritten the Dll entry.
+    INIT_MAT_OFF      = NOP_RET_OFF + NOP_RET_SIZE
+    INIT_MAT_SIZE     = (len(_INIT_MAT_PROLOGUE)
+                         + _INIT_MAT_STRIDE * len(cfg.params)
+                         + len(_INIT_MAT_EPILOGUE)
+                         if cfg.materialize_init else 0)
+    DLL_OFF           = INIT_MAT_OFF + INIT_MAT_SIZE
     DLL_SIZE          = 200
     TEXT_TOTAL        = _align_up(DLL_OFF + DLL_SIZE, 32)
 
@@ -1000,6 +1077,8 @@ def link(cfg: LinkerConfig) -> None:
         print(f"    knob3    @ 0x{KNOB3_OFF:04X}  ({KNOB3_SIZE})")
     print(f"    divf     @ 0x{DIVF_OFF:04X}  ({DIVF_SIZE})")
     print(f"    nop_ret  @ 0x{NOP_RET_OFF:04X}  ({NOP_RETURN_COUNT} × 32-byte stubs)")
+    if INIT_MAT_SIZE:
+        print(f"    init_mat @ 0x{INIT_MAT_OFF:04X}  ({INIT_MAT_SIZE}) — materializes params on load")
     print(f"    Dll      @ 0x{DLL_OFF:04X}")
     print(f"    total      0x{TEXT_TOTAL:X}")
 
@@ -1113,6 +1192,43 @@ def link(cfg: LinkerConfig) -> None:
     if n_nop_handlers:
         print(f"  WARNING: {n_nop_handlers} knob(s) using NOP_RETURN edit "
               f"handler (each gets a unique stub VA)")
+
+    # Now that every handler has an address, write the _init that calls them and
+    # point the descriptor at it instead of a NOP_RETURN. This is what stops a
+    # reloaded patch from playing defaults until you touch a knob.
+    if cfg.materialize_init:
+        # A NOP handler has nothing to materialize and its stub would just burn
+        # a call, so only real handlers go in the list.
+        nop_lo = TEXT_VA + NOP_RET_OFF
+        nop_hi = nop_lo + NOP_RET_SIZE
+        call_vas = [va for va in knob_edit_vas if not (nop_lo <= va < nop_hi)]
+        # ZDL_MATERIALIZE_INIT_MAX_CALLS caps how many handler calls the body
+        # emits. It exists for BISECTING the freeze, not for shipping.
+        #
+        # v1 (ctx in A10), v2 (ctx on the stack) and v3 (full callee-saved set)
+        # each froze the pedal on boot, and each runs clean in the Ziddle
+        # emulator. So the freeze is neither the instruction sequence nor
+        # register discipline, and a fourth candidate fix would be a fourth
+        # guess. Setting this to 0 emits the prologue and epilogue with NO calls
+        # between them: it materializes nothing, and asks one question --
+        #   boots  -> our _init frame is fine; the fault is in calling handlers
+        #             from _init (they tail-branch into ctx[7], which may not be
+        #             ready at load), and ctx[34]/ctx[35] is the next thing to
+        #             understand.
+        #   freezes-> the prologue/epilogue itself is wrong, and every version
+        #             built on it was built on sand.
+        _max = os.environ.get("ZDL_MATERIALIZE_INIT_MAX_CALLS")
+        if _max is not None:
+            call_vas = call_vas[:int(_max)]
+            print(f"  init:    BISECT -- capped to {int(_max)} handler call(s)")
+        body = _init_materialize_body(call_vas, TEXT_VA + INIT_MAT_OFF)
+        if len(body) > INIT_MAT_SIZE:
+            raise RuntimeError(
+                f"materialize_init body {len(body)}B exceeds reserved {INIT_MAT_SIZE}B")
+        out_text[INIT_MAT_OFF:INIT_MAT_OFF + len(body)] = body
+        init_va = TEXT_VA + INIT_MAT_OFF
+        print(f"  init:    materializing {len(call_vas)} param(s) at load "
+              f"(_init @ 0x{init_va:08X}, {len(body)}B)")
 
     desc_bytes, desc_relocs = _build_descriptor(
         effect_name=cfg.effect_name,
@@ -1291,8 +1407,7 @@ def link(cfg: LinkerConfig) -> None:
                     f"--mem_model:data=far."
                 )
             if rel['sym_idx'] not in sym_addr:
-                print(f"  SKIP unresolved sym {sym['name']!r} at {sec['name']}+0x{offset:X}")
-                continue
+                raise RuntimeError(f"unresolved relocation for {sym['name']!r} at {sec['name']}+0x{offset:X}")
             # cl6x's intra-section CALLP placeholders encode a displacement
             # measured from the SECTION START, not from the instruction. We
             # compensate by adding the instruction's section offset (stored
@@ -1311,8 +1426,7 @@ def link(cfg: LinkerConfig) -> None:
             elif rtype == RT_PCR_S21:
                 _patch_pcr_s21(out_text, file_off, target, TEXT_VA + file_off)
             else:
-                print(f"  SKIP unknown reloc type {rtype} at {sec['name']}+0x{offset:X}")
-                continue
+                raise RuntimeError(f"unsupported relocation type {rtype} at {sec['name']}+0x{offset:X}")
             n_ok += 1
         return n_ok
 

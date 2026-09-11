@@ -26,8 +26,8 @@
  *            ID6 = FlutSpd   A3[9]   0-1  → flutter LFO speed
  *            ID7 = Bias      A3[10]  0-1  → tape bias (0=dark, 0.5=neutral, 1=bright)
  *    Page 3  ID8 = HeadBump  A3[11]  0-1  → head-bump resonance amount
- *            ID9 = HeadFrq   A3[12]  0-1  → head-bump freq (H^2 → 25-200 Hz)
- *            ID10= Output    A3[13]  0-1  → output gain 0-2×
+ *            ID9 = Output    A3[12]  0-1  → wet output trim 0-2×
+ *            ID10= Mix       A3[13]  0-1  → dry/wet crossfade
  *
  *    A3[0]  = on/off multiplier (1.0 when on, 0.0 when off)
  *    A3[4]  = knob level multiplier  (so knob value 100 → 1.0)
@@ -51,6 +51,7 @@
 #include <stdint.h>
 
 #include "../common/zoom_params.h"
+#include "../common/tape_controls.h"
 #include "totape9_params.h"
 
 #define TOTAPE9_PERSISTENT_STATE 1
@@ -255,13 +256,8 @@ static inline uintptr_t align4(uintptr_t x)
     return (x + 3u) & ~(uintptr_t)3u;
 }
 
-#define TOTAPE9_PARAM_MISSING(raw) (((raw) != (raw)) || ((raw) <= 0.0001f))
-#define TOTAPE9_PARAM_NORM(raw, fallback_norm) \
-    (TOTAPE9_PARAM_MISSING(raw) ? zoom_clamp01(fallback_norm) : \
-     ((raw) < 0.0f ? zoom_clamp01(fallback_norm) : \
-      ((raw) <= (ZOOM_PARAM_RAW_MAX * 1.1f) ? zoom_clamp01((raw) * ZOOM_PARAM_RAW_TO_NORM) : \
-       ((raw) <= 1.0f ? zoom_clamp01(raw) : \
-        ((raw) <= 100.0f ? zoom_clamp01((raw) * 0.01f) : zoom_clamp01(fallback_norm))))))
+#define TOTAPE9_PARAM_MISSING(raw) (!((raw) >= 0.0f && (raw) <= 100.0f))
+#define TOTAPE9_PARAM_NORM(raw, fallback_norm) zoom_param_norm01((raw), (fallback_norm))
 
 static inline void start_lazy_init(ToTape9State *st)
 {
@@ -596,8 +592,22 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
     float rawFlutSpd = params[TOTAPE9_FLUTSPD_SLOT];
     float rawBias = params[TOTAPE9_BIAS_SLOT];
     float rawHeadBmp = params[TOTAPE9_HEADBMP_SLOT];
-    float rawHeadFrq = params[TOTAPE9_OUTPUT_SLOT];   /* dead block: slot reused */
-    float rawOutput = params[TOTAPE9_MIX_SLOT];
+    /* Knob 8 is labelled OUTPUT and knob 9 MIX, and until now this block read them
+     * as HeadFrq and Output -- everything from knob 8 on was shifted by one. So
+     * "Output" moved a 25-200 Hz filter corner instead of the level, which is
+     * exactly the "Output does nothing" it was reported as: it does something,
+     * just never the thing written on it. There was no Mix at all.
+     *
+     * The shift survived because an earlier pass fixed it in the OTHER branch of
+     * this file -- the one under `#if !TOTAPE9_FULL_DSP`, which does not compile:
+     * TOTAPE9_FULL_DSP defaults to 1. The edit was real, it just never shipped.
+     *
+     * HeadFrq is retired rather than given a knob back. It was the least useful
+     * control on the pedal and the pack has no room for it; the bump now sits at
+     * a fixed 62 Hz, near the middle of its old travel and where a tape machine's
+     * head bump actually lives. */
+    float rawOutput = params[TOTAPE9_OUTPUT_SLOT];
+    float rawMix    = params[TOTAPE9_MIX_SLOT];
 
     /* Bypass = clean dry passthrough, same off-gate as every other effect.
      * (An earlier build kept processing while "off" whenever the param block
@@ -613,8 +623,9 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
     float pFlutSpd = TOTAPE9_PARAM_NORM(rawFlutSpd, TOTAPE9_FLUTSPD_DEFAULT_NORM);
     float pBias = TOTAPE9_PARAM_NORM(rawBias, TOTAPE9_BIAS_DEFAULT_NORM);
     float pHeadBmp = TOTAPE9_PARAM_NORM(rawHeadBmp, TOTAPE9_HEADBMP_DEFAULT_NORM);
-    float pHeadFrq = TOTAPE9_PARAM_NORM(rawHeadFrq, TOTAPE9_OUTPUT_DEFAULT_NORM);
-    float pOutput = TOTAPE9_PARAM_NORM(rawOutput, TOTAPE9_MIX_DEFAULT_NORM);
+    const float pHeadFrq = 0.45f;          /* retired knob -> fixed ~62 Hz bump */
+    float pOutput = TOTAPE9_PARAM_NORM(rawOutput, TOTAPE9_OUTPUT_DEFAULT_NORM);
+    float pMixFull = TOTAPE9_PARAM_NORM(rawMix, TOTAPE9_MIX_DEFAULT_NORM);
 
     if (!TOTAPE9_PARAM_MISSING(rawInput)) st->cachedInput = pInput;
     else if (st->criticalParamCacheReady && st->cachedInput == st->cachedInput) pInput = zoom_clamp01(st->cachedInput);
@@ -623,15 +634,16 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
     if (!TOTAPE9_PARAM_MISSING(rawOutput)) st->cachedOutput = pOutput;
     else if (st->criticalParamCacheReady && st->cachedOutput == st->cachedOutput) pOutput = zoom_clamp01(st->cachedOutput);
 
-    /* Dead-code path only (the full Airwindows body, kept for future state-ABI
-     * work). The RELEASE core above no longer has an output gain -- that knob
-     * became Mix, a real dry/wet crossfade. */
+    /* Output level. 0..2x with unity at the knob's midpoint, applied to the
+     * finished tape signal before Mix blends it against the dry. */
     float outputGain = pOutput * 2.0f;
 
     /* --- Derive algorithm parameters (matching ToTape9 formulas exactly)
      *     overallscale = 1.0 throughout                                  --- */
 
     float inputGain    = pInput * 2.0f; inputGain = inputGain * inputGain;
+    /* Custom Oxide voicing: drive the tape harder without the full level jump. */
+    if (inputGain > 1.0f) outputGain *= recip_approx_pos(oxide_drive_denominator(inputGain));
 
     float dublyAmount  = pTilt * 2.0f;
     float outlyAmount  = (1.0f - pTilt) * -2.0f;
@@ -698,6 +710,9 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
     {
         float sL = fxL[i];
         float sR = fxR[i];
+        /* Held for the Mix crossfade: this effect had no dry path at all, so it
+         * could only ever be heard at full wet however its last knob was set. */
+        const float cleanL = sL, cleanR = sR;
 
         /* == Input gain == */
         sL *= inputGain;
@@ -1023,8 +1038,10 @@ void TOTAPE9_AUDIO_FUNC(unsigned int *ctx)
         /* ================================================================
          * Write back, scaled by on/off
          * ============================================================= */
-        fxL[i] = sL;
-        fxR[i] = sR;
+        /* Output is a level on the finished signal, and Mix sits it against the
+         * dry -- the order every other effect in the pack uses. */
+        fxL[i] = cleanL * (1.0f - pMixFull) + sL * pMixFull;
+        fxR[i] = cleanR * (1.0f - pMixFull) + sR * pMixFull;
     }
     /* (no return value; jump to B3 handled by compiler epilogue) */
 #endif

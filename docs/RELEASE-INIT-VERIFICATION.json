@@ -1,0 +1,134 @@
+[
+  {
+    "name": "Spool",
+    "params": 9,
+    "init": "0x3c20",
+    "sha256": "fc2708ba021b4590e674a12a89f217c3141706d48a361994d00dc5c1557b3eb0"
+  },
+  {
+    "name": "Oxide",
+    "params": 9,
+    "init": "0x3660",
+    "sha256": "f4d96d454b1a5ed348cfa25a8967d12c30fd542742b4c99b605643f293f417b0"
+  },
+  {
+    "name": "Galactic",
+    "params": 5,
+    "init": "0x22a0",
+    "sha256": "baef94196cc62cf7e49ab2965da8cbc7c2cba0df24ca070355704fcc46e72aa5"
+  },
+  {
+    "name": "Flower",
+    "params": 2,
+    "init": "0xe20",
+    "sha256": "b01007fe2c9ae53562b2310508f377b4103eb0edb7005bc21de30bffa8e246d4"
+  },
+  {
+    "name": "Shatter",
+    "params": 2,
+    "init": "0x940",
+    "sha256": "890ca27a6a0594efca203d4cdcd050163ee9144509e8bec28d0d4b8102377d4d"
+  },
+  {
+    "name": "Arrakis",
+    "params": 2,
+    "init": "0xd00",
+    "sha256": "437a289e2631505931560b1ae1acd16d3f0109c30e77059f3a25f92c028e42bc"
+  },
+  {
+    "name": "Microlm",
+    "params": 4,
+    "init": "0x1020",
+    "sha256": "ff287abaf58459a7fefdb127ed4d87a8ced7b5722856daebcb90b7e2b41ca4b9"
+  },
+  {
+    "name": "Corrupt",
+    "params": 4,
+    "init": "0x1640",
+    "sha256": "ebd2bb91347d0210b11785c6af7de6f1b5028a4c756e81fdd6a519d271202f0a"
+  },
+  {
+    "name": "Klang",
+    "params": 3,
+    "init": "0x16a0",
+    "sha256": "ce7fd6adbebaeb9a3feceed772ff810111d1db7fcb244c4120e4b3516fc64d2e"
+  },
+  {
+    "name": "GenLoss",
+    "params": 4,
+    "init": "0x1540",
+    "sha256": "eb09e37158d5137a5520a418bcb1c624f4efe75689de638438db0d311a5ebecb"
+  },
+  {
+    "name": "Scorch",
+    "params": 2,
+    "init": "0xb00",
+    "sha256": "13b5b1ac07ddc9a7c1f8272a1d24377b26b30ea5b5f59b72a973204160736727"
+  },
+  {
+    "name": "Howl",
+    "params": 3,
+    "init": "0x1040",
+    "sha256": "8d8f6fac83d0f12b2c4a28b56d55db53881d54994f0d4d98e4eb78a53e7ae6a5"
+  },
+  {
+    "name": "Taffy",
+    "params": 5,
+    "init": "0x1320",
+    "sha256": "c4cb0b6abf9076b14d75bb5622d0d1aa1fa79b222717d4748573d0c7ee861e67"
+  },
+  {
+    "name": "Dissolve",
+    "params": 4,
+    "init": "0x1040",
+    "sha256": "2584f4d7382784c823654db504d47bf306220964980e1e97bfe89f3bbefaece3"
+  },
+  {
+    "name": "Mangle",
+    "params": 6,
+    "init": "0x16c0",
+    "sha256": "f5621787079dbc55c04e8fe0a7e2a11fce801793a0cb3b255cd8dd601d76f069"
+  },
+  {
+    "name": "Rooms",
+    "params": 5,
+    "init": "0x1b80",
+    "sha256": "748b65996bac867fed67fb03d9b655c720f439a9f9c2d08a050ea44da682a49b"
+  },
+  {
+    "name": "Hydra",
+    "params": 6,
+    "init": "0x1600",
+    "sha256": "092fc8ebace202a44ed82bb7febe4fb48ee343a33fbf50ebddaf27649dc31b61"
+  },
+  {
+    "name": "Rewire",
+    "params": 8,
+    "init": "0x2900",
+    "sha256": "3c8e5f9f83f352915282c525b0960ea9201f52ffeaed81b60374b71aa6b42f0d"
+  },
+  {
+    "name": "Dustbox",
+    "params": 4,
+    "init": "0x1dc0",
+    "sha256": "ca202c3b4b672e581e28b649bd3526db1906f7565d18cab21bf4b47caac9985c"
+  },
+  {
+    "name": "Stasis",
+    "params": 6,
+    "init": "0x1aa0",
+    "sha256": "8ad4e161ba1e9df996019eada0d1ae45db429b316d9e50b51b07a3f06744939d"
+  },
+  {
+    "name": "Spiral",
+    "params": 8,
+    "init": "0x1ce0",
+    "sha256": "7fd81521c97a8fd34c54e93db0d8221ebff8786886ffc92f40520d41b8e12b5b"
+  },
+  {
+    "name": "Gyre",
+    "params": 8,
+    "init": "0x1b80",
+    "sha256": "a45111ab3acf4273ffb268eb3228dd18348e6db780f8b0abe89a3c073aebd8ba"
+  }
+]
