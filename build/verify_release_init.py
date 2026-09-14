@@ -50,7 +50,7 @@ def verify():
             for base in [0, 0x10000000, 0x11820000]:
                 assert ((base + init_va + off) & ~31) + 4*delta == base + target
         parsed = parse_zdl(path)
-        assert parsed['params'] == [{k:p[k] for k in ('name','max','default')} for p in manifest['params']], path
+        assert [{k:p[k] for k in ('name','max','default')} for p in parsed['params']] == [{k:p[k] for k in ('name','max','default')} for p in manifest['params']], path
         assert parsed['fxid'] == manifest['fxid'] and parsed['gid'] == manifest['gid'], path
         rows.append(dict(name=manifest['effect_name'], params=count, init=hex(init_va),
                          sha256=hashlib.sha256(path.read_bytes()).hexdigest()))

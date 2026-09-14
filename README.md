@@ -47,6 +47,13 @@ browser can edit patches, but it cannot install effects.
 
 ## Custom effect pack
 
+**September 14 display update:** all 22 effects now have individual laboratory-inspired
+graphics, corrected LCD proportions, and shorter pedal labels. Mode controls show
+names in PE and supported custom effects show short names on the pedal. Reinstall
+the updated files from [dist/](dist/) to get the pedal artwork and labels; refresh
+the Patch Editor for its UI changes. Existing patch values and effect IDs are preserved.
+See the [display update notes](docs/EFFECT-DISPLAY-REFRESH.md) for details.
+
 This fork ships a curated **library of 22 effects** — all grouped under the
 Delay category, each with a custom on-device cover. Eighteen originals, three
 Airwindows-derived ports (Galactic reverb, Oxide tape, Spool tape echo), and one

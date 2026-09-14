@@ -594,7 +594,8 @@ def _build_descriptor(
     n_user = len(params)
     for i, p in enumerate(params):
         entry = bytearray(0x30)
-        nb = p.name.encode('ascii')[:8]
+        from parameter_display import pedal_name
+        nb = pedal_name(effect_name, p.name).encode('ascii')[:8]
         entry[:len(nb)] = nb
         _p32(entry, 0x0C, p.max_val)
         _p32(entry, 0x10, p.default_val)
@@ -906,6 +907,9 @@ def _build_dll(desc_entry_count: int) -> bytes:
 
 def link(cfg: LinkerConfig) -> None:
     """Build cfg.output_path from cfg.obj_path."""
+    if os.environ.get("ZDL_SELECTOR_OUTPUT_DIR"):
+        cfg.output_path = str(Path(os.environ["ZDL_SELECTOR_OUTPUT_DIR"]) / Path(cfg.output_path).name)
+        Path(cfg.output_path).parent.mkdir(parents=True, exist_ok=True)
     print(f"=== {cfg.effect_name} ZDL Linker ===")
 
     # ----- Parse .obj -----
@@ -1238,6 +1242,16 @@ def link(cfg: LinkerConfig) -> None:
         knob_edit_vas=knob_edit_vas,
         params=cfg.params,
     )
+    # Stock RNDMFLTR descriptor +0x24 holds GetString(value, destination).
+    # Object-defined callbacks are opt-in via generated parameter headers.
+    desc_bytes = bytearray(desc_bytes)
+    for i in range(len(cfg.params)):
+        va = obj_symbol_va.get(f"ZDL_GetLabel_{i}")
+        if va is not None:
+            offset = (i + 2) * 0x30 + 0x24
+            _p32(desc_bytes, offset, va)
+            desc_relocs.append((offset, va))
+    desc_bytes = bytes(desc_bytes)
     expected = 0x30 * (2 + len(cfg.params))
     assert len(desc_bytes) == expected, \
         f"descriptor size {len(desc_bytes)} != {expected}"
@@ -1421,8 +1435,10 @@ def link(cfg: LinkerConfig) -> None:
             file_off = base_off + offset
             if rtype == RT_ABS_L16:
                 _patch_abs_l16(out_text, file_off, target)
+                dyn_relocs.append((TEXT_VA + file_off, rtype, target))
             elif rtype == RT_ABS_H16:
                 _patch_abs_h16(out_text, file_off, target)
+                dyn_relocs.append((TEXT_VA + file_off, rtype, target))
             elif rtype == RT_PCR_S21:
                 _patch_pcr_s21(out_text, file_off, target, TEXT_VA + file_off)
             else:

@@ -34,3 +34,37 @@ remains in Diagnostics. Reserved bottom spacing keeps controls clear. The strip
 follows open modal drawers so it remains readable and dismissible there too.
 Browser checked invalid-import notice, opening Settings, clearing the notice and
 closing Settings. Eight MIDI regression tests and script syntax checks pass.
+
+## Performance controls
+
+Added grouped Bypass / Tuner, Resume effects, and All slots off toolbar buttons.
+Tuner uses original MS-70CDR CC74 (127 on / 0 off), as documented in
+https://github.com/g200kg/zoom-ms-utility/blob/master/midimessage.md .
+The pedal's BYPASS/MUTE TUNER setting determines output; PE does not overwrite it.
+Buttons report commands sent, not unverified hardware state. All slots off reads
+fresh data, changes only on/off fields, verifies the result, and retains unrelated
+local edits. No flash store. Explicit Stasis holds remain a documented exception;
+use Capture=1 to release them. Offline/unsupported/busy controls are disabled.
+15 Node tests pass, and controls render in the offline browser. Hardware pending.
+
+### Slots 4–6 Apply feedback
+
+Suppress on/off echoes only for the transient slot bounce owned by Apply; these
+previously changed the displayed slot state and rebuilt every knob. Real on/off
+messages outside the transaction still update the UI. Cancel a queued Apply when
+starting another drag, so the earlier gesture cannot apply halfway through it.
+Labels now say "Apply slots 4–6 after editing" and acknowledge the brief audio
+dip. The measured late-slot fallback is retained; seamless late-slot live editing
+is not established by the init fix. 16 Node tests pass. Hardware retest pending.
+
+### Automatic slot updates and stable controls
+
+Removed the user-facing late-slot Apply option and per-slot transport labels;
+the proven fallback always runs automatically. Busy transactions keep disabled
+controls at stable opacity, with a wait cursor and existing operation text.
+On/off changes now update the existing slot label/toggle/class instead of
+rebuilding six slots; toggle callbacks read current state rather than a stale
+render-time value. Hardware echoes use the same in-place update.
+17 Node tests pass and the offline page loads. This does not remove the audible
+bypass gap or establish live 0x31 support in slots 4–6. The init-materialization
+fix and live firmware update routing remain separate investigations.

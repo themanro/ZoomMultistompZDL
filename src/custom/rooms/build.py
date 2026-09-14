@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -21,6 +22,7 @@ sys.path.insert(0, str(ROOT / "src" / "airwindows" / "common"))
 
 from linker import LinkerConfig, link, params_from_manifest  # noqa: E402
 from manifest_params import write_param_header  # noqa: E402
+from stock_style_covers import POSITIONS
 from custom_covers import make_cover  # noqa: E402
 
 TI_ROOT = Path("/Applications/ti/ti-cgt-c6000_8.5.0.LTS")
@@ -42,8 +44,15 @@ def main() -> None:
                         help="destination for an isolated hardware-test build")
     parser.add_argument("--materialize-init", action=argparse.BooleanOptionalAction, default=True,
                         help="enable the corrected init for hardware validation")
+    parser.add_argument("--discrete-mode-pilot", action="store_true",
+                        help="build separate Rooms6 probe with six Mode positions")
     args = parser.parse_args()
     manifest = json.loads((HERE / "manifest_pedal.json").read_text())
+    if args.discrete_mode_pilot:
+        manifest.update(effect_name="Rooms6", fxid=490, fxid_version="0.01")
+        manifest["params"][0].update(max=5, default=0)
+        args.output_dir = ROOT / "build" / "probes"
+        os.environ["ZDL_SELECTOR_LABELS"] = "1"
     write_param_header(manifest, HERE / "rooms_params.h", "ROOMS")
 
     src_c = HERE / "rooms.c"
@@ -60,6 +69,7 @@ def main() -> None:
         [
             str(CL6X),
             *CFLAGS,
+            *(["--define=ROOMS_DISCRETE_MODE=1"] if args.discrete_mode_pilot else []),
             f"--define=ROOMS_AUDIO_FUNC={audio_func}",
             "-c",
             str(src_c),
@@ -76,7 +86,7 @@ def main() -> None:
 
     cfg = LinkerConfig(
         effect_name=effect_name,
-        screen_image=make_cover(effect_name, [p["name"] for p in manifest["params"]]),
+        screen_image=make_cover("Rooms", [p["name"] for p in manifest["params"]]),
         audio_func_name=audio_func,
         gid=manifest["gid"],
         fxid=manifest["fxid"],
@@ -86,7 +96,7 @@ def main() -> None:
         fxid_version=manifest.get("fxid_version", "1.00").encode("ascii"),
         flags_byte=manifest.get("flags_byte", 0x01),
         audio_nop=manifest.get("audio_nop", False),
-        knob_positions=[(2, 14, 46), (3, 55, 46), (4, 96, 46)],
+        knob_positions=POSITIONS["Rooms"],
         materialize_init=args.materialize_init,
         use_object_edit_handlers=False,
         synthesize_linesel_edit_handlers=True,

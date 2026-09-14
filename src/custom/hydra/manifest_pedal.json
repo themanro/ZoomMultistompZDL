@@ -12,7 +12,7 @@
       "name": "Div",
       "max": 100,
       "default": 42,
-      "comment": "Re-trigger length as a division of Tempo. Position 0 is Grain: a fixed 256-sample window, free-running, which is the granular octave-shifter mode the tempo ladder cannot reach. Above that: 1/32, 1/16T, 1/16, 1/8T, 1/8, dotted 1/8, 1/4. Default 42 = 1/8T."
+      "comment": "Re-trigger length as a division of Tempo. Position 0 is Grain: a fixed 256-sample window, free-running, which is the granular octave-shifter mode the tempo ladder cannot reach. Above that: 1/32, 1/16T, 1/16, 1/8T, 1/8, dotted 1/8, 1/4. Default 42 = 1/16 (DSP range 32-43); 1/8T starts at 44."
     },
     {
       "name": "Tempo",

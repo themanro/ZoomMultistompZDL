@@ -18,6 +18,7 @@ sys.path.insert(0, str(ROOT / "src" / "airwindows" / "common"))
 
 from linker import LinkerConfig, link, params_from_manifest  # noqa: E402
 from manifest_params import write_param_header  # noqa: E402
+from stock_style_covers import POSITIONS
 from custom_covers import make_cover  # noqa: E402
 
 TI_ROOT = Path("/Applications/ti/ti-cgt-c6000_8.5.0.LTS")
@@ -78,7 +79,7 @@ def main() -> None:
         fxid_version=manifest.get("fxid_version", "1.00").encode("ascii"),
         flags_byte=manifest.get("flags_byte", 0x01),
         audio_nop=manifest.get("audio_nop", False),
-        knob_positions=[(2, 14, 46), (3, 55, 46), (4, 96, 46)],
+        knob_positions=POSITIONS["Stasis"],
         use_object_edit_handlers=False,
         synthesize_linesel_edit_handlers=True,
         synth_edit_start_index=2,

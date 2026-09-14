@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs'),vm=require('node:vm');
 const src=fs.readFileSync(require('node:path').join(__dirname,'../patch_editor.html'),'utf8');
 function fn(name){const start=src.search(new RegExp('(?:async )?function '+name+'\\('));assert(start>=0);return src.slice(start,src.indexOf('\n}',start)+2);}
-function context(extra={}){return vm.createContext({setTimeout,clearTimeout,performance,Promise,Map,Set,Math,Array,Number,Error,busy:false,syncing:false,midiActionActive:false,actionCancelled:false,patchGeneration:0,nextSend:0,dumpCooldownUntil:0,pendingDump:null,sxAccum:null,autoApplyPending:false,sleep:async()=>{},banner:()=>{},log:()=>{},updateActionState:()=>{},...extra});}
+function context(extra={}){return vm.createContext({setTimeout,clearTimeout,performance,Promise,Map,Set,Math,Array,Number,Error,busy:false,syncing:false,midiActionActive:false,actionCancelled:false,transientBypassSlot:-1,patchGeneration:0,nextSend:0,dumpCooldownUntil:0,pendingDump:null,sxAccum:null,autoApplyPending:false,sleep:async()=>{},banner:()=>{},log:()=>{},updateActionState:()=>{},...extra});}
 test('transaction rejects overlap and releases ownership after failure',async()=>{
  const c=context();vm.runInContext(fn('cancelDump')+'\n'+fn('midiAction'),c);
  let finish;let calls=0;
@@ -106,4 +106,75 @@ test('same-topology refresh retains slot arrays and DOM while accepting real ren
  c.reconcilePatch({name:'New',fx:[[1,42,9]],dsp:0,curfx:0,maxfx:1});
  assert.equal(c.patch.fx[0],old);assert.equal(old[2],9);assert.equal(c.patch.name,'New');assert.equal(renders,0);assert.equal(updates,1);
  c.reconcilePatch({name:'New',fx:[[1,43,9]]});assert.equal(renders,1);
+});
+test('tuner controls send original-model CC only and never write patches',()=>{
+ const sent=[];const c=context({midiOut:{},READ_ONLY:false,DEVID:97,send:x=>sent.push(Array.from(x))});
+ vm.runInContext(fn('setPedalTuner'),c);c.setPedalTuner(true);c.setPedalTuner(false);
+ assert.deepEqual(sent,[[176,74,127],[176,74,0]]);
+ c.READ_ONLY=true;c.setPedalTuner(true);assert.equal(sent.length,2);
+ c.READ_ONLY=false;c.DEVID=110;c.setPedalTuner(true);assert.equal(sent.length,2);
+});
+test('all slots off preserves live parameters and leaves unrelated local edits pending',async()=>{
+ const live={name:'Live name',fx:Array.from({length:6},()=>[1,42,25])};let written,reads=0;
+ const copy=x=>JSON.parse(JSON.stringify(x));
+ const c=context({patch:copy(live),midiOut:{},READ_ONLY:false,DEVID:97,
+ dirty:new Set(['0,2','1,0']),dirtyVersions:new Map(),waitIdle:async()=>{},
+ decodePatch:copy,encodePatch:copy,zx:x=>x,send:x=>{if(x.fx)written=copy(x);},
+ readCurrent:async()=>{const r=copy(reads++?written:live);r.slice=()=>copy(r);return r;},
+ reconcilePatch:p=>{c.patch=p;}});
+ c.patch.fx[0][2]=77;vm.runInContext(fn('turnAllSlotsOff'),c);await c.turnAllSlotsOff();
+ assert(written.fx.every(f=>f[0]===0));assert.equal(written.fx[0][2],25);
+ assert.equal(c.patch.fx[0][2],77);assert(c.dirty.has('0,2'));assert(!c.dirty.has('1,0'));assert.equal(c.busy,false);
+});
+
+test('Apply bypass echoes do not alter the model or rebuild slot controls',()=>{
+ let rendered=0;
+ const c=context({DEVID:97,patch:{fx:[[1,42,25]]},BYID:{42:{name:'test'}},
+ transientBypassSlot:0,midiActionActive:true,KNOBREG:[],render:()=>{throw Error("unexpected rebuild");},updateSlotState:()=>rendered++});
+ vm.runInContext(fn('handleSysex'),c);
+ c.handleSysex([240,82,0,97,49,0,0,0,0,247]);
+ assert.equal(c.patch.fx[0][0],1);assert.equal(rendered,0);
+ c.transientBypassSlot=-1;c.midiActionActive=false;
+ c.handleSysex([240,82,0,97,49,0,0,0,0,247]);
+ assert.equal(c.patch.fx[0][0],0);assert.equal(rendered,1);
+});
+
+test('slot state changes preserve controls and update only the state display',()=>{
+ const classes={};const attrs={};const label={};const hint={};
+ const toggle={classList:{toggle:(k,v)=>classes[k]=v},setAttribute:(k,v)=>attrs[k]=v};
+ const slot={classList:{toggle:()=>{}},querySelector:q=>({'.toggle':toggle,'.slot-state':label,'.bypassHint':hint}[q])};
+ const c=context({patch:{fx:[[0,42]]},$:()=>({children:[slot]})});
+ vm.runInContext(fn('updateSlotState'),c);c.updateSlotState(0);
+ assert.equal(label.textContent,'Off');assert.equal(attrs['aria-pressed'],'false');assert.equal(hint.hidden,false);
+ c.patch.fx[0][0]=1;c.updateSlotState(0);
+ assert.equal(label.textContent,'On');assert.equal(attrs['aria-pressed'],'true');assert.equal(hint.hidden,true);
+});
+test('direct-edit trial enables late-slot messages and suppresses automatic Apply',()=>{
+ const sent=[];const c=context({directEditTrial:false,editEnable:()=>{},zx:x=>x,send:x=>sent.push(Array.from(x))});
+ vm.runInContext('const LIVE_EDIT_SLOTS=3;const liveEditable=s=>s<LIVE_EDIT_SLOTS||directEditTrial;\n'+fn('sendParam')+'\n'+fn('autoApplyMaybe'),c);
+ c.sendParam(3,2,77);assert.equal(sent.length,0);
+ c.directEditTrial=true;c.sendParam(3,2,77);assert.deepEqual(sent,[[49,3,2,77,0]]);
+ c.setTimeout=()=>{throw Error('trial scheduled Apply');};c.autoApplyMaybe();
+});
+
+test('mode selector preserves readback values and sends only on a different detent',()=>{
+ const changes=[],releases=[];
+ class El {
+   constructor(tag){this.tag=tag;this.style={};this.children=[];this.events={};this.attrs={};}
+   setAttribute(k,v){this.attrs[k]=v;} appendChild(x){this.children.push(x);} append(...xs){this.children.push(...xs);}
+   addEventListener(k,f){this.events[k]=f;} getContext(){return new Proxy({}, {get:()=>()=>{}});}
+ }
+ let blocked=false;
+ const c=context({document:{createElement:t=>new El(t)},window:{devicePixelRatio:1},tok:(k,f)=>f,
+ editingBlocked:()=>blocked,autoApplyT:null});
+ vm.runInContext(fn('selectorIndex')+'\n'+fn('makeSelector'),c);
+ const choices=[{from:0,to:16,value:8,label:'Room'},{from:17,to:33,value:25,label:'Digit'},{from:34,to:100,value:60,label:'Peak'}];
+ const w=c.makeSelector('Mode',19,100,v=>changes.push(v),()=>releases.push(1),choices);
+ const select=w.children[2];assert.equal(select.value,'1');assert.equal(changes.length,0);
+ w._receive(30);assert.equal(select.value,'1');assert.match(select.title,/30/);assert.equal(changes.length,0);
+ select.value='1';select.events.change();assert.equal(changes.length,0);
+ select.value='2';select.events.change();assert.deepEqual(changes,[60]);assert.equal(releases.length,1);
+ blocked=true;select.value='0';select.events.change();assert.equal(select.value,'2');assert.equal(changes.length,1);
+ blocked=false;w._setNorm(0);assert.deepEqual(changes,[60,8]);w._release();assert.equal(releases.length,2);
+ w._receive(100);assert.equal(select.value,'2');assert.equal(changes.length,2);
 });

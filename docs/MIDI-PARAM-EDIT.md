@@ -301,3 +301,19 @@ Two corrections to it, both checked against hardware:
   debounced to one apply per gesture (toolbar checkbox)
 * incoming `0x31` mirrors the hardware into the editor for every slot, so the
   editor follows knobs turned on the pedal
+
+## Current-build direct-edit retest
+
+PE's removed auto-apply checkbox was not a valid direct-edit test: sendParam
+also returned early for slot indices >=3. Turning auto-apply off therefore
+left no outbound parameter update path in those slots. It does not provide
+new hardware evidence that current binaries ignore 0x31.
+
+Settings > Diagnostics > Test direct edits in slots 4–6 temporarily permits
+0x31 in all six slots and suppresses scheduled automatic Apply. It cancels any
+queued Apply first, is not persisted, and restores normal behavior when ended
+or the page reloads. Do not press Apply, switch slots on/off or change effect
+types during the isolated test. Listen for a real change; a display/readback
+change alone does not establish DSP materialization. Compare knob 1/2 and a
+later knob on the same current custom effect, then a stock effect if needed.
+No hardware result yet. 18 PE Node tests pass.

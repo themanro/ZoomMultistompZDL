@@ -186,7 +186,12 @@ void ROOMS_AUDIO_FUNC(unsigned int *ctx)
     float depth = zoom_param_norm01(params[ROOMS_DEPTH_SLOT], ROOMS_DEPTH_DEFAULT_NORM);
     float mix   = zoom_param_norm01(params[ROOMS_MIX_SLOT],   ROOMS_MIX_DEFAULT_NORM);
 
+#ifdef ROOMS_DISCRETE_MODE
+    /* Separate Rooms6 patch ID: shared edit handler stores raw UI / 100. */
+    int mode = (int)(modeN * 100.0f + 0.5f);
+#else
     int mode = (int)(modeN * 5.999f);
+#endif
     if (mode < 0) mode = 0; else if (mode > 5) mode = 5;
     /* branchless mode enables (predicated compares, never a jump table) */
     float enRoom  = (mode==0)?1.0f:0.0f;

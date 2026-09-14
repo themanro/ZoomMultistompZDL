@@ -10,14 +10,10 @@ Output is not byte-identical to the June set: those were rendered from an older
 cover whose border bled to the frame edge, while make_cover now draws it inset
 by a pixel. The framing is the same; the art is simply current.
 
-  * canvas 640x416, background (18, 20, 24)
-  * cover drawn at 630x404 inset at (5, 6), matching the original framing
-  * lit pixels (180, 230, 255)
-
-The 128x64 cover is stretched NON-UNIFORMLY (4.92x across, 6.30x down). That is
-deliberate: covers are authored pre-squashed vertically because the device's
-pixels are not square, so the gallery has to un-squash them to show what the
-screen actually looks like.
+The cover is decoded from the ZDL, then scaled with nearest-neighbor pixels.
+The physical pixel aspect comes from lcd_geometry.PIXEL_ASPECT (about 1.4),
+so a 128x64 bitmap is displayed at approximately 10:7, matching PE. No VHS
+filter is applied to the release gallery.
 
 Usage:
     python3 build/make_gallery_png.py            # every effect in dist/
@@ -45,8 +41,9 @@ except ImportError:
 # light-blue LCD skin and clashed the moment the hero went to tape.
 BG = (8, 9, 11)
 LIT = (157, 193, 216)
-CANVAS = (640, 416)
-INNER = (630, 404)
+from lcd_geometry import PIXEL_ASPECT
+INNER = (630, round(630 * 64 / 128 * PIXEL_ASPECT))
+CANVAS = (640, INNER[1] + 12)
 ORIGIN = (5, 6)
 
 
@@ -67,7 +64,7 @@ def render(zdl: Path, out: Path) -> None:
     # Gentler than the hero: these render at 220px in the README table, where the
     # full tape pass turns knob labels into texture. Seeded per effect so each one
     # gets its own dropouts instead of 21 identically-damaged frames.
-    canvas = vhs(canvas, strength=0.45, seed=abs(hash(out.stem)) % 100000)
+    # Native artwork: no texture that obscures pixels at pedal size.
     out.parent.mkdir(parents=True, exist_ok=True)
     canvas.save(out)
 

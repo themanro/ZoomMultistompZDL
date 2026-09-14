@@ -30,7 +30,8 @@ CX, CY = 64, 23          # emblem centre (top band)
 KNOB_Y = 46              # firmware value boxes sit at y=46 (rows 46..61)
 
 
-DEVICE_ASPECT = 1.30     # MS-70CDR LCD pixels are ~1.3x taller than wide
+from lcd_geometry import PIXEL_ASPECT
+DEVICE_ASPECT = PIXEL_ASPECT
 
 
 class _VSquash:
@@ -237,11 +238,15 @@ def _em_oxide(c):                         # Oxide — reels shedding oxide speck
         c.filled_circle(x, y, 1)
 
 
-def _em_spool(c):                         # Spool — reel feeding shrinking echo loops
-    _reel(c, 50, CY, 8)
-    c.hline(50, 66, CY)
-    for cx, r in [(74, 6), (88, 4), (99, 3)]:
-        c.circle(cx, CY, r)
+def _em_spool(c):
+    # Two reels feeding a head: one continuous, readable tape path.
+    for x in (43, 85):
+        c.circle(x, 24, 9); c.circle(x, 24, 2)
+        for dx, dy in ((0,-8),(0,8),(-8,0),(8,0)):
+            _line(c,x,24,x+dx,24+dy)
+    _line(c,51,27,58,33);c.hline(58,70,33);_line(c,70,33,77,27)
+    c.rect(59,28,69,33)
+    for x in (62,65,67):c.vline(x,30,32)
 
 
 def _em_genloss(c):                       # GenLoss — reels + tangled tape
@@ -331,48 +336,27 @@ def _em_spiral(c):                        # Spiral — echoes climbing a stairca
     _line(c, 42 + 5 * 9, tip, 42 + 5 * 9 + 3, tip + 4)
 
 
-def _em_stasis(c):                        # Stasis — a note seized mid-flight and held
-    # left: the incoming note, decaying the way it actually would
-    prev = None
-    for x in range(36, 61):
-        t = (x - 36) / 4.6
-        amp = 7.0 * math.exp(-(x - 36) / 42.0)   # still ringing when seized
-        y = int(CY - amp * math.sin(t))
-        if prev is not None:
-            _line(c, x - 1, prev, x, y)
-        prev = y
-    # the stomp: a dashed vertical marking the instant of capture
-    for y in range(CY - 9, CY + 10, 3):
-        _line(c, 63, y, 63, y + 1)
-    # right: that seized segment repeated at CONSTANT amplitude -- held, not
-    # decaying, and identical each time, which is what a crossfade loop is
-    seg = 9
-    for k in range(3):
-        x0 = 66 + k * seg
-        prev = None
-        for x in range(x0, x0 + seg + 1):
-            t = (x - x0) / 1.43
-            y = int(CY - 4.0 * math.sin(t))
-            if prev is not None:
-                _line(c, x - 1, prev, x, y)
-            prev = y
+def _em_stasis(c):
+    pts=[(24,26),(29,26),(35,19),(41,29),(46,24)]
+    for a,b in zip(pts,pts[1:]):_line(c,*a,*b)
+    c.rect(51,16,95,33)
+    for x in (54,67,80):
+        pts=[(x,28),(x+4,20),(x+9,29),(x+12,24)]
+        for a,b in zip(pts,pts[1:]):_line(c,*a,*b)
+    c.circle(100,25,5);c.rect(94,20,96,30,0)
+    _line(c,102,19,105,21);_line(c,105,21,105,17)
 
 
-def _em_rooms(c):                         # Rooms — a strike and its reverb tail
-    # Reflections that get shorter AND closer together. The densifying is the
-    # point: evenly spaced decaying repeats read as a DELAY, and it is the
-    # build-up of density that says reverb instead. A first attempt drew a
-    # perspective room with six evenly spaced bars and read as a fence.
-    base = CY + 9
-    c.hline(38, 92, base)                  # floor, to sit the tail on
-    x, h, gap = 41.0, 17.0, 10.5
-    while x < 91 and h > 1.2:
-        c.vline(int(x), int(base - h), base)
-        x += gap
-        h *= 0.76
-        gap *= 0.80
-        if gap < 2.0:
-            gap = 2.0
+def _em_rooms(c):
+    c.rect(32,16,96,33);c.rect(40,20,88,29)
+    for a,b in [((32,16),(40,20)),((96,16),(88,20)),((32,33),(40,29)),((96,33),(88,29))]:
+        _line(c,*a,*b)
+    c.filled_circle(46,25,1)
+    # Dotted reflection path, with enough clearance from room edges.
+    pts=[(49,25),(67,21),(83,26),(64,29),(49,25)]
+    for a,b in zip(pts,pts[1:]):
+        steps=max(abs(b[0]-a[0]),abs(b[1]-a[1]))
+        for k in range(0,steps+1,3):c.px(round(a[0]+(b[0]-a[0])*k/steps),round(a[1]+(b[1]-a[1])*k/steps))
 
 
 def _em_dustbox(c):                       # Dustbox — fuzz over a divided sub-octave
@@ -502,6 +486,12 @@ def _load_override(name: str):
 
 
 def make_cover(name: str, param_names=None) -> bytes:
+    if name in {"Stasis", "Spool", "Rooms"}:
+        from stock_style_covers import draw
+        return encode_zoom_rle(draw(name, (param_names or [])[:3]))
+    from pack_covers import NAMES, draw as draw_pack
+    if name in NAMES:
+        return encode_zoom_rle(draw_pack(name, param_names or []))
     override = _load_override(name)
     if override is not None:
         return override
@@ -516,7 +506,7 @@ def make_cover(name: str, param_names=None) -> bytes:
     adv = 3 * 2 + 1                       # scale-2 glyph advance
     w = len(name) * adv - 1
     x = max(3, (128 - w) // 2)
-    _VSquash(c, 9).draw_text(name.upper(), x, 4, scale=2, spacing=1, v=0)
+    _VSquash(c, 9, aspect=1 if name in {"Stasis", "Spool", "Rooms"} else DEVICE_ASPECT).draw_text(name.upper(), x, 4, scale=2, spacing=1, v=0)
     fn = EMBLEMS.get(name)
     if fn:
         fn(_VSquash(c, CY))              # emblem drawn round-on-device

@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT / "build"))
 sys.path.insert(0, str(HERE.parent / "common"))
 
 from airwindows_image import make_airwindows_tape_echo_screen  # noqa: E402
+from stock_style_covers import POSITIONS
 from custom_covers import make_cover  # noqa: E402
 from linker import LinkerConfig, link, params_from_manifest  # noqa: E402
 from manifest_params import write_param_header  # noqa: E402
@@ -65,7 +66,7 @@ def main() -> None:
         fxid_version=manifest.get("fxid_version", "1.00").encode("ascii"),
         flags_byte=manifest.get("flags_byte", 0x01),
         screen_image=make_cover(manifest["effect_name"], [p["name"] for p in manifest["params"]]),
-        knob_positions=[(2, 14, 46), (3, 55, 46), (4, 96, 46)],
+        knob_positions=POSITIONS["Spool"],
         audio_nop=manifest.get("audio_nop", False),
         use_object_edit_handlers=False,
         synthesize_linesel_edit_handlers=True,

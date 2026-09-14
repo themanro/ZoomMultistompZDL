@@ -26,6 +26,8 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "build"))
 
 
+from selector_metadata import attach_selectors
+
 GID_CATEGORY = {
     1: "Dynamics", 2: "Filter", 3: "Drive", 4: "Amp", 5: "Pedal",
     6: "Modulation", 7: "SFX", 8: "Delay", 9: "Reverb",
@@ -88,14 +90,16 @@ def parse_zdl(path: Path):
         for nm, maxv, defv, _fl in entries[2:]
         if nm and maxv != 0xFFFFFFFF
     ]
-    return {
+    from parameter_display import restore_names
+    restore_names(eff_name, params)
+    return attach_selectors({
         "name": eff_name,
         "fxid": fxid,
         "gid": gid,
         "category": GID_CATEGORY.get(gid, f"gid{gid}"),
         "id": patch_id(fxid, gid),
         "params": params,
-    }
+    })
 
 
 def _cover_b64(path: Path):
