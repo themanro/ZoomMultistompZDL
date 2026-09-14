@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render graphics/thumb_effects.png -- the README hero -- as a VHS screengrab.
+"""Render graphics/thumb_effects.png -- the README hero -- from the current native effect artwork.
 
 The old hero was made by hand in June 2026 and said "x16" long after the pack
 passed sixteen effects; it was already three effects stale when the count reached
@@ -14,18 +14,8 @@ Palette is the editor's P4 "television white blend" phosphor theme, read from th
 same values patch_editor.html uses, so the hero and the editor look like the same
 machine.
 
-The VHS pass models the tape rather than sprinkling noise. In order:
-
-  * chroma smeared horizontally ~20x harder than luma, because VHS carries colour
-    at a fraction of luma bandwidth -- this is the artefact that actually reads as
-    "tape" rather than "old TV";
-  * per-line horizontal jitter, correlated down the frame, from the capstan;
-  * chroma misregistration, R and B pulled opposite ways;
-  * dropouts as short bright dashes where oxide has shed;
-  * head-switching tear in the bottom ~14 lines, the giveaway of a helical scan;
-  * scanlines, bloom into the dark, tape grain, vignette.
-
-Seeded, so a rebuild produces the same frame and the file does not churn in git.
+The overview keeps crisp native pixels and the physical LCD proportions.
+The legacy VHS helper remains available for older exploration scripts.
 
 Usage:
     python3 build/make_thumb_png.py
@@ -58,7 +48,7 @@ DIM = (108, 134, 150)    # --ink-soft
 
 CANVAS = (1600, 900)
 COLS, ROWS = 6, 4
-CARD = (244, 156)        # 128x64 stretched the way the device's non-square pixels want
+CARD = (244, 171)        # 128x64 stretched the way the device's non-square pixels want
 GAP = 12
 SEED = 20260827
 
@@ -253,7 +243,7 @@ def main() -> int:
 
     cards = [cover_card(z, *CARD) for z in zdls]
     title = title_card(len(zdls), CARD[0] * 2 + GAP, CARD[1])
-    out = vhs(compose(cards, title))
+    out = compose(cards, title)
 
     dest = ROOT / "graphics" / "thumb_effects.png"
     dest.parent.mkdir(parents=True, exist_ok=True)

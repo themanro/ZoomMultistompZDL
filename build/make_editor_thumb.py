@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render graphics/thumb_editors.png -- the editor hero -- as a VHS screengrab.
+"""Render graphics/thumb_editors.png -- the editor hero -- from current editor screenshots.
 
 Composition follows the June 2026 hero: an eyebrow, a big title, and the two
 editors side by side. What is different is that the June one was an ILLUSTRATION
@@ -13,6 +13,9 @@ pedal sends one -- a synthetic 146-byte 0x28 dump handed to the page's own
 handleSysex() -- so slots, knob counts and cover previews come from the editor's
 real code paths. When Rewire's Shift knob was missing from the editor's effect DB,
 this image showed seven knobs, which is how the staleness got caught.
+
+The current Arrakis bitmap is imported through the JSON file input, so the
+capture does not depend on the cover editor's older embedded examples.
 
 The pages are captured at a NARROW viewport on purpose: at full width the slot
 cards sit in one long row, and the reference composition wants two tall panels.
@@ -31,11 +34,11 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "build"))
 
-from make_thumb_png import BG, CARD_BG, LIT, DIM, draw_text, vhs  # noqa: E402
+from make_thumb_png import BG, CARD_BG, LIT, DIM, draw_text  # noqa: E402
 
 from PIL import Image  # noqa: E402
 
-PORT = 8777
+PORT = 8766
 PATCH_URL = f"http://127.0.0.1:{PORT}/tools/patch_editor.html"
 COVER_URL = f"http://127.0.0.1:{PORT}/tools/cover_editor.html"
 OUT = ROOT / "graphics" / "thumb_editors.png"
@@ -76,7 +79,10 @@ PATCH_JS = """
   base[0]=0xF0; base[1]=0x52; base[2]=0x00; base[3]=0x61; base[4]=0x28; base[145]=0xF7;
   const p = decodePatch(base);
   const slots = __SLOTS__;
-  for (let i = 0; i < 6; i++) p.fx[i] = slots[i];
+  for (let i = 0; i < 6; i++) {
+    const [on, id] = slots[i];
+    p.fx[i] = [on, id, ...BYID[id].params.map(p => p.default), 0, 0, 0].slice(0, 11);
+  }
   p.name = 'FARLOW RUD';
   p.curfx = 0; p.maxfx = 6;
   handleSysex(encodePatch(p, base));
@@ -109,6 +115,11 @@ def shoot(url, js, vw, vh, selector, out_path):
         page = b.new_page(viewport={"width": vw, "height": vh}, device_scale_factor=2)
         page.goto(url, wait_until="networkidle")
         page.evaluate(js)
+        if url == COVER_URL:
+            import json
+            from decode_picture import decode_picture
+            rows, _ = decode_picture(str(ROOT / "dist" / "Arrakis.ZDL"))
+            page.locator('#jsonIn').set_input_files({"name": "Arrakis.json", "mimeType": "application/json", "buffer": json.dumps({"grid": rows}).encode()})
         page.wait_for_timeout(700)
         target = page.query_selector(selector) if selector else None
         (target or page).screenshot(path=str(out_path))
@@ -190,7 +201,7 @@ def main() -> int:
     frame(canvas, fit(Image.open(b).convert("RGB"), PANEL),
           MARGIN + PANEL[0] + GAP, PANEL_Y, "COVER EDITOR")
 
-    vhs(canvas, strength=0.7).save(OUT)
+    canvas.save(OUT)
     a.unlink(missing_ok=True)
     b.unlink(missing_ok=True)
     print(f"  {OUT.relative_to(ROOT)}  ({CANVAS[0]}x{CANVAS[1]})")
