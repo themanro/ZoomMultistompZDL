@@ -5,11 +5,11 @@ built on the [repeat98/ZoomMultistompZDL](https://github.com/repeat98/ZoomMultis
 toolchain. Eighteen are originals (most with a full-quality Python **desktop
 preview** in `tools/audio_preview/renderers/`); the rest are rebuilt/renamed
 Airwindows-derived ports plus one contributed effect (Dustbox). All are grouped
-under the **Delay** category with a custom on-device cover, and all compile
-clean (`.fardata 0`, `0 relocations`).
+under the **Delay** category with a custom on-device cover, and all have rebuilt release binaries in `dist/`.
 
-> ⚠️ **Status:** curated after hardware listening, and the whole pack was rebuilt
-> on 2026-09-10 with working load-time parameter initialization.
+> **Updated September 14, 2026:** all 22 effects have individual laboratory-style
+> graphics, LCD proportion corrections, and short pedal labels. Saved effect IDs
+> and parameter ranges are preserved. See [display notes](docs/EFFECT-DISPLAY-REFRESH.md).
 
 ### Every effect ends with Mix
 
@@ -31,12 +31,9 @@ crossfade. Those are by-ear calibration points, not derived constants.
 
 ### Known gaps
 
-* **Oxide `HeadBmp`.** In this reduced core it is a broadband
-  drive + level lift, not a low-frequency resonance — there is no filter behind
-  it, so it is not a bass control however it reads by ear. `HeadFrq` used to sit
-  beside it and controlled no frequency either: it only scaled the same lift, so
-  two knobs adjusted one quantity. Its slot became `Output`, a makeup gain the
-  pack was otherwise missing.
+* The desktop Python renderers are alternate listening references. Their extra
+  controls and algorithms can differ from the reduced pedal versions; they are
+  not evidence that a feature exists in the shipped ZDL.
 * Some features are deferred on the originals (Klang's frequency-shifter modes,
   GenLoss dropouts, Scorch's full cab IR). Compare each effect's `manifest.json`
   against its `manifest_pedal.json` to see what was cut for the pedal build.
@@ -48,9 +45,18 @@ crossfade. Those are by-ear calibration points, not derived constants.
 
 ## Sound previews
 
-Rendered demos (click to play in GitHub's audio viewer) for the effects that
-have a desktop renderer. These are the **desktop** renders — full-quality,
-before the pedal knob reduction.
+All **22 effects now have samples**. Open a WAV link to play or download it.
+These are desktop renders, **not recordings from the pedal**.
+
+### Existing desktop references
+
+The original 11 files below were checked for readable WAV data, finite samples,
+non-silence, and full-scale clipping on September 14. They pass those checks and
+are retained unchanged. Their original presets were not saved, and they use the
+older Python algorithms rather than the current release C kernels. The checks
+are technical validation, not a fresh listening review or a pedal comparison.
+Most were peak-normalized, so these files should not be used to compare effect
+loudness.
 
 | Effect | Demo | Dry source |
 |---|---|---|
@@ -66,11 +72,50 @@ before the pedal knob reduction.
 | Hydra | [hydra.wav](previews/audio/hydra.wav) — double-time ghost + half-time drag | [drums](previews/audio/dry_drums.wav) |
 | Spiral | [spiral.wav](previews/audio/spiral.wav) — slow 8-second rising delay | [guitar](previews/audio/dry_guitar.wav) |
 
-Regenerate or explore other presets with the preview tool below.
+### New release-source references
+
+These 11 samples run the current release C audio code on the desktop at 44.1 kHz.
+Only the firmware pointer plumbing is replaced with host-owned buffers. This
+checks the audio algorithm, but does not emulate the pedal CPU, loader, MIDI,
+or converters. Each starts from the release manifest defaults. Stasis changes
+Capture from Release to Hold at 1.5 seconds so its freeze can be heard.
+
+The dry source is fed at **25% amplitude** to leave headroom. Outputs are not
+loudness-matched; a peak-only safety reduction is applied if needed. Five seconds
+of tail and a final 100 ms fade are included. The dry links below are the original,
+unattenuated files, so turn them down for a level comparison.
+
+| Effect | Sample | Dry source |
+|---|---|---|
+| Spool | [Tape echo](previews/audio/spool.wav) | [guitar](previews/audio/dry_guitar.wav) |
+| Oxide | [Tape coloration](previews/audio/oxide.wav) | [chord](previews/audio/dry_chord.wav) |
+| Galactic | [Large modulated reverb](previews/audio/galactic.wav) | [chord](previews/audio/dry_chord.wav) |
+| Taffy | [Variable-speed playback](previews/audio/taffy.wav) | [guitar](previews/audio/dry_guitar.wav) |
+| Dissolve | [Smear and glitch](previews/audio/dissolve.wav) | [drums](previews/audio/dry_drums.wav) |
+| Mangle | [Delay at default settings](previews/audio/mangle.wav) | [drums](previews/audio/dry_drums.wav) |
+| Rooms | [Room mode reverb](previews/audio/rooms.wav) | [chord](previews/audio/dry_chord.wav) |
+| Rewire | [Lo-fi processing chain](previews/audio/rewire.wav) | [guitar](previews/audio/dry_guitar.wav) |
+| Dustbox | [Motor-like fuzz](previews/audio/dustbox.wav) | [riff](previews/audio/dry_riff.wav) |
+| Stasis | [Capture at 1.5 s, then sustain](previews/audio/stasis.wav) | [chord](previews/audio/dry_chord.wav) |
+| Gyre | [Grain capture](previews/audio/gyre.wav) | [guitar](previews/audio/dry_guitar.wav) |
+
+[Exact settings and source hashes](previews/audio/release_samples.json) make the
+new renders reproducible. [Audio check report](previews/audio/validation.json)
+lists sample rate, duration, peaks, RMS and clipping checks for every WAV.
+
+After building the release pack (which generates its parameter headers), run:
+
+```bash
+python3 tools/audio_preview/render_release_samples.py
+python3 tools/audio_preview/check_samples.py
+```
+
+The renderer requires a host C compiler, NumPy and SoundFile. Existing Python
+reference demos can be explored separately with the tool below.
 
 ## Hearing them on desktop (no compiler, no pedal)
 
-The renderers mirror each effect's DSP so you can audition before flashing:
+The Python renderers provide alternate desktop versions for auditioning:
 
 ```bash
 pip install numpy scipy soundfile
@@ -97,8 +142,8 @@ Pre-built `.ZDL` files for all 22 are in [`dist/`](dist/).
 All pedal builds follow the repo's safe-DSP rules: no math library (polynomial
 sines, cubic soft-clips, reciprocal approximations, baked filter coefficients),
 no runtime divide, persistent state in the `ctx[3]` arena, the `ctx[11]/ctx[12]`
-magic shuttle preserved, and **no static arrays** (scalar float literals compile
-to immediates and stay relocation-free; arrays would force a code→data
-relocation, a documented freeze risk).
+magic shuttle preserved, and controlled persistent memory. Audio kernels avoid unsupported relocation
+patterns; dynamic parameter-label callbacks use verified runtime relocations.
+See [release verification](docs/RELEASE-INIT-AUDIT.md).
 
 Licensing follows the parent repo (MIT for repo code).
