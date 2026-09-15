@@ -9,6 +9,23 @@ This was a good amount of work and tokens, please consider to: [buymeacoffee.com
 
 <p align="center"><img src="graphics/thumb_effects.png" width="820" alt="22 custom effects for the Zoom MS-70CDR"></p>
 
+**New here?** This is a pack of 22 extra effects plus a free browser-based
+[Patch Editor](https://themanro.github.io/ZoomMultistompZDL/tools/patch_editor.html)
+for adjusting knobs and arranging effects in your patches. On the original
+MS-70CDR, you install the ready-made files from [dist/](dist/) over USB using
+Zoom Effect Manager—no custom firmware reflash, coding, or compiling needed.
+Back up your patches and effect list first. The Patch Editor edits patches;
+Zoom Effect Manager installs the effects. See the [installation guide](docs/INSTALLING-ZDLS.md).
+
+**Pedal compatibility:**
+
+* **Tested:** original **MS-70CDR (firmware 2.10)**—custom effects and Patch Editor.
+* **Potential effect compatibility, not yet verified for this pack:** **MS-50G,
+  MS-60B, G1on, G1Xon, B1on and B1Xon**. PE currently enables editing only on the
+  original MS-70CDR; these are not confirmed PE targets.
+* **Not supported:** **MS-100BT** and **Plus models**, including **MS-50G+,
+  MS-60B+ and MS-70CDR+**. See [Compatibility](#compatibility) below.
+
 ## Quickstart — edit your pedal from the browser
 
 **[▶ Open the Patch Editor](https://themanro.github.io/ZoomMultistompZDL/tools/patch_editor.html)**
