@@ -20,9 +20,9 @@ Zoom Effect Manager installs the effects. See the [installation guide](docs/INST
 **Pedal compatibility:**
 
 * **Tested:** original **MS-70CDR (firmware 2.10)**—custom effects and Patch Editor.
-* **Potential effect compatibility, not yet verified for this pack:** **MS-50G,
-  MS-60B, G1on, G1Xon, B1on and B1Xon**. PE currently enables editing only on the
-  original MS-70CDR; these are not confirmed PE targets.
+* **Compatible family, awaiting confirmation:** **MS-50G, MS-60B, G1on,
+  G1Xon, B1on and B1Xon**. Custom effects and Patch Editor compatibility on these
+  models is awaiting confirmation from users.
 * **Not supported:** **MS-100BT** and **Plus models**, including **MS-50G+,
   MS-60B+ and MS-70CDR+**. See [Compatibility](#compatibility) below.
 
