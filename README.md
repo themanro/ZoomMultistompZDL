@@ -25,6 +25,8 @@ Zoom Effect Manager installs the effects. See the [installation guide](docs/INST
   models is awaiting confirmation from users.
 * **Not supported:** **MS-100BT** and **Plus models**, including **MS-50G+,
   MS-60B+ and MS-70CDR+**. See [Compatibility](#compatibility) below.
+  MS-100BT owners: [MS StompCtrl](https://github.com/1njected/ms-stompctrl) is a
+  browser editor and backup tool for that pedal (see [Related projects](#related-projects)).
 
 ## Custom NAM captures and cabinets (experimental)
 
@@ -77,7 +79,7 @@ pedal will refuse it).
 **What works.** A2 Lite captures only (the small standard NAM architecture).
 Larger NAM models don't fit this DSP. Captures trained at 48 kHz work, but
 retraining at 44.1 kHz (the pedal's rate) is closer to the real amp; we used
-[NAM ReTrainer](https://github.com/Leemuzhko/NeuralAmpModeler-ReTrainer) by Leemuzhko for
+NAM ReTrainer by Leemuzhko for
 that. The cab fit follows the Hybrid IR idea, also from
 [Leemuzhko](https://github.com/Leemuzhko/HYBRID-IR): a short filter plus a few
 EQ bands instead of a long IR, so a cab costs almost nothing.
@@ -545,6 +547,16 @@ them beside the repo, treat them as read-only references.
 | [build/ABI.md](build/ABI.md) | Low-level linker/runtime ABI reference for developers. |
 | [docs/TI-PDF-NOTES.md](docs/TI-PDF-NOTES.md) + TI PDFs | TI C6000 toolchain references. |
 | [docs/PROBING-A-NEW-PEDAL.md](docs/PROBING-A-NEW-PEDAL.md) | How to find out whether a pedal this project has never seen — the `+` models especially — is analysable, talks MIDI, and hands over patches. |
+
+## Related projects
+
+| Project | What it is |
+|---|---|
+| [MS StompCtrl](https://github.com/1njected/ms-stompctrl) | Browser-only patch editor and backup tool for the **MS-100BT**, over Bluetooth in Chrome ([open it](https://1njected.github.io/ms-stompctrl/)). Reads, edits and writes patches, backs up the bank, and installs `.ZDL` files. Effects from this repo are untested on the MS-100BT, so back up first and report what you find. MIT. |
+| [repeat98/ZoomMultistompZDL](https://github.com/repeat98/ZoomMultistompZDL) | The upstream ZDL toolchain this fork started from. |
+| [Leemuzhko/HYBRID-IR](https://github.com/Leemuzhko/HYBRID-IR) | The short-filter-plus-EQ cab idea behind CabIR. |
+| [Ziddle](https://berbasoft.com/ziddle/) | C674x emulator used to test ZDLs before they touch hardware. |
+| [r/zoommultistomp](https://www.reddit.com/r/zoommultistomp/) | Community subreddit for the MultiStomp pedals. |
 
 ## Contributing
 
