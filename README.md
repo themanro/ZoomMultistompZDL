@@ -23,8 +23,10 @@ Zoom Effect Manager installs the effects. See the [installation guide](docs/INST
 * **Compatible family, awaiting confirmation:** **MS-50G, MS-60B, G1on,
   G1Xon, B1on and B1Xon**. Custom effects and Patch Editor compatibility on these
   models is awaiting confirmation from users.
-* **Not supported:** **MS-100BT** and **Plus models**, including **MS-50G+,
-  MS-60B+ and MS-70CDR+**. See [Compatibility](#compatibility) below.
+* **Not supported:** **MS-100BT**, the **Plus models** (**MS-50G+, MS-60B+
+  and MS-70CDR+**) and the **Four series** (**G1/G1X Four, B1/B1X Four,
+  A1/A1X Four**). The Plus and Four pedals use Zoom's newer ZD2 effect format,
+  so ZDL files don't load on them. See [Compatibility](#compatibility) below.
   MS-100BT owners: [MS StompCtrl](https://github.com/1njected/ms-stompctrl) is a
   browser editor and backup tool for that pedal (see [Related projects](#related-projects)).
 
@@ -291,7 +293,7 @@ More detailed install notes live in [docs/INSTALLING-ZDLS.md](docs/INSTALLING-ZD
 | Zoom MS-70CDR firmware 2.10 | Primary hardware target; the release effects are developed and play-tested against this pedal. |
 | Other ZDL-based Zoom pedals (MS-50G, MS-60B, G1on/G1Xon, B1on/B1Xon) | Compatible family, awaiting confirmation — hardware reports welcome. |
 | Original G3/G3X, G5, B3 and A3 | Share the ZFX-IV DSP family, but this project's custom effects and Patch Editor are not currently supported or validated on them. |
-| Newer Zoom ZD2-based pedals | Not supported by these ZDL builds. |
+| Newer Zoom ZD2-based pedals (Plus models; G1/G1X, B1/B1X and A1/A1X Four; G3n, G5n, B3n, AC-2/AC-3) | Not supported by these ZDL builds. ZD2 and ZDL effects are not interchangeable ([Zoom Firmware Editor](https://github.com/Barsik-Barbosik/Zoom-Firmware-Editor) lists which pedal uses which; the A1 Four is assumed ZD2 like the rest of the Four series). |
 
 **Does sharing the processor mean my pedal can run these effects?** It makes
 porting worth investigating, but does not establish compatibility. Zoom's
