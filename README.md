@@ -555,6 +555,8 @@ them beside the repo, treat them as read-only references.
 | Project | What it is |
 |---|---|
 | [MS StompCtrl](https://github.com/1njected/ms-stompctrl) | Browser-only patch editor and backup tool for the **MS-100BT**, over Bluetooth in Chrome ([open it](https://1njected.github.io/ms-stompctrl/)). Reads, edits and writes patches, backs up the bank, and installs `.ZDL` files. Effects from this repo are untested on the MS-100BT, so back up first and report what you find. MIT. |
+| [MIDISTOMP](https://github.com/matujuice/zoom-ms-midistomp) | Custom firmware for the original MultiStomps: MIDI Program Change, CC control of every knob, MIDI clock with Start/Stop, a tap-tempo screen and footswitch-hold options. Installed by flashing a modified Zoom updater (riskier than an Effect Manager install). Tested on an MS-60B running MS-50G 3.10; MS-50G and MS-70CDR untested. MIT. |
+| [Matujuice ZDL effects pack](https://github.com/matujuice/zoom-ms-zdl-effects-pack) | Free custom effects built on this toolchain, made for synths and drum machines: wavefolder, pitch shifters, a pitch-tracked choir, Euclidean gate, dub siren, glitch, scrub/freeze, distortion, pump, delay, sweep. Release v1.5 has its own Tempo knobs; v1.6 and later follow MIDISTOMP's tempo (120 BPM on stock firmware). Its effect IDs 480, 490 and 496 overlap an old Howl ID and two of our test probes, so don't install those alongside it. MIT. |
 | [repeat98/ZoomMultistompZDL](https://github.com/repeat98/ZoomMultistompZDL) | The upstream ZDL toolchain this fork started from. |
 | [Leemuzhko/HYBRID-IR](https://github.com/Leemuzhko/HYBRID-IR) | The short-filter-plus-EQ cab idea behind CabIR. |
 | [Ziddle](https://berbasoft.com/ziddle/) | C674x emulator used to test ZDLs before they touch hardware. |

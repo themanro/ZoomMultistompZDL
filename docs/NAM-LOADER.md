@@ -4,15 +4,32 @@
 > file a [NAM / Cab report](https://github.com/themanro/ZoomMultistompZDL/issues/new?template=nam-cab-report.yml),
 > including when everything works.
 
+## Before you start
+
+- **You don't need a firmware update** to use the loader or this project's
+  effects. The MS-70CDR here runs firmware 2.10.
+- **If you do update firmware: close Zoom Effect Manager first, and never
+  unplug during the update.** Zoom's own updater also rewrites the part of the
+  pedal that holds update mode, so cutting it off early can leave the pedal
+  needing a repair.
+- **The "+" models (MS-50G+, MS-60B+, MS-70CDR+) and the Four series are not
+  supported.** If Effect Manager looks different from the guides, check your
+  model first.
+- Back up your patches.
+
 ## If the pedal freezes
 
 A bad effect file can stop the pedal from finishing boot, or freeze it when a
 patch uses the effect. It is recoverable, and in testing it always was:
 
 1. **Remove the last file you installed.** Zoom Effect Manager can still reach
-   a pedal that will not boot: start the pedal in **firmware update mode**
-   (see Zoom's firmware update instructions for your model), connect Effect
-   Manager, delete the effect you added last, and write.
+   a pedal that will not boot: start the pedal in **firmware update mode** by
+   holding the **Up and Down buttons while plugging in the USB cable** (the
+   screen may look blank or odd), connect Effect Manager, delete the effect
+   you added last, and write. The same mode runs Zoom's firmware updater if
+   the firmware itself is damaged, such as after an interrupted update.
+   (Button combo as documented by [MIDISTOMP](https://github.com/matujuice/zoom-ms-midistomp/blob/main/docs/user-guide.md#3-recovery-and-going-back-to-stock),
+   tested there on an MS-60B.)
 2. **If a saved patch freezes it** (boots fine until that patch loads): remove
    or replace the effect the same way. Patches that used it come back with that
    slot empty.
