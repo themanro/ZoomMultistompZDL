@@ -1,6 +1,6 @@
 {
   "effect_name": "Corrupt",
-  "comment": "PEDAL BUILD manifest for Corrupt (4-knob). build.py reads THIS file. Zero-crossing pitch track -> square master + sub octave + octave-up harmony, Tone low-pass to tame the harsh square edges.",
+  "comment": "Data Corrupter-inspired PLL synth-fuzz approximation. Tracks monophonic input and drives a square master, divided subharmonic, and FM-modulated harmony. The pedal build uses the Unison root mode; the independent Square voice and Oscillator root mode are not modeled.",
   "audio_func_name": "Fx_DLY_Corrupt",
   "gid": 8,
   "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_. Grouped under DLY (fewest stock effects = easy to find).",
@@ -10,28 +10,40 @@
   "flags_byte": 1,
   "params": [
     {
+      "name": "Master",
+      "max": 100,
+      "default": 0,
+      "comment": "Tracked master oscillator pitch: unison, one octave down, or two octaves down."
+    },
+    {
       "name": "Sub",
       "max": 100,
-      "default": 82,
-      "comment": "params[5]. Sub (octave-down) square level."
+      "default": 60,
+      "comment": "Level of the divided square subharmonic, one octave below the Master."
     },
     {
-      "name": "Tone",
-      "max": 100,
-      "default": 45,
-      "comment": "params[6]. Low-pass: dark/smooth .. raw/buzzy."
-    },
-    {
-      "name": "Wave",
+      "name": "Harm",
       "max": 100,
       "default": 50,
-      "comment": "params[7]. Octave-up harmony square level (richness)."
+      "comment": "Selects unison, fifth, octave, fourth, sub-octave, or 12th harmony."
+    },
+    {
+      "name": "Rate",
+      "max": 100,
+      "default": 40,
+      "comment": "Frequency-modulator rate, approximately 0.5 to 12 Hz."
+    },
+    {
+      "name": "Depth",
+      "max": 100,
+      "default": 35,
+      "comment": "Frequency-modulator pitch depth, up to approximately three semitones."
     },
     {
       "name": "Mix",
       "max": 100,
       "default": 50,
-      "comment": "Mix default 1 (quiet-safe). The editor materialises patches on load (full-patch send), so audible-on-load no longer needs a hot default."
+      "comment": "Dry/synth blend."
     }
   ],
   "audio_nop": false,

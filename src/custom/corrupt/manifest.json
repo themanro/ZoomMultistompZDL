@@ -1,42 +1,42 @@
 {
   "effect_name": "Corrupt",
-  "comment": "Corrupt \u2014 an EarthQuaker Devices Data Corrupter style monophonic harmonizing PLL synth-fuzz. Tracks the input pitch, regenerates it as a square-wave master oscillator, divides that into subharmonic octaves, and adds an FM-modulated (vibrato) harmony voice. Glitchy octave-jumping on ambiguous pitch is part of the character. Best on single-note lines. Desktop preview implements the full DSP; pedal C port is staged (audio_nop smoke build).",
-  "gid": 3,
-  "gid_comment": "0x03 = Drive category (synth-fuzz). NOTE: on MS-70CDR, custom Drive effects may need a stock Drive installed to appear in the on-device browser.",
+  "comment": "Data Corrupter-inspired monophonic PLL synth-fuzz approximation. Tracks the input pitch and regenerates square-wave master, divided subharmonic, and FM-modulated harmony voices. Best on single-note lines; ambiguous input can cause octave jumps. Pedal build fixes the root mode to Unison and does not model the independent Square voice.",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category used by the existing Corrupt release effect.",
   "fxid": 454,
   "fxid_comment": "0x01C6 = above the repo's used range, distinct from microloom(450)/flower(451)/shatter(452)/arrakis(453). Verify uniqueness before flashing.",
-  "fxid_version": "1.00",
+  "fxid_version": "2.00",
   "flags_byte": 1,
   "params": [
     {
       "name": "Master",
       "max": 100,
       "default": 0,
-      "comment": "Master oscillator octave: 0 = unison, 50 = -1 oct, 100 = -2 oct (the Master Oscillator toggle)."
+      "comment": "Tracked master oscillator pitch: unison, one octave down, or two octaves down."
     },
     {
       "name": "Sub",
       "max": 100,
       "default": 60,
-      "comment": "Subharmonic voice level (a square one octave below the master)."
+      "comment": "Level of the divided square subharmonic, one octave below the Master."
     },
     {
       "name": "Harm",
       "max": 100,
       "default": 50,
-      "comment": "Harmony interval select: unison / 5th / octave / 4th / -octave / +12th."
+      "comment": "Selects unison, fifth, octave, fourth, sub-octave, or 12th harmony."
     },
     {
       "name": "Rate",
       "max": 100,
       "default": 40,
-      "comment": "Frequency-modulation (vibrato) rate on the harmony voice (~0.5..12 Hz)."
+      "comment": "Frequency-modulator rate, approximately 0.5 to 12 Hz."
     },
     {
       "name": "Depth",
       "max": 100,
       "default": 35,
-      "comment": "FM vibrato depth (0..3 semitones). High = seasick warble."
+      "comment": "Frequency-modulator pitch depth, up to approximately three semitones."
     },
     {
       "name": "Mix",
@@ -45,6 +45,6 @@
       "comment": "Dry/synth blend."
     }
   ],
-  "audio_nop": true,
-  "audio_nop_comment": "Pedal C port starts as a UI-only smoke build. Full DSP validated on desktop first; see tools/audio_preview/renderers/corrupt.py."
+  "audio_nop": false,
+  "audio_nop_comment": "Full pedal DSP is compiled from corrupt.c."
 }

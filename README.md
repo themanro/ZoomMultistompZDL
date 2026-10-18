@@ -209,7 +209,7 @@ pedal actually shows.
 | **Flower** | Rate, Mix | Korg-style random sample-and-hold step filter — the "Digital Bath" sound |
 | **Shatter** | Chance, Mix | stutter / beat-repeat glitch for drums |
 | **Arrakis** | Detune, Mix | Dune-style detuned sub-octave drone, two subs beating against each other |
-| **Corrupt** | Sub, Tone, Wave, Mix | EQD Data Corrupter-style PLL square synth with tracked sub and divided harmony |
+| **Corrupt** | Master, Sub, Harm, Rate, Depth, Mix | Data Corrupter-inspired PLL square synth with octave selection, tracked harmony, and FM modulation |
 | **Klang** | Freq, Sweep, Mix | swept-carrier ring modulator — sirens, dive bombs, clangorous metal |
 | **GenLoss** | Wow, Tone, Hiss, Mix | tape/VHS generation loss: wow, head-bump tone shift, hiss |
 | **Scorch** | Gain, Mix | aggressive high-gain amp with a cab-style filter (cab baked as biquads, not an FIR) |
@@ -224,6 +224,7 @@ pedal actually shows.
 | **Dustbox** | Dust, Motor, Filter, Power | DOD FX33 Buzz Box-style fuzz with a flip-flop sub-octave — contributed, MIT |
 | **Rewire** | Route, Bits, Drive, Ring, Comb, Shift, Tone, Mix | five lo-fi blocks — crush, drive, ring mod, comb, frequency shift — in a chain you can **reorder**. Shift is a true single-sideband shifter (−51 dB image), so it moves partials off the harmonic series |
 | **Gyre** | Size, Feed, Decay, Rise, Glide, Span, Tone, Mix | granular feedback loop; two grains half a window apart with complementary windows, so the loop is unity-throughput and holds instead of running away |
+| **Particle** | Mode, Size, Density, Delay, Feedback, Mix | experimental Particle 2-inspired granular delay and pitch textures |
 | **Galactic** | Replace, Bright, Detune, Bigness, Mix | lush Airwindows reverb, wet path boosted for pedal levels |
 | **Oxide** | Input, Tilt, Shape, Flutter, FlutSpd, Bias, HeadBmp, Output, Mix | Airwindows ToTape9 saturation. Input is a 0–4× drive compensated above unity, Tilt the Dolby-style encode/decode balance, Bias an asymmetric even-harmonic drive |
 | **Spool** | Tempo, Div, Feed, Flutter, Wow, Wear, Drive, Spring, Mix | tempo-locked tape echo with flutter, wow, head wear, drive and a spring tail. Feed reaches self-oscillation above ~90 |

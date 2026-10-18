@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+"""Build experimental Rainbow.ZDL from rainbow.c + manifest_pedal.json."""
+
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent.parent.parent
+sys.path.insert(0, str(ROOT / "build"))
+sys.path.insert(0, str(ROOT / "src" / "airwindows" / "common"))
+
+from linker import LinkerConfig, link, params_from_manifest  # noqa: E402
+from manifest_params import write_param_header  # noqa: E402
+from custom_covers import make_cover  # noqa: E402
+
+TI_ROOT = Path("/Applications/ti/ti-cgt-c6000_8.3.15")
+CL6X = TI_ROOT / "bin" / "cl6x"
+
+CFLAGS = [
+    "--c99",
+    "--opt_level=2",
+    "-mv6740",
+    "--abi=eabi",
+    "--mem_model:data=far",
+    f"--include_path={TI_ROOT}/include",
+]
+
+
+def main() -> None:
+    if not CL6X.is_file():
+        raise SystemExit(f"TI C6000 compiler not found at {CL6X}; edit TI_ROOT if it is installed elsewhere.")
+
+    manifest = json.loads((HERE / "manifest_pedal.json").read_text())
+    write_param_header(manifest, HERE / "rainbow_params.h", "RAINBOW")
+
+    obj = HERE / "rainbow.obj"
+    out_zdl = ROOT / "dist" / f"{manifest['effect_name']}.ZDL"
+    out_zdl.parent.mkdir(exist_ok=True)
+    audio_func = manifest["audio_func_name"]
+
+    print(f"[rainbow] compiling rainbow.c -> {obj.name}")
+    subprocess.run(
+        [
+            str(CL6X),
+            *CFLAGS,
+            f"--define=RAINBOW_AUDIO_FUNC={audio_func}",
+            "-c",
+            str(HERE / "rainbow.c"),
+            f"--output_file={obj}",
+        ],
+        check=True,
+        cwd=HERE,
+    )
+
+    for junk in ("compiler.opt", "linker.cmd"):
+        path = HERE / junk
+        if path.exists():
+            path.unlink()
+
+    cfg = LinkerConfig(
+        materialize_init=True,
+        effect_name=manifest["effect_name"],
+        screen_image=make_cover(manifest["effect_name"], [p["name"] for p in manifest["params"]]),
+        audio_func_name=audio_func,
+        gid=manifest["gid"],
+        fxid=manifest["fxid"],
+        params=params_from_manifest(manifest["params"]),
+        obj_path=obj,
+        output_path=out_zdl,
+        fxid_version=manifest.get("fxid_version", "1.00").encode("ascii"),
+        flags_byte=manifest.get("flags_byte", 0x01),
+        dsp_cost=24.0,
+        knob_positions=[(2, 14, 46), (3, 55, 46), (4, 96, 46)],
+        use_object_edit_handlers=False,
+        synthesize_linesel_edit_handlers=True,
+        synth_edit_start_index=2,
+        knob3_blob_path="/tmp/__nonexistent__",
+    )
+    link(cfg)
+    print(f"\n[rainbow] done -> {out_zdl}")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,26 +1,13 @@
 /*
- * corrupt.c -- Corrupt: Data Corrupter-style PLL square synth, MS-70CDR.
+ * corrupt.c -- Data Corrupter-inspired PLL square synth for the MS-70CDR.
  *
- * Pedal port (v1) of tools/audio_preview/renderers/corrupt.py. The desktop
- * version tracks pitch with autocorrelation/FFT, which is far too heavy for
- * the pedal runtime, so this uses a lightweight ZERO-CROSSING tracker: a
- * low-passed copy of the input is watched for rising zero crossings, the
- * interval gives the period, and a reciprocal approximation turns that into
- * the oscillator phase increment (no runtime divide). Tracking is crude and
- * octave-jumps on ambiguous input -- which is on-brand for a Data Corrupter.
+ * The pedal version tracks pitch with a low-cost rising-zero-crossing
+ * detector, then regenerates a square master, a divided subharmonic, and an
+ * FM-modulated harmony voice. Ambiguous input can cause octave jumps; use
+ * single-note lines for the most stable tracking.
  *
- * v1 voices: square MASTER (unison) + square SUB (one octave down), gated by
- * an envelope follower so the synth tracks picking dynamics. Harmony/FM are
- * deferred. 2 knobs:
- *   Sub (params[5]) - subharmonic level
- *   Mix (params[6]) - dry/synth blend
- *
- * Safe-DSP: no math lib (squares are compares; reciprocal is a Newton
- * approximation), no runtime divide, no modulo. Small persistent state lives
- * in the ctx[3] arena (no large buffer needed). ctx[11]/ctx[12] preserved.
- *
- * NOTE: gid=3 (Drive). On MS-70CDR a custom Drive effect may only appear in
- * the on-device browser if at least one stock Drive effect is also installed.
+ * Safe-DSP: no math library, runtime divide, or modulo. Persistent state lives
+ * in the ctx[3] arena; ctx[11]/ctx[12] magic shuttle is preserved.
  */
 
 #include <stdint.h>
@@ -29,7 +16,7 @@
 #include "corrupt_params.h"
 
 #ifndef CORRUPT_AUDIO_FUNC
-#define CORRUPT_AUDIO_FUNC Fx_DRV_Corrupt
+#define CORRUPT_AUDIO_FUNC Fx_DLY_Corrupt
 #endif
 
 #define CORRUPT_DO_PRAGMA(x) _Pragma(#x)
@@ -40,18 +27,20 @@ CORRUPT_CODE_SECTION(CORRUPT_AUDIO_FUNC)
 
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
-#define CR_MAGIC   0x43525054u   /* 'CRPT' */
-#define CR_VERSION 2u
-
-#define CR_LP_COEF  0.10f        /* ~800 Hz one-pole for pitch detection */
-#define CR_GATE     0.01f
-#define CR_ENV_ATK  0.05f
-#define CR_ENV_REL  0.0008f
-#define CR_MIN_P    40.0f        /* ~1100 Hz */
-#define CR_MAX_P    1100.0f      /* ~40 Hz */
-#define CR_P_SMOOTH 0.30f
-#define CR_MAKEUP   1.8f
-#define CR_CLAMP    1.5f
+#define CR_MAGIC       0x43525054u   /* 'CRPT' */
+#define CR_VERSION     3u
+#define CR_LP_COEF     0.10f
+#define CR_TONE_COEF   0.575f       /* one-pole equivalent of the 6 kHz preview LPF */
+#define CR_GATE        0.01f
+#define CR_ENV_ATK     0.05f
+#define CR_ENV_REL     0.0008f
+#define CR_MIN_P       40.0f
+#define CR_MAX_P       1100.0f
+#define CR_P_SMOOTH    0.30f
+#define CR_MAKEUP      1.8f
+#define CR_WAVE_LEVEL  0.55f
+#define CR_CLAMP       1.5f
+#define CR_SAMPLE_RATE_INV 0.000022675737f
 
 typedef struct CorruptState {
     uint32_t magic;
@@ -65,6 +54,7 @@ typedef struct CorruptState {
     float mphase;
     float sphase;
     float hphase;
+    float fmPhase;
     float tlp;
     float env;
 } CorruptState;
@@ -111,22 +101,40 @@ void CORRUPT_AUDIO_FUNC(unsigned int *ctx)
         st->mphase = 0.0f;
         st->sphase = 0.0f;
         st->hphase = 0.0f;
+        st->fmPhase = 0.0f;
         st->tlp = 0.0f;
         st->env = 0.0f;
         st->initialized = 1u;
     }
 
-    float subLvl  = zoom_param_norm01(params[CORRUPT_SUB_SLOT], CORRUPT_SUB_DEFAULT_NORM);
-    float tone    = zoom_param_norm01(params[CORRUPT_TONE_SLOT], CORRUPT_TONE_DEFAULT_NORM);
-    float waveLvl = zoom_param_norm01(params[CORRUPT_WAVE_SLOT], CORRUPT_WAVE_DEFAULT_NORM);
-    float mix     = zoom_param_norm01(params[CORRUPT_MIX_SLOT], CORRUPT_MIX_DEFAULT_NORM);
-    float tcoef = 0.04f + tone * 0.6f;      /* output low-pass: dark .. raw */
+    float master = zoom_param_norm01(params[CORRUPT_MASTER_SLOT], CORRUPT_MASTER_DEFAULT_NORM);
+    float subLvl = zoom_param_norm01(params[CORRUPT_SUB_SLOT], CORRUPT_SUB_DEFAULT_NORM);
+    float harm = zoom_param_norm01(params[CORRUPT_HARM_SLOT], CORRUPT_HARM_DEFAULT_NORM);
+    float rate = zoom_param_norm01(params[CORRUPT_RATE_SLOT], CORRUPT_RATE_DEFAULT_NORM);
+    float depth = zoom_param_norm01(params[CORRUPT_DEPTH_SLOT], CORRUPT_DEPTH_DEFAULT_NORM);
+    float mix = zoom_param_norm01(params[CORRUPT_MIX_SLOT], CORRUPT_MIX_DEFAULT_NORM);
+
+    float masterRatio = 1.0f;
+    if (master >= 0.25f) masterRatio = 0.5f;
+    if (master >= 0.75f) masterRatio = 0.25f;
+
+    float harmRatio;
+    if (harm >= 0.84f) harmRatio = 2.996614f;       /* 12th */
+    else if (harm >= 0.67f) harmRatio = 0.5f;       /* octave below */
+    else if (harm >= 0.50f) harmRatio = 1.334840f;  /* fourth */
+    else if (harm >= 0.34f) harmRatio = 2.0f;       /* octave */
+    else if (harm >= 0.17f) harmRatio = 1.498307f;  /* fifth */
+    else harmRatio = 1.0f;                         /* unison */
+
+    float fmRate = 0.5f + rate * 11.5f;
+    float fmInc = fmRate * CR_SAMPLE_RATE_INV;
+    float fmDepth = depth * 0.519f;                /* approximately three semitones */
     float wet = mix;
     float dry = 1.0f - mix;
 
     float lpIn = st->lpIn, prevLp = st->prevLp, period = st->period;
     float mphase = st->mphase, sphase = st->sphase, hphase = st->hphase;
-    float tlp = st->tlp, env = st->env;
+    float fmPhase = st->fmPhase, tlp = st->tlp, env = st->env;
     int sinceCross = st->sinceCross;
 
     int f;
@@ -140,7 +148,7 @@ void CORRUPT_AUDIO_FUNC(unsigned int *ctx)
         else env += CR_ENV_REL * (a - env);
 
         lpIn += CR_LP_COEF * (in - lpIn);
-        sinceCross++;
+        if (sinceCross <= (int)CR_MAX_P) sinceCross++;
         if (prevLp < 0.0f && lpIn >= 0.0f && env > CR_GATE) {
             float p = (float)sinceCross;
             if (p >= CR_MIN_P && p <= CR_MAX_P) {
@@ -150,22 +158,29 @@ void CORRUPT_AUDIO_FUNC(unsigned int *ctx)
         }
         prevLp = lpIn;
 
-        float inc = cr_recip(period);     /* cycles per sample */
-
-        mphase += inc;
+        float inc = cr_recip(period);
+        mphase += inc * masterRatio;
         if (mphase >= 1.0f) mphase -= 1.0f;
-        float master = mphase < 0.5f ? 1.0f : -1.0f;
+        float masterVoice = mphase < 0.5f ? 1.0f : -1.0f;
 
-        sphase += inc * 0.5f;             /* one octave down */
+        sphase += inc * masterRatio * 0.5f;
         if (sphase >= 1.0f) sphase -= 1.0f;
-        float sub = sphase < 0.5f ? 1.0f : -1.0f;
+        float subVoice = sphase < 0.5f ? 1.0f : -1.0f;
 
-        hphase += inc * 2.0f;             /* harmony: one octave up */
+        fmPhase += fmInc;
+        if (fmPhase >= 1.0f) fmPhase -= 1.0f;
+        float lfo;
+        if (fmPhase < 0.5f) lfo = 16.0f * fmPhase * (0.5f - fmPhase);
+        else lfo = -16.0f * (fmPhase - 0.5f) * (1.0f - fmPhase);
+        float fmRatio = 1.0f + lfo * fmDepth;
+
+        hphase += inc * masterRatio * harmRatio * fmRatio;
         if (hphase >= 1.0f) hphase -= 1.0f;
-        float harm = hphase < 0.5f ? 1.0f : -1.0f;
+        float harmVoice = hphase < 0.5f ? 1.0f : -1.0f;
 
-        float synth = env * CR_MAKEUP * (master + subLvl * sub + waveLvl * harm) * 0.45f;
-        tlp += tcoef * (synth - tlp);     /* Tone: tames the harsh square edges */
+        float synth = env * CR_MAKEUP *
+                      (masterVoice + subLvl * subVoice + CR_WAVE_LEVEL * harmVoice) * 0.45f;
+        tlp += CR_TONE_COEF * (synth - tlp);
         float o = tlp;
         if (o > CR_CLAMP) o = CR_CLAMP;
         else if (o < -CR_CLAMP) o = -CR_CLAMP;
@@ -180,6 +195,7 @@ void CORRUPT_AUDIO_FUNC(unsigned int *ctx)
     st->mphase = mphase;
     st->sphase = sphase;
     st->hphase = hphase;
+    st->fmPhase = fmPhase;
     st->tlp = tlp;
     st->env = env;
     st->sinceCross = sinceCross;

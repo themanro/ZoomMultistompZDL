@@ -26,6 +26,44 @@ class Selectors(unittest.TestCase):
       for raw in range(choice['from'],choice['to']+1):
        buf=ctypes.create_string_buffer(b'XXXXXXXXZ',10);n=fn(raw,buf)
        self.assertEqual(buf.value.decode(),pedal_label(choice['label']));self.assertEqual(n,len(pedal_label(choice['label'])));self.assertEqual(buf.raw[8],ord('Z'))
+ def test_shallow_water_control_names_and_noise_toggle(self):
+  db=json.loads((ROOT/'tools/effects_db.json').read_text())
+  effect=next(e for e in db['custom'] if e['name']=='Shallow')
+  self.assertEqual([p['name'] for p in effect['params']],['Rate','Depth','Sensitivity','Noise','Mix'])
+  self.assertEqual([c['label'] for c in effect['params'][3]['choices']],['Off','On'])
+ def test_rainbow_machine_controls_and_short_pedal_label(self):
+  db=json.loads((ROOT/'tools/effects_db.json').read_text())
+  effect=next(e for e in db['custom'] if e['name']=='Rainbow')
+  self.assertEqual([p['name'] for p in effect['params']],
+                   ['Pitch','Primary','Tracking','Tone','Secondary','Magic'])
+  self.assertEqual(effect['params'][4]['name'],'Secondary')
+  self.assertEqual(__import__('parameter_display').pedal_name('Rainbow','Secondary'),'Second')
+ def test_spacerev_expression_lfo_controls(self):
+  db=json.loads((ROOT/'tools/effects_db.json').read_text())
+  effect=next(e for e in db['custom'] if e['name']=='SpaceRev')
+  self.assertEqual([p['name'] for p in effect['params']],
+                   ['Expression','Rate','Depth','Mix'])
+  self.assertEqual(__import__('parameter_display').pedal_name('SpaceRev','Expression'),'Expr')
+ def test_space2_fifth_shimmer_controls(self):
+  db=json.loads((ROOT/'tools/effects_db.json').read_text())
+  effect=next(e for e in db['custom'] if e['name']=='Space2')
+  self.assertEqual([p['name'] for p in effect['params']],['Fifth','Decay','Tone','Mix'])
+ def test_corrupt_pll_controls_and_pitch_selectors(self):
+  db=json.loads((ROOT/'tools/effects_db.json').read_text())
+  effect=next(e for e in db['custom'] if e['name']=='Corrupt')
+  self.assertEqual([p['name'] for p in effect['params']],
+                   ['Master','Sub','Harm','Rate','Depth','Mix'])
+  self.assertEqual([c['label'] for c in effect['params'][0]['choices']],
+                   ['Unis','-1Oct','-2Oct'])
+  self.assertEqual([c['label'] for c in effect['params'][2]['choices']],
+                   ['Unis','5th','Oct','4th','-Oct','12th'])
+ def test_particle_granular_modes_and_controls(self):
+  db=json.loads((ROOT/'tools/effects_db.json').read_text())
+  effect=next(e for e in db['custom'] if e['name']=='Particle')
+  self.assertEqual([p['name'] for p in effect['params']],
+                   ['Mode','Size','Density','Delay','Feedback','Mix'])
+  self.assertEqual([c['label'] for c in effect['params'][0]['choices']],
+                   ['Rand','Dens','LFO','RPit','Rev','Det','DPit','LPit'])
  def test_rooms6_matches_actual_dsp_selector(self):
   src=(ROOT/'src/custom/rooms/rooms.c').read_text()
   start=src.index('#ifdef ROOMS_DISCRETE_MODE')

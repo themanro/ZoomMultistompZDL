@@ -1,0 +1,38 @@
+{
+  "effect_name": "BeatRpt",
+  "comment": "Tempo-synced beat repeat. Length selects a 1/32, 1/16, 1/8, or 1/4-note slice; BPM sets the grid. Mode selects continuous repeats, one repeat on effect activation, or one repeated slice every four beats. The 1/4 slice is capped at 32768 frames (~0.74s) by the stereo ring size.",
+  "audio_func_name": "Fx_DLY_BeatRpt",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category.",
+  "fxid": 485,
+  "fxid_comment": "0x01E5. Unused by existing effect manifests and tools/effects_db.json at implementation time.",
+  "fxid_version": "1.00",
+  "flags_byte": 1,
+  "params": [
+    {
+      "name": "Length",
+      "max": 100,
+      "default": 50,
+      "comment": "Repeated slice length: 1/32, 1/16, 1/8, or 1/4 note; longest slice capped at 32768 frames (~0.74s)."
+    },
+    {
+      "name": "BPM",
+      "max": 240,
+      "default": 120,
+      "comment": "Tempo in BPM; DSP range is 40-240."
+    },
+    {
+      "name": "Mode",
+      "max": 100,
+      "default": 0,
+      "comment": "0-33 Continuous, 34-66 Manual, 67-100 Auto (one repeat every four beats). Manual mode triggers one slice when the effect is switched on."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 50,
+      "comment": "Blend between live input and the repeated slice."
+    }
+  ],
+  "audio_nop": false
+}

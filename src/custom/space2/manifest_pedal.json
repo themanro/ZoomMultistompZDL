@@ -1,0 +1,38 @@
+{
+  "effect_name": "Space2",
+  "comment": "Original DigiTech Space Station XP-300 patch 2-inspired shimmer reverb approximation with an added perfect-fifth voice. Not a firmware or algorithm clone.",
+  "audio_func_name": "Fx_REV_Space2",
+  "gid": 9,
+  "gid_comment": "0x09 = Reverb category.",
+  "fxid": 492,
+  "fxid_comment": "0x01EC. Unused by current effect manifests and tools/effects_db.json at implementation time.",
+  "fxid_version": "1.00",
+  "flags_byte": 1,
+  "params": [
+    {
+      "name": "Fifth",
+      "max": 100,
+      "default": 48,
+      "comment": "Level of the upward perfect-fifth pitch-shifted voice."
+    },
+    {
+      "name": "Decay",
+      "max": 100,
+      "default": 68,
+      "comment": "Reverb feedback and tail length."
+    },
+    {
+      "name": "Tone",
+      "max": 100,
+      "default": 55,
+      "comment": "Brightness of the shimmer and reverb tail."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 42,
+      "comment": "Blend between the dry signal and the shimmer reverb."
+    }
+  ],
+  "audio_nop": false
+}

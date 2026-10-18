@@ -8,8 +8,9 @@ Airwindows-derived ports plus one contributed effect (Dustbox). All are grouped
 under the **Delay** category with a custom on-device cover, and all have rebuilt release binaries in `dist/`.
 
 > **Updated September 14, 2026:** all 22 effects have individual laboratory-style
-> graphics, LCD proportion corrections, and short pedal labels. Saved effect IDs
-> and parameter ranges are preserved. See [display notes](docs/EFFECT-DISPLAY-REFRESH.md).
+> graphics, LCD proportion corrections, and short pedal labels. Effect IDs stay
+> stable; Corrupt's control map is explicitly expanded to six controls. See
+> [display notes](docs/EFFECT-DISPLAY-REFRESH.md).
 
 ### Every effect ends with Mix
 
@@ -34,6 +35,12 @@ crossfade. Those are by-ear calibration points, not derived constants.
 * The desktop Python renderers are alternate listening references. Their extra
   controls and algorithms can differ from the reduced pedal versions; they are
   not evidence that a feature exists in the shipped ZDL.
+* Corrupt is a Data Corrupter-inspired approximation: Master selects unison,
+  -1 octave, or -2 octaves; Sub sets the divided voice level; Harm selects a
+  tracked interval; and Rate/Depth modulate that harmony. The pedal version
+  fixes the root mode to Unison and omits the independent Square voice and the
+  hardware's eight subharmonic programs. Existing Corrupt patches made with
+  the former Sub/Tone/Wave/Mix map may need their settings retuned.
 * Some features are deferred on the originals (Klang's frequency-shifter modes,
   GenLoss dropouts, Scorch's full cab IR). Compare each effect's `manifest.json`
   against its `manifest_pedal.json` to see what was cut for the pedal build.
@@ -53,6 +60,102 @@ forward/reverse routing. It has its own PE controls, pedal graphic, and Effect
 Manager thumbnail. `dist/Tonic.ZDL` is available for local testing; hardware
 validation is pending, so it is not yet part of the 22-effect release pack.
 Rewire and its saved-patch controls are unchanged.
+
+### Experimental addition: BeatRpt
+
+[BeatRpt](src/custom/beatrep/) repeats the previous tempo-synced slice. Set
+Length to 1/32, 1/16, 1/8, or 1/4 note and BPM from 40 to 240. Mode selects
+continuous repeats, one repeat when the effect is switched on, or one repeated
+slice every four beats. In Manual mode, switch the effect off and on to trigger
+another slice. The stereo ring caps slices at 32,768 frames (about 0.74 s),
+so the 1/4 setting is shortened at the slowest BPM values. It is experimental
+and not hardware-validated.
+
+Build with `python3 src/custom/beatrep/build.py`; this writes
+`dist/BeatRpt.ZDL`. The TI C6000 compiler is required, as for the release
+effects.
+
+### Experimental addition: Particle
+
+[Particle](src/custom/particle/) is an original granular-delay and pitch-texture
+approximation inspired by Red Panda Particle 2. Its eight modes cover random,
+density, LFO, random-pitch, reverse, detune, density-pitch, and LFO-pitch
+textures. Size, Density, Delay, Feedback, and Mix shape the grain engine.
+Stereo processing, tap/MIDI sync, the freeze footswitch, and hidden expert
+parameters are not modeled. Hardware validation is pending.
+
+Build with `python3 src/custom/particle/build.py`; this writes
+`dist/Particle.ZDL`.
+
+### Experimental addition: BeatScat
+
+[BeatScat](src/custom/beatscat/) is a separate, original beat-scatter effect
+inspired by live beat-repeat tools. Div and BPM set the grid; Type selects
+stutter, reverse, or quarter-shifted playback; Pattern selects every division,
+alternating divisions, or the opposite-phase alternation. It triggers
+automatically while enabled. The longest slice is capped at 32,768 frames.
+Hardware validation is pending.
+
+Build with `python3 src/custom/beatscat/build.py`; this writes
+`dist/BeatScat.ZDL`.
+
+### Experimental addition: Bloom
+
+[Bloom](src/custom/bloom/) is an original approximation inspired by the Alesis
+Midiverb II Bloom patch, not a bit-exact emulation or factory algorithm dump.
+It combines a diffuse stereo reverb tail with a controllable swell on the wet
+attack. Bloom controls the swell speed; Decay, Tone, and Mix shape the tail.
+Hardware validation is pending.
+
+Build with `python3 src/custom/bloom/build.py`; this writes
+`dist/Bloom.ZDL`.
+
+### Experimental addition: Shallow
+
+[Shallow](src/custom/shallow/) is an original approximation inspired by the
+Fairfield Circuitry Shallow Water. Rate, Depth, and Sensitivity shape a
+dynamics-responsive random delay modulation; Noise toggles subtle noise on
+the wet signal, and Mix controls the dry/wet balance. This is not a circuit or
+firmware clone. Hardware validation is pending.
+
+Build with `python3 src/custom/shallow/build.py`; this writes
+`dist/Shallow.ZDL`.
+
+### Experimental addition: Rainbow
+
+[Rainbow](src/custom/rainbow/) is an original approximation inspired by the
+EarthQuaker Devices Rainbow Machine. Pitch, Primary, Tracking, Tone, Secondary,
+and Magic map to the pedal's six knobs; dual delay-head voices create the
+pitch-warping harmonies and Magic controls regeneration. The effect's own
+enable control replaces the pedal's Activate footswitch; the momentary/latching
+Magic footswitch behavior is not reproduced. This is not a circuit or firmware
+clone. Hardware validation is pending.
+
+Build with `python3 src/custom/rainbow/build.py`; this writes
+`dist/Rainbow.ZDL`.
+
+### Experimental addition: SpaceRev
+
+[SpaceRev](src/custom/spacerev/) is an original approximation inspired by the
+DigiTech XP-300 Space Station Reverse mode. It captures stereo grains and plays
+them backwards. Expression sets the base reverse-grain length; Rate and Depth
+control a triangle LFO that modulates the expression value. Mix blends the
+reversed grains with the live input. It does not clone the XP-300 algorithm or
+use a physical expression pedal input. Hardware validation is pending.
+
+Build with `python3 src/custom/spacerev/build.py`; this writes
+`dist/SpaceRev.ZDL`.
+
+### Experimental addition: Space2
+
+[Space2](src/custom/space2/) is a separate original approximation inspired by
+patch 2 of the DigiTech XP-300 Space Station, described as a shimmer reverb
+with added fifths. A fifth-up pitch voice feeds a diffuse reverb. Fifth, Decay,
+Tone, and Mix shape the result. It is not a firmware or algorithm clone.
+Hardware validation is pending.
+
+Build with `python3 src/custom/space2/build.py`; this writes
+`dist/Space2.ZDL`.
 
 ### Release pack samples
 
@@ -75,7 +178,7 @@ loudness.
 | Flower | [flower.wav](previews/audio/flower.wav) — Digital Bath random filter | [chord](previews/audio/dry_chord.wav) |
 | Shatter | [shatter.wav](previews/audio/shatter.wav) — machine-gun stutter | [drums](previews/audio/dry_drums.wav) |
 | Arrakis | [arrakis.wav](previews/audio/arrakis.wav) — −2 oct beating drone | [drone](previews/audio/dry_drone.wav) |
-| Corrupt | [corrupt.wav](previews/audio/corrupt.wav) — PLL square synth | [guitar](previews/audio/dry_guitar.wav) |
+| Corrupt | [corrupt.wav](previews/audio/corrupt.wav) — PLL square synth with FM harmony | [guitar](previews/audio/dry_guitar.wav) |
 | Klang | [klang.wav](previews/audio/klang.wav) — metallic ring mod | [chord](previews/audio/dry_chord.wav) |
 | GenLoss | [genloss.wav](previews/audio/genloss.wav) — wrecked tape | [chord](previews/audio/dry_chord.wav) |
 | Scorch | [scorch.wav](previews/audio/scorch.wav) — djent high-gain amp+cab | [riff](previews/audio/dry_riff.wav) |

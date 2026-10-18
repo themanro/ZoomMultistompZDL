@@ -19,6 +19,14 @@ def groups(labels, classify, maximum=100):
     return result
 
 SELECTORS={
+ 'Particle':{
+   'Mode':groups(['Rand','Dens','LFO','RPit','Rev','Det','DPit','LPit'],
+                 lambda r:ladder(r,[.125,.25,.375,.5,.625,.75,.875])),
+ },
+ 'Corrupt':{
+   'Master':groups(['Unis','-1Oct','-2Oct'],lambda r:ladder(r,[.25,.75])),
+   'Harm':groups(['Unis','5th','Oct','4th','-Oct','12th'],lambda r:ladder(r,[.17,.34,.5,.67,.84])),
+ },
  'Tonic':{
    'Mode':groups(['Decim','Crush','FM','Ring'],lambda r:ladder(r,[.25,.5,.75])),
    'Order':groups(['Fwd','Rev'],lambda r:ladder(r,[.5])),
@@ -28,6 +36,16 @@ SELECTORS={
  'Spool':{'Div':groups(['1/16','1/8T','1/8','1/8.','1/4','1/4.'],lambda r:ladder(r,[.16666667,.33333334,.5,.6666667,.8333333]))},
  'Hydra':{'Div':groups(['Grain','1/32','1/16T','1/16','1/8T','1/8','1/8.','1/4'],lambda r:ladder(r,[.0625,.1875,.3125,.4375,.5625,.6875,.8125]))},
  'Spiral':{'Div':groups(['1/32','1/16T','1/16','1/8T','1/8','1/8.','1/4','1/4.'],lambda r:ladder(r,[.125,.25,.375,.5,.625,.75,.875]))},
+ 'BeatRpt':{
+   'Length':groups(['1/32','1/16','1/8','1/4'],lambda r:ladder(r,[.25,.5,.75])),
+   'Mode':groups(['Loop','Manual','Auto'],lambda r:ladder(r,[.34,.67])),
+ },
+ 'BeatScat':{
+   'Div':groups(['1/32','1/16','1/8','1/4'],lambda r:ladder(r,[.25,.5,.75])),
+   'Type':groups(['Stut','Rev','Shift'],lambda r:ladder(r,[.34,.67])),
+   'Pattern':groups(['Every','Alt','Sync'],lambda r:ladder(r,[.34,.67])),
+ },
+ 'Shallow':{'Noise':groups(['Off','On'],lambda r:ladder(r,[.5]))},
  'Rewire':{'Route':groups(['BDRCS','SCRDB','DSBCR','RCSBD','SBRDC'],lambda r:ladder(r,[.2,.4,.6,.8]))},
  'Stasis':{'Capture':groups(['Stomp','Release','Hold'],lambda r:r,2)},
  'RndmFLTR':{
@@ -43,7 +61,7 @@ def attach_selectors(effect):
     return effect
 
 def pedal_label(label):
-    return {'Release':'Rels', 'Stomp':'Stmp'}.get(label,label)
+    return {'Release':'Rels', 'Stomp':'Stmp', 'Manual':'Manu'}.get(label,label)
 
 def pedal_label_c(manifest):
     """Stock GetString ABI: A4=integer value, B4=destination; return length.

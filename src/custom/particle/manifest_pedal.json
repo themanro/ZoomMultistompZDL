@@ -1,0 +1,48 @@
+{
+  "effect_name": "Particle",
+  "comment": "Original Red Panda Particle 2-inspired granular delay approximation. Eight modes cover random, density, LFO, random-pitch, reverse, detune, density-pitch, and LFO-pitch behavior. This is not a firmware clone; stereo processing, tap tempo, MIDI sync, freeze footswitch, and the original feedback options are not modeled.",
+  "audio_func_name": "Fx_DLY_Particle",
+  "gid": 8,
+  "fxid": 490,
+  "fxid_version": "1.00",
+  "flags_byte": 1,
+  "params": [
+    {
+      "name": "Mode",
+      "max": 100,
+      "default": 0,
+      "comment": "Selects one of the five granular-delay or three pitch modes."
+    },
+    {
+      "name": "Size",
+      "max": 100,
+      "default": 38,
+      "comment": "Grain duration, approximately 6 to 186 ms."
+    },
+    {
+      "name": "Density",
+      "max": 100,
+      "default": 55,
+      "comment": "Grain overlap and texture modulation amount."
+    },
+    {
+      "name": "Delay",
+      "max": 100,
+      "default": 30,
+      "comment": "Base grain delay, up to approximately 2.4 seconds."
+    },
+    {
+      "name": "Feedback",
+      "max": 100,
+      "default": 35,
+      "comment": "Amount of granular output recirculated into the delay buffer; shown as Feed on the pedal."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 50,
+      "comment": "Dry/wet crossfade."
+    }
+  ],
+  "audio_nop": false
+}

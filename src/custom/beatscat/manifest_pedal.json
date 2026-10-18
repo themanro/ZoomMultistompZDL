@@ -1,0 +1,44 @@
+{
+  "effect_name": "BeatScat",
+  "comment": "Original BPM-synced beat-scatter effect inspired by performance beat-repeat tools. Div sets the slice grid; Pattern selects every, alternate, or syncopated slices; Type selects stutter, reverse, or quarter-shifted playback. The last captured division is transformed on selected grid cycles.",
+  "audio_func_name": "Fx_DLY_BeatScat",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category.",
+  "fxid": 486,
+  "fxid_comment": "0x01E6. Unused by existing effect manifests and tools/effects_db.json at implementation time.",
+  "fxid_version": "1.00",
+  "flags_byte": 1,
+  "params": [
+    {
+      "name": "Div",
+      "max": 100,
+      "default": 50,
+      "comment": "Scatter slice and grid length: 1/32, 1/16, 1/8, or 1/4 note. Long slices are capped at 32768 frames."
+    },
+    {
+      "name": "BPM",
+      "max": 240,
+      "default": 120,
+      "comment": "Tempo in BPM; DSP range is 40-240."
+    },
+    {
+      "name": "Type",
+      "max": 100,
+      "default": 0,
+      "comment": "Stutter repeats the first quarter of the captured slice; Reverse plays it backwards; Shift rotates its starting point by one quarter."
+    },
+    {
+      "name": "Pattern",
+      "max": 100,
+      "default": 0,
+      "comment": "Every scatters each division, Alt scatters alternating divisions, Sync scatters alternating divisions with the opposite phase."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 50,
+      "comment": "Blend between live input and the scattered slice."
+    }
+  ],
+  "audio_nop": false
+}

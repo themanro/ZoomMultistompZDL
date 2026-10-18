@@ -1,0 +1,44 @@
+{
+  "effect_name": "Shallow",
+  "comment": "Original Fairfield Circuitry Shallow Water-inspired random-delay modulation approximation. Includes Rate, Depth, Sensitivity, Noise, and Mix controls; not a circuit or firmware clone.",
+  "audio_func_name": "Fx_MOD_Shallow",
+  "gid": 6,
+  "gid_comment": "0x06 = Modulation category.",
+  "fxid": 488,
+  "fxid_comment": "0x01E8. Unused by current effect manifests and tools/effects_db.json at implementation time.",
+  "fxid_version": "1.00",
+  "flags_byte": 1,
+  "params": [
+    {
+      "name": "Rate",
+      "max": 100,
+      "default": 42,
+      "comment": "Speed of the smoothed random modulation."
+    },
+    {
+      "name": "Depth",
+      "max": 100,
+      "default": 55,
+      "comment": "Range of random delay-time variation."
+    },
+    {
+      "name": "Sensitivity",
+      "max": 100,
+      "default": 50,
+      "comment": "How strongly playing dynamics change modulation depth."
+    },
+    {
+      "name": "Noise",
+      "max": 100,
+      "default": 0,
+      "comment": "Off/on control for subtle noise added to the wet signal."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 50,
+      "comment": "Dry/wet blend."
+    }
+  ],
+  "audio_nop": false
+}

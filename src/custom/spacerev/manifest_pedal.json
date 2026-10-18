@@ -1,0 +1,38 @@
+{
+  "effect_name": "SpaceRev",
+  "comment": "Original DigiTech Space Station Reverse-mode-inspired effect. An onboard Expression value controls reverse-grain length; an LFO modulates that value using Rate and Depth. Not a firmware or algorithm clone.",
+  "audio_func_name": "Fx_DLY_SpaceRev",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category.",
+  "fxid": 491,
+  "fxid_comment": "0x01EB. Unused by current effect manifests and tools/effects_db.json at implementation time.",
+  "fxid_version": "1.00",
+  "flags_byte": 1,
+  "params": [
+    {
+      "name": "Expression",
+      "max": 100,
+      "default": 50,
+      "comment": "Base expression position, mapped to reverse-grain length."
+    },
+    {
+      "name": "Rate",
+      "max": 100,
+      "default": 30,
+      "comment": "LFO speed for modulating the expression position."
+    },
+    {
+      "name": "Depth",
+      "max": 100,
+      "default": 35,
+      "comment": "Amount the LFO sweeps the expression position around its base."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 50,
+      "comment": "Blend between live input and the reversed grains."
+    }
+  ],
+  "audio_nop": false
+}

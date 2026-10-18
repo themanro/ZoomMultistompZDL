@@ -1,0 +1,50 @@
+{
+  "effect_name": "Rainbow",
+  "comment": "Original EarthQuaker Devices Rainbow Machine-inspired polyphonic pitch-warping approximation. The pedal's six knob controls are represented; footswitch-only behavior is not reproduced.",
+  "audio_func_name": "Fx_MOD_Rainbow",
+  "gid": 6,
+  "gid_comment": "0x06 = Modulation category.",
+  "fxid": 489,
+  "fxid_comment": "0x01E9. Unused by current effect manifests and tools/effects_db.json at implementation time.",
+  "fxid_version": "1.00",
+  "flags_byte": 1,
+  "params": [
+    {
+      "name": "Pitch",
+      "max": 100,
+      "default": 50,
+      "comment": "Unison at noon, moving from a fourth below to a third above."
+    },
+    {
+      "name": "Primary",
+      "max": 100,
+      "default": 48,
+      "comment": "Level of the primary pitch-warped harmony."
+    },
+    {
+      "name": "Tracking",
+      "max": 100,
+      "default": 55,
+      "comment": "Controls the pitch-grain delay and tracking character."
+    },
+    {
+      "name": "Tone",
+      "max": 100,
+      "default": 58,
+      "comment": "Dark-to-bright tone of the harmony voices."
+    },
+    {
+      "name": "Secondary",
+      "max": 100,
+      "default": 0,
+      "comment": "Adds a second voice an octave beyond the primary harmony."
+    },
+    {
+      "name": "Magic",
+      "max": 100,
+      "default": 0,
+      "comment": "Adds regeneration and increasing pitch-warped repeats."
+    }
+  ],
+  "audio_nop": false
+}

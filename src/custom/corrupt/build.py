@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Corrupt.ZDL from corrupt.c + manifest_pedal.json (2-knob pedal build)."""
+"""Build Corrupt.ZDL from corrupt.c + manifest_pedal.json."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from linker import LinkerConfig, link, params_from_manifest  # noqa: E402
 from manifest_params import write_param_header  # noqa: E402
 from custom_covers import make_cover  # noqa: E402
 
-TI_ROOT = Path("/Applications/ti/ti-cgt-c6000_8.5.0.LTS")
+TI_ROOT = Path("/Applications/ti/ti-cgt-c6000_8.3.15")
 CL6X = TI_ROOT / "bin" / "cl6x"
 
 CFLAGS = [

@@ -4,12 +4,12 @@ Corrupter style monophonic harmonizing PLL synth-fuzz.
 Signal flow:
   1. Track the input fundamental (autocorrelation per frame). Octave-ambiguous
      frames produce the glitchy octave jumps the pedal is loved for.
-  2. Synthesize a square-wave MASTER oscillator locked to that pitch (octave
-     selectable: unison / -1 / -2, the Master Oscillator toggle).
+  2. Synthesize a square-wave MASTER oscillator locked to that pitch (selectable
+     at unison, -1 octave, or -2 octaves).
   3. Derive a SUBHARMONIC square one octave below the master (the analog pedal
      uses flip-flop frequency division; perfect octaves).
-  4. Add a HARMONY square at a selectable interval, frequency-modulated
-     (vibrato) by Rate/Depth -> the warbly sci-fi wobble.
+  4. Add a HARMONY square at a selectable interval, frequency-modulated by
+     Rate/Depth -> the warbly sci-fi wobble.
   5. An envelope follower makes the synth voices track your picking dynamics
      and gate out when you stop.
 
@@ -17,12 +17,15 @@ Square waves are not band-limited on purpose: the aliasing is part of the
 digital, gnarly Data Corrupter character (tamed slightly by a final low-pass).
 
 Knobs (manifest order, 0..100):
-  Master octave of the master oscillator (0 unison, 50 -1oct, 100 -2oct)
+  Master octave of the master oscillator (unison / -1 / -2 octaves)
   Sub    subharmonic voice level
-  Harm   harmony interval (unison/5th/oct/4th/-oct/+12th)
-  Rate   FM vibrato rate on the harmony voice
-  Depth  FM vibrato depth (semitones)
+  Harm   harmony interval (unison/5th/oct/4th/-oct/12th)
+  Rate   FM rate on the harmony voice
+  Depth  FM pitch depth (semitones)
   Mix    dry/synth blend
+
+The pedal approximation fixes the root mode to Unison and omits the
+independent Square voice and the hardware's eight subharmonic programs.
 """
 
 from __future__ import annotations
@@ -110,9 +113,9 @@ def render(audio, sample_rate, params, tail, root):
     harm = float(params.get("harm", 50.0)) / 100.0
     rate = float(params.get("rate", 40.0)) / 100.0
     depth = float(params.get("depth", 35.0)) / 100.0
-    mix = float(params.get("mix", 85.0)) / 100.0
+    mix = float(params.get("mix", 50.0)) / 100.0
 
-    oct_sel = int(round(master * 2))                  # 0,1,2 -> /1,/2,/4
+    oct_sel = 0 if master < 0.25 else (1 if master < 0.75 else 2)
     master_ratio = 2.0 ** (-oct_sel)
     sub_ratio = master_ratio * 0.5                    # one octave below master
     h_idx = min(int(harm * len(HARM_INTERVALS)), len(HARM_INTERVALS) - 1)

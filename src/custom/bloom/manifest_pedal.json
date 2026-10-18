@@ -1,0 +1,38 @@
+{
+  "effect_name": "Bloom",
+  "comment": "Original Alesis Midiverb II Bloom-patch-inspired reverb approximation: diffuse long-tail stereo reverb with a controllable swelling wet attack. Not an exact algorithm or factory-preset dump.",
+  "audio_func_name": "Fx_REV_Bloom",
+  "gid": 9,
+  "gid_comment": "0x09 = Reverb category.",
+  "fxid": 487,
+  "fxid_comment": "0x01E7. Unused by current effect manifests and tools/effects_db.json at implementation time.",
+  "fxid_version": "1.00",
+  "flags_byte": 1,
+  "params": [
+    {
+      "name": "Bloom",
+      "max": 100,
+      "default": 55,
+      "comment": "Wet attack swell, from a quick rise to a slow several-second bloom."
+    },
+    {
+      "name": "Decay",
+      "max": 100,
+      "default": 75,
+      "comment": "Reverb tail length, from a short ambience to a long sustained wash."
+    },
+    {
+      "name": "Tone",
+      "max": 100,
+      "default": 42,
+      "comment": "Damping of high frequencies in the reverb tail."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 50,
+      "comment": "Dry/wet blend."
+    }
+  ],
+  "audio_nop": false
+}
