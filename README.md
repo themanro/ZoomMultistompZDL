@@ -566,9 +566,11 @@ deep versions live in [docs/](docs/) and [build/ABI.md](build/ABI.md).
   403–499 and 914 (Spool), NAM captures 900–907, 950–957 and 500–699, CabIR
   cabs 930–945 and 700–899. Other projects building effects for these pedals:
   please avoid them. 409 is retired: Spool and TEcho4 (another collection)
-  both used it, and swapping them froze a pedal at boot. The pedal matches
-  effects by ID alone, whatever the category, so a new ID must be unused in
-  every category and by every collection
+  both used it, and swapping them froze a pedal at boot. An effect is
+  identified by its group and ID together: Zoom's own effects reuse IDs across
+  groups (DELAY, COMP, LINESEL, TREMOLO and HDHALL are all ID 8), and Skull
+  (Delay 416) runs beside SpaceHole (Reverb 416). So a new Delay effect needs
+  an ID no other collection uses in the Delay group
   ([repeat98's registry](https://github.com/repeat98/ZoomMultistompZDL/blob/main/docs/FXID-REGISTRY.md)
   lists them).
 

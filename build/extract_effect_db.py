@@ -357,18 +357,18 @@ def main() -> None:
                 print(f"WARNING: patch-ID collision {e['name']} vs {ids[e['id']]}")
             ids[e["id"]] = e["name"]
 
-    # sanity: no fxid collision with a stock effect. The pedal keys effects by
-    # fxid ALONE (independent of gid/category), so a custom fxid equal to any
-    # stock fxid loads the wrong DSP on hardware -> cracking / dead effect. (This
-    # is what fxids 474-483 hit, e.g. Howl 480 vs stock CoronaCho 480.)
+    # sanity: no effect-ID collision with a stock effect. The pedal identifies
+    # an effect by gid and fxid together: Zoom's own files reuse fxids across
+    # groups (DELAY, COMP, LINESEL, TREMOLO and HDHALL are all fxid 8), and
+    # Skull (8/416) runs beside SPC_HOLE (9/416) on an MS-70CDR 2.10.
     stock_fx = {}
     for e in db["stock"]:
         if "fxid" in e:
-            stock_fx.setdefault(e["fxid"], e["name"])
+            stock_fx.setdefault((e["gid"], e["fxid"]), e["name"])
     for e in db["custom"]:
-        if e.get("fxid") in stock_fx:
-            print(f"*** fxid COLLISION: custom {e['name']} fxid {e['fxid']} == stock "
-                  f"{stock_fx[e['fxid']]} — PICK A DIFFERENT fxid, this breaks on hardware ***")
+        if (e.get("gid"), e.get("fxid")) in stock_fx:
+            print(f"*** effect-ID COLLISION: custom {e['name']} {e['gid']}/{e['fxid']} == stock "
+                  f"{stock_fx[(e['gid'], e['fxid'])]} — PICK A DIFFERENT fxid, this breaks on hardware ***")
 
     db_json = json.dumps(db, indent=1)
 
