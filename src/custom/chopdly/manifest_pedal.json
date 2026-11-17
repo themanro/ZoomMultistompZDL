@@ -1,0 +1,69 @@
+{
+  "effect_name": "Chopdly",
+  "comment": "PEDAL BUILD manifest for Chopdly (9-knob). Delay that cuts the last cycle into chops (equal, or at note attacks) and plays them back rearranged, reversed and pitched; the result feeds back and gets re-chopped. Chops, Order, Pitch, Reverse and Stretch are named-step knobs (labels: build/selector_metadata.py); the rest are 0..100.",
+  "audio_func_name": "Fx_DLY_Chopdly",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_.",
+  "fxid": 947,
+  "fxid_comment": "0x03B3. Free in every collection in repeat98's FXID registry (checked 2026-10-29 and 2026-11-09; 946 is TapeEcho4). Reserved in this README; add to the registry's themanro release row.",
+  "fxid_version": "1.03",
+  "flags_byte": 1,
+  "dsp_cost": 40.0,
+  "params": [
+    {
+      "name": "Time",
+      "max": 100,
+      "default": 45,
+      "comment": "params[5]. Cycle/delay length 30 ms .. 2.5 s, squared curve (45 = ~0.53 s)."
+    },
+    {
+      "name": "Chops",
+      "max": 16,
+      "default": 4,
+      "comment": "params[6]. Named steps: 0 = Trans (cut at note attacks; none found: 4 equal), 1..16 = equal chops."
+    },
+    {
+      "name": "Order",
+      "max": 21,
+      "default": 6,
+      "comment": "params[7]. Named steps: Fwd, Back (chops in reverse order), Swap (pairs swapped), Skip (evens then odds), Stutr (each other chop twice), Build (0, 01, 012...), Mix1-8 (fixed shuffles, every chop once), Rpt1-6 (fixed, chops may repeat or drop), Rand (new shuffle every cycle), Chaos (new random with repeats every cycle)."
+    },
+    {
+      "name": "Pitch",
+      "max": 12,
+      "default": 3,
+      "comment": "params[8]. Named steps: -12/-7/-5/Unity/+5/+7/+12 = all chops; Oct+ / Oct- = half the chops up / down an octave; Octs = a third up, a third down; Fifth = a third +7, a third -5; Some = half the chops jump +-5/7/12; Wild = every chop jumps. Fixed per-slot coins, so it recalls. Varispeed unless Stretch is on."
+    },
+    {
+      "name": "Reverse",
+      "max": 7,
+      "default": 0,
+      "comment": "params[9]. Named steps: Off, Few (1/4 of chops), Alt (every other chop), Half, Most (3/4), All, Ping (chops alternate L/R, forward), Scatr (each chop a fixed pan, forward). Fixed per-slot coins."
+    },
+    {
+      "name": "Stretch",
+      "max": 6,
+      "default": 4,
+      "comment": "params[10]. Named steps: 1/4, 1/3, 1/2, 3/4 = slower, Off = plain read, 1.5x, 2x = faster; how fast each chop runs through its audio with pitch kept (two-grain crossfade, 46 ms grains). Pitch still applies on top."
+    },
+    {
+      "name": "Glide",
+      "max": 100,
+      "default": 20,
+      "comment": "params[11]. Chop edges: 0 = cut where chopped (32-sample anti-click fade); higher = longer fades and the ending chop overlaps the next one (crossfade). 100 = half the shorter chop."
+    },
+    {
+      "name": "Feedbk",
+      "max": 100,
+      "default": 35,
+      "comment": "params[12]. Chopped output back into the recording (0 .. 0.95), limited."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 50,
+      "comment": "params[13]. Dry/wet."
+    }
+  ],
+  "audio_nop": false
+}

@@ -1,0 +1,23 @@
+{
+  "effect_name": "Chimera",
+  "comment": "PEDAL BUILD manifest for Chimera (9-knob). The guitar as the voice source of a simulated throat and mouth (talkbox-like): named after and built on the Chimera voice synth (github.com/jamesondh/chimera-vocal-synth, MIT, (c) 2026 Jameson Hodge): a 16-section airway with a nasal branch, vowel shapes fitted to measured formants (design.py). Move is a named-step knob (labels: build/selector_metadata.py); the rest are 0..100.",
+  "audio_func_name": "Fx_DLY_Chimera",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_.",
+  "fxid": 418,
+  "fxid_comment": "0x01A2. In this project's reserved 403-499 Delay block, next to Deform; free in every group's DB entry. Check repeat98's FXID registry before release.",
+  "fxid_version": "0.02",
+  "flags_byte": 1,
+  "dsp_cost": 40.0,
+  "params": [
+    {"name": "Vowel",  "max": 100, "default": 50, "comment": "params[5]. The mouth's shape: u, o, a, e, i from 0 to 100, morphing between."},
+    {"name": "Open",   "max": 100, "default": 55, "comment": "params[6]. Jaw and lips: closed (a hum, with Nasal) to wide open."},
+    {"name": "Body",   "max": 100, "default": 30, "comment": "params[7]. The throat's length: 19 cm (big) to 13.5 cm (small); 30 is an adult man."},
+    {"name": "Nasal",  "max": 100, "default": 0,  "comment": "params[8]. Opens the soft palate into the nose."},
+    {"name": "Talk",   "max": 100, "default": 35, "comment": "params[9]. How far Move moves the mouth."},
+    {"name": "Move",   "max": 3,   "default": 0,  "comment": "params[10]. Named steps Pick, Slow, Fast, Chat: the mouth follows each note, sways slowly or quickly, or babbles."},
+    {"name": "Buzz",   "max": 100, "default": 30, "comment": "params[11]. Drives the guitar into a soft clipper first: more harmonics for the mouth to shape."},
+    {"name": "Breath", "max": 100, "default": 0,  "comment": "params[12]. Air noise through the throat, following your playing: a whisper."},
+    {"name": "Mix",    "max": 100, "default": 100, "comment": "params[13]. Dry/wet."}
+  ]
+}

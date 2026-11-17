@@ -1,0 +1,23 @@
+{
+  "effect_name": "Horizon",
+  "comment": "PEDAL BUILD manifest for Horizon (9-knob). A huge, spacey reverb: pre-delay, four diffusers, an 8-line modulated feedback delay network up to cathedral sizes, decays from about a second to a minute and a hold at the top, damping inside the loop, a swell that blooms each note in, stereo width. All knobs 0..100.",
+  "audio_func_name": "Fx_DLY_Horizon",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_.",
+  "fxid": 419,
+  "fxid_comment": "0x01A3. In this project's reserved 403-499 Delay block; free in every group's DB entry. Check repeat98's FXID registry before release.",
+  "fxid_version": "0.02",
+  "flags_byte": 1,
+  "dsp_cost": 50.0,
+  "params": [
+    {"name": "Size",  "max": 100, "default": 70, "comment": "params[5]. The space, a room to a cathedral (the delay lines x0.35 .. x1.52); turning it bends the pitch of the tail."},
+    {"name": "Decay", "max": 100, "default": 60, "comment": "params[6]. Reverb time, about 0.8 s to a minute; 100 holds the tail forever and stops taking new sound."},
+    {"name": "Pre",   "max": 100, "default": 15, "comment": "params[7]. Pre-delay, 0 .. 370 ms."},
+    {"name": "Mod",   "max": 100, "default": 35, "comment": "params[8]. Slow movement of the delay lines: chorus in the tail, shimmer at the top."},
+    {"name": "Lo",    "max": 100, "default": 20, "comment": "params[9]. Low cut inside the tail, 20 .. 600 Hz."},
+    {"name": "Hi",    "max": 100, "default": 55, "comment": "params[10]. High cut inside the tail, 1.5 .. 16 kHz: dark to bright."},
+    {"name": "Swell", "max": 100, "default": 0,  "comment": "params[11]. Each note blooms into the reverb, over up to 2 s; 0 off."},
+    {"name": "Width", "max": 100, "default": 80, "comment": "params[12]. Stereo width of the tail, mono .. extra wide."},
+    {"name": "Mix",   "max": 100, "default": 45, "comment": "params[13]. Dry/wet."}
+  ]
+}

@@ -13,7 +13,7 @@ older G3/G5/B3 need firmware patching nobody has done.
 
 ## Tracker
 
-| Pedal | Effect format | Install path | Our effects | Patch Editor | NAM | Next step |
+| Pedal | Effect format | Install path | Our effects | MultiStomp Editor | NAM | Next step |
 |---|---|---|---|---|---|---|
 | MS-70CDR | ZDL | Effect Manager | **working** | **working** | **working** | (home platform) |
 | MS-50G | ZDL | Effect Manager | **NAM + CabIR confirmed** by a user ([#5](https://github.com/themanro/ZoomMultistompZDL/issues/5)) | **write test passed**; save, backup and restore worked | **working** (full rate and Eco); same headroom as MS-70CDR | Map the stock amps' CAB parameter ([#5](https://github.com/themanro/ZoomMultistompZDL/issues/5)) |
@@ -29,14 +29,14 @@ older G3/G5/B3 need firmware patching nobody has done.
 
 ## Priorities
 
-1. **MS-50G**: effects, NAM and Patch Editor writes confirmed on firmware
+1. **MS-50G**: effects, NAM and MultiStomp Editor writes confirmed on firmware
    3.10 (#5), including knob edits; DSP headroom matches the MS-70CDR. Left:
-   Patch Editor can't change stock amps' CAB setting yet.
+   MultiStomp Editor can't change stock amps' CAB setting yet.
 2. **MS-100BT**: already runs our effects through
    [lopezchau's tools](https://github.com/lopezchau/zoom-ms100bt-bluetooth).
    Next: NAM and CabIR there, then a README update (it currently says "not
    supported").
-3. **MS-60B**: needs the 105-byte patch layout in Patch Editor, and owners
+3. **MS-60B**: needs the 105-byte patch layout in MultiStomp Editor, and owners
    should know it has only about 10 free flash blocks (a NAM capture uses about 8).
 4. **G1on family**: get the first identity line, patch dump and one install
    result. [repeat98#7](https://github.com/repeat98/ZoomMultistompZDL/issues/7)

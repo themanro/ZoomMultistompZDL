@@ -1,7 +1,7 @@
 # Installing ZDLs With Zoom Effect Manager
 
 On an MS-70CDR you can also install them without Effect Manager: open the
-[Patch Editor](https://themanro.github.io/ZoomMultistompZDL/tools/patch_editor.html),
+[MultiStomp Editor](https://themanro.github.io/ZoomMultistompZDL/tools/editor.html),
 connect, and use **Effects** (see the README).
 Effects can also put back Zoom's own effects from Zoom's firmware updater,
 the way Effect Manager installs them, without Effect Manager.
@@ -36,7 +36,7 @@ the same ID in your library or on the pedal.
 If your pedal has the old Spool: remove it and write the pedal, power-cycle,
 then add the new Spool.ZDL and write again. Don't swap it in one write.
 Patches that used the old Spool show an empty slot; pick Spool again there.
-The Patch Editor's Effects does the same in two steps: Remove, power-cycle,
+The MultiStomp Editor's Effects does the same in two steps: Remove, power-cycle,
 then Install.
 
 ## "No data to display, check filters"

@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs'),vm=require('node:vm');
 const src=fs.readFileSync(require('node:path').join(__dirname,'../patch_editor.html'),'utf8');
 function fn(name){const start=src.search(new RegExp('(?:async )?function '+name+'\\('));assert(start>=0);return src.slice(start,src.indexOf('\n}',start)+2);}
-function context(extra={}){return vm.createContext({setTimeout,clearTimeout,performance,Promise,Map,Set,Math,Array,Number,Error,busy:false,syncing:false,midiActionActive:false,actionCancelled:false,transientBypassSlot:-1,patchGeneration:0,nextSend:0,dumpCooldownUntil:0,pendingDump:null,sxAccum:null,fsWaiter:null,autoApplyPending:false,sleep:async()=>{},banner:()=>{},log:()=>{},updateActionState:()=>{},...extra});}
+function context(extra={}){return vm.createContext({setTimeout,clearTimeout,performance,Promise,Map,Set,Math,Array,Number,Error,busy:false,syncing:false,midiActionActive:false,actionCancelled:false,transientBypassSlot:-1,patchGeneration:0,nextSend:0,dumpCooldownUntil:0,pendingDump:null,sxAccum:null,fsWaiter:null,autoApplyPending:false,quietApply:false,bounceMs:()=>20,sleep:async()=>{},banner:()=>{},log:()=>{},updateActionState:()=>{},...extra});}
 test('capture sync restores original DSP costs when saved overrides disappear or become invalid',()=>{
  for(const baseline of [194,177]){
   let saved=[{slot:1,shortName:'eco',cost:160}];
@@ -52,6 +52,14 @@ test('Apply preserves live name and untouched fields; clears only verified edits
  c.readCurrent=async()=>{if(reads++)live.fx[0][2]=60;const r=structuredClone(live);r.slice=()=>structuredClone(live);return r;};
  await c.applyToPedal();assert.equal(c.patch.name,'Pedal rename');assert.equal(c.patch.fx[0][3],70);assert.equal(c.dirty.size,0);
 });
+test('Apply bounces the edited slot as off-then-on, waiting only the update gap',async()=>{
+ const {c,live}=applyContext();const writes=[];const waits=[];
+ c.lastEditedSlot=0;c.bounceMs=()=>15;c.sleep=async ms=>{waits.push(ms);};
+ c.encodePatch=x=>structuredClone(x);c.send=m=>{if(m&&m.fx)writes.push(m.fx[0][0]);};
+ c.readCurrent=async()=>{const b=structuredClone(live);b.fx[0][2]=60;const r=structuredClone(b);r.slice=()=>structuredClone(b);return r;};
+ await c.applyToPedal();
+ assert.deepEqual(writes,[0,1]);assert.equal(waits[0],15);assert.equal(c.transientBypassSlot,-1);
+});
 test('failed verification and newer revisions retain edits',async()=>{
  for(const newer of [false,true]){
  const {c,live}=applyContext();let reads=0;
@@ -96,7 +104,7 @@ test('parameter echo updates only its knob, with no render or name mutation',()=
  let received;let renders=0;
  const c=context({DEVID:97,patch:{name:'DreamShot',fx:[[1,42,0]]},BYID:{42:{name:'Effect'}},
  KNOBREG:[[{_receive:v=>received=v}]],render:()=>renders++});
- vm.runInContext(fn('handleSysex'),c);
+ vm.runInContext(fn('handleSysex')+'\n'+fn('misfit')+'\n'+fn('slotName'),c);
  c.handleSysex([240,82,0,97,49,0,2,63,0,247]);
  assert.equal(c.patch.fx[0][2],63);assert.equal(received,63);assert.equal(renders,0);assert.equal(c.patch.name,'DreamShot');
 });
@@ -146,7 +154,7 @@ test('Apply bypass echoes do not alter the model or rebuild slot controls',()=>{
  let rendered=0;
  const c=context({DEVID:97,patch:{fx:[[1,42,25]]},BYID:{42:{name:'test'}},
  transientBypassSlot:0,midiActionActive:true,KNOBREG:[],render:()=>{throw Error("unexpected rebuild");},updateSlotState:()=>rendered++});
- vm.runInContext(fn('handleSysex'),c);
+ vm.runInContext(fn('handleSysex')+'\n'+fn('misfit')+'\n'+fn('slotName'),c);
  c.handleSysex([240,82,0,97,49,0,0,0,0,247]);
  assert.equal(c.patch.fx[0][0],1);assert.equal(rendered,0);
  c.transientBypassSlot=-1;c.midiActionActive=false;
@@ -261,10 +269,59 @@ test('an older build under a retired effect ID can be removed, but is never repl
  const DB={legacy:[{name:'Spool (old 409)',gid:8,fxid:409}]},fsIndex=[{file:'Spool.ZDL',name:'Spool',gid:8,fxid:914}];
  const old={name:'SPOOL.ZDL',size:20746,info:{gid:8,fxid:409,version:'1.01'}};
  const c=context({DB,fsIndex,fsFiles:{files:[old]},fsCanWrite:()=>{},fsInfo:()=>({gid:8,fxid:914,version:'1.02'})});
- vm.runInContext(src.split('\n').find(l=>l.startsWith('const fsRetired='))+'\n'+fn('fsOurs')+'\n'+fn('fsInstall'),c);
+ vm.runInContext(['const fsRetired=','const fsLocal=','const fsProbeName='].map(k=>src.split('\n').find(l=>l.startsWith(k))).join('\n')+'\nvar location={hostname:"localhost"};\n'+fn('fsProbe')+'\n'+fn('fsOurs')+'\n'+fn('fsInstall_')+'\nvar fsInstall=fsInstall_;function fsProg(){}function fsProgAdd(){}',c);
  assert.equal(c.fsOurs('SPOOL.ZDL',old.info),true,'the old build is ours to remove');
  assert.equal(c.fsOurs('SPOOL.ZDL',{gid:8,fxid:410}),false,'any other ID is not');
  await assert.rejects(c.fsInstall('Spool.ZDL',[]),/older build under effect ID 8\/409.*Remove it and power-cycle/);
+});
+
+test('a restore writes what the backup has and the pedal lacks, and keeps what was installed since',()=>{
+ const zdl=(gid,fxid,version,size=0x60)=>{const b=Array(size).fill(0);b.splice(4,4,...Buffer.from('SIZE'));b[0x4c]=0x7f;b.splice(0x4d,3,...Buffer.from('ELF'));
+  b[0x3c]=gid;b[0x40]=fxid&255;b[0x41]=fxid>>8;b.splice(0x44,4,...Buffer.from(version));return b;};
+ // FLST_SEQ.ZDT: per group '>>>' 00 <gid> 8 x 00, 13-byte records, '<<<' 00 + 9 x 00; zero-padded to 4108.
+ const list=sections=>{const out=[];for(const [gid,names] of sections){out.push(0x3e,0x3e,0x3e,0,gid,...Array(8).fill(0));
+  for(const n of names)out.push(...Buffer.from(n),...Array(13-n.length).fill(0));out.push(0x3c,0x3c,0x3c,0,...Array(9).fill(0));}
+  return [...out,...Array(4108-out.length).fill(0)];};
+ const c=context({String});
+ vm.runInContext(['const fsRecord=','const fsListHas='].map(k=>src.split('\n').find(l=>l.startsWith(k))).join('\n')+'\n'
+  +['fsInfo','fsSection','fsRecords','fsListWith','fsListWithout','fsRestorePlan'].map(fn).join('\n'),c);
+ const backup=[{name:'COMP.ZDL',data:zdl(1,10,'1.00')},{name:'DELAY.ZDL',data:zdl(8,1,'1.01',0x70)},{name:'SPOOL.ZDL',data:zdl(8,914,'1.01')},
+               {name:'NAM1AMPT.ZDL',data:zdl(8,900,'0.26')},{name:'CLASH.ZDL',data:zdl(8,600,'1.00')}];
+ // After Zoom's updater: COMP as it was, DELAY at another version; since the backup, OTHER took
+ // CLASH's ID, NEWFX was installed, and a different effect is called NAM1AMPT.ZDL.
+ const head=(name,gid,fxid,version,size=0x60)=>({name,size,info:{gid,fxid,version}});
+ const pedal=[head('COMP.ZDL',1,10,'1.00'),head('DELAY.ZDL',8,1,'1.00'),head('OTHER.ZDL',8,600,'1.00'),head('NEWFX.ZDL',8,700,'1.00'),
+              head('NAM1AMPT.ZDL',8,123,'1.00'),{name:'FLST_SEQ.ZDT',size:4108,info:null}];
+ const p=c.fsRestorePlan(backup,list([[1,['COMP.ZDL']],[8,['DELAY.ZDL','SPOOL.ZDL','NAM1AMPT.ZDL','CLASH.ZDL']]]),pedal,
+                         list([[1,['COMP.ZDL']],[8,['DELAY.ZDL','OTHER.ZDL','NEWFX.ZDL','NAM1AMPT.ZDL']]]));
+ assert.deepEqual(Array.from(p.write,w=>w.name),['DELAY.ZDL','SPOOL.ZDL']);
+ assert.equal(p.write[0].replaces.name,'DELAY.ZDL');
+ assert.deepEqual(Array.from(p.keep),['COMP.ZDL']);
+ assert.deepEqual(Array.from(p.skip,s=>s.name+': '+s.why),['NAM1AMPT.ZDL: the pedal\'s NAM1AMPT.ZDL is a different effect','CLASH.ZDL: OTHER.ZDL on the pedal has its effect ID 8/600']);
+ // The backup's order, CLASH (not on the pedal) dropped, then what was installed since.
+ assert.deepEqual(Array.from(c.fsRecords(p.list),r=>r.name),['COMP.ZDL','DELAY.ZDL','SPOOL.ZDL','NAM1AMPT.ZDL','OTHER.ZDL','NEWFX.ZDL']);
+ assert.equal(p.list.length,4108);
+ assert.equal(p.bytes,(0x70-0x60)+0x60);
+});
+
+test('new capture and cab slots skip IDs another effect on the pedal already has',async()=>{
+ const NAMLoader=require('../nam_loader.js'),CabLoader=require('../cab_loader.js');
+ const file=(name,fxid)=>({name,size:1,info:{gid:8,fxid,version:'1.00'}});
+ // Captures in slots 1 and 17; Matujuice's GOOEY and DJFILTER on 501 and 502 (capture slots 18, 19);
+ // a stock effect in another group on 503; a cab in slot 1 and another collection's effect on cab slot 2's 931.
+ const files=[file('NAM1ampt.ZDL',900),file('NAM17ab.ZDL',500),file('GOOEY.ZDL',501),file('DJFILTER.ZDL',502),
+              {name:'STOCK.ZDL',size:1,info:{gid:2,fxid:503,version:'1.00'}},file('C1CAB.ZDL',930),file('OTHER.ZDL',931)];
+ const store={'namlite-captures-v1':JSON.stringify([{slot:3,shortName:'gone'}])};
+ const logged=[];
+ const c=context({NAMLoader,CabLoader,CAB_SLOTS:99,fsFiles:{files},fsAllIds:async()=>{},fsNamSay:()=>{},fsCabSay:()=>{},log:t=>logged.push(t),
+                  localStorage:{getItem:k=>store[k]??null,setItem:(k,v)=>{store[k]=v;}}});
+ vm.runInContext(['const namSlotOf=','const cabSlotOf='].map(k=>src.split('\n').find(l=>l.startsWith(k))).join('\n')+'\n'+fn('fsCaptures')+'\n'+fn('fsNewSlots'),c);
+ // Slots 1 and 17 hold captures, 3 was made in this browser; 18 and 19 belong to GOOEY and DJFILTER.
+ assert.deepEqual(Array.from(await c.fsNewSlots(false,15)),[2,4,5,6,7,8,9,10,11,12,13,14,15,16,20]);
+ assert.deepEqual(Array.from(await c.fsNewSlots(false,1,18)),[2],'a preferred slot whose ID is taken is skipped');
+ assert.deepEqual(Array.from(await c.fsNewSlots(false,1,3)),[3],'a preferred slot free of other effects is kept');
+ assert.deepEqual(Array.from(await c.fsNewSlots(true,2)),[3,4],'cab slot 2 (931) is taken by OTHER.ZDL');
+ assert(logged.some(t=>/GOOEY\.ZDL already has its ID 8\/501/.test(t)));
 });
 
 test('a slot swap leaves MIDISTOMP routing (byte 17 of each slot block) with the slot position',()=>{
@@ -289,4 +346,64 @@ test('the whole editor script compiles (no duplicate top-level names)',()=>{
  const scripts=[...src.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
  assert.ok(scripts.length>0);
  for(const code of scripts)assert.doesNotThrow(()=>new vm.Script(code));
+});
+
+test('a backup zip reads back whole for a restore',async()=>{
+ const ZdlStrip=require('../zdl_strip.js');
+ const c=context({Blob,TextEncoder,Uint8Array});vm.runInContext(fn('fsCrc')+'\n'+fn('fsZip'),c);
+ const a=Array.from({length:3000},(_,i)=>i*7&255),list=Array(4108).fill(0);list[0]=0x3e;
+ const zip=c.fsZip([{name:'files/A.ZDL',data:a},{name:'files/FLST_SEQ.ZDT',data:list},{name:'order.txt',data:[65,10]}]);
+ const got=await ZdlStrip.unzipAll(new Uint8Array(await zip.arrayBuffer()),n=>/^files\/[^/]+$/.test(n));
+ assert.deepEqual(got.map(e=>e.name),['files/A.ZDL','files/FLST_SEQ.ZDT']);
+ assert.deepEqual(Array.from(got[0].data),a);assert.deepEqual(Array.from(got[1].data),list);
+});
+test('a slot whose values are impossible for its ID is named unknown, not that effect',()=>{
+ // A user's MS-70CDR: Ba Boost reported under RackComp's ID with Ratio 10 (RackComp max 9).
+ const rack={name:'RackComp',id:0x200002,params:[{name:'THRSH',max:50},{name:'Ratio',max:9},{name:'Level',max:150},{name:'ATTCK',max:9}]};
+ const c=context({BYID:{[0x200002]:rack}});
+ vm.runInContext(fn('misfit')+'\n'+fn('slotName'),c);
+ const kobie=[1,0x200002,35,10,8,78,0,0,0,0,0];
+ const mf=c.misfit(kobie);
+ assert.equal(mf.param,'Ratio');assert.equal(mf.value,10);assert.equal(mf.max,9);
+ assert.equal(c.slotName(kobie),"unknown 0x200002 (RackComp's ID)");
+ const fine=[1,0x200002,35,9,78,8,0,0,0,0,0];
+ assert.equal(c.misfit(fine),null);assert.equal(c.slotName(fine),'RackComp');
+ assert.equal(c.slotName([0,0],'empty'),'empty');
+ assert.equal(c.slotName([1,0x123]),'0x123');
+});
+test('probe builds install only from a local copy, with matching name and effect ID',()=>{
+ const probes=[{name:'Chopdly',gid:8,fxid:947}];
+ const load=host=>{const c=context({DB:{probes,legacy:[]},fsIndex:[],location:{hostname:host},RegExp});
+  vm.runInContext(['const fsLocal=','const fsProbeName=','const fsRetired='].map(k=>src.split('\n').find(l=>l.startsWith(k))).join('\n')+'\n'+fn('fsProbe')+'\n'+fn('fsOurs'),c);return c;};
+ const local=load('localhost');
+ assert.equal(local.fsOurs('Chopdly.ZDL',{gid:8,fxid:947}),true);
+ assert.equal(local.fsOurs('CHOPDLY.ZDL',{gid:8,fxid:947}),true);
+ assert.equal(local.fsOurs('Chopdly.ZDL',{gid:8,fxid:946}),false);   // TapeEcho4's ID
+ assert.equal(local.fsOurs('TapeEch4.ZDL',{gid:8,fxid:947}),false);
+ assert.equal(load('themanro.github.io').fsOurs('Chopdly.ZDL',{gid:8,fxid:947}),false);
+});
+
+test('Zoom\'s own effects are removable only from their own list, only when in the effect list, and never by an aliasing ID',async()=>{
+ const pid=(gid,fxid)=>(((fxid&63)<<17)|(((fxid>>6)&1)<<30)|(((fxid>>7)&7)<<8)|(gid<<1))>>>0;
+ const DB={stock:[{name:'Hall',gid:9,fxid:5,id:pid(9,5),category:'Reverb'},{name:'LineSel',gid:4,fxid:1,id:pid(4,1),category:'Filter'}]};
+ const fsIndex=[{file:'Spool.ZDL',name:'Spool',gid:8,fxid:914}];
+ const head=(name,gid,fxid)=>({name,size:9000,info:{gid,fxid,version:'1.00'}});
+ const files=[head('HALL.ZDL',9,5),head('SPOOL.ZDL',8,914),head('LINESEL.ZDL',4,1),head('ALIAS.ZDL',9,5+1024)];
+ // The effect list (FLST_SEQ.ZDT) has HALL and SPOOL; LINESEL is a file the pedal keeps outside it.
+ const list=[0x3e,0x3e,0x3e,0,9,...Array(8).fill(0),...Buffer.from('HALL.ZDL'),...Array(5).fill(0),0x3c,0x3c,0x3c,0,...Array(9).fill(0),
+             0x3e,0x3e,0x3e,0,8,...Array(8).fill(0),...Buffer.from('SPOOL.ZDL'),...Array(4).fill(0),0x3c,0x3c,0x3c,0,...Array(9).fill(0)];
+ const done=[];
+ const c=context({DB,fsIndex,fsFiles:{files},String,fsCanWrite:()=>{},confirm:()=>true,fsKeepList:async()=>list.slice(),
+  fsWrite:async n=>done.push('write '+n),fsDelete:async n=>done.push('delete '+n),fsSay:()=>{},fsScan:async()=>{}});
+ vm.runInContext(['const fsRetired=','const fsLocal=','const fsProbeName=','const fsMaybeOurs=','const fsRecord=','const fsListHas=','const FS_LIST='].map(k=>src.split('\n').find(l=>l.startsWith(k))).join('\n')
+  +'\nvar location={hostname:"example.org"};\n'+['fsProbe','fsOurs','fsZoomOf','fsRecords','fsListWithout','fsRemove_'].map(fn).join('\n'),c);
+ assert.equal(c.fsZoomOf('HALL.ZDL',files[0].info).name,'Hall');
+ assert.equal(c.fsZoomOf('SPOOL.ZDL',files[1].info),null,'ours is not Zoom\'s');
+ assert.equal(c.fsZoomOf('ALIAS.ZDL',files[3].info),null,'an ID above 1023 is never taken for a stock one');
+ await assert.rejects(c.fsRemove_('HALL.ZDL'),/not one of this project's effects/,'the plain remove still refuses Zoom\'s effects');
+ await assert.rejects(c.fsRemove_('SPOOL.ZDL',{zoom:true}),/not one of Zoom's effects/);
+ await assert.rejects(c.fsRemove_('LINESEL.ZDL',{zoom:true}),/not in the pedal's effect list/);
+ assert.deepEqual(done,[],'nothing was written for a refused removal');
+ assert.equal(await c.fsRemove_('HALL.ZDL',{zoom:true}),true);
+ assert.deepEqual(done,['write FLST_SEQ.ZDT','delete HALL.ZDL']);
 });

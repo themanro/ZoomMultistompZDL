@@ -48,6 +48,13 @@ RELEASE_PLUGINS = [
     ("stasis",     CUSTOM_DIR / "stasis"     / "build.py"),
     ("spiral",      CUSTOM_DIR / "spiral"      / "build.py"),
     ("gyre",        CUSTOM_DIR / "gyre"        / "build.py"),
+    ("chopdly",     CUSTOM_DIR / "chopdly"     / "build.py"),
+    ("droplets",    CUSTOM_DIR / "droplets"    / "build.py"),
+    ("carillon",    CUSTOM_DIR / "carillon"    / "build.py"),
+    ("deform",      CUSTOM_DIR / "deform"      / "build.py"),
+    ("chimera",     CUSTOM_DIR / "chimera"     / "build.py"),
+    ("horizon",     CUSTOM_DIR / "horizon"     / "build.py"),
+    ("horizonl",    CUSTOM_DIR / "horizonl"    / "build.py"),
 ]
 
 # Dropped from the release set 2026-06-29 after hardware listening (user
@@ -57,19 +64,8 @@ RELEASE_PLUGINS = [
 DIAGNOSTIC_PLUGINS = [
     ("tovinyl4",    PLUGIN_DIR / "tovinyl4"    / "build.py"),
     ("hello",       PLUGIN_DIR / "hello"       / "build.py"),
-    ("ctxmap",      PROBE_DIR / "ctxmap"      / "build.py"),
-    ("paramtap",    PROBE_DIR / "paramtap"    / "build.py"),
-    ("ctxgate",     PROBE_DIR / "ctxgate"     / "build.py"),
-    ("ctxnib",      PROBE_DIR / "ctxnib"      / "build.py"),
-    ("stateping",   PROBE_DIR / "stateping"   / "build.py"),
-    ("stateiso",    PROBE_DIR / "stateiso"    / "build.py"),
-    ("statecomb",   PROBE_DIR / "statecomb"   / "build.py"),
-    ("desccomb",    PROBE_DIR / "desccomb"    / "build.py"),
-    ("descsize",    PROBE_DIR / "descsize"    / "build.py"),
-    ("desciso",     PROBE_DIR / "desciso"     / "build.py"),
     ("initprobe",   PROBE_DIR / "initprobe"   / "build.py"),
     ("ctxwatch",    PROBE_DIR / "ctxwatch"    / "build.py"),
-    ("edgewatch",   PROBE_DIR / "edgewatch"   / "build.py"),
     ("matprobe",    PROBE_DIR / "matprobe"    / "build.py"),
 ]
 

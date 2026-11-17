@@ -6,7 +6,7 @@ and the tools that need them read them from the same paths as before.
 
 | Local path | What it is | Who needs it |
 | --- | --- | --- |
-| `stock_zdls/` | Zoom's stock effects | `build/extract_effect_db.py` (the Patch Editor's effect list), `build/analyze_stock_corpus.py`, the TapeHack template build |
+| `stock_zdls/` | Zoom's stock effects | `build/extract_effect_db.py` (the MultiStomp Editor's effect list), `build/analyze_stock_corpus.py`, the TapeHack template build |
 | `firmware/` (except `wrap_for_dis6x.py`) | Zoom firmware images and what was extracted and disassembled from them | Firmware research only |
 | `build/linesel_handlers.bin`, `build/air_knob3_edit.bin` | Edit-handler code from the stock LineSel and AIR effects | `build/linker.py`: every effect build |
 | `build/divf_rts.bin` | TI's float-divide runtime routine, as found in a stock effect | `build/linker.py` |

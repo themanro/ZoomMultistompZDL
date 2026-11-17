@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MultiStomp Editor</title>
 <!--
-  The Patch Editor in Modwerk's design. Same editor: this page fetches
+  The MultiStomp Editor in Modwerk's design. Same editor: this page fetches
   patch_editor.html at load and runs its markup and script unchanged, under
   this stylesheet and layout. Every behaviour (MIDI, writes, the effect
   installer) stays in patch_editor.html; only the look and arrangement live
@@ -66,8 +66,6 @@
   .dspmeter.near .bar i{background:var(--warn)} .dspmeter.full .bar i{background:var(--err)}
   .mw-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .mw-actions [role=group]{display:flex;gap:8px;margin:0;padding:0}
-  .mw-classic{font-size:12px;color:var(--faint);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:4px 10px}
-  .mw-classic:hover{color:var(--text);border-color:var(--line-hover)}
 
   /* ---- sidebar: the pedal's patches ---- */
   .mw-side{background:var(--sidebar);border-right:1px solid var(--line);padding:16px 12px;overflow:auto;max-height:calc(100dvh - 63px);position:sticky;top:63px}
@@ -105,6 +103,18 @@
   .slot .toggle.on::after{transform:translateX(16px);background:var(--accent)}
   .slot>select{width:100%;font-weight:600;background-color:var(--field)}
   .slot canvas.cover{width:100%;height:auto;aspect-ratio:2/1;image-rendering:pixelated;border-radius:6px;border:1px solid var(--line);background:var(--screen-bg)}
+  .slot .fxview{margin:0;position:relative}
+  .fxview[data-mode=anim] canvas.cover,.fxview[data-mode=screen] canvas.fxvis{display:none}
+  .slot .fxview .fxswap,.slot .fxview .fxplay{position:absolute}
+  .fxview[data-mode=screen] .fxplay{display:none}
+  .slot canvas.fxvis{width:100%;height:auto;aspect-ratio:2/1;display:block;border-radius:6px;border:1px solid var(--line);background:var(--screen-bg);cursor:pointer}
+  .slot .fxview .fxplay{left:8px;bottom:8px;font-size:11px;padding:2px 8px;border-radius:999px;background:var(--screen-bg);color:var(--muted);border:1px solid var(--line)}
+  .slot .fxview .fxswap{right:8px;bottom:8px;font-size:11px;padding:2px 8px;border-radius:999px;background:var(--screen-bg);color:var(--muted);border:1px solid var(--line)}
+  /* The picture's buttons show on hover or keyboard focus; always on touch screens. */
+  @media (hover:hover){
+    .fxview .fxswap,.fxview .fxplay{opacity:0;transition:opacity .15s}
+    .fxview:hover .fxswap,.fxview:hover .fxplay,.fxview:has(:focus-visible) .fxswap,.fxview:has(:focus-visible) .fxplay{opacity:1}
+  }
   .slot .bypassHint{font-size:12px;color:var(--warn)!important}
   .knobs{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px 6px}
   .knob{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
@@ -148,12 +158,22 @@
   .drawer .striptools{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
   .drawer label{display:inline-flex;align-items:center;gap:6px}
   #locrows,#librows-local{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
-  #fxRows,#fxStockRows,#fxNamRows{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) auto;gap:6px 12px;align-items:center;margin:8px 0}
-  #fxRows .head,#fxStockRows .head,#fxNamRows .head{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--faint)}
-  #fxRows>div:not(.head),#fxStockRows>div:not(.head),#fxNamRows>div:not(.head){padding:3px 0;border-bottom:1px solid var(--line)}
-  #fxRows .acts,#fxStockRows .acts,#fxNamRows .acts{display:flex;gap:6px;justify-content:flex-end;border-bottom:1px solid var(--line)}
-  #fxRows button,#fxStockRows button,#fxNamRows button{min-height:28px;padding:2px 10px;font-size:12px}
-  #fxStatus,#fxStockStatus,#fxNamStatus{color:var(--muted)}
+  #fxRows,#fxStockRows,#fxZoomRows,#fxNamRows{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) auto;gap:6px 12px;align-items:center;margin:8px 0}
+  #fxRows .head,#fxStockRows .head,#fxZoomRows .head,#fxNamRows .head{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--faint)}
+  #fxRows>div:not(.head),#fxStockRows>div:not(.head),#fxZoomRows>div:not(.head),#fxNamRows>div:not(.head){padding:3px 0;border-bottom:1px solid var(--line)}
+  #fxRows .acts,#fxStockRows .acts,#fxZoomRows .acts,#fxNamRows .acts{display:flex;gap:6px;justify-content:flex-end;border-bottom:1px solid var(--line)}
+  #fxRows button,#fxStockRows button,#fxZoomRows button,#fxNamRows button{min-height:28px;padding:2px 10px;font-size:12px}
+  #fxStatus,#fxStockStatus,#fxZoomStatus,#fxNamStatus{color:var(--muted)}
+  .fx-progress{position:sticky;bottom:0;z-index:5;margin:14px -24px -96px;padding:12px 24px 16px;background:var(--surface);border-top:1px solid var(--line);display:grid;gap:8px;box-shadow:0 -8px 24px rgba(0,0,0,.35)}
+  .fx-progress.floating{position:fixed;left:0;right:0;bottom:0;margin:0}
+  .fx-progress-text{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--text-secondary)}
+  .fx-progress-text span:last-child{font-family:var(--mono);color:var(--accent)}
+  .fx-progress-track{height:6px;border-radius:999px;background:var(--field);overflow:hidden;position:relative}
+  #fxProgFill{height:100%;width:0;border-radius:999px;background:var(--accent);transition:width .2s}
+  .fx-progress.indet #fxProgFill{width:30%;position:absolute;animation:fxIndet 1.2s ease-in-out infinite}
+  @keyframes fxIndet{from{left:-30%}to{left:100%}}
+  @media(prefers-reduced-motion:reduce){.fx-progress.indet #fxProgFill{animation:none;width:100%;opacity:.4}}
+  #fxRows .acts.working{font-family:var(--mono);font-size:12px;color:var(--accent)}
   .nam-dsp{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin:4px 0 10px}
   .drawer details.info{display:inline;border:0;padding:0;font-weight:400;letter-spacing:0}
   .drawer details.info>summary{display:inline;color:var(--faint);font-weight:400}
@@ -266,8 +286,9 @@ function arrange(){
   for(const id of ["currentPatch","dspmeter","editStatus"])patch.appendChild($(id));
   const acts=document.createElement("div");acts.className="mw-actions";
   for(const id of ["openLibrary","openEffects","openNamCab","openSettings"])if($(id))acts.appendChild($(id));
-  const classic=document.createElement("a");classic.href="patch_editor.html";classic.className="mw-classic";classic.textContent="Classic editor";classic.title="The original Patch Editor (same features)";
-  acts.appendChild(classic);
+  // Settings → Editor: the way back to the classic editor.
+  const sw=$("editorSwitch");
+  if(sw){sw.textContent="You're using the new editor. ";const a=document.createElement("a");a.href="patch_editor.html";a.textContent="Switch to the classic editor";sw.append(a,": the same features in the original design.");}
   top.append(status,patch,acts);
   const toolbar=$("mainToolbar");if(toolbar)toolbar.hidden=true;
 

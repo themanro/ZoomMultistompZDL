@@ -19,6 +19,33 @@
    "sha256": "4fded786b226833208b010a3dc810308b7ff348e25e0ad89689cd0d2b3c0629f"
   },
   {
+   "file": "Carillon.ZDL",
+   "name": "Carillon",
+   "gid": 8,
+   "fxid": 497,
+   "version": "0.03",
+   "bytes": 25454,
+   "sha256": "0c2fbe951cd2dd65442ea56a03e522b7029a054e4e123fb38d6565ced34c5373"
+  },
+  {
+   "file": "Chimera.ZDL",
+   "name": "Chimera",
+   "gid": 8,
+   "fxid": 418,
+   "version": "0.02",
+   "bytes": 27306,
+   "sha256": "dc086028f46a5600f1084ef2a1cf8a85aa164f8c8c6f4920cd7b2ecc2c5c90f3"
+  },
+  {
+   "file": "Chopdly.ZDL",
+   "name": "Chopdly",
+   "gid": 8,
+   "fxid": 947,
+   "version": "1.03",
+   "bytes": 31794,
+   "sha256": "487280354b1140b6375e5da2d3114ff78f47a8d21cfbfb4de120006d8acecc31"
+  },
+  {
    "file": "Choral.ZDL",
    "name": "Choral",
    "gid": 8,
@@ -37,6 +64,15 @@
    "sha256": "8ee58e03d0d5863cf0ac0671ca8749f545eca023b7851c086f873fc3665ed324"
   },
   {
+   "file": "Deform.ZDL",
+   "name": "Deform",
+   "gid": 8,
+   "fxid": 417,
+   "version": "0.03",
+   "bytes": 21934,
+   "sha256": "3f3ec15914547e2540066e98de83ff32cf1abdb5f155adb211f74c54d2bc8a87"
+  },
+  {
    "file": "DirtBox.ZDL",
    "name": "DirtBox",
    "gid": 8,
@@ -53,6 +89,15 @@
    "version": "2.00",
    "bytes": 8050,
    "sha256": "53be6d443b17550761bb3beababf96565270e259475751fb8e715190d889cce9"
+  },
+  {
+   "file": "Droplets.ZDL",
+   "name": "Droplets",
+   "gid": 8,
+   "fxid": 492,
+   "version": "0.02",
+   "bytes": 25406,
+   "sha256": "0395dc757aa9d8a2dcf838cc2f599074b427ffab9756b37d12fce148d754cb67"
   },
   {
    "file": "DualShft.ZDL",
@@ -104,9 +149,9 @@
    "name": "Galactic",
    "gid": 8,
    "fxid": 408,
-   "version": "1.00",
-   "bytes": 13026,
-   "sha256": "48d56674eb083d214806754fa96bfdb4f1cb12b417aae718444c86bd85c42764"
+   "version": "1.02",
+   "bytes": 13090,
+   "sha256": "85b1d3fe413393479f8ef055660ddb3f3d1b8c8fba069555a8c1afec85a3db27"
   },
   {
    "file": "GenLoss.ZDL",
@@ -134,6 +179,24 @@
    "version": "1.00",
    "bytes": 11674,
    "sha256": "e804f0d47e0236b6527de0734153ddafe81e4fda82e44df8838e6b9e3c8bc73a"
+  },
+  {
+   "file": "Horizon.ZDL",
+   "name": "Horizon",
+   "gid": 8,
+   "fxid": 419,
+   "version": "0.02",
+   "bytes": 24342,
+   "sha256": "9e65688ae63f71ae6a852a833b7ce78b5e77bd33959d4ee2bcfa2f2659a98cd5"
+  },
+  {
+   "file": "HorizonL.ZDL",
+   "name": "HorizonL",
+   "gid": 8,
+   "fxid": 420,
+   "version": "0.01",
+   "bytes": 24910,
+   "sha256": "16c67e7b84a15c480486a9523cb4de4598566e4afeebc06dc17550cf63728435"
   },
   {
    "file": "Howl.ZDL",

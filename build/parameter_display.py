@@ -2,6 +2,9 @@
 PEDAL_NAMES={
  'Tonic':{'Amount':'Amnt'},
  'Arrakis':{'Detune':'Detun'},
+ 'Carillon':{'Cutoff':'Cut'},
+ 'Chopdly':{'Reverse':'Rev','Stretch':'Strch','Feedbk':'Feed'},
+ 'Droplets':{'Contour':'Contr','Pattern':'Pattn','Random':'Rand','Feedbk':'Feed'},
  'Dissolve':{'Chance':'Chnce','Glitch':'Gltch'},
  'Dustbox':{'Filter':'Filt'},
  'Galactic':{'Replace':'Repl','Bright':'Brght','Detune':'Detun','Bigness':'Size'},

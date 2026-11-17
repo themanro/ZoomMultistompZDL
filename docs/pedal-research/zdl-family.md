@@ -47,16 +47,16 @@ flash from [MIDISTOMP models/](https://github.com/matujuice/zoom-ms-midistomp/tr
   [#5](https://github.com/themanro/ZoomMultistompZDL/issues/5), 2026-10-13).
   Patch dumps decode with our MS-70CDR layout
   ([#1](https://github.com/themanro/ZoomMultistompZDL/issues/1)).
-- **Patch Editor writes:** the opt-in write test **passed** on the same pedal
+- **MultiStomp Editor writes:** the opt-in write test **passed** on the same pedal
   (146/146 bytes identical, 2026-10-14); saving a patch and backing up and
   restoring all 50 banks worked, and knob edits are heard on the pedal.
-- **DSP:** same as the MS-70CDR. Patch Editor's meter read 85% for NAM alone
+- **DSP:** same as the MS-70CDR. MultiStomp Editor's meter read 85% for NAM alone
   and 89% for NAM + cab, both clean; adding a chorus or the stock Delay was
   fine (an earlier crackle turned out to be the audio interface clipping).
 - **Graphic EQ** (`0x200004`) was missing from our database: its band names
   use the pedal's "Hz" glyph (byte `0x1F`), which the DB builder rejected.
   Fixed; all GEQ variants now load.
-- **Bug: stock amps' CAB knob can't move in Patch Editor.** In Zoom's amp
+- **Bug: stock amps' CAB knob can't move in MultiStomp Editor.** In Zoom's amp
   files the CAB parameter has no maximum; its default is a packed effect
   reference (e.g. `0x04000140`, group 4 / ID 320). The real range isn't in the
   amp file. Needs two patch dumps from an MS-50G with the cab changed on the
@@ -65,7 +65,7 @@ flash from [MIDISTOMP models/](https://github.com/matujuice/zoom-ms-midistomp/tr
 
 ## MS-60B
 
-- **Patch Editor:** 105-byte, 4-slot patches. Our "Enable writes" test can't
+- **MultiStomp Editor:** 105-byte, 4-slot patches. Our "Enable writes" test can't
   pass on it (it expects 146 bytes) and stays read-only, which is safe but
   misleading. Needs its own layout map.
 - **Flash:** only 10 free blocks; remove stock effects before adding any. A NAM
@@ -92,7 +92,7 @@ flash from [MIDISTOMP models/](https://github.com/matujuice/zoom-ms-midistomp/tr
   memory area about 680–689 KB (enough for NAM's ~86 KB working set).
 - **Recovery:** the updater runs over Bluetooth; no USB recovery combo found.
   "All Initialize" (hold knob 1 at power-on) restores factory patches.
-- **Patch Editor:** can't reach it without USB MIDI; would need Web Serial over
+- **MultiStomp Editor:** can't reach it without USB MIDI; would need Web Serial over
   Bluetooth like ms-stompctrl.
 - **Next:** NAM + CabIR test by the #4 reporter; list it as "works with
   third-party tools" in the README.

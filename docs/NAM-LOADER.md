@@ -81,7 +81,7 @@ added last.
 > are 950-957 (908-913 were the retired CabIR bank and NAM test effects).
 > Files `NAM<slot><name>` (4 name characters for slots 1-9, 3 for 10-16, e.g.
 > `NAM12amp.ZDL`); short names must start with a letter so slot 1 can never
-> collide with slots 10-16 on the pedal's 8-character names. Patch Editor lists
+> collide with slots 10-16 on the pedal's 8-character names. MultiStomp Editor lists
 > only the captures and cabs you have made (named via this browser's loader or
 > files in dist/), not the empty reserved slots.
 >
@@ -105,7 +105,7 @@ added last.
 > - Knob 3 becomes **Dry**: the dry side's level, -24 to +24 dB in about
 >   0.5 dB steps, 50 = unchanged, smoothed. The amp side is always fully wet.
 > - Full rate only, 194, the same file size. Templates:
->   `tools/nam_template_split/`. Patch Editor shows knob 3 as Dry for
+>   `tools/nam_template_split/`. MultiStomp Editor shows knob 3 as Dry for
 >   captures exported as split.
 >
 > **Hardware (2026-10-19):** full, Eco, Eco+ and split (NAM213Pl / NAM214Pl,
@@ -136,7 +136,7 @@ added last.
 > No captures ship with the repo: bring your own `.nam` (e.g. from
 > [TONE3000](https://www.tone3000.com/)) and build it with the loader.
 
-1. Start the local Patch Editor. Open **Settings → Custom NAM captures → Open NAM Loader**.
+1. Start the local MultiStomp Editor. Open **Settings → Custom NAM captures → Open NAM Loader**.
 2. Choose a compatible `.nam` file.
 3. Give it a short name (1–8 ASCII letters, numbers, hyphens or underscores),
    such as `smokey`. Choose an unused capture slot.
@@ -192,7 +192,7 @@ the same capture without an EQ. It costs ~1.8% of the DSP whatever the settings.
 At full rate one capture uses most of the pedal's DSP: it declares 194 of the
 roughly 225 the pedal allows, Eco 181, Eco+ 152, a cab 10 (0.26). On the owner's MS-70CDR a
 full-rate capture plus one light effect (Great Muff, or a cab) plays clean.
-Patch Editor's DSP meter adds the chain up before you write it. How the full rate was made to fit at all is in
+MultiStomp Editor's DSP meter adds the chain up before you write it. How the full rate was made to fit at all is in
 [NAM-RUNTIME-INVESTIGATION.md](NAM-RUNTIME-INVESTIGATION.md).
 
 ## Capture slots and names

@@ -29,8 +29,11 @@ GALACTIC_CODE_SECTION(GALACTIC_AUDIO_FUNC)
 #define ZDL_PTR(type, word) ((type)(uintptr_t)(word))
 
 #define GALACTIC_MAGIC 0x47414C41u
-#define GALACTIC_VERSION 1u
+#define GALACTIC_VERSION 2u   /* 2: knob smoothing and bypass holdover in the state */
 #define GALACTIC_CLEAR_STEP 512u
+#define GAL_HOLD_BLOCKS 330u          /* ~60 ms of 8-frame blocks at 44.1 kHz */
+#define GAL_SMOOTH_FAST 0.0175f       /* per block: ~10 ms */
+#define GAL_SMOOTH_SIZE 0.003f        /* per block: ~60 ms */
 
 #define GAL_A_LEN 9700
 #define GAL_B_LEN 6000
@@ -125,6 +128,12 @@ typedef struct GalacticState {
 
     uint32_t fpdL;
     uint32_t fpdR;
+
+    /* Pedal-side additions (not in the Airwindows source; see the audio
+     * function): smoothed knobs, and how long the slot has been switched off. */
+    float smA, smB, smC, smD, smE;
+    uint32_t smReady;
+    uint32_t offBlocks;
 } GalacticState;
 
 static inline uintptr_t align4(uintptr_t x)
@@ -186,6 +195,8 @@ static inline void gal_finish_init(GalacticState *st)
 
     st->fpdL = 0x1234567u;
     st->fpdR = 0x89ABCDFu;
+    st->smReady = 0u;
+    st->offBlocks = GAL_HOLD_BLOCKS;   /* loaded switched off: stay off, no holdover */
     st->initialized = 1u;
 }
 
@@ -377,8 +388,6 @@ void GALACTIC_AUDIO_FUNC(unsigned int *ctx)
     unsigned int *magicDst = ZDL_PTR(unsigned int *, *(unsigned int *)ZDL_PTR(unsigned int *, ctx[11]));
     *magicDst = *magicSrc;
 
-    if (params[0] < 0.5f) return;
-
     volatile unsigned int *desc = ZDL_PTR(volatile unsigned int *, ctx[3]);
     if (!desc) return;
 
@@ -400,8 +409,21 @@ void GALACTIC_AUDIO_FUNC(unsigned int *ctx)
         return;
     }
     if (!st->initialized) {
+        if (params[0] < 0.5f) return;
         gal_clear_chunk(st);
         return;
+    }
+
+    /* Bypass holdover. On slots 4-6 an editor can only change knobs by
+     * writing the patch with the slot off and then on again (the stock OS
+     * ignores live edits there), which is a ~20 ms off. Keep the tank running
+     * through any off shorter than GAL_HOLD_BLOCKS, so that never cuts the
+     * tail; a real bypass (footswitch) takes effect 60 ms later. */
+    if (params[0] < 0.5f) {
+        if (st->offBlocks >= GAL_HOLD_BLOCKS) return;
+        st->offBlocks++;
+    } else {
+        st->offBlocks = 0u;
     }
 
     float A = GAL_PARAM_NORM(params[GALACTIC_REPLACE_SLOT], GALACTIC_REPLACE_DEFAULT_NORM);
@@ -409,6 +431,22 @@ void GALACTIC_AUDIO_FUNC(unsigned int *ctx)
     float C = GAL_PARAM_NORM(params[GALACTIC_DETUNE_SLOT], GALACTIC_DETUNE_DEFAULT_NORM);
     float D = GAL_PARAM_NORM(params[GALACTIC_BIGNESS_SLOT], GALACTIC_BIGNESS_DEFAULT_NORM);
     float E = GAL_PARAM_NORM(params[GALACTIC_MIX_SLOT], GALACTIC_MIX_DEFAULT_NORM);
+
+    /* Knob smoothing. The Airwindows source takes knob values per host
+     * buffer as they come; on the pedal a knob arrives in steps (live edits,
+     * or a whole patch write), and a step in Bigness moves every delay
+     * length at once, which is heard as a jump. Glide instead: ~10 ms for
+     * the gains, ~60 ms for Bigness. */
+    if (!st->smReady) {
+        st->smA = A; st->smB = B; st->smC = C; st->smD = D; st->smE = E;
+        st->smReady = 1u;
+    }
+    st->smA += (A - st->smA) * GAL_SMOOTH_FAST;
+    st->smB += (B - st->smB) * GAL_SMOOTH_FAST;
+    st->smC += (C - st->smC) * GAL_SMOOTH_FAST;
+    st->smD += (D - st->smD) * GAL_SMOOTH_SIZE;
+    st->smE += (E - st->smE) * GAL_SMOOTH_FAST;
+    A = st->smA; B = st->smB; C = st->smC; D = st->smD; E = st->smE;
 
     float regen = 0.125f - (A * 0.0625f);
     float attenuate = A * 0.6665f;

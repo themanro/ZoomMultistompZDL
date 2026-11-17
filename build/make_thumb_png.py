@@ -13,9 +13,9 @@ of the built .ZDL -- the same 128x64 bitmap the pedal puts on its screen, title 
 emblem, knob names and all. Nothing here is a mock-up of the pedal, which is why
 the hero cannot show a knob name the firmware does not have.
 
-Palette is the editor's P4 "television white blend" phosphor theme, read from the
-same values patch_editor.html uses, so the hero and the editor look like the same
-machine.
+Colours: as the pedal shows its screen, dark ink on the light LCD (readme_art.py),
+not the editor's inverted phosphor theme. Luca Matturro's pack is not in it; it
+has its own section on the effects page.
 
 The overview keeps crisp native pixels and the physical LCD proportions.
 The legacy VHS helper remains available for older exploration scripts.
@@ -43,11 +43,9 @@ try:
 except ImportError:
     raise SystemExit("Pillow is required: pip install pillow")
 
-# ---- P4 "television white blend", straight from patch_editor.html -----------
-BG = (8, 9, 11)          # --lcd
-CARD_BG = (4, 4, 5)      # --screen-bg
-LIT = (157, 193, 216)    # --ink-bright / --screen-fg
-DIM = (108, 134, 150)    # --ink-soft
+# ---- as the pedal shows them: dark ink on the light LCD, on a dark page -----
+from readme_art import LCD_BG as CARD_BG, LCD_INK as LIT  # noqa: E402
+BG = (12, 13, 16)
 
 COLS = 8
 MARGIN = 40
@@ -232,21 +230,20 @@ def vhs(img: Image.Image, strength: float = 1.0, seed: int = SEED) -> Image.Imag
 
 def main() -> int:
     import readme_art as A
-    ours = sorted(A.PACK + A.EXPERIMENTAL, key=str.lower) + [e[0] for e in A.EXAMPLES]
+    effects = sorted(A.PACK + A.EXPERIMENTAL, key=str.lower)
+    ours = effects + [e[0] for e in A.EXAMPLES]         # the two loader examples are cards, not effects
     card = lambda n: A.to_image(A.bits_for(n), CARD, CARD_BG, LIT)
     tw = CARD[0] * 2 + GAP
     # Scale 2, not 1, for the small line: a 5px-tall glyph reads as texture.
     sections = [
         (title_card([("CUSTOM", 6, 4, 3), ("EFFECTS", 26, 4, 3), ("ZOOM MS-70CDR - ZDL PACK", 50, 2, 2)],
-                    f"X{len(ours)}", tw, CARD[1]), [card(n) for n in ours]),
-        (title_card([("MATUJUICE", 6, 4, 3), ("BY LUCA MATTURRO", 30, 2, 2), ("INCLUDED - MIT", 46, 2, 2)],
-                    f"X{len(A.MATUJUICE)}", tw, CARD[1]), [card(n) for n in A.MATUJUICE]),
+                    f"X{len(effects)}", tw, CARD[1]), [card(n) for n in ours]),
     ]
     out = compose(sections)
     dest = ROOT / "graphics" / "thumb_effects.png"
     dest.parent.mkdir(parents=True, exist_ok=True)
     out.save(dest)
-    print(f"  {len(ours)} + {len(A.MATUJUICE)} -> {dest.relative_to(ROOT)}  ({out.width}x{out.height})")
+    print(f"  {len(effects)} effects + {len(A.EXAMPLES)} examples -> {dest.relative_to(ROOT)}  ({out.width}x{out.height})")
     return 0
 
 

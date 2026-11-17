@@ -39,11 +39,8 @@ try:
 except ImportError:
     raise SystemExit("Pillow is required: pip install pillow")
 
-# P4 "television white blend" -- the editor's TV phosphor theme, so the gallery,
-# the hero and the editor all look like the same machine. The June palette was the
-# light-blue LCD skin and clashed the moment the hero went to tape.
-BG = (8, 9, 11)
-LIT = (157, 193, 216)
+# As the pedal shows its screen: dark ink on the light LCD (readme_art.py).
+from readme_art import LCD_BG as BG, LCD_INK as LIT  # noqa: E402
 from lcd_geometry import PIXEL_ASPECT
 INNER = (630, round(630 * 64 / 128 * PIXEL_ASPECT))
 CANVAS = (640, INNER[1] + 12)

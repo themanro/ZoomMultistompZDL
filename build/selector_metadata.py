@@ -30,6 +30,32 @@ SELECTORS={
  'Spiral':{'Div':groups(['1/32','1/16T','1/16','1/8T','1/8','1/8.','1/4','1/4.'],lambda r:ladder(r,[.125,.25,.375,.5,.625,.75,.875]))},
  'Rewire':{'Route':groups(['BDRCS','SCRDB','DSBCR','RCSBD','SBRDC'],lambda r:ladder(r,[.2,.4,.6,.8]))},
  'Stasis':{'Capture':groups(['Stomp','Release','Hold'],lambda r:r,2)},
+ # Chopdly (Delay 947): every value is a named step; the DSP reads
+ # round(norm*100) like Stasis. Order must match chopdly.c.
+ 'Chopdly':{
+   'Chops':groups(['Trans']+[str(i) for i in range(1,17)],lambda r:r,16),
+   'Order':groups(['Fwd','Back','Swap','Skip','Stutr','Build']+[f'Mix{i}' for i in range(1,9)]
+                  +[f'Rpt{i}' for i in range(1,7)]+['Rand','Chaos'],lambda r:r,21),
+   'Pitch':groups(['-12','-7','-5','Unity','+5','+7','+12','Oct+','Oct-','Octs','Fifth','Some','Wild'],lambda r:r,12),
+   'Reverse':groups(['Off','Few','Alt','Half','Most','All','Ping','Scatr'],lambda r:r,7),
+   'Stretch':groups(['1/4','1/3','1/2','3/4','Off','1.5x','2x'],lambda r:r,6),
+ },
+ # Droplets (Delay 492): step numbers must match droplets.c's tables.
+ 'Droplets':{
+   'Pitch':groups(['-24','-12','-7','-5','-3','Unity','+3','+5','+7','+12','+24'],lambda r:r,10),
+   'Pattern':groups(['Off','Oct','Oct-','Fifth','Pwr','Maj','Min','Down','Sus','Pent','Wide'],lambda r:r,10),
+ },
+ 'Carillon':{
+   'Key':groups(['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'],lambda r:r,11),
+   'Scale':groups(['Free','Chrom','Major','Minor','Dor','Pent','MinPt','Whole','Fifth','Oct'],lambda r:r,9),
+ },
+ 'Deform':{
+   'Split':groups(['Low','Mid','High'],lambda r:r,2),
+   'Mode':groups(['Bit','Redux','Both'],lambda r:r,2),
+ },
+ 'Chimera':{
+   'Move':groups(['Pick','Slow','Fast','Chat'],lambda r:r,3),
+ },
  'RndmFLTR':{
    'Type':groups(['HPF','BPF','LPF'],lambda r:r,2),
    'Chara':groups(['2Pole','4Pole'],lambda r:r,1),

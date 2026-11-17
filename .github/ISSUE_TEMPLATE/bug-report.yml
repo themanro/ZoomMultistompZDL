@@ -1,4 +1,4 @@
-name: Bug report — an effect or the patch editor
+name: Bug report — an effect or the MultiStomp Editor
 description: Something behaves wrong on an MS-70CDR (or another ZDL-based MultiStomp).
 title: "[bug] "
 labels: ["bug"]
@@ -10,7 +10,7 @@ body:
         project was found in the raw bytes and missed by the prose — including some
         the author was confidently wrong about.
 
-        In the patch editor: **Show diagnostics → Copy diag**, then paste it below.
+        In the MultiStomp Editor: **Show diagnostics → Copy diag**, then paste it below.
         It contains the last patch the pedal sent, the last patch the editor wrote,
         a byte-level diff, and the recent MIDI.
   - type: textarea

@@ -1,0 +1,23 @@
+{
+  "effect_name": "Deform",
+  "comment": "PEDAL BUILD manifest for Deform (9-knob). Drive, soft crush and a one-knob compressor after the Torso S-4's Deform, with noise that follows your playing and a two-band Tilt. Split and Mode are named-step knobs (labels: build/selector_metadata.py); the rest are 0..100.",
+  "audio_func_name": "Fx_DLY_Deform",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_.",
+  "fxid": 417,
+  "fxid_comment": "0x01A1. In this project's reserved 403-499 Delay block; free in every group's DB entry (498, the obvious gap, is the old NAMLite's and still in patches). Check repeat98's FXID registry before release.",
+  "fxid_version": "0.03",
+  "flags_byte": 1,
+  "dsp_cost": 45.0,
+  "params": [
+    {"name": "Drive", "max": 100, "default": 35, "comment": "params[5]. 0..+36 dB into a soft, slightly uneven clipper; level held about even."},
+    {"name": "Crush", "max": 100, "default": 40, "comment": "params[6]. How far the crush goes (Mode picks how); 0 off."},
+    {"name": "Comp",  "max": 100, "default": 30, "comment": "params[7]. One-knob compressor: threshold and ratio together, level made up."},
+    {"name": "Tilt",  "max": 100, "default": 50, "comment": "params[8]. 50 flat; up pushes highs into the drive, down pushes lows. Half undone after."},
+    {"name": "Split", "max": 2,   "default": 1,  "comment": "params[9]. Named steps Low, Mid, High: Tilt's crossover, 80 Hz, 650 Hz, 2.5 kHz."},
+    {"name": "Mode",  "max": 2,   "default": 0,  "comment": "params[10]. Named steps Bit, Redux, Both: fewer levels, lower sample rate, or both."},
+    {"name": "Noise", "max": 100, "default": 0,  "comment": "params[11]. Pink noise that follows your playing, before the drive."},
+    {"name": "Decay", "max": 100, "default": 40, "comment": "params[12]. How long the noise hangs on after you stop, 20 ms .. 2 s."},
+    {"name": "Mix",   "max": 100, "default": 100, "comment": "params[13]. Dry/wet."}
+  ]
+}

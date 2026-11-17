@@ -37,12 +37,19 @@ LIVE = {
     "Ring": ["--signal", "@guitar", "--seconds", "6"],
     "Skull": ["--signal", "@guitar", "--seconds", "6"],
 }
-EXPERIMENTAL = ["Loop", "Scope", "Spectrum", "Ring", "Skull", "Tonic"]
+EXPERIMENTAL = ["Loop", "Chopdly", "Droplets", "Carillon", "Deform", "Chimera", "Horizon", "HorizonL", "Scope", "Spectrum", "Ring", "Skull", "Tonic"]
 
 # Loader examples: (gallery file stem, kind, name, icon)
 EXAMPLES = [("nam-example", "NAM", "smokey", "amp"), ("cab-example", "IR", "4x12", "cabinet")]
 
-# Luca Matturro's pack (dist/matujuice/), credited separately.
+# The pedal's screen: a set bit is dark ink on the light LCD (the Skull build
+# draws "bone is white on the black panel" with clear bits). The pictures show
+# it that way round, as it looks on the pedal.
+LCD_BG = (218, 226, 230)
+LCD_INK = (20, 24, 30)
+
+# Luca Matturro's pack (dist/matujuice/), credited separately: on the effects
+# page, not in the README's overview.
 MATUJUICE = ["WaveFold", "DualShft", "Choral", "EuGate", "DubSiren", "SGNL",
              "Scrub", "GridDly", "SyncEQ", "Breather", "DirtBox", "Sweep"]
 

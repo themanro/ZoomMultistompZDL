@@ -79,6 +79,748 @@
    "credit": "Matujuice pack v1.5 by Luca Matturro (MIT)"
   },
   {
+   "name": "Carillon",
+   "fxid": 497,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1080165136,
+   "params": [
+    {
+     "name": "Cutoff",
+     "max": 100,
+     "default": 70
+    },
+    {
+     "name": "Reso",
+     "max": 100,
+     "default": 30
+    },
+    {
+     "name": "Decay",
+     "max": 100,
+     "default": 55
+    },
+    {
+     "name": "Key",
+     "max": 11,
+     "default": 0,
+     "choices": [
+      {
+       "label": "C",
+       "from": 0,
+       "to": 0,
+       "value": 0
+      },
+      {
+       "label": "C#",
+       "from": 1,
+       "to": 1,
+       "value": 1
+      },
+      {
+       "label": "D",
+       "from": 2,
+       "to": 2,
+       "value": 2
+      },
+      {
+       "label": "D#",
+       "from": 3,
+       "to": 3,
+       "value": 3
+      },
+      {
+       "label": "E",
+       "from": 4,
+       "to": 4,
+       "value": 4
+      },
+      {
+       "label": "F",
+       "from": 5,
+       "to": 5,
+       "value": 5
+      },
+      {
+       "label": "F#",
+       "from": 6,
+       "to": 6,
+       "value": 6
+      },
+      {
+       "label": "G",
+       "from": 7,
+       "to": 7,
+       "value": 7
+      },
+      {
+       "label": "G#",
+       "from": 8,
+       "to": 8,
+       "value": 8
+      },
+      {
+       "label": "A",
+       "from": 9,
+       "to": 9,
+       "value": 9
+      },
+      {
+       "label": "A#",
+       "from": 10,
+       "to": 10,
+       "value": 10
+      },
+      {
+       "label": "B",
+       "from": 11,
+       "to": 11,
+       "value": 11
+      }
+     ]
+    },
+    {
+     "name": "Scale",
+     "max": 9,
+     "default": 2,
+     "choices": [
+      {
+       "label": "Free",
+       "from": 0,
+       "to": 0,
+       "value": 0
+      },
+      {
+       "label": "Chrom",
+       "from": 1,
+       "to": 1,
+       "value": 1
+      },
+      {
+       "label": "Major",
+       "from": 2,
+       "to": 2,
+       "value": 2
+      },
+      {
+       "label": "Minor",
+       "from": 3,
+       "to": 3,
+       "value": 3
+      },
+      {
+       "label": "Dor",
+       "from": 4,
+       "to": 4,
+       "value": 4
+      },
+      {
+       "label": "Pent",
+       "from": 5,
+       "to": 5,
+       "value": 5
+      },
+      {
+       "label": "MinPt",
+       "from": 6,
+       "to": 6,
+       "value": 6
+      },
+      {
+       "label": "Whole",
+       "from": 7,
+       "to": 7,
+       "value": 7
+      },
+      {
+       "label": "Fifth",
+       "from": 8,
+       "to": 8,
+       "value": 8
+      },
+      {
+       "label": "Oct",
+       "from": 9,
+       "to": 9,
+       "value": 9
+      }
+     ]
+    },
+    {
+     "name": "Slope",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "Waves",
+     "max": 100,
+     "default": 20
+    },
+    {
+     "name": "Noise",
+     "max": 100,
+     "default": 0
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 60
+    }
+   ],
+   "cost": 40.0,
+   "cover": "MmdEJQAAAAAAAAAAAAAAAEVSRFcAAAAAAAAAAAAAAABHYkRXAAAAAAAAAAAAAAAARVJEVQAAAAAAAAAAAAAAADVXdyUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAV1AwADMkcFISYAAAAAAAAFQgQABEVEB1FVAAAAAAAABmIEAAJHRgdxVgAAAAAAAAVCBAABRUQFVVUAAAAAAAAFcgMABjV3BVIlAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOAAAAAAAAAAAAAAAAAAAAAOAAAAAAAAAAAAAAAAAAAADgAAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAAAAAA4OAAAAAAAAAAAAAAAAAAAADuAAAAAAAAAAAAAAAAAA7g4AAAAAAAAAAAAAAAAAAA4OAAAAAAAAAAAAAAAAAO4ODgAAAADu7u7u7u7u7u4ADg4AAAAADgAAAAAA4OAADg7uDgAAAA4OAADg4ODg4O7u7g4AAAAODg7g4ODg4ODu7u4OAAAADg4O7uDg4ODu7u7uDgAAAA4O7u7g4ODg7u7u7g7gAAAODu7u7uDg7u7u7u7uAAAADu7u7u7u7u7u7u7u7gAAAO7u7u7u7u7u7u7u7u4OAADu7u7u7u7u7u7u7u7u7uAA7u7u7u7u7u7u7u7u7u4O7u7u7u7u7u7u7u7u7u7u7uAAAAAAAAAAAAAAAAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAAA1cAAAAM5kAAABnMlAAAAARSAAAACoigAAAVEUgAAAAEUgAAAAzEoAAAFZHIAAAABFIAAAAKgqAAABURSAAAAAMyAAAACuxAAAAZzUgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4AAAAAHwAAAAAPgAAAAAH/wAAAAP/gAAAAf/AAAAADyeAAAAHk8AAAAPJ4AAAAAwhgAAABhDAAAADCGAAAAAYIMAAAAwQYAAABggwAAAAGCDAAAAMEGAAAAYIMAAAABgAwAAADABgAAAGADAAAAAMAYAAAAYAwAAAAwBgAAAADweAAAAHg8AAAAPB4AAAAAf/AAAAA/+AAAAB/8AAAAAA+AAAAAB8AAAAAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+  },
+  {
+   "name": "Chimera",
+   "fxid": 418,
+   "gid": 8,
+   "category": "Delay",
+   "id": 4457232,
+   "params": [
+    {
+     "name": "Vowel",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Open",
+     "max": 100,
+     "default": 55
+    },
+    {
+     "name": "Body",
+     "max": 100,
+     "default": 30
+    },
+    {
+     "name": "Nasal",
+     "max": 100,
+     "default": 0
+    },
+    {
+     "name": "Talk",
+     "max": 100,
+     "default": 35
+    },
+    {
+     "name": "Move",
+     "max": 3,
+     "default": 0,
+     "choices": [
+      {
+       "label": "Pick",
+       "from": 0,
+       "to": 0,
+       "value": 0
+      },
+      {
+       "label": "Slow",
+       "from": 1,
+       "to": 1,
+       "value": 1
+      },
+      {
+       "label": "Fast",
+       "from": 2,
+       "to": 2,
+       "value": 2
+      },
+      {
+       "label": "Chat",
+       "from": 3,
+       "to": 3,
+       "value": 3
+      }
+     ]
+    },
+    {
+     "name": "Buzz",
+     "max": 100,
+     "default": 30
+    },
+    {
+     "name": "Breath",
+     "max": 100,
+     "default": 0
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 100
+    }
+   ],
+   "cost": 40.0,
+   "cover": "NXV2IAAAAAAAAAAAAAAAAEUnRVAAAAAAAAAAAAAAAABHJ2ZwAAAAAAAAAAAAAAAARSVFUAAAAAAAAAAAAAAAADV1dVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUlcGc1AAUldAIAAAAAAAAHVUBSRQAFVUQFAAAAAAAAB1VgYkYABVdkBwAAAAAAAAVSQEJFAAJXRAUAAAAAAAAFInBHNQACJXcFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB////8AAAAAAAAAAAAAAA/wAAABAAAAAAAAAAAAAAAIAAAAAfwAAAAAAAAAAAAH+AcOAAAAAAAAAAAAAAAABAAHDgAAAAAAAAAAAAAAA/wDhw4AOHAAA//4AAAA//4AA4cOHDhwAAAAD////4AAAAOHDhw4cAAEAAAAAAAAAOADhw4cOHAABAHAAAAAOHDhw4cOHDhwAAThw4cOHDhw4cOHDhw4cAAEAcAAAAA4cOHDhw4cOHAABAAAAAAAAADgA4cOHDhwAAAAD////4AAAAOHDhw4cAAD//gAAAD//gADhw4cOHAAAAAAAAAAAAP8A4cOADhwAAAAAAAAAAAABAAHDgAAAAAAAAAAAAAAAAf4Bw4AAAAAAAAAAAAAAAAACAAAAAH8AAAAAAAAAAAAAA/wAAABAAAAAAAAAAAAAAAAH////wAAAAAAAAAAAAAAAAAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAAUldAAAAEzqAAAAYmUAAAAFVUQAAACqjgAAAFVSAAAABVdkAAAArM4AAABlUgAAAAJXRAAAAKiKAAAAVVIAAAACJXcAAABI6gAAAGJiAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4AAAAAHwAAAAAPgAAAAAH/wAAAAP/gAAAAf/AAAAADyeAAAAHk8AAAAPJ4AAAAAwhgAAABhDAAAADCGAAAAAYIMAAAAwQYAAABggwAAAAGCDAAAAMEGAAAAYIMAAAABgAwAAADABgAAAGADAAAAAMAYAAAAYAwAAAAwBgAAAADweAAAAHg8AAAAPB4AAAAAf/AAAAA/+AAAAB/8AAAAAA+AAAAAB8AAAAAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+  },
+  {
+   "name": "Chopdly",
+   "fxid": 947,
+   "gid": 8,
+   "category": "Delay",
+   "id": 6686480,
+   "params": [
+    {
+     "name": "Time",
+     "max": 100,
+     "default": 45
+    },
+    {
+     "name": "Chops",
+     "max": 16,
+     "default": 4,
+     "choices": [
+      {
+       "label": "Trans",
+       "from": 0,
+       "to": 0,
+       "value": 0
+      },
+      {
+       "label": "1",
+       "from": 1,
+       "to": 1,
+       "value": 1
+      },
+      {
+       "label": "2",
+       "from": 2,
+       "to": 2,
+       "value": 2
+      },
+      {
+       "label": "3",
+       "from": 3,
+       "to": 3,
+       "value": 3
+      },
+      {
+       "label": "4",
+       "from": 4,
+       "to": 4,
+       "value": 4
+      },
+      {
+       "label": "5",
+       "from": 5,
+       "to": 5,
+       "value": 5
+      },
+      {
+       "label": "6",
+       "from": 6,
+       "to": 6,
+       "value": 6
+      },
+      {
+       "label": "7",
+       "from": 7,
+       "to": 7,
+       "value": 7
+      },
+      {
+       "label": "8",
+       "from": 8,
+       "to": 8,
+       "value": 8
+      },
+      {
+       "label": "9",
+       "from": 9,
+       "to": 9,
+       "value": 9
+      },
+      {
+       "label": "10",
+       "from": 10,
+       "to": 10,
+       "value": 10
+      },
+      {
+       "label": "11",
+       "from": 11,
+       "to": 11,
+       "value": 11
+      },
+      {
+       "label": "12",
+       "from": 12,
+       "to": 12,
+       "value": 12
+      },
+      {
+       "label": "13",
+       "from": 13,
+       "to": 13,
+       "value": 13
+      },
+      {
+       "label": "14",
+       "from": 14,
+       "to": 14,
+       "value": 14
+      },
+      {
+       "label": "15",
+       "from": 15,
+       "to": 15,
+       "value": 15
+      },
+      {
+       "label": "16",
+       "from": 16,
+       "to": 16,
+       "value": 16
+      }
+     ]
+    },
+    {
+     "name": "Order",
+     "max": 21,
+     "default": 6,
+     "choices": [
+      {
+       "label": "Fwd",
+       "from": 0,
+       "to": 0,
+       "value": 0
+      },
+      {
+       "label": "Back",
+       "from": 1,
+       "to": 1,
+       "value": 1
+      },
+      {
+       "label": "Swap",
+       "from": 2,
+       "to": 2,
+       "value": 2
+      },
+      {
+       "label": "Skip",
+       "from": 3,
+       "to": 3,
+       "value": 3
+      },
+      {
+       "label": "Stutr",
+       "from": 4,
+       "to": 4,
+       "value": 4
+      },
+      {
+       "label": "Build",
+       "from": 5,
+       "to": 5,
+       "value": 5
+      },
+      {
+       "label": "Mix1",
+       "from": 6,
+       "to": 6,
+       "value": 6
+      },
+      {
+       "label": "Mix2",
+       "from": 7,
+       "to": 7,
+       "value": 7
+      },
+      {
+       "label": "Mix3",
+       "from": 8,
+       "to": 8,
+       "value": 8
+      },
+      {
+       "label": "Mix4",
+       "from": 9,
+       "to": 9,
+       "value": 9
+      },
+      {
+       "label": "Mix5",
+       "from": 10,
+       "to": 10,
+       "value": 10
+      },
+      {
+       "label": "Mix6",
+       "from": 11,
+       "to": 11,
+       "value": 11
+      },
+      {
+       "label": "Mix7",
+       "from": 12,
+       "to": 12,
+       "value": 12
+      },
+      {
+       "label": "Mix8",
+       "from": 13,
+       "to": 13,
+       "value": 13
+      },
+      {
+       "label": "Rpt1",
+       "from": 14,
+       "to": 14,
+       "value": 14
+      },
+      {
+       "label": "Rpt2",
+       "from": 15,
+       "to": 15,
+       "value": 15
+      },
+      {
+       "label": "Rpt3",
+       "from": 16,
+       "to": 16,
+       "value": 16
+      },
+      {
+       "label": "Rpt4",
+       "from": 17,
+       "to": 17,
+       "value": 17
+      },
+      {
+       "label": "Rpt5",
+       "from": 18,
+       "to": 18,
+       "value": 18
+      },
+      {
+       "label": "Rpt6",
+       "from": 19,
+       "to": 19,
+       "value": 19
+      },
+      {
+       "label": "Rand",
+       "from": 20,
+       "to": 20,
+       "value": 20
+      },
+      {
+       "label": "Chaos",
+       "from": 21,
+       "to": 21,
+       "value": 21
+      }
+     ]
+    },
+    {
+     "name": "Pitch",
+     "max": 12,
+     "default": 3,
+     "choices": [
+      {
+       "label": "-12",
+       "from": 0,
+       "to": 0,
+       "value": 0
+      },
+      {
+       "label": "-7",
+       "from": 1,
+       "to": 1,
+       "value": 1
+      },
+      {
+       "label": "-5",
+       "from": 2,
+       "to": 2,
+       "value": 2
+      },
+      {
+       "label": "Unity",
+       "from": 3,
+       "to": 3,
+       "value": 3
+      },
+      {
+       "label": "+5",
+       "from": 4,
+       "to": 4,
+       "value": 4
+      },
+      {
+       "label": "+7",
+       "from": 5,
+       "to": 5,
+       "value": 5
+      },
+      {
+       "label": "+12",
+       "from": 6,
+       "to": 6,
+       "value": 6
+      },
+      {
+       "label": "Oct+",
+       "from": 7,
+       "to": 7,
+       "value": 7
+      },
+      {
+       "label": "Oct-",
+       "from": 8,
+       "to": 8,
+       "value": 8
+      },
+      {
+       "label": "Octs",
+       "from": 9,
+       "to": 9,
+       "value": 9
+      },
+      {
+       "label": "Fifth",
+       "from": 10,
+       "to": 10,
+       "value": 10
+      },
+      {
+       "label": "Some",
+       "from": 11,
+       "to": 11,
+       "value": 11
+      },
+      {
+       "label": "Wild",
+       "from": 12,
+       "to": 12,
+       "value": 12
+      }
+     ]
+    },
+    {
+     "name": "Reverse",
+     "max": 7,
+     "default": 0,
+     "choices": [
+      {
+       "label": "Off",
+       "from": 0,
+       "to": 0,
+       "value": 0
+      },
+      {
+       "label": "Few",
+       "from": 1,
+       "to": 1,
+       "value": 1
+      },
+      {
+       "label": "Alt",
+       "from": 2,
+       "to": 2,
+       "value": 2
+      },
+      {
+       "label": "Half",
+       "from": 3,
+       "to": 3,
+       "value": 3
+      },
+      {
+       "label": "Most",
+       "from": 4,
+       "to": 4,
+       "value": 4
+      },
+      {
+       "label": "All",
+       "from": 5,
+       "to": 5,
+       "value": 5
+      },
+      {
+       "label": "Ping",
+       "from": 6,
+       "to": 6,
+       "value": 6
+      },
+      {
+       "label": "Scatr",
+       "from": 7,
+       "to": 7,
+       "value": 7
+      }
+     ]
+    },
+    {
+     "name": "Stretch",
+     "max": 6,
+     "default": 4,
+     "choices": [
+      {
+       "label": "1/4",
+       "from": 0,
+       "to": 0,
+       "value": 0
+      },
+      {
+       "label": "1/3",
+       "from": 1,
+       "to": 1,
+       "value": 1
+      },
+      {
+       "label": "1/2",
+       "from": 2,
+       "to": 2,
+       "value": 2
+      },
+      {
+       "label": "3/4",
+       "from": 3,
+       "to": 3,
+       "value": 3
+      },
+      {
+       "label": "Off",
+       "from": 4,
+       "to": 4,
+       "value": 4
+      },
+      {
+       "label": "1.5x",
+       "from": 5,
+       "to": 5,
+       "value": 5
+      },
+      {
+       "label": "2x",
+       "from": 6,
+       "to": 6,
+       "value": 6
+      }
+     ]
+    },
+    {
+     "name": "Glide",
+     "max": 100,
+     "default": 20
+    },
+    {
+     "name": "Feedbk",
+     "max": 100,
+     "default": 35
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 50
+    }
+   ],
+   "cost": 40.0,
+   "cover": "NSZkUAAABwNSYwJmdgNSYEVVVCAAAAQEVVQFVUUEVVBHVlQgAAAGBHViBWVmAndgRVRUIAAAAQRVQQVVRQF1QDUkZyAAAAYDUkYCVnUGVUAAAAAAAAAAAAAAAAAAAAAAZ3NQI3AAZ1BSRwA3YCFgAFIkUFQiAFRQVUQAQlBhEABiJHBUJwBmUHdGACJgIiAAQiRQVCIAVCBVRAASUCRAAEcjUCMgAFcgVXQAYlB0cAAAAAAAAAAAAAAAAAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAP////gAAAgAAAAAAAABgAB////wAAAIAAAAAAYAAYAAP///+AAADAAAAAAPAAHAAB////hwAAwQAAAAD4ABw8AeP//4+AAOPAAAAB/HgefgDB///fhwDn4YAAAfz8fn8gwOD538/H7/fhwAP/////4AAAAP///////////////+AAAAD////////////////gAAAA//////////38/H5/IMDg+d/Px+/34cAB/HgefgDB///fhwDn4YAAAPgAHDwB4///j4AA48AAAADwABwAAf///4cAAMEAAAAAYAAYAAP///+AAADAAAAAAAAAGAAH////AAAAgAAAAAAAABAAD////4AAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//////wAAAAAAAAAAAAAAP/////8AAAAAAAAAAAAAAAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAAHdXAAAAakxgAAAmZ2AAAAAidAAAAIqqgAAAVVRQAAAAInYAAACOrEAAAFZWYAAAACJUAAAAiqggAABVVFAAAAAnVwAAAGpIwAAAJWdQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4AAAAAHwAAAAAPgAAAAAH/wAAAAP/gAAAAf/AAAAADyeAAAAHk8AAAAPJ4AAAAAwhgAAABhDAAAADCGAAAAAYIMAAAAwQYAAABggwAAAAGCDAAAAMEGAAAAYIMAAAABgAwAAADABgAAAGADAAAAAMAYAAAAYAwAAAAwBgAAAADweAAAAHg8AAAAPB4AAAAAf/AAAAA/+AAAAB/8AAAAAA+AAAAAB8AAAAAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+  },
+  {
    "name": "Choral",
    "fxid": 486,
    "gid": 8,
@@ -167,6 +909,102 @@
    "cover": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/////8AAAAAAAAAAAAAAB//////AAAAAAAAAAAAAAAf/////wfAAAAAAAAAAAAAAAAAAAAEQAAP8Hg/wf4PD3+D/8AAFUAAD/B4P8H+Dw9/g//AACRAP//weD/B/g8Pf4P/wABHwD/wB4e8PeHvD3h4PAAAgAA/8AeHvD3h7w94eDwAAQAAAB4A8PeHvD3h7w8HgAIAAADwB4e/wf4PD3+APAAAAAAA8AeHv8H+Dw9/gDwAAAAAAPAHh7/B/g8Pf4A8AAAAAADwB4e8PeHvD3gAPAAAAAAA8AeHvD3h7w94ADwAAAAAAPAHh7w94e8PeAA8AAAAAAAB/g8Hh7w8H+8AB4AAAAAAD/B4PD3h4P94ADwAAAAAAA/weDw94eD/eAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///+AAAAAAAAAAAAAAAAA////gAAAAAAAAAAAAAAAAP///4AAA/////wAAAAAAAAAAAAA/8P////8AAAAAAAAAYAAAJxD/////AAAAAAAAABAAACUQAAAAAAAAAAAAAAAgAAAlEAAAAAAAAAAAAAAAAAAAJ//////////////////wAD/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADVgAAAA5K4AAABSVwAAAABFUAAAAEroAAAAVVQAAAAAJWAAAABK7AAAAHdWAAAAABVQAAAASqgAAAB1JAAAAABjYAAAAESuAAAAVScAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4AAAAAHwAAAAAPgAAAAAH/wAAAAP/gAAAAf/AAAAADyeAAAAHk8AAAAPJ4AAAAAwhgAAABhDAAAADCGAAAAAYIMAAAAwQYAAABggwAAAAGCDAAAAMEGAAAAYIMAAAABgAwAAADABgAAAGADAAAAAMAYAAAAYAwAAAAwBgAAAADweAAAAHg8AAAAPB4AAAAAf/AAAAA/+AAAAB/8AAAAAA+AAAAAB8AAAAAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH///////////////////+A=="
   },
   {
+   "name": "Deform",
+   "fxid": 417,
+   "gid": 8,
+   "category": "Delay",
+   "id": 4326160,
+   "params": [
+    {
+     "name": "Drive",
+     "max": 100,
+     "default": 35
+    },
+    {
+     "name": "Crush",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "Comp",
+     "max": 100,
+     "default": 30
+    },
+    {
+     "name": "Tilt",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Split",
+     "max": 2,
+     "default": 1,
+     "choices": [
+      {
+       "label": "Low",
+       "from": 0,
+       "to": 0,
+       "value": 0
+      },
+      {
+       "label": "Mid",
+       "from": 1,
+       "to": 1,
+       "value": 1
+      },
+      {
+       "label": "High",
+       "from": 2,
+       "to": 2,
+       "value": 2
+      }
+     ]
+    },
+    {
+     "name": "Mode",
+     "max": 2,
+     "default": 0,
+     "choices": [
+      {
+       "label": "Bit",
+       "from": 0,
+       "to": 0,
+       "value": 0
+      },
+      {
+       "label": "Redux",
+       "from": 1,
+       "to": 1,
+       "value": 1
+      },
+      {
+       "label": "Both",
+       "from": 2,
+       "to": 2,
+       "value": 2
+      }
+     ]
+    },
+    {
+     "name": "Noise",
+     "max": 100,
+     "default": 0
+    },
+    {
+     "name": "Decay",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 100
+    }
+   ],
+   "cost": 45.0,
+   "cover": "Z3JlAAAAAAAAAAAAAAAAAFRFVwAAAAAAAAAAAAAAAABWZWcAAAAAAAAAAAAAAAAAVEVVAAAAAAAAAAAAAAAAAGdCVQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANkdwV2AAUmcGdwAAAAAAAEVCIHJQAHVUBSIAAAAAAAAmQiByUAB1VgYiAAAAAAAAFEIgUlAAVVQFIgAAAAAAAGR3IFdgAFJnBnIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAAAAAAAwf//wAAAD//+AAAAAAAAeMEAAEAAAAgAAgAAAAAAA8DBAABAAAAIAAIAAAAAAD4AwQAAQAAACAACAAAAAABgAAEAAHgAAAgAA8AAAAAAwAABAAAIAAAIAABAAAAAAYAAAQAACAAACAAAQAAAAAMAAAEAAAgAAAgAAEAAAAAGAAAPAAAIAAB4AABAAAAADAAAAAAACAAAQAAAQAAAABgAAAAAAAgAAEAAAEAAAAAwAAAAAAAIAABAAABAAAAAIAAAAAAADwAAQAAAeAAAAeAAAAAAAAEAAEAAAAgAAAMAAAAAAAABAABAAAAIAAAGAAAAAAAAAQAAQAAACAAADAAAAAAAAAH//8AAAA///DgAAAAAAAAAAAAAAAAAAAPgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAAZnVwAAAbKagAAAMlYAAAAFUlQAAAIqooAAAEV1AAAABWJWAAACMpOAAABFdgAAAAVSJAAAAiqKgAAARVQAAAAGVycAAAGpsoAAADJUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4AAAAAHwAAAAAPgAAAAAH/wAAAAP/gAAAAf/AAAAADyeAAAAHk8AAAAPJ4AAAAAwhgAAABhDAAAADCGAAAAAYIMAAAAwQYAAABggwAAAAGCDAAAAMEGAAAAYIMAAAABgAwAAADABgAAAGADAAAAAMAYAAAAYAwAAAAwBgAAAADweAAAAHg8AAAAPB4AAAAAf/AAAAA/+AAAAB/8AAAAAA+AAAAAB8AAAAAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+  },
+  {
    "name": "DirtBox",
    "fxid": 491,
    "gid": 8,
@@ -253,6 +1091,198 @@
    ],
    "cost": 20.0,
    "cover": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB+H/D8Pw4cBw17AAAAAAAAfh/w/D8OHAcd/wAAAAAAAH4f8Pw/DgwDHPcAAAAAAABxw4cBwHHcBx3AAAAAAAAAccOHAcBx3AcdwAAAAAAAAHHDhwHAcdwHGcAAAAAAAABxw4DgOHHcBxW4AAAAAAAAccOA4Dhx3Acd+AAAAAAAAHHDgOA4cdQFDXgAAAAAAABxw4AcB3HcAMDAAAAAAAAAccOAHAdx3ADhwAAAAAAAAHHDgBwHcdwAocAAAAAAAAB+H/fh+A4f8OHeAAAAAAAAfh/34fgOH/Dh/wAAAAAAAH4f9+H4DhvQ4b0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAHDAAEgDgBgAAAAAAAAAAACoIACEBEAmA+AOAAAAAAAA+GAAQgigQQQacf//CAAQAKgAKQAQEaD4R4CAAQACAABwQRID4A4ACAAQACAAQAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADUlNwAABq5MAAANHc1AAABFV0QAAAjoqgAAEQiRQAAAR3dGAAAE7OwAABUIkcAAAEVVRAAAAqiqAAAVCJFAAAA1VTcAAAyuqgAADdyNQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4AAAAAHwAAAAAPgAAAAAH/wAAAAP/gAAAAf/AAAAADyeAAAAHk8AAAAPJ4AAAAAwhgAAABhDAAAADCGAAAAAYIMAAAAwQYAAABggwAAAAGCDAAAAMEGAAAAYIMAAAABgAwAAADABgAAAGADAAAAAMAYAAAAYAwAAAAwBgAAAADweAAAAHg8AAAAPB4AAAAAf/AAAAA/+AAAAB/8AAAAAA+AAAAAB8AAAAAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH///////////////////+A=="
+  },
+  {
+   "name": "Droplets",
+   "fxid": 492,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1079509776,
+   "params": [
+    {
+     "name": "Pitch",
+     "max": 10,
+     "default": 5,
+     "choices": [
+      {
+       "label": "-24",
+       "from": 0,
+       "to": 0,
+       "value": 0
+      },
+      {
+       "label": "-12",
+       "from": 1,
+       "to": 1,
+       "value": 1
+      },
+      {
+       "label": "-7",
+       "from": 2,
+       "to": 2,
+       "value": 2
+      },
+      {
+       "label": "-5",
+       "from": 3,
+       "to": 3,
+       "value": 3
+      },
+      {
+       "label": "-3",
+       "from": 4,
+       "to": 4,
+       "value": 4
+      },
+      {
+       "label": "Unity",
+       "from": 5,
+       "to": 5,
+       "value": 5
+      },
+      {
+       "label": "+3",
+       "from": 6,
+       "to": 6,
+       "value": 6
+      },
+      {
+       "label": "+5",
+       "from": 7,
+       "to": 7,
+       "value": 7
+      },
+      {
+       "label": "+7",
+       "from": 8,
+       "to": 8,
+       "value": 8
+      },
+      {
+       "label": "+12",
+       "from": 9,
+       "to": 9,
+       "value": 9
+      },
+      {
+       "label": "+24",
+       "from": 10,
+       "to": 10,
+       "value": 10
+      }
+     ]
+    },
+    {
+     "name": "Rate",
+     "max": 100,
+     "default": 45
+    },
+    {
+     "name": "Size",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "Contour",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Scan",
+     "max": 100,
+     "default": 25
+    },
+    {
+     "name": "Pattern",
+     "max": 10,
+     "default": 0,
+     "choices": [
+      {
+       "label": "Off",
+       "from": 0,
+       "to": 0,
+       "value": 0
+      },
+      {
+       "label": "Oct",
+       "from": 1,
+       "to": 1,
+       "value": 1
+      },
+      {
+       "label": "Oct-",
+       "from": 2,
+       "to": 2,
+       "value": 2
+      },
+      {
+       "label": "Fifth",
+       "from": 3,
+       "to": 3,
+       "value": 3
+      },
+      {
+       "label": "Pwr",
+       "from": 4,
+       "to": 4,
+       "value": 4
+      },
+      {
+       "label": "Maj",
+       "from": 5,
+       "to": 5,
+       "value": 5
+      },
+      {
+       "label": "Min",
+       "from": 6,
+       "to": 6,
+       "value": 6
+      },
+      {
+       "label": "Down",
+       "from": 7,
+       "to": 7,
+       "value": 7
+      },
+      {
+       "label": "Sus",
+       "from": 8,
+       "to": 8,
+       "value": 8
+      },
+      {
+       "label": "Pent",
+       "from": 9,
+       "to": 9,
+       "value": 9
+      },
+      {
+       "label": "Wide",
+       "from": 10,
+       "to": 10,
+       "value": 10
+      }
+     ]
+    },
+    {
+     "name": "Random",
+     "max": 100,
+     "default": 20
+    },
+    {
+     "name": "Feedbk",
+     "max": 100,
+     "default": 30
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 50
+    }
+   ],
+   "cost": 50.0,
+   "cover": "ZiZHcwAAAAAAAAAAAAAAAFVVRCQAAAAAAAAAAAAAAABWVkYiAAAAAAAAAAAAAAAAVVREIQAAAAAAAAAAAAAAAGUkdyYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZ3NQBwAABicFIQAAAAAAAFIkUCEAAAVSB1EAAAAAAABiJHByAAAGcgdxAAAAAAAAQiRQJAAABFIFVQAAAAAAAEcjUAQAAARSBVIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAABAAAAAADAAAAAACgAAAgAA4AAAAABwgAAAAQ5gAAIAAOMEAAAAecIAAAEOcIACAAHjjjAAAHnnDCABDvDGGgAB99544wx55555xgz6zz5hhffffeeef+++8+68+u++88////////////f+/f7//f/////////////3/v3+//3/////////////9/79/v/9//33333nnn/vvvPuvPrvvvPN99544wx55555xgz6zz5hheOOMAAAeecMIAEO8MYaAADjBAAAAHnCAAABDnCAAgAA4AAAAABwgAAAAQ5gAAIAAEAAAAAAMAAAAAAKAAACAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAACAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAAZ3NQAAAMTuAAAAN3cAAAAFIkUAAACqSAAAAEIUAAAABiJHAAAAzkwAAAAiJgAAAAQiRQAAAKpIAAAAEkQAAAAEcjUAAACqTgAAAGd3AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4AAAAAHwAAAAAPgAAAAAH/wAAAAP/gAAAAf/AAAAADyeAAAAHk8AAAAPJ4AAAAAwhgAAABhDAAAADCGAAAAAYIMAAAAwQYAAABggwAAAAGCDAAAAMEGAAAAYIMAAAABgAwAAADABgAAAGADAAAAAMAYAAAAYAwAAAAwBgAAAADweAAAAHg8AAAAPB4AAAAAf/AAAAA/+AAAAB/8AAAAAA+AAAAAB8AAAAAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
   },
   {
    "name": "DualShft",
@@ -510,7 +1540,7 @@
      "default": 50
     }
    ],
-   "cost": 20.0,
+   "cost": 30.0,
    "cover": "AAAAAAAAAAAAAAAAAAAAAH////////////////////5v/////////////////+P2f/////////////////wf/n///////////////7/D//5///////////////4IP/x+f3//////////////B/+D/n9/////////////8P/4f754D////////////g//B/8ef3///////////8H/8P//vn9///////////g//g////5///////////+H/8H////+f////////////////////n////gePH/j+BAEAeB///5////4Hjx/4/gQBAHgf//+f///j+OI/jiP/H8eP////n5P/4/jiP44j/x/Hj////59d/+OIAj+AI/8fx4////+fU//jiAI/gCP/H8eP////nt3/xxHEfxxH/j+PH////57T/8cRxH8cR/4/jx////+f///4EcQBHHgePAHgeOP/n//+eBHEARx4HjwB4HcN/5//wf/////////////3Df+f/D//////////////4AD/n4P/4f///////////4niP5x//B////////////+9p7+f/8P/////////////ieI/n/g9/////////////+AA/5/H8H//////3//////3Hf+f//3//////4//////9x3/n//////////f//////jj/5////////////////////+b///////////////////9n////////////////////4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZ2QjcAAMzmrgAAZ3VXAAAFRUVEAACqSKQAAFQldAAABmZHRgAAzErkAABWJXYAAAVERUQAAKpKpAAAVCVUAAAFdHU3AADK5qQAAGcjVwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4AAAAAHwAAAAAPgAAAAAH/wAAAAP/gAAAAf/AAAAADyeAAAAHk8AAAAPJ4AAAAAwhgAAABhDAAAADCGAAAAAYIMAAAAwQYAAABggwAAAAGCDAAAAMEGAAAAYIMAAAABgAwAAADABgAAAGADAAAAAMAYAAAAYAwAAAAwBgAAAADweAAAAHg8AAAAPB4AAAAAf/AAAAA/+AAAAB/8AAAAAA+AAAAAB8AAAAAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH///////////////////+A=="
   },
   {
@@ -651,6 +1681,118 @@
    ],
    "cost": 20.0,
    "cover": "AAAAAAAAAAAAAAAAAAAAAH////////////////////5v////Af////8B/////wH2f///+P4////4/j////j4Pn///+f/z///5//P///n/j55//8f//H//x//8f//H//Ofn/8///+f/z///5//P//Hn+P4////4/j////j+P//v5/8B/////wH/////Af//H+f//////////////////v/n/////8AIPggB+AAP////5//////ACD4IAfgAD////+f/////wAg+CAH4AA/////n////8H//g/B8EH//////5/////B//4PwfBB//////+f8c//wf/+D8HwQf//////n+r3/8Hwfg/AD8AP/////5/g7//B8H4PwA/AD/////+f6v//wfB+D8APwA//////n/Hv/4Pg/B+D4IP//////5////+D4Pwfg+CD//////+f////g+D8H4Pgg///////n/////wA/B+D4IAA/////5/////8APwfg+CAAP////+f/////AD8H4PggAD/////n////////////////////5/////Af////8B/////wH+f///+P4////4/j////j+Pn///+f/z///5//P///n//55//8f//H//x//8f//H//+fn/8///+f/z///5//P///n+P4////Y/D/f/fj+P///5/8B////3QHd3d3/Af///+b//////8AAAAAB//////9n////////////////////4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAN3cAAAA7uwAAAGcyUAAAAEIUAAAAIiKAAABURSAAAAAiJgAAADMygAAAVkcgAAAAEkQAAAAiIoAAAFRFIAAAAGd3AAAAI7sAAABnNSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4AAAAAHwAAAAAPgAAAAAH/wAAAAP/gAAAAf/AAAAADyeAAAAHk8AAAAPJ4AAAAAwhgAAABhDAAAADCGAAAAAYIMAAAAwQYAAABggwAAAAGCDAAAAMEGAAAAYIMAAAABgAwAAADABgAAAGADAAAAAMAYAAAAYAwAAAAwBgAAAADweAAAAHg8AAAAPB4AAAAAf/AAAAA/+AAAAB/8AAAAAA+AAAAAB8AAAAAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH///////////////////+A=="
+  },
+  {
+   "name": "Horizon",
+   "fxid": 419,
+   "gid": 8,
+   "category": "Delay",
+   "id": 4588304,
+   "params": [
+    {
+     "name": "Size",
+     "max": 100,
+     "default": 70
+    },
+    {
+     "name": "Decay",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "Pre",
+     "max": 100,
+     "default": 15
+    },
+    {
+     "name": "Mod",
+     "max": 100,
+     "default": 35
+    },
+    {
+     "name": "Lo",
+     "max": 100,
+     "default": 20
+    },
+    {
+     "name": "Hi",
+     "max": 100,
+     "default": 55
+    },
+    {
+     "name": "Swell",
+     "max": 100,
+     "default": 0
+    },
+    {
+     "name": "Width",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 45
+    }
+   ],
+   "cost": 50.0,
+   "cover": "UmdyUAAAAAAAAAAAAAAAAFVSFXAAAAAAAAAAAAAAAAB1YiVwAAAAAAAAAAAAAAAAVVJFUAAAAAAAAAAAAAAAAFJXclAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZzJQIgMwAAAAAAAAAAAAAFRFIGUEQAAAAAAAAAAAAABWRyAlBiAAAAAAAAAAAAAAVEUgJQUQAAAAAAAAAAAAAGc1IHIiYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAACgcIACjgAAAAAAAAAAACAAGHCADA4CAAAAAAAAAAAEgANwgGAOkAAAAAAAAAAAA5UBgADAVAAAAAAAAAAAREOAoAAAAoABEQAAAAAAAAAL1AAAAAAVSADgAAAAAAAAAAAAB/AAAAAA4AAAAAACIi8oAH//AApSIuAAAAAAAAAOAAAH8AAAAAAAAAAAAAAAD1QAAAAA9UgAAAAAAAAAREAA8AAAAuABEQAAAAAAAAAAFXGAHMD0AAAAAAAAAAAABIBzAJxgAJAAAAAAAAAAACAAGACcDAACAAAAAAAAAAAAAKAAgAKAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAADd3AAAAzmSgAAAGZwAAAABCFAAAAKiKQAAABVQAAAAAIiYAAACsjkAAAAZmAAAAABJEAAAAqIpAAAAEVAAAAABndwAAAM5qQAAABFcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4AAAAAHwAAAAAPgAAAAAH/wAAAAP/gAAAAf/AAAAADyeAAAAHk8AAAAPJ4AAAAAwhgAAABhDAAAADCGAAAAAYIMAAAAwQYAAABggwAAAAGCDAAAAMEGAAAAYIMAAAABgAwAAADABgAAAGADAAAAAMAYAAAAYAwAAAAwBgAAAADweAAAAHg8AAAAPB4AAAAAf/AAAAA/+AAAAB/8AAAAAA+AAAAAB8AAAAAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
+  },
+  {
+   "name": "HorizonL",
+   "fxid": 420,
+   "gid": 8,
+   "category": "Delay",
+   "id": 4719376,
+   "params": [
+    {
+     "name": "Size",
+     "max": 100,
+     "default": 70
+    },
+    {
+     "name": "Decay",
+     "max": 100,
+     "default": 60
+    },
+    {
+     "name": "Pre",
+     "max": 100,
+     "default": 15
+    },
+    {
+     "name": "Mod",
+     "max": 100,
+     "default": 35
+    },
+    {
+     "name": "Lo",
+     "max": 100,
+     "default": 20
+    },
+    {
+     "name": "Hi",
+     "max": 100,
+     "default": 55
+    },
+    {
+     "name": "Swell",
+     "max": 100,
+     "default": 0
+    },
+    {
+     "name": "Width",
+     "max": 100,
+     "default": 80
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 45
+    }
+   ],
+   "cost": 35.0,
+   "cover": "UmdyUEAAAAAAAAAAAAAAAFVSFXBAAAAAAAAAAAAAAAB1YiVwQAAAAAAAAAAAAAAAVVJFUEAAAAAAAAAAAAAAAFJXclBwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZzJQIgMwAAAAAAAAAAAAAFRFIGUEQAAAAAAAAAAAAABWRyAlBiAAAAAAAAAAAAAAVEUgJQUQAAAAAAAAAAAAAGc1IHIiYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAACgcIACjgAAAAAAAAAAACAAGHCADA4CAAAAAAAAAAAEgANwgGAOkAAAAAAAAAAAA5UBgADAVAAAAAAAAAAAREOAoAAAAoABEQAAAAAAAAAL1AAAAAAVSADgAAAAAAAAAAAAB/AAAAAA4AAAAAACIi8oAH//AApSIuAAAAAAAAAOAAAH8AAAAAAAAAAAAAAAD1QAAAAA9UgAAAAAAAAAREAA8AAAAuABEQAAAAAAAAAAFXGAHMD0AAAAAAAAAAAABIBzAJxgAJAAAAAAAAAAACAAGACcDAACAAAAAAAAAAAAAKAAgAKAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAADd3AAAAzmSgAAAGZwAAAABCFAAAAKiKQAAABVQAAAAAIiYAAACsjkAAAAZmAAAAABJEAAAAqIpAAAAEVAAAAABndwAAAM5qQAAABFcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4AAAAAHwAAAAAPgAAAAAH/wAAAAP/gAAAAf/AAAAADyeAAAAHk8AAAAPJ4AAAAAwhgAAABhDAAAADCGAAAAAYIMAAAAwQYAAABggwAAAAGCDAAAAMEGAAAAYIMAAAABgAwAAADABgAAAGADAAAAAMAYAAAAYAwAAAAwBgAAAADweAAAAHg8AAAAPB4AAAAAf/AAAAA/+AAAAB/8AAAAAA+AAAAAB8AAAAAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
   },
   {
    "name": "Howl",
@@ -12692,391 +13834,7 @@
    "cover": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH/7////////////////3/7/+////////////////9////vAAA/////////////f//g73//3////////////3B/wG9x/+////////////9gP8Bvd7/3+P+AAAAAAH//YD/g73UV+AL/v/////9//3B//+91s/f4/7//////f/9////vcZfv//+4tUXER3//f///73//3//ju5Vd1V9//3///+8AAD//yDilRdRHf/9////v/////6O7tV3V33//f///7/////9/uLbERcd//3///+/////4/7//////f/9////v////wv+//////3//f///7////9j/gAAAAAB//3///+/////f////7/////9////v////3////+//////f///7wAAP9///+AADwAAP3///+9//9/f///v/+9//99////vcZ/v3///7tHvcVHvf///73e/94///+5W73Vb93///+9xFfgAAAAOkeB1W/t////vd7v3j///7tXvdVv3f///73G17////+7W73Eb73///+9//9/////v/+9//99////vAAA/////4AAPAAA/f///7////////////////3///+////////////////9////v////////////////f///4AAAAAAAAAAAAAAAAH///+AAAAAAAAAAAAAAAAB////gAAAADq7qBHV0AAAAf///4AAAAASqigRFRAAAAH///+AAAAAE7u4EZWQAAAB////gAAAABKwqBEVEAAAAf///4AAAAASq6gdydwAAAH///+AAAAAAAAAAAAAAAAB////gAAAAAD/AAB/gAD/wf///4AAAAAD/8AB/+ABgGH///+D+434B+fgA/PwAb9h////g/uN/A+B8AfA+AGzYf///4AbzYweZngPMzwBs2H///+AM82MPee8HvPeAb9h////gHPtjDvn3B3z7gG/Yf///4Bjffw759wd8+4Bv2H///+Aw334O//cHf/uAb9h////gMMd8D3/vB7/3gG/Yf///4GDHbgefngPPzwBv2H//4OD+w2cD4HwB8D4AYBhwf8Bg/sNjAf/4AP/8AG/YYD/AYAAAAAD/8AB/+ABgGGA/4OAAAAAAP8AAH+AAP/Bwf//gAAAAAAAAAAAAAAAAf///4AAAAAAAAAAAAAAAAH/9/+////////////////9/+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="
   }
  ],
- "probes": [
-  {
-   "name": "CabIR",
-   "fxid": 908,
-   "gid": 8,
-   "category": "Delay",
-   "id": 1574672,
-   "params": [
-    {
-     "name": "Cab",
-     "max": 100,
-     "default": 0
-    },
-    {
-     "name": "Mix",
-     "max": 100,
-     "default": 100
-    },
-    {
-     "name": "Level",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Reso",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Pres",
-     "max": 100,
-     "default": 50
-    }
-   ],
-   "cost": 20.0,
-   "cover": "AAAAAAAAAAAAAAAAAAAAAD////////////////////wgAAAAAAAAAAAAAAAAAAAEJ//////////////////P5Cf/////////////////8+Qn/////////AAAAAAAAADkJ//////////3///////z5CfwAABAAP//9///////z+Qn8AAAQAD///f////////kJ/AAAEAA///3////////5CfwAABAAP//9/v//////+Qn/+A/wH8B//f7///////kJ//gP8B/Af/3+///////5Cf/4D/AfwH/9/v//////+Qn/+A/wH8B//d7///////kJ//gP8AA///3e9//////5Cf/4D/AAP//93vf9////+Qn/+A/wAD///d73/f////kJ//gP8AA///3e973////5Cf/4D/AfwH/93ve9////+Qn/+A/wH8B//d73ve////kJ//gP8B/Af/3e973v+//5Cf/4D/AfwH/93ve973v/+Qn8AAAQH8B//d73ve97//kJ/AAAEB/Af/3e973ve9/5CfwAABAfwH/93ve973vf+Qn8AAAQH8B/4AAAAAAAAPkJ///////////////////5Cf//////////////////+Qn///////////////////kJ///////////////////5Cf//////////////////+Qn///////////////////kJ///////////////////5CAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAADJgAAAAK6gAAAEdXQAQgABFUAAAADkoAAABEVEAEIAAR2AAAAA5EAAAARlZABCAAEVQAAAAKSgAAAEQkQAQgAA1YAAAACuoAAAB3J3AEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAD4AAAAAHwAAAAAPgABCAAH/wAAAAP/gAAAAf/AAQgADyeAAAAHk8AAAAPJ4AEIAAwhgAAABhDAAAADCGABCAAYIMAAAAwQYAAABggwAQgAGCDAAAAMEGAAAAYIMAEIABgAwAAADABgAAAGADABCAAMAYAAAAYAwAAAAwBgAQgADweAAAAHg8AAAAPB4AEIAAf/AAAAA/+AAAAB/8ABCAAA+AAAAAB8AAAAAD4AAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEP////////////////////A=="
-  },
-  {
-   "name": "CtxWatch",
-   "fxid": 447,
-   "gid": 7,
-   "category": "SFX",
-   "id": 8258318,
-   "params": [
-    {
-     "name": "Span",
-     "max": 100,
-     "default": 40
-    },
-    {
-     "name": "Level",
-     "max": 100,
-     "default": 60
-    }
-   ],
-   "cost": 20.0,
-   "cover": "AAAAAAAAAAAAAAAAAAAAAH////////////////////5////////////////////+f////////////////////n////////////////////5//////CBMmc4HCZ/////+f/////wgTJnOBwmf/////n/////z+cyZM5z5n/////5/////8/nzgQOc+B/////+f/////P584EDnPgf/////n/////z+cyBM5z5n/////5/////8DnMgTOcCZ/////+f/////w5zJkznwmf/////n////////////////////5////////////////////+f////////////////////kAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAANiUAAAAAAR1dAAAAJAAAAEVXAAAAAAERUQAAACQAAAAmdwAAAAABGVkAAAAkAAAAFFUAAAAAARCRAAAAJAAAAGRVAAAAAAHcncAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAgAAAAAAAAIAAAAAkAAAAA+AAAAAAAAPgAAAAJAAAAASQAAAAAAAEkAAAACQAAAAYjAAAAAAAGIwAAAAkAAAAEIQAAAAAABCEAAAAJAAAACCCAAAAAAAgggAAACQAAAAQBAAAAAAAEAQAAAAkAAAAGAwAAAAAABgMAAAAJAAAAAQQAAAAAAAEEAAAACQAAAADYAAAAAAAA2AAAAAkAAAAAIAAAAAAAACAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJ////////////////////+AAAAAAAAAAAAAAAAAAAAAA=="
-  },
-  {
-   "name": "EdgeWatch",
-   "fxid": 448,
-   "gid": 7,
-   "category": "SFX",
-   "id": 1073742606,
-   "params": [
-    {
-     "name": "Unused",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Unused2",
-     "max": 100,
-     "default": 50
-    }
-   ],
-   "cost": 20.0,
-   "cover": "AAAAAAAAAAAAAAAAAAAAAH////////////////////5////////////////////+f////////////////////n////////////////////5/////gQ+ECZzgcJn////+f////4EPhAmc4HCZ/////n////+fMnz5kznPmf////5/////hzJkOBA5z4H////+f////4cyZDgQOc+B/////n////+fMmT4EznPmf////5/////gQIECBM5wJn////+f////4EPhAmTOfCZ/////n////////////////////5////////////////////+f////////////////////kAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAFVTdgAAAAFVTdmAAAJAAABXVEUAAAABXVEUQAACQAAAV1JlAAAAAV1JlIAAAkAAAFVRRQAAAAFVRRUAAAJAAAA1NnYAAAAA1NnZwAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAgAAAAAAAAIAAAAAkAAAAA+AAAAAAAAPgAAAAJAAAAASQAAAAAAAEkAAAACQAAAAYjAAAAAAAGIwAAAAkAAAAEIQAAAAAABCEAAAAJAAAACCCAAAAAAAgggAAACQAAAAQBAAAAAAAEAQAAAAkAAAAGAwAAAAAABgMAAAAJAAAAAQQAAAAAAAEEAAAACQAAAADYAAAAAAAA2AAAAAkAAAAAIAAAAAAAACAAAAAJAAAAAAAAAAAAAAAAAAAACQAAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAAAAAAAJ////////////////////+AAAAAAAAAAAAAAAAAAAAAA=="
-  },
-  {
-   "name": "NAM-t7knob",
-   "fxid": 920,
-   "gid": 8,
-   "category": "Delay",
-   "id": 3147536,
-   "params": [
-    {
-     "name": "Input",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Output",
-     "max": 100,
-     "default": 25
-    },
-    {
-     "name": "Mix",
-     "max": 100,
-     "default": 0
-    },
-    {
-     "name": "Bass",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Mid",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Treb",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Gate",
-     "max": 100,
-     "default": 0
-    }
-   ],
-   "cost": 20.0,
-   "cover": "AAAAAAAAAAAAAAAAAAAAAD////////////////////wgAAAAAAAAAAAAAAAAAAAEJ///////////////////5Cf//////////////////+Qn///B///////////////kJ///gP//8P/w/wAP8P/w5Cf//xx///D/8P8AD/D/8OQn//8+f//w//D/AA/w//DkJ/B+HD8H8A/w8P/w8A8A5CfgMYDGA/AP8PD/8PAPAOQnxw/B+HHwD/Dw//DwDwDkJ8+fvvz58A/w8P/w8PDw5CfHH398cfAP8PD/8PDw8OQn4A7/uAPwD/Dw//Dw8PDkJ/AxwcYH8PDw8AAA8PDw5Cf/2gAt//Dw8PAAAPDw8OQn/9scbf/w8PDwAADw8PDkJ//nPnP/8P8A8P/w8P/w5Cf/5xxz//D/APD/8PD/8OQn/9oALf/w/wDw//Dw//DkJ/+9wd7/8P8A8P/w8P/w5CfwYv+jB/D/APD/8PD/8OQn4B9/fAPw/wDw//Dw//DkJ8cff3xx8P/w8P/w8P/w5CfPn4D8+fD/8PD/8PD/8OQnxwOA4HHw//Dw//Dw//DkJ+A8HB4D////////////5Cfwfz5/B////////////+Qn//8cf//////////////kJ///gP///73ve973ve975Cf//8H//////////////+Qn///////////////////kJ///////////////////5CAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAB1ZXAAAErsrgAAAV1AAQgAJ1UgAACqSqQAAAHJQAEIACdlIAAAqkykAAAByIABCAAlRSAAAKpIpAAAAUlAAQgAdUMgAABGSGQAAAFdQAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAD4AAAAAHwAAAAAPgABCAAH/wAAAAP/gAAAAf/AAQgADyeAAAAHk8AAAAPJ4AEIAAwhgAAABhDAAAADCGABCAAYIMAAAAwQYAAABggwAQgAGCDAAAAMEGAAAAYIMAEIABgAwAAADABgAAAGADABCAAMAYAAAAYAwAAAAwBgAQgADweAAAAHg8AAAAPB4AEIAAf/AAAAA/+AAAAB/8ABCAAA+AAAAAB8AAAAAD4AAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEP////////////////////A=="
-  },
-  {
-   "name": "NAM-tgate",
-   "fxid": 922,
-   "gid": 8,
-   "category": "Delay",
-   "id": 3409680,
-   "params": [
-    {
-     "name": "Input",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Output",
-     "max": 100,
-     "default": 25
-    },
-    {
-     "name": "Mix",
-     "max": 100,
-     "default": 0
-    },
-    {
-     "name": "Bass",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Mid",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Treb",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Gate",
-     "max": 100,
-     "default": 0
-    }
-   ],
-   "cost": 20.0,
-   "cover": "AAAAAAAAAAAAAAAAAAAAAD////////////////////wgAAAAAAAAAAAAAAAAAAAEJ///////////////////5Cf//////////////////+Qn///B///////////////kJ///gP//8P/w/wAP8P/w5Cf//xx///D/8P8AD/D/8OQn//8+f//w//D/AA/w//DkJ/B+HD8H8A/w8P/w8A8A5CfgMYDGA/AP8PD/8PAPAOQnxw/B+HHwD/Dw//DwDwDkJ8+fvvz58A/w8P/w8PDw5CfHH398cfAP8PD/8PDw8OQn4A7/uAPwD/Dw//Dw8PDkJ/AxwcYH8PDw8AAA8PDw5Cf/2gAt//Dw8PAAAPDw8OQn/9scbf/w8PDwAADw8PDkJ//nPnP/8P8A8P/w8P/w5Cf/5xxz//D/APD/8PD/8OQn/9oALf/w/wDw//Dw//DkJ/+9wd7/8P8A8P/w8P/w5CfwYv+jB/D/APD/8PD/8OQn4B9/fAPw/wDw//Dw//DkJ8cff3xx8P/w8P/w8P/w5CfPn4D8+fD/8PD/8PD/8OQnxwOA4HHw//Dw//Dw//DkJ+A8HB4D////////////5Cfwfz5/B////////////+Qn//8cf//////////////kJ///gP///73ve973ve975Cf//8H//////////////+Qn///////////////////kJ///////////////////5CAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAB1ZXAAAErsrgAAAV1AAQgAJ1UgAACqSqQAAAHJQAEIACdlIAAAqkykAAAByIABCAAlRSAAAKpIpAAAAUlAAQgAdUMgAABGSGQAAAFdQAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAD4AAAAAHwAAAAAPgABCAAH/wAAAAP/gAAAAf/AAQgADyeAAAAHk8AAAAPJ4AEIAAwhgAAABhDAAAADCGABCAAYIMAAAAwQYAAABggwAQgAGCDAAAAMEGAAAAYIMAEIABgAwAAADABgAAAGADABCAAMAYAAAAYAwAAAAwBgAQgADweAAAAHg8AAAAPB4AEIAAf/AAAAA/+AAAAB/8ABCAAA+AAAAAB8AAAAAD4AAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEP////////////////////A=="
-  },
-  {
-   "name": "NAM-tsize",
-   "fxid": 921,
-   "gid": 8,
-   "category": "Delay",
-   "id": 3278608,
-   "params": [
-    {
-     "name": "Input",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Output",
-     "max": 100,
-     "default": 25
-    },
-    {
-     "name": "Mix",
-     "max": 100,
-     "default": 0
-    },
-    {
-     "name": "Bass",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Mid",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Treb",
-     "max": 100,
-     "default": 50
-    }
-   ],
-   "cost": 20.0,
-   "cover": "AAAAAAAAAAAAAAAAAAAAAD////////////////////wgAAAAAAAAAAAAAAAAAAAEJ///////////////////5Cf//////////////////+Qn///B///////////////kJ///gP//8P/w/wAP8P/w5Cf//xx///D/8P8AD/D/8OQn//8+f//w//D/AA/w//DkJ/B+HD8H8A/w8P/w8A8A5CfgMYDGA/AP8PD/8PAPAOQnxw/B+HHwD/Dw//DwDwDkJ8+fvvz58A/w8P/w8PDw5CfHH398cfAP8PD/8PDw8OQn4A7/uAPwD/Dw//Dw8PDkJ/AxwcYH8PDw8AAA8PDw5Cf/2gAt//Dw8PAAAPDw8OQn/9scbf/w8PDwAADw8PDkJ//nPnP/8P8A8P/w8P/w5Cf/5xxz//D/APD/8PD/8OQn/9oALf/w/wDw//Dw//DkJ/+9wd7/8P8A8P/w8P/w5CfwYv+jB/D/APD/8PD/8OQn4B9/fAPw/wDw//Dw//DkJ8cff3xx8P/w8P/w8P/w5CfPn4D8+fD/8PD/8PD/8OQnxwOA4HHw//Dw//Dw//DkJ+A8HB4D////////////5Cfwfz5/B////////////+Qn//8cf//////////////kJ///gP///73ve973ve975Cf//8H//////////////+Qn///////////////////kJ///////////////////5CAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAB1ZXAAAErsrgAAAV1AAQgAJ1UgAACqSqQAAAHJQAEIACdlIAAAqkykAAAByIABCAAlRSAAAKpIpAAAAUlAAQgAdUMgAABGSGQAAAFdQAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAD4AAAAAHwAAAAAPgABCAAH/wAAAAP/gAAAAf/AAQgADyeAAAAHk8AAAAPJ4AEIAAwhgAAABhDAAAADCGABCAAYIMAAAAwQYAAABggwAQgAGCDAAAAMEGAAAAYIMAEIABgAwAAADABgAAAGADABCAAMAYAAAAYAwAAAAwBgAQgADweAAAAHg8AAAAPB4AEIAAf/AAAAA/+AAAAB/8ABCAAA+AAAAAB8AAAAAD4AAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEP////////////////////A=="
-  },
-  {
-   "name": "NAMLite",
-   "fxid": 498,
-   "gid": 8,
-   "category": "Delay",
-   "id": 1080296208,
-   "params": [
-    {
-     "name": "Input",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Output",
-     "max": 100,
-     "default": 25
-    },
-    {
-     "name": "Mix",
-     "max": 100,
-     "default": 0
-    }
-   ],
-   "cost": 20.0,
-   "cover": "/////////////////////4AAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAADMYzYP378AAAAAAYAAAAAAzGM2D9+/AAAAAAGAAAAAAP2b9gMGMAAAAAABgAAAAAD9m/YDBjAAAAAAAYAAAAAA/fv2AwY8AAAAAAGAAAAAAP379gMGPAAAAAABgAAAAADNmzYDBjAAAAAAAYAAAAAAzZs2AwYwAAAAAAGAAAAAAM2bN+/GPwAAAAABgAAAAADNmzfvxj8AAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAAB/////////////////////w=="
-  },
-  {
-   "name": "NAMMem",
-   "fxid": 909,
-   "gid": 8,
-   "category": "Delay",
-   "id": 1705744,
-   "params": [
-    {
-     "name": "Test",
-     "max": 1,
-     "default": 1
-    }
-   ],
-   "cost": 20.0,
-   "cover": "AAAAAAAAAAAAAAAAAAAAAD////////////////////wgAAAAAAAAAAAAAAAAAAAEJ///////////////////5Cf//////////////////+Qn///B///////////////kJ///gP//8P/w/wAP8P/w5Cf//xx///D/8P8AD/D/8OQn//8+f//w//D/AA/w//DkJ/B+HD8H8A/w8P/w8A8A5CfgMYDGA/AP8PD/8PAPAOQnxw/B+HHwD/Dw//DwDwDkJ8+fvvz58A/w8P/w8PDw5CfHH398cfAP8PD/8PDw8OQn4A7/uAPwD/Dw//Dw8PDkJ/AxwcYH8PDw8AAA8PDw5Cf/2gAt//Dw8PAAAPDw8OQn/9scbf/w8PDwAADw8PDkJ//nPnP/8P8A8P/w8P/w5Cf/5xxz//D/APD/8PD/8OQn/9oALf/w/wDw//Dw//DkJ/+9wd7/8P8A8P/w8P/w5CfwYv+jB/D/APD/8PD/8OQn4B9/fAPw/wDw//Dw//DkJ8cff3xx8P/w8P/w8P/w5CfPn4D8+fD/8PD/8PD/8OQnxwOA4HHw//Dw//Dw//DkJ+A8HB4D////////////5Cfwfz5/B////////////+Qn//8cf//////////////kJ///gP///73ve973ve975Cf//8H//////////////+Qn///////////////////kJ///////////////////5CAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAB3NwAAAAAAAAQgAAAAAAAAJEIAAAAAAAAEIAAAAAAAACYiAAAAAAAABCAAAAAAAAAkEgAAAAAAAAQgAAAAAAAAJ2IAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAPgAAAAAAAABCAAAAAAAAAf/AAAAAAAAAQgAAAAAAAAPJ4AAAAAAAAEIAAAAAAAADCGAAAAAAAABCAAAAAAAABggwAAAAAAAAQgAAAAAAAAYIMAAAAAAAAEIAAAAAAAAGADAAAAAAAABCAAAAAAAAAwBgAAAAAAAAQgAAAAAAAAPB4AAAAAAAAEIAAAAAAAAB/8AAAAAAAABCAAAAAAAAAD4AAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEP////////////////////A=="
-  },
-  {
-   "name": "NAMProf",
-   "fxid": 911,
-   "gid": 8,
-   "category": "Delay",
-   "id": 1967888,
-   "params": [
-    {
-     "name": "Input",
-     "max": 100,
-     "default": 44
-    },
-    {
-     "name": "Output",
-     "max": 100,
-     "default": 27
-    },
-    {
-     "name": "Mix",
-     "max": 100,
-     "default": 100
-    }
-   ],
-   "cost": 20.0,
-   "cover": "AAAAAAAAAAAAAAAAAAAAAD////////////////////wgAAAAAAAAAAAAAAAAAAAEJ///////////////////5Cf//////////////////+Qn///B///////////////kJ///gP//8P/w/wAP8P/w5Cf//xx///D/8P8AD/D/8OQn//8+f//w//D/AA/w//DkJ/B+HD8H8A/w8P/w8A8A5CfgMYDGA/AP8PD/8PAPAOQnxw/B+HHwD/Dw//DwDwDkJ8+fvvz58A/w8P/w8PDw5CfHH398cfAP8PD/8PDw8OQn4A7/uAPwD/Dw//Dw8PDkJ/AxwcYH8PDw8AAA8PDw5Cf/2gAt//Dw8PAAAPDw8OQn/9scbf/w8PDwAADw8PDkJ//nPnP/8P8A8P/w8P/w5Cf/5xxz//D/APD/8PD/8OQn/9oALf/w/wDw//Dw//DkJ/+9wd7/8P8A8P/w8P/w5CfwYv+jB/D/APD/8PD/8OQn4B9/fAPw/wDw//Dw//DkJ8cff3xx8P/w8P/w8P/w5CfPn4D8+fD/8PD/8PD/8OQnxwOA4HHw//Dw//Dw//DkJ+A8HB4D////////////5Cfwfz5/B////////////+Qn//8cf//////////////kJ///gP///73ve973ve975Cf//8H//////////////+Qn///////////////////kJ///////////////////5CAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAB1ZXAAAErsrgAAAV1AAQgAJ1UgAACqSqQAAAHJQAEIACdlIAAAqkykAAAByIABCAAlRSAAAKpIpAAAAUlAAQgAdUMgAABGSGQAAAFdQAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAD4AAAAAHwAAAAAPgABCAAH/wAAAAP/gAAAAf/AAQgADyeAAAAHk8AAAAPJ4AEIAAwhgAAABhDAAAADCGABCAAYIMAAAAwQYAAABggwAQgAGCDAAAAMEGAAAAYIMAEIABgAwAAADABgAAAGADABCAAMAYAAAAYAwAAAAwBgAQgADweAAAAHg8AAAAPB4AEIAAf/AAAAA/+AAAAB/8ABCAAA+AAAAAB8AAAAAD4AAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEP////////////////////A=="
-  },
-  {
-   "name": "NAMProf2",
-   "fxid": 912,
-   "gid": 8,
-   "category": "Delay",
-   "id": 2098960,
-   "params": [
-    {
-     "name": "Input",
-     "max": 100,
-     "default": 44
-    },
-    {
-     "name": "Output",
-     "max": 100,
-     "default": 27
-    },
-    {
-     "name": "Mix",
-     "max": 100,
-     "default": 100
-    }
-   ],
-   "cost": 20.0,
-   "cover": "AAAAAAAAAAAAAAAAAAAAAD////////////////////wgAAAAAAAAAAAAAAAAAAAEJ///////////////////5Cf//////////////////+Qn///B///////////////kJ///gP//8P/w/wAP8P/w5Cf//xx///D/8P8AD/D/8OQn//8+f//w//D/AA/w//DkJ/B+HD8H8A/w8P/w8A8A5CfgMYDGA/AP8PD/8PAPAOQnxw/B+HHwD/Dw//DwDwDkJ8+fvvz58A/w8P/w8PDw5CfHH398cfAP8PD/8PDw8OQn4A7/uAPwD/Dw//Dw8PDkJ/AxwcYH8PDw8AAA8PDw5Cf/2gAt//Dw8PAAAPDw8OQn/9scbf/w8PDwAADw8PDkJ//nPnP/8P8A8P/w8P/w5Cf/5xxz//D/APD/8PD/8OQn/9oALf/w/wDw//Dw//DkJ/+9wd7/8P8A8P/w8P/w5CfwYv+jB/D/APD/8PD/8OQn4B9/fAPw/wDw//Dw//DkJ8cff3xx8P/w8P/w8P/w5CfPn4D8+fD/8PD/8PD/8OQnxwOA4HHw//Dw//Dw//DkJ+A8HB4D////////////5Cfwfz5/B////////////+Qn//8cf//////////////kJ///gP///73ve973ve975Cf//8H//////////////+Qn///////////////////kJ///////////////////5CAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAB1ZXAAAErsrgAAAV1AAQgAJ1UgAACqSqQAAAHJQAEIACdlIAAAqkykAAAByIABCAAlRSAAAKpIpAAAAUlAAQgAdUMgAABGSGQAAAFdQAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAD4AAAAAHwAAAAAPgABCAAH/wAAAAP/gAAAAf/AAQgADyeAAAAHk8AAAAPJ4AEIAAwhgAAABhDAAAADCGABCAAYIMAAAAwQYAAABggwAQgAGCDAAAAMEGAAAAYIMAEIABgAwAAADABgAAAGADABCAAMAYAAAAYAwAAAAwBgAQgADweAAAAHg8AAAAPB4AEIAAf/AAAAA/+AAAAB/8ABCAAA+AAAAAB8AAAAAD4AAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEP////////////////////A=="
-  },
-  {
-   "name": "NAMProf3",
-   "fxid": 913,
-   "gid": 8,
-   "category": "Delay",
-   "id": 2230032,
-   "params": [
-    {
-     "name": "Input",
-     "max": 100,
-     "default": 44
-    },
-    {
-     "name": "Output",
-     "max": 100,
-     "default": 27
-    },
-    {
-     "name": "Mix",
-     "max": 100,
-     "default": 100
-    }
-   ],
-   "cost": 20.0,
-   "cover": "AAAAAAAAAAAAAAAAAAAAAD////////////////////wgAAAAAAAAAAAAAAAAAAAEJ///////////////////5Cf//////////////////+Qn///B///////////////kJ///gP//8P/w/wAP8P/w5Cf//xx///D/8P8AD/D/8OQn//8+f//w//D/AA/w//DkJ/B+HD8H8A/w8P/w8A8A5CfgMYDGA/AP8PD/8PAPAOQnxw/B+HHwD/Dw//DwDwDkJ8+fvvz58A/w8P/w8PDw5CfHH398cfAP8PD/8PDw8OQn4A7/uAPwD/Dw//Dw8PDkJ/AxwcYH8PDw8AAA8PDw5Cf/2gAt//Dw8PAAAPDw8OQn/9scbf/w8PDwAADw8PDkJ//nPnP/8P8A8P/w8P/w5Cf/5xxz//D/APD/8PD/8OQn/9oALf/w/wDw//Dw//DkJ/+9wd7/8P8A8P/w8P/w5CfwYv+jB/D/APD/8PD/8OQn4B9/fAPw/wDw//Dw//DkJ8cff3xx8P/w8P/w8P/w5CfPn4D8+fD/8PD/8PD/8OQnxwOA4HHw//Dw//Dw//DkJ+A8HB4D////////////5Cfwfz5/B////////////+Qn//8cf//////////////kJ///gP///73ve973ve975Cf//8H//////////////+Qn///////////////////kJ///////////////////5CAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAB1ZXAAAErsrgAAAV1AAQgAJ1UgAACqSqQAAAHJQAEIACdlIAAAqkykAAAByIABCAAlRSAAAKpIpAAAAUlAAQgAdUMgAABGSGQAAAFdQAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAD4AAAAAHwAAAAAPgABCAAH/wAAAAP/gAAAAf/AAQgADyeAAAAHk8AAAAPJ4AEIAAwhgAAABhDAAAADCGABCAAYIMAAAAwQYAAABggwAQgAGCDAAAAMEGAAAAYIMAEIABgAwAAADABgAAAGADABCAAMAYAAAAYAwAAAAwBgAQgADweAAAAHg8AAAAPB4AEIAAf/AAAAA/+AAAAB/8ABCAAA+AAAAAB8AAAAAD4AAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEP////////////////////A=="
-  },
-  {
-   "name": "NAMTest",
-   "fxid": 497,
-   "gid": 2,
-   "category": "Filter",
-   "id": 1080165124,
-   "params": [
-    {
-     "name": "Input",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Output",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Mix",
-     "max": 100,
-     "default": 100
-    }
-   ],
-   "cost": 20.0,
-   "cover": "/////////////////////4AAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAADMYzfvx78AAAAAAYAAAAAAzGM378e/AAAAAAGAAAAAAP2b8YwYDAAAAAABgAAAAAD9m/GMGAwAAAAAAYAAAAAA/fvxjwYMAAAAAAGAAAAAAP378Y8GDAAAAAABgAAAAADNmzGMAYwAAAAAAYAAAAAAzZsxjAGMAAAAAAGAAAAAAM2bMY/eDAAAAAABgAAAAADNmzGP3gwAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAAB/////////////////////w=="
-  },
-  {
-   "name": "NAMTime",
-   "fxid": 910,
-   "gid": 8,
-   "category": "Delay",
-   "id": 1836816,
-   "params": [
-    {
-     "name": "Input",
-     "max": 100,
-     "default": 44
-    },
-    {
-     "name": "Output",
-     "max": 100,
-     "default": 27
-    },
-    {
-     "name": "Mix",
-     "max": 100,
-     "default": 100
-    }
-   ],
-   "cost": 20.0,
-   "cover": "AAAAAAAAAAAAAAAAAAAAAD////////////////////wgAAAAAAAAAAAAAAAAAAAEJ///////////////////5Cf//////////////////+Qn///B///////////////kJ///gP//8P/w/wAP8P/w5Cf//xx///D/8P8AD/D/8OQn//8+f//w//D/AA/w//DkJ/B+HD8H8A/w8P/w8A8A5CfgMYDGA/AP8PD/8PAPAOQnxw/B+HHwD/Dw//DwDwDkJ8+fvvz58A/w8P/w8PDw5CfHH398cfAP8PD/8PDw8OQn4A7/uAPwD/Dw//Dw8PDkJ/AxwcYH8PDw8AAA8PDw5Cf/2gAt//Dw8PAAAPDw8OQn/9scbf/w8PDwAADw8PDkJ//nPnP/8P8A8P/w8P/w5Cf/5xxz//D/APD/8PD/8OQn/9oALf/w/wDw//Dw//DkJ/+9wd7/8P8A8P/w8P/w5CfwYv+jB/D/APD/8PD/8OQn4B9/fAPw/wDw//Dw//DkJ8cff3xx8P/w8P/w8P/w5CfPn4D8+fD/8PD/8PD/8OQnxwOA4HHw//Dw//Dw//DkJ+A8HB4D////////////5Cfwfz5/B////////////+Qn//8cf//////////////kJ///gP///73ve973ve975Cf//8H//////////////+Qn///////////////////kJ///////////////////5CAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAB1ZXAAAErsrgAAAV1AAQgAJ1UgAACqSqQAAAHJQAEIACdlIAAAqkykAAAByIABCAAlRSAAAKpIpAAAAUlAAQgAdUMgAABGSGQAAAFdQAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEIAAD4AAAAAHwAAAAAPgABCAAH/wAAAAP/gAAAAf/AAQgADyeAAAAHk8AAAAPJ4AEIAAwhgAAABhDAAAADCGABCAAYIMAAAAwQYAAABggwAQgAGCDAAAAMEGAAAAYIMAEIABgAwAAADABgAAAGADABCAAMAYAAAAYAwAAAAwBgAQgADweAAAAHg8AAAAPB4AEIAAf/AAAAA/+AAAAB/8ABCAAA+AAAAAB8AAAAAD4AAQgAAAAAAAAAAAAAAAAAAAEIAAAAAAAAAAAAAAAAAAABCAAAAAAAAAAAAAAAAAAAAQgAAAAAAAAAAAAAAAAAAAEP////////////////////A=="
-  }
- ],
+ "probes": [],
  "generated": {
   "nam": {
    "first": 17,
@@ -13429,33 +14187,6 @@
    ],
    "cost": 20.0,
    "cover": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH//////AAAAAAAAAAAAAABEREREQAAAAAAAAAAAAAAAIiIiIiA/////////////wCIiIiIgP////////////8B//////z5kDhD5/////5/AIiIiIiA+ZA4Q+f////9fwBEREREQPgc58yZ/////X8ARERERED4HOfMmf////t/Af/////8+Bznw5n////7fwAiIiIiIPgc58OZ//////8AIiIiIiD5nOfMmf//////ACIiIiIg+ZznzJn//////wH//////PmQOEzn//////8AERERERD5kDhM5///////ABEREREQ/////////////wAIAAiIiP////////////8B//////z///5/PnM/////AAiIiIiI///+fz5zP////wAIiIiIiP///nzJkD////8ABERERET///58yZA///5/Af/////8///+fMmQP///vwAERERERP///nzJkD///38AAiIiIiL///58yZM/////AAIiIiIi///+fMmTP///fwH//////v///gc+cz////8AAiIiIiL///4HPnM/////AAERERER/////////////wABEREREQAAAAAAAAAAAAAB//////0AIAIAIAIAIAAAAACIiIiIgCIiIiIiIiIAAAAAiIiIiIA////////+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABnc1AAADObqAAAByVwAAAAUiRQAAAqIjgAAAJXQAAAAGIkcAAAMys4AAACV2AAAABCJFAAACoqKAAAAlVAAAAARyNQAAArm6gAAAIlcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4AAAAAHwAAAAAPgAAAAAH/wAAAAP/gAAAAf/AAAAADyeAAAAHk8AAAAPJ4AAAAAwhgAAABhDAAAADCGAAAAAYIMAAAAwQYAAABggwAAAAGCDAAAAMEGAAAAYIMAAAABgAwAAADABgAAAGADAAAAAMAYAAAAYAwAAAAwBgAAAADweAAAAHg8AAAAPB4AAAAAf/AAAAA/+AAAAB/8AAAAAA+AAAAAB8AAAAAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH///////////////////+A==",
-   "legacy": true
-  },
-  {
-   "name": "NAMLite (old Filter)",
-   "fxid": 498,
-   "gid": 2,
-   "category": "Filter",
-   "id": 1080296196,
-   "params": [
-    {
-     "name": "Input",
-     "max": 100,
-     "default": 50
-    },
-    {
-     "name": "Output",
-     "max": 100,
-     "default": 25
-    },
-    {
-     "name": "Mix",
-     "max": 100,
-     "default": 0
-    }
-   ],
-   "cost": 20.0,
-   "cover": "/////////////////////4AAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAADMYzYP378AAAAAAYAAAAAAzGM2D9+/AAAAAAGAAAAAAP2b9gMGMAAAAAABgAAAAAD9m/YDBjAAAAAAAYAAAAAA/fv2AwY8AAAAAAGAAAAAAP379gMGPAAAAAABgAAAAADNmzYDBjAAAAAAAYAAAAAAzZs2AwYwAAAAAAGAAAAAAM2bN+/GPwAAAAABgAAAAADNmzfvxj8AAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAAB/////////////////////w==",
    "legacy": true
   },
   {

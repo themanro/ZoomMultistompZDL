@@ -20,6 +20,19 @@ debugging session — an earlier one-line note said the same thing and was overr
 > different axis entirely -- see "Where the slot 4-6 asymmetry actually comes
 > from", read with this note in mind.
 
+> **SETTLED, 2026-11-13, from MIDISTOMP's firmware reverse engineering**
+> ([docs/dev/os-reverse-engineering.md](https://github.com/matujuice/zoom-ms-midistomp/blob/main/docs/dev/os-reverse-engineering.md),
+> Luca Matturro): the stock OS's SysEx `0x31` handler "only edits slots 0-2
+> (slot 4 is a patch-level setting, 3 and 5 are ignored), but calling
+> fx_set_param directly works for all six slots". So the limit is Zoom's
+> receive handler, on every stock firmware, and not this repo's effects or
+> edit handlers (the stock-vs-custom theory below is dead). MIDISTOMP's
+> `midi-cc` patch calls `fx_set_param(slot, param, value, 0, 1)` itself:
+> effect n on/off = CC 10n+4, knob k = CC 10n+4+k (CC 14-73, any channel,
+> 0-127 scaled to the knob's range). On a MIDISTOMP pedal that is the live,
+> gapless path for slots 4-6. Its notes record the CC test on an MS-60B
+> running the MS-50G OS, not yet on an MS-70CDR.
+
 ## The rule
 
 The MS-70CDR honours live `0x31` parameter edits **only for the early effect
@@ -297,8 +310,15 @@ Two corrections to it, both checked against hardware:
 
 * slots 1-3 — live `0x31`, no flash write, nothing else disturbed
 * slots 4-6 — labelled as unable to update live; **Apply → pedal** performs the
-  read → merge-dirty → bypass-bounce sequence above. Optionally automatic,
-  debounced to one apply per gesture (toolbar checkbox)
+  read → merge-dirty → bypass-bounce sequence above, automatically after each
+  knob gesture and in the background (no greyed UI). Since 2026-11-13 the
+  bounce is two writes, slot off with the new values then on, with
+  `bounceMs` (default 20 ms, Settings > Diagnostics) between them; it was a
+  write, 40 ms, off, 110 ms, on. Whether 20 ms still makes the pedal re-read
+  the knobs is not yet confirmed on hardware
+* a click on a slot writes the pedal's own patch back with only `curfx`
+  changed, to move the pedal's screen (unproven: that curfx is a 0-based slot
+  index the screen follows; the log records the readback)
 * incoming `0x31` mirrors the hardware into the editor for every slot, so the
   editor follows knobs turned on the pedal
 

@@ -1,0 +1,23 @@
+{
+  "effect_name": "Carillon",
+  "comment": "PEDAL BUILD manifest for Carillon (9-knob). Resonant filter bank: 32 band-pass filters C2..C8 snapped to a key and scale; Decay takes them from one filter to ringing bells. Key and Scale are named-step knobs (labels: build/selector_metadata.py); the rest are 0..100.",
+  "audio_func_name": "Fx_DLY_Carillon",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_.",
+  "fxid": 497,
+  "fxid_comment": "0x01F1. In this project's reserved 403-499 Delay block; never used in the Delay group (497 is the NAMTest probe's ID in the Filter group, gid 2; 498 the old NAMLite). Check repeat98's FXID registry before release.",
+  "fxid_version": "0.03",
+  "flags_byte": 1,
+  "dsp_cost": 40.0,
+  "params": [
+    {"name": "Cutoff", "max": 100, "default": 70, "comment": "params[5]. Where the bank's emphasis sits, C2 .. above C8."},
+    {"name": "Reso",   "max": 100, "default": 30, "comment": "params[6]. Boost of the bands around Cutoff."},
+    {"name": "Decay",  "max": 100, "default": 55, "comment": "params[7]. Band width and ring: 0 one plain filter, 100 bells ringing a few seconds."},
+    {"name": "Key",    "max": 11,  "default": 0,  "comment": "params[8]. Named steps C .. B: the scale's root; in Free, moves the bank."},
+    {"name": "Scale",  "max": 9,   "default": 2,  "comment": "params[9]. Named steps: Free, Chrom, Major, Minor, Dor, Pent, MinPt, Whole, Fifth, Oct."},
+    {"name": "Slope",  "max": 100, "default": 40, "comment": "params[10]. Low-pass (0) .. band-pass (50) .. high-pass (100)."},
+    {"name": "Waves",  "max": 100, "default": 20, "comment": "params[11]. 0..50 depth of a slow ripple across the bands; 50..100 full depth, faster."},
+    {"name": "Noise",  "max": 100, "default": 0,  "comment": "params[12]. 0..50 random bands struck on their own; 50..100 adds a hiss that makes the bank whistle."},
+    {"name": "Mix",    "max": 100, "default": 60, "comment": "params[13]. Dry/wet."}
+  ]
+}

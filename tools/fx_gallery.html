@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Effect pictures</title>
+<style>
+  /* A look at the Patch Editor's effect pictures (fx_visuals.js), outside the editor.
+     ?fx=Deform,Spiral picks effects; each shows at its defaults, low and high knobs.
+     Serve the repo over localhost (it reads effects_db.json). */
+  :root{--screen-bg:#111114;--screen-fg:#dfe2ff;--ink:#e6e6ea;--muted:#8a8a96;--line:#2a2a30}
+  body{margin:0;padding:16px;background:#19191c;color:var(--ink);font:13px/1.4 system-ui,sans-serif}
+  h2{font-size:14px;font-weight:600;margin:18px 0 8px}
+  .row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:1200px}
+  figure{margin:0} figure div{width:100%} canvas{width:100%;aspect-ratio:2/1;display:block;border:1px solid var(--line);border-radius:6px;background:var(--screen-bg)}
+  figcaption{color:var(--muted);font-size:11px;margin-top:4px}
+</style>
+</head>
+<body>
+<div id="out"></div>
+<script>
+(async () => {
+  if (location.protocol === "file:") {
+    out.textContent = "Open this page from the local server, not from disk: http://localhost:8000/tools/fx_gallery.html (start the pedal servers first).";
+    return;
+  }
+  // a plain timer instead of the frame clock, so it keeps moving in a hidden or background tab
+  window.requestAnimationFrame = cb => setTimeout(() => cb(performance.now()), 16);
+  await new Promise((ok, no) => { const sc = document.createElement("script"); sc.src = "fx_visuals.js?" + Date.now(); sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); });
+  const db = await (await fetch("effects_db.json", { cache: "no-store" })).json();
+  const all = [...db.custom, ...db.stock];
+  const want = (new URLSearchParams(location.search).get("fx") || "Deform").split(",");
+  FxVis.setMotion(true);
+  for (const name of want) {
+    const e = all.find(x => x.name === name);
+    const h = document.createElement("h2"); h.textContent = e ? name + "  (" + FxVis.sceneFor(e).join(" / ") + ")" : name + ": not in effects_db.json";
+    out.appendChild(h); if (!e) continue;
+    const row = document.createElement("div"); row.className = "row"; out.appendChild(row);
+    const ps = e.params || [];
+    for (const [label, val] of [["defaults", p => p.default ?? 0], ["knobs low (20%)", p => Math.round((p.max || 100) * 0.2)], ["knobs high (85%)", p => Math.round((p.max || 100) * 0.85)]]) {
+      const fig = document.createElement("figure"), box = document.createElement("div"), cv = document.createElement("canvas");
+      const vals = [1, e.id, ...ps.map(val)];
+      box.appendChild(cv); fig.appendChild(box);
+      const cap = document.createElement("figcaption"); cap.textContent = label + ": " + ps.map((p, k) => p.name + " " + vals[k + 2]).join(", ");
+      fig.appendChild(cap); row.appendChild(fig);
+      FxVis.attach(cv, e, () => vals);
+    }
+  }
+})();
+</script>
+</body>
+</html>

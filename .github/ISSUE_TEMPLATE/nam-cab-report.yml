@@ -55,15 +55,15 @@ body:
     id: chain
     attributes:
       label: Full effect chain, in order
-      description: Names as the pedal or Patch Editor shows them, including stock effects.
+      description: Names as the pedal or MultiStomp Editor shows them, including stock effects.
       placeholder: "GreatMuff → NAM-smoke44 → CAB-sm57"
     validations:
       required: true
   - type: input
     id: meter
     attributes:
-      label: What did Patch Editor's DSP meter show?
-      description: The percentage in the toolbar for that patch. Leave blank if you didn't use Patch Editor.
+      label: What did MultiStomp Editor's DSP meter show?
+      description: The percentage in the toolbar for that patch. Leave blank if you didn't use MultiStomp Editor.
       placeholder: "98%"
   - type: textarea
     id: capture

@@ -7,9 +7,9 @@ release set in `dist/`.
 Build one probe by name:
 
 ```bash
-python3 -B build_all.py ctxmap
-python3 -B build_all.py descsize
 python3 -B build_all.py initprobe
+python3 -B build_all.py ctxwatch
+python3 -B build_all.py matprobe
 ```
 
 Build release effects plus every probe:
@@ -62,12 +62,25 @@ Effect Manager at `dist/`, so a stray diagnostic ends up on a stranger's pedal.
 `dist/` and does **not**, so move the file yourself. EdgeWatch and MatProb have
 each escaped that way.
 
-## Current probes of note
+## Current probes
 
-| Probe | fxid | Question it answers |
-|---|---|---|
-| `matprobe` | 496 | Did `_init` materialize params at load? Gain defaults to 0, so no = silence. |
-| `ctxmap`, `ctxnib`, `ctxgate`, `ctxwatch` | | Which `ctx[]` slots exist and what is in them. |
-| `stateping`, `stateiso`, `statecomb` | | Per-instance state block behaviour. |
-| `desccomb`, `descsize`, `desciso` | | Arena descriptor bounds. |
-| `initprobe` | | `_init` entry conditions. |
+| Probe | Question it answers |
+|---|---|
+| `matprobe` (fxid 496) | Did `_init` materialize params at load? Gain defaults to 0, so no = silence. |
+| `initprobe` | `_init` entry conditions ([INIT-MATERIALIZATION](../../docs/INIT-MATERIALIZATION.md)). |
+| `ctxwatch` | Whether any `ctx[]` region tracks a patch write when `params[]` does not ([MIDI-PARAM-EDIT](../../docs/MIDI-PARAM-EDIT.md)). |
+| `blink`, `redraw`, `coverrw` | How an effect animates its own screen ([animated covers](../../docs/pedal-research/animated-covers.md)). |
+| `bpmhunt` | A blind memory scan for the patch tempo; found nothing ([TEMPO-SYNC](../../docs/TEMPO-SYNC.md)). |
+| `reid` | Whether an effect runs, saves and recalls under a moved effect ID ([README](reid/README.md)). |
+| `namtest`, `namlite`, `nam_memory`, `nam_profile` | The NAM capture runtime ([NAM-A2-LITE-PROTOTYPE](../../docs/NAM-A2-LITE-PROTOTYPE.md), [NAM-RUNTIME-INVESTIGATION](../../docs/NAM-RUNTIME-INVESTIGATION.md)); `namlite` also feeds the loader templates. |
+| `cab_ir` | The cab IR loader ([NAM-LOADER](../../docs/NAM-LOADER.md)). |
+| `slo_ir` | The withdrawn SloIR prototype ([SLO-IR-PROTOTYPE](../../docs/SLO-IR-PROTOTYPE.md)). |
+
+Removed on 2026-11-09, because nothing linked to them any more: the `ctx[]` map
+probes (`ctxmap`, `ctxnib`, `ctxgate`, `paramtap`), the state block probes
+(`stateping`, `stateiso`, `statecomb`), the arena descriptor probes (`desccomb`,
+`descsize`, `desciso`), `edgewatch`, `nam_timing` and `syncprobe` v1–v3. Their
+findings are in [STATE-ABI-PROGRESS](../../docs/STATE-ABI-PROGRESS.md),
+[ABI](../../build/ABI.md), [MIDI-PARAM-EDIT](../../docs/MIDI-PARAM-EDIT.md) and
+[TEMPO-SYNC](../../docs/TEMPO-SYNC.md); their sources are in git history (commit
+afb3371 and earlier).

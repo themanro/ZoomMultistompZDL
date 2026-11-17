@@ -84,7 +84,7 @@ Report the **output**, not a conclusion. The breakdown is what decides this.
 
 ## Check 2 — Does the pedal talk at all?
 
-Open the patch editor:
+Open the MultiStomp Editor:
 
 **https://themanro.github.io/ZoomMultistompZDL/tools/patch_editor.html**
 

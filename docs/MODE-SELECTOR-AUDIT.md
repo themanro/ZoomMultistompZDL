@@ -52,19 +52,16 @@ slots encode HPF/BPF/LPF and 2Pole/4Pole. The supplied hardware photo confirms
 those labels and the binary switch appearance.
 
 The linker can now attach object-defined `ZDL_GetLabel_<index>` callbacks at
-that field with relocations. Opt-in generated C callbacks copy at most seven
-ASCII characters plus NUL. Six experimental builds are in
-`build/selector-pilot/`; the regular dist releases do not contain these
-callbacks. Build with:
-
-```
-ZDL_SELECTOR_LABELS=1 ZDL_SELECTOR_OUTPUT_DIR="$PWD/build/selector-pilot" python3 build_all.py stasis rooms tapeecho4 hydra spiral rewire
-```
-
-Pilot scope: dynamic mode names on the pedal, preserving existing raw ranges.
-This is NOT yet a hardware-verified change. It also does not turn a 0–100
-pedal control into a six-position selector: matching that rotation behavior
-requires a separate raw-range/edit-handler design and saved-patch migration.
+that field with relocations. Generated C callbacks copy at most seven ASCII
+characters plus NUL. They started as a pilot (six builds in
+`build/selector-pilot/`, removed 2026-11-09) and are now on by default
+(`ZDL_SELECTOR_LABELS=1` is the default in `manifest_params.py`): every
+control in `build/selector_metadata.py` shows its names on the pedal, among
+them Stasis's 0–2 Capture and Chopdly's stepped Chops, Order, Pitch, Reverse
+and Stretch (one detent a step), and
+`build/verify_release_displays.py` checks every label string's relocations in
+`dist/`. A 0–100 control with names keeps its raw range; turning one into a
+stepped selector needs a new raw range and changes what saved patches mean.
 The cover bitmap is separate from the firmware's edit-page controls; changing
 cover artwork cannot implement that switch behavior.
 

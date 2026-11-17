@@ -6,8 +6,10 @@
   "gid_comment": "0x08 = Delay -> Fx_DLY_; consolidated under DLY.",
   "fxid": 408,
   "fxid_comment": "0x0198 in the custom Airwindows range.",
-  "fxid_version": "1.00",
+  "fxid_version": "1.02",
   "flags_byte": 1,
+  "dsp_cost": 30.0,
+  "dsp_cost_comment": "3,400 emulated cycles per callback (2026-11-13) plus memory stalls the emulator does not count: 528 KB of delay lines live in uncached-for-L2 DDR. Was the linker default 20.",
   "params": [
     {
       "name": "Replace",

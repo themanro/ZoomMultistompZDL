@@ -7,6 +7,104 @@ dated. Effects in [dist/](dist/) carry their own version in the file
 ## Unreleased
 
 ### Effects
+- **HorizonL** (new, Delay 420, version 0.01): Horizon with its reverb tank
+  (diffusers, the eight lines, their damping) at half the sample rate, for
+  chains where Horizon crackles: Carillon + Horizon crackled on the pedal
+  although they emulate at about 19,000 cycles at peak, so the cost is
+  Horizon's reads from its 330 KB of lines, which the emulator does not
+  charge. HorizonL does half the reads into 165 KB, at about 5,300
+  emulated cycles per callback (Horizon 7,400), declared cost 35. Same
+  knobs, same screen; reverb times within about 5% of Horizon's; Hi follows
+  Horizon's curve but stops at 10 kHz, and the tail is a little darker
+  (the half-rate filters). Horizon itself is unchanged. Not yet tested on
+  the pedal. [README](src/custom/horizonl/README.md).
+- **Horizon** (new, Delay 419, version 0.02): a huge, spacey reverb.
+  Pre-delay (to 370 ms), four diffusers, then eight long, slowly moving
+  delay lines mixed in a Hadamard feedback matrix: Size from a room to a
+  cathedral (turning it bends the tail's pitch), Decay from 0.8 s to
+  a minute (measured within 10% of the setting) and a hold at 100, Mod,
+  Lo and Hi cuts inside the tail, Swell (each note blooms in over up to
+  2 s), Width, Mix. Left and right uncorrelated. On firmware 2.10 its
+  screen shows the eight lines as orbits, each lit by its sound, and the
+  reverb time. About 6,000 emulated cycles per callback, plus the memory
+  traffic of its 330 KB of lines (declared cost 50). 0.01 used 650 KB and
+  a 432-byte stack frame and was on the pedal when it froze; 0.02 halves
+  the memory and keeps the frame at 260 bytes. 0.02 loads and runs on the
+  pedal (2026-11-15), but next to Carillon the chain crackles: see HorizonL.
+  [README](src/custom/horizon/README.md).
+- **Chimera** (new, Delay 418, version 0.02): your guitar as the voice of a
+  simulated throat and mouth, like a talkbox, named after and built on the
+  Chimera physical-model voice synth (github.com/jamesondh/chimera-vocal-synth,
+  MIT, by Jameson Hodge).
+  A 16-section airway plus a 6-section nose at 44.1 kHz, with the guitar as
+  the glottal source; vowel shapes fitted to measured formants (u o a e i).
+  Knobs: Vowel, Open, Body, Nasal, Talk, Move (Pick, Slow, Fast, Chat),
+  Buzz, Breath, Mix. On firmware 2.10 its screen shows the airway and the
+  sound inside it. About 4,800 emulated cycles per callback (5,400 with the
+  nose open). 0.01 froze the pedal (installed with Horizon 0.01): its audio
+  function used a 900-byte stack frame; 0.02 uses 280. 0.02 loads and runs
+  on the pedal (2026-11-15). [README](src/custom/chimera/README.md).
+- **Lighter on the DSP, same sound: Deform 0.03, Carillon 0.03, Droplets
+  0.02.** Their audio is bit-identical to the builds before (checked in the
+  emulator on 12 knob settings).
+  - **The screen no longer spikes.** Each drew most of a frame in one
+    callback, 30 times a second, which put single callbacks far over their
+    usual cost (Deform up to 19,300 emulated cycles against about 6,000).
+    With the chain near the DSP limit that one long callback is a click.
+    The drawing is now spread over more callbacks: Deform's worst is 8,900,
+    Carillon's 9,400 (was 10,900).
+  - **Deform**: its per-sample reciprocals use the pedal's reciprocal
+    instruction instead of three software steps: 6,020 emulated cycles a
+    callback at the defaults (was 7,430), 7,700 at the heaviest (was 8,870).
+    Declared DSP cost 45 (was 25), in line with what it uses.
+  - **Droplets**: up to six grains it plays as before; with seven or eight
+    all voices run straight through without branching. 2,780 at the
+    defaults (was 3,120), 5,740 with Rate and Size at maximum (was 7,030).
+  - **Carillon**: 6,250 (was 6,510).
+- **Galactic 1.02**: declared DSP cost 30, was the build default 20 (3,400
+  emulated cycles plus the memory traffic of its 528 KB of delay lines).
+- **Galactic 1.01**: knob turns no longer interrupt the sound. Knobs now
+  glide instead of jumping (about 10 ms; Bigness about 60 ms, since it moves
+  every delay length at once). An off shorter than 60 ms no longer cuts the
+  tail, so the Patch Editor's off-and-on in slots 4–6 can't be heard; a real
+  bypass takes effect 60 ms later. The added smoothing and holdover are the
+  pedal's, not Airwindows'. Not yet tested on the pedal.
+- **Deform** (new, Delay 417, version 0.01): drive, crush and compression
+  after the Torso S-4's Deform, in its order: noise that follows your
+  playing, a two-band drive (Tilt, Split), a crush made to stay soft (Mode:
+  Bit with rounded steps, squeezed quiet signals and its error fed back;
+  Redux with straight lines between held samples and a filter after; or
+  Both), and a one-knob compressor. Level held about even across Drive and
+  Crush. On firmware 2.10 its screen shows the drive and crush curve, the
+  gain reduction and the wet signal. Not yet tested on the pedal.
+  [README](src/custom/deform/README.md).
+- **Carillon** (new, Delay 497, version 0.02): a resonant filter bank after
+  the Torso S-4's. 32 band-pass filters from C2 to C8, snapped to a Key and
+  Scale (named steps), with Cutoff, Reso, Slope (low-pass to high-pass),
+  Decay (from one plain filter to bells ringing for seconds), Waves (a
+  ripple across the bands) and Noise (bands struck on their own, then a
+  hiss). On firmware 2.10 its screen shows a bar per band and the filter's
+  shape. [README](src/custom/carillon/README.md). 0.02: Noise strikes no
+  longer click (each struck band now starts its ring from silence instead
+  of jumping), heard on the pedal at high Noise.
+- **Droplets** (new, Delay 492, version 0.01): a granular delay. Up to 8
+  grains at once from the last 2.5 s of your playing, with Pitch and Pattern
+  as named steps, Rate, Size, Contour, Scan, Random (spray, pitch jumps,
+  length/timing/level, reversed grains), Feedbk, and Lock (Feedbk 100)
+  to freeze the buffer. On firmware 2.10 its screen shows the buffer and the
+  grains. Not yet tested on the pedal.
+  [README](src/custom/droplets/README.md).
+- **Chopdly** (new, Delay 947, version 1.03): a delay that cuts the last
+  cycle into chops (equal, or at note attacks, cut at the quiet point just
+  before each) and plays them back
+  rearranged, reversed, pitched and stretched; the repeats feed back and get
+  re-chopped. Chops, Order, Pitch, Reverse and Stretch are named steps, shown
+  by name on the pedal and as dropdowns in the Patch Editor. Reverse's Ping
+  and Scatr steps pan the chops (alternating L/R, or a fixed place per
+  chop); otherwise the chops are mono. Glide sets how chops join, from hard
+  cuts to long overlapping crossfades. On firmware 2.10
+  its screen shows the recording, the cuts, the chop playing and the current
+  steps. [README](src/custom/chopdly/README.md).
 - **Spool** has a new effect ID, 914 (was 409), as version 1.02; the sound is
   unchanged. TEcho4.ZDL from another collection used 409 too, and swapping
   the two in Zoom Effect Manager froze an MS-70CDR at boot until its ROM was
@@ -16,7 +114,109 @@ dated. Effects in [dist/](dist/) carry their own version in the file
   reads them (as "Spool (old 409)"), can remove the old file, and refuses to
   write the new ID over it in place.
 
-### Patch Editor
+### README and docs
+- **README rewritten and shortened** (786 to 479 lines): a new title, a
+  four-step Get started, an editor section with a moving preview, the
+  effects in one table, NAM condensed, the Zoom Effect Manager steps without
+  screenshots, one compatibility table. Dropped: out-of-date notes, the old
+  effect counts, and "Not yet tested" on effects that now run.
+- **[EFFECTS.md](EFFECTS.md)**, a new page with every effect: its screen on
+  the pedal, its moving picture from the editor, what it does and its knobs
+  (read from the effect database). Luca Matturro's Matujuice pack has its
+  own section there and is no longer in the README's compilation picture.
+  Generated by `build/make_effects_page.py`.
+- **Pedal screens as the pedal shows them**: the compilation picture and
+  each effect's picture are now dark ink on the light screen, not inverted
+  (`build/make_thumb_png.py`, `build/make_gallery_png.py`). The live screens
+  stay dark, as on the pedal.
+- **Moving pictures**: `build/make_fx_previews.py` records each effect's
+  editor picture as a looping WebP (`graphics/fx/`), and
+  `build/make_editor_preview.py` records the editor itself with an example
+  bank (`graphics/editor.webp`); both run the real page in headless Chrome.
+
+### MultiStomp Editor (was Patch Editor)
+- **Renamed the MultiStomp Editor** in both editors, the launcher, the NAM
+  loader, the issue forms and the docs. File names are unchanged
+  (`tools/editor.html`, `tools/patch_editor.html`), so links keep working.
+- **Every effect has its own picture.** Each of our effects and Luca
+  Matturro's Matujuice pack now has a scene of its own in
+  `tools/fx_visuals.js` that follows its knobs (Deform keeps its hatching;
+  nothing else borrows it). Skull's picture is the pedal's own skull,
+  rendered by `src/custom/skull/pe_frames.py`. `tools/fx_gallery.html` shows
+  any of them at three knob settings (`?fx=Spiral,Hydra`).
+- **The new design is the default editor** (`tools/editor.html`): the README,
+  the launcher and the server open it. The classic editor is in Settings →
+  Editor, and each editor links to the other there.
+- **Drawers close on a click beside them**, not only with ✕ (or Esc):
+  click the dimmed page to dismiss Library, Effects, NAM / Cab or Settings.
+- **Remove Zoom's own effects** (Effects on the pedal → Zoom's effects on the
+  pedal), listed apart from this project's: each with its group and the
+  blocks it takes, and a Remove button. Zoom's effects fill about 683 of the
+  pedal's 700 blocks, so removing ones you never use is how to make room.
+  Only effects whose ID is in Zoom's stock list (IDs up to 1023, so another
+  collection's larger, aliasing IDs never count) and that are in the pedal's
+  effect list are offered; files the pedal keeps outside that list are not.
+  The plain Remove still refuses them. Put them back from Zoom's updater or
+  a backup. Not yet tried on the pedal.
+- Installing or updating an effect now checks room the way the pedal
+  stores files: whole 4096-byte blocks (4090 bytes of data each) and a
+  limit on files. MS-70CDR 2.10: 700 blocks and 200 file slots, of which
+  Zoom's own effects fill 683 blocks (read from the 2.10 updater with
+  Ziddle's firmware tools). It refuses an install that would leave fewer
+  than 3 blocks free. The Effects Library's scan line shows blocks and
+  slots in use. The byte count the pedal reports hid the rounding: on
+  2026-11-13 the pedal sat at 685 of 700 blocks, Chimera and Horizon need
+  13, and installing both froze it (twice).
+- Each slot shows an animation of its effect that follows the knobs: it
+  moves on its own and reshapes as you turn (from the editor or on the
+  pedal). Scenes by kind (waveform, filter-bank bars, hatched drive, delay
+  rings and reverb box, modulation waves, filter curve, steps, pitch lines,
+  dynamics curve), each of this project's effects with its own knobs wired
+  in (Deform's crush steps its outline, Carillon's bars follow its Scale,
+  Chopdly's waveform is cut into its chops). Zoom's effects get one by
+  category. A Screen / Animation button switches every slot back to the
+  pedal-screen picture; the choice is remembered. A slot that is off holds
+  its picture still (dimmed). When the system asks for reduced motion the
+  scenes hold still until you press Play, which overrides it and is
+  remembered. `tools/fx_visuals.js`. Up to 60 frames a second, so knob
+  turns glide.
+- Deform's animation is drawn pixel by pixel, after the S-4's: two hatched
+  circles (low and high band) that pulse with the playing. Drive eats holes
+  and dashes into the lines, Noise breaks off fading fragments and dust, and
+  Crush steps the picture: Redux across, Bit down, Both into blocks.
+- The Pause/Play and Screen buttons on a slot's picture show only while
+  the mouse is over it (or a button has keyboard focus; always on touch
+  screens).
+- Rewire's animation shows its chain: the five blocks as tiles in the order Route picks (sliding into place when it changes), each showing a test waveform as it is at that point in the chain, its knob as a bar under it, Tone at the end and the dry path over the top. Horizon's: its eight lines as orbits around the horizon, lit by each note after the pre-delay, fading as Decay says.
+- Chimera's animation: its airway, the same vowel shapes as the pedal, with sound running from the glottis to the lips, the nose branching off when Nasal is up, and the mouth moving as Move moves it.
+- New animations for Carillon, Droplets and Galactic, in the same style.
+  Carillon: a tall dim bar per band is the filter's shape, and a bright bar
+  inside it is what comes through, with struck bands ringing for as long as
+  Decay says. Droplets: the 2.5 s buffer along the bottom (frozen and marked
+  LOCK at Feedbk 100) and each grain above it at its pitch and read point,
+  a little waveform shaped by its envelope (Contour), pale when reversed.
+  Like Deform, they use two colours: the screen colour made vivid (the
+  filter shape and ringing bands, the grains, the faint stars) and a pale
+  one. Galactic: a turning
+  galaxy, as big as Bigness, lit by a ring that runs out from each note,
+  with trails as long as Replace leaves them; Detune makes the arms waver
+  and Bright makes the stars sharp or soft.
+- Clicking a slot in 1–3 no longer writes the patch when the pedal's screen
+  has already followed the live nudge, so it no longer blips the sound.
+  Slots 4–6 still need the write (a short blip).
+- The update after a knob move in slots 4–6 runs in the background: the
+  buttons no longer grey out and the knobs stay usable while it runs. The
+  slot now stays off for 20 ms instead of about 150 ms (one write fewer),
+  so the sound gap is much shorter. The length is in Settings > Diagnostics
+  ("Slot 4–6 update gap"); raise it if knobs in slots 4–6 stop changing the
+  sound.
+- Clicking a slot's title or picture now writes the patch back with that
+  slot as the current effect, which should move the pedal's screen in all
+  six slots (the old nudge couldn't reach slots 4–6). Not yet confirmed on
+  the pedal; the log shows what the pedal reports back.
+- When an MS-70CDR reports firmware other than 2.10, the effects panel and
+  a notice say that live screens need 2.10 and link to Modwerk for the
+  update. The editor doesn't flash firmware itself.
 - **Effects**: install, update and remove this project's effects over USB
   on the MS-70CDR, without Zoom Effect Manager. It shows the version on the
   pedal next to the one available, refuses Zoom's own effects and any name

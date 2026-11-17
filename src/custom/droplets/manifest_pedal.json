@@ -1,0 +1,68 @@
+{
+  "effect_name": "Droplets",
+  "comment": "PEDAL BUILD manifest for Droplets (9-knob). Granular delay: short grains sprayed from a 2.5 s buffer of what you played, with pitch patterns, randomness, feedback and a Lock that freezes the buffer. Pitch and Pattern are named-step knobs (labels: build/selector_metadata.py); the rest are 0..100.",
+  "audio_func_name": "Fx_DLY_Droplets",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_.",
+  "fxid": 492,
+  "fxid_comment": "0x01EC. In this project's reserved 403-499 Delay block; never used (gap between DirtBox 491 and Breather 493; 498 was the old NAMLite). Check repeat98's FXID registry before release.",
+  "fxid_version": "0.02",
+  "flags_byte": 1,
+  "dsp_cost": 50.0,
+  "params": [
+    {
+      "name": "Pitch",
+      "max": 10,
+      "default": 5,
+      "comment": "params[5]. Named steps: -24, -12, -7, -5, -3, Unity, +3, +5, +7, +12, +24 semitones for every grain."
+    },
+    {
+      "name": "Rate",
+      "max": 100,
+      "default": 45,
+      "comment": "params[6]. Grains per second, ~2 .. 60 (free running)."
+    },
+    {
+      "name": "Size",
+      "max": 100,
+      "default": 40,
+      "comment": "params[7]. Grain length 10 .. 250 ms, squared curve."
+    },
+    {
+      "name": "Contour",
+      "max": 100,
+      "default": 50,
+      "comment": "params[8]. Grain envelope: 0 = sharp hit, 50 = smooth, 100 = slow swell with a sharp end."
+    },
+    {
+      "name": "Scan",
+      "max": 100,
+      "default": 25,
+      "comment": "params[9]. 0..49: where grains start, 30 ms .. 2.5 s behind the live input (a place in the frozen buffer when Locked). 50..100: the start point travels through the last 2.5 s, still at 50 up to twice speed at 100."
+    },
+    {
+      "name": "Pattern",
+      "max": 10,
+      "default": 0,
+      "comment": "params[10]. Named steps: pitch sequence stepped per grain, on top of Pitch. Off, Oct, Oct-, Fifth, Pwr, Maj, Min, Down, Sus (fixed cycles), Pent, Wide (random picks)."
+    },
+    {
+      "name": "Random",
+      "max": 100,
+      "default": 20,
+      "comment": "params[11]. 0..33: spray (random start, up to 0.5 s) and stereo spread; 33..66 adds random pitch jumps, size, timing and level; 66..100 adds reversed grains (up to half)."
+    },
+    {
+      "name": "Feedbk",
+      "max": 100,
+      "default": 30,
+      "comment": "params[12]. Grains back into the buffer, 0 .. 99; 100 = Lock: the buffer freezes (nothing new is recorded) and the grains keep playing from it."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 50,
+      "comment": "params[13]. Dry/wet."
+    }
+  ]
+}

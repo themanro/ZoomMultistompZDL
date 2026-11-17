@@ -49,7 +49,7 @@ IDs from [thammer/zoom-explorer](https://github.com/thammer/zoom-explorer).
   (file transfer; Stomphacks needs its PR #112), [sym.bios.is](https://sym.bios.is/)
   (patch editor), [Zoom Explorer](https://github.com/thammer/zoom-explorer).
 - SysEx: `F0 52 00 6E …`; patches via `45 00 00` / `46 00` (~989 bytes with
-  CRC), files via `60 xx`. Different from our Patch Editor's protocol.
+  CRC), files via `60 xx`. Different from our MultiStomp Editor's protocol.
 
 ## Risk and recovery (sources disagree)
 

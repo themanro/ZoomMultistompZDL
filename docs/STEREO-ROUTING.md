@@ -93,3 +93,62 @@ because stock builds don't have one either. A "make this effect stereo"
 control would belong in the per-plugin `manifest.json` only as a hint to
 the author about which buffers to touch in their C code, not as a flag
 the host reads.
+
+## Hardware results: StProbe (2026-11-01)
+
+StProbe was a stereo and cable-loop probe (Delay 916; never published, removed
+2026-11-09). It asked, for a feedback-loop effect (R Out patched back into
+L In, the instrument on R In):
+
+1. Does an effect get L In and R In separately?
+2. Can it send different signals to L Out and R Out?
+3. Is `ctx[4]` the raw input, before the chain, with the same L/R layout?
+4. How does the cable loop behave: where it starts to ring, and at what pitch?
+
+Its modes, and what each answer meant:
+
+| Mode | Setup | What it means |
+|---|---|---|
+| **Tone** | No input. Listen to L Out, then R Out. | Low single beep on L, high double beep on R: the outputs are separate. Both beeps on one output: they are summed. |
+| **InFx** | Guitar in L In, then in R In. Reads `ctx[5]`. | L: steady. R: chopped to silence 6 times a second, if R In is separate. Pulsing but never silent: one input is copied to both sides. Silent: R In doesn't reach the effect. |
+| **InDry** | As InFx. Reads `ctx[4]`. Repeat with a stock delay in slot 1 and the probe in slot 2. | Same answers for `ctx[4]`. If the delay is absent here but present in InFx, `ctx[4]` is the raw input. |
+| **Loop** | Cable R Out → L In, amp on L Out, guitar in R In. Gain and Inst at 0. | The guitar passes clean to L Out. Raise Gain slowly: note the value where it starts to ring, and the pitch (set by the round trip through the cable). Inst feeds the guitar into the loop. R Out is capped at -6 dBFS. |
+
+Unplug the R Out → L In cable before leaving Loop: InFx and InDry send the
+input to both outputs, so with the cable in place they howl at once.
+
+Also try Tone with a stock mono effect after the probe: does the separation
+survive it?
+
+MS-70CDR, firmware 2.10, StProbe 0.01 alone in slot 1 (2026-11-01):
+
+- **Tone, both outputs plugged:** L Out plays only the low single beep, R Out
+  only the high double beep. The outputs are separate.
+- **Tone, only L Out plugged:** L Out still plays only the single beep. The
+  pedal does not sum R into L when one output is unplugged.
+
+- **InFx, guitar in L In (R In plugged or empty):** steady on L Out.
+- **InFx, guitar in R In, L In plugged (free cable):** chopped. R In reaches
+  the effect separately from L In.
+- **InFx, guitar in R In, L In empty:** silent. R In only works while L In is
+  plugged, which the loop always is (R Out cabled to L In).
+
+- **Loop, R Out cabled to L In, Inst 0:** starts to ring at Gain 41. In the
+  code, Gain 41 gives 8 × 0.41² = 1.34, and R Out's small-signal gain is
+  0.5 × 1.5 = 0.75, so the loop inside the effect is 1.34 × 0.75 = 1.0. The
+  round trip out of R Out, through the cable and back into L In is therefore
+  unity (0 dB): full scale out comes back as full scale in.
+
+  It rings at one pitch, a whine: the round trip through the converters is
+  short. A tuner reads A5 (880 Hz): a 1.14 ms (50-sample) period. The loop
+  can also ring at a multiple of its basic frequency, so the round trip is
+  about 50 samples or a whole fraction of that.
+- **Loop, guitar in R In, Gain 0, Inst 0:** silent on L Out, although the
+  code passes R In straight to L Out. At full volume the guitar is just
+  audible, very faint, with or without R Out plugged.
+- **InFx, guitar in R In, R Out unplugged, compared with L In:** R In is also
+  very faint (a little louder than in Loop). The pedal itself delivers R In
+  far below L In; the code is not the cause. Not yet ruled out: the cable or
+  jack contact on R In.
+
+InDry: not yet run (only matters for an effect placed after others).

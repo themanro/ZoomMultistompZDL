@@ -70,7 +70,7 @@ def _bind(port: int) -> ThreadingHTTPServer:
 def main() -> None:
     """Serve the repo and open an editor.
 
-        python3 tools/serve_editor.py              # patch editor
+        python3 tools/serve_editor.py              # MultiStomp Editor
         python3 tools/serve_editor.py --cover      # cover editor
         python3 tools/serve_editor.py --no-open    # just serve
         python3 tools/serve_editor.py 8100         # pick a starting port
@@ -90,12 +90,14 @@ def main() -> None:
     httpd = _bind(port)
     actual = httpd.server_address[1]
     base = f"http://localhost:{actual}"
-    patch_url = f"{base}/tools/patch_editor.html"
+    patch_url = f"{base}/tools/editor.html"
+    classic_url = f"{base}/tools/patch_editor.html"
     cover_url = f"{base}/tools/cover_editor.html"
 
     if actual != port:
         print(f"(port {port} was busy -- using {actual})")
-    print(f"Patch Editor  ->  {patch_url}")
+    print(f"MultiStomp Editor  ->  {patch_url}")
+    print(f"  (classic)   ->  {classic_url}")
     print(f"Cover Editor  ->  {cover_url}")
     print("   Web MIDI only works on localhost or https, so open these URLs --")
     print("   a file:// page will load but can never reach the pedal.")

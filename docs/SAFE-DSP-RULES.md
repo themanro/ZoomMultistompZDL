@@ -66,6 +66,38 @@ experiment, not a port.
   probes declaring a fixed cost next to Great Muff (30.43): 224.4 accepted,
   228.4 refused -- below the ~230 reported elsewhere. PE's meter uses 228. The same research also confirmed our size cap (~30 KB
   code+data, layout-dependent) and a 9-control maximum.
+* **Keep every callback's cost flat, not just the average.** The pedal clicks
+  when ONE callback overruns, so a screen that draws its whole frame in a
+  single callback (30 times a second) crackles a chain whose average fits.
+  Hardware-confirmed 2026-11-13: Deform + Carillon + Droplets + Galactic
+  crackled until each screen's drawing was split so no step adds more than
+  ~3,000 emulated cycles (Deform's worst callback went 19,300 -> 8,900); then
+  clean. Measure peaks with the screen running: build the emulator copy
+  (`ZVIS_EMU=<dir> python3 src/custom/<fx>/build.py`) and run
+  `NAMCHECK_TRACE=trace.txt namcheck <dir>/<Fx>.ZDL input.f32 out.f32 <knobs>`,
+  which writes one cycle count per callback; the plain build hides the screen.
+  The declared cost cannot protect against this: these four declared 165 of
+  228 and still crackled. Rough real scale: ~30,000 emulated-plus-stall
+  cycles per callback for the whole chain.
+* **"Bit-identical" optimizations need a check on the TI build, not the host.**
+  cl6x reassociates float sums by default, so moving state into locals can
+  change rounding even when the C maths is the same (in a feedback reverb the
+  difference then grows). Compare `namcheck` outputs of the old and new ZDL
+  with `cmp`. The C674x's `_rcpsp` plus two Newton steps replaces a
+  bit-trick-plus-three-steps reciprocal at full precision, guarded with
+  `#ifdef __TI_COMPILER_VERSION__` for host builds.
+* **Keep the audio function's stack frame small (300 bytes or less).** The
+  firmware runs effects on a stack of unmeasured size. Proven frames reach
+  272 bytes (Carillon); Chimera 0.01 used 900 (its tube state and
+  coefficients copied into local arrays) and was installed when the pedal
+  froze (2026-11-13). Keep large arrays in the ctx[3] state, not in locals.
+  `build/stack_guard.py` reads the compiler's frame size and fails the build
+  over the limit (wired into Chimera and Horizon; add it to new builds).
+* **Run every screen path in the emulator copy, not just on the host.**
+  Chimera's nose drawing (two `zv_line`s plus a row run in one step) ran on
+  the host but hung the emulator's TI build (`Error: Budget`), while either
+  part alone ran. Byte-wise spans replaced it. Exercise each drawing branch
+  (knob settings that enable it) with `ZVIS_EMU` builds before release.
 * **Size cap: keep a ZDL at or under 32,126 bytes (code+data 29,576).**
   Confirmed on hardware 2026-09-30/10-02: everything up to those sizes loaded;
   NAM 0.24 (32,998 / 30,336) froze the pedal on load, and so did TSize2 -- the

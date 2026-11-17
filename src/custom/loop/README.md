@@ -33,7 +33,7 @@ LED, but **the loop plays either way**, so ignore the LED.
 it's stopped. The first press of the clearing pair briefly starts the loop
 again before the second one clears it.
 
-An on/off message over MIDI, or the on/off button in Patch Editor, counts as a
+An on/off message over MIDI, or the on/off button in MultiStomp Editor, counts as a
 press too.
 
 ## Knobs

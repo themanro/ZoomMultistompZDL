@@ -144,11 +144,16 @@ function strip(zdl){
 
 // One file from a zip, found by `want(name)`; stored or deflated entries.
 async function unzipOne(bytes,want){
-  const b=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes),v=view(b),dec=new TextDecoder();
+  const [first]=await unzipAll(bytes,want,1);
+  return first?first.data:null;
+}
+// Every entry whose name `want` accepts, in zip order (at most `max`): [{name, data}].
+async function unzipAll(bytes,want=()=>true,max=Infinity){
+  const b=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes),v=view(b),dec=new TextDecoder(),found=[];
   let end=b.length-22;while(end>=0&&v.getUint32(end,true)!==0x06054b50)end--;
   if(end<0)throw new Error("not a zip file");
   let at=v.getUint32(end+16,true);
-  for(let k=v.getUint16(end+10,true);k>0;k--){
+  for(let k=v.getUint16(end+10,true);k>0&&found.length<max;k--){
     if(v.getUint32(at,true)!==0x02014b50)throw new Error("the zip's directory is damaged");
     const method=v.getUint16(at+10,true),csize=v.getUint32(at+20,true),size=v.getUint32(at+24,true),off=v.getUint32(at+42,true);
     const nl=v.getUint16(at+28,true),name=dec.decode(b.subarray(at+46,at+46+nl));
@@ -160,9 +165,9 @@ async function unzipOne(bytes,want){
     else if(method===8)out=new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer());
     else throw new Error(name+" uses a compression this page can't read");
     if(out.length!==size)throw new Error(name+" did not unpack whole");
-    return out;
+    found.push({name,data:out});
   }
-  return null;
+  return found;
 }
 
 // Files in an updater's FS.bin. It holds several directory copies: an entry
@@ -204,6 +209,6 @@ async function updaterEffects(bytes){
   return out.sort((a,b)=>a.file<b.file?-1:a.file>b.file?1:0);
 }
 
-const api={strip,updaterEffects,fsBinFiles,unzipOne};
+const api={strip,updaterEffects,fsBinFiles,unzipOne,unzipAll};
 if(typeof module!=='undefined')module.exports=api;else root.ZdlStrip=api;
 })(globalThis);
