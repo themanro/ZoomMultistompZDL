@@ -930,7 +930,7 @@ let curProg=0;                                 // currently-loaded program (was 
 const $=id=>document.getElementById(id);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 // One user transaction owns MIDI until its reads and scheduled writes finish.
-let busySince=0, midiActionActive=false, actionCancelled=false, patchGeneration=0;
+let busySince=0, midiActionActive=false, actionCancelled=false, patchGeneration=0, connecting=false, lastBadDump=0;
 let expectedProgram=null, dumpCooldownUntil=0;
 let transientBypassSlot=-1; // hide only the slot bounce owned by Apply
 let quietApply=false;       // the automatic Apply after a knob move: no greyed UI, knobs stay live
@@ -1122,8 +1122,9 @@ async function connect(){
     const acc=await navigator.requestMIDIAccess({sysex:true});
     midiAccess=acc;
     let inp=null,out=null;
-    for(const i of acc.inputs.values()) if(/zoom ms/i.test(i.name)) inp=i;
-    for(const o of acc.outputs.values()) if(/zoom ms/i.test(o.name)) out=o;
+    // "ZOOM MS Series" on the MultiStomps; the G1/B1 pedals name their port differently (#13).
+    for(const i of acc.inputs.values()) if(/zoom/i.test(i.name)) inp=i;
+    for(const o of acc.outputs.values()) if(/zoom/i.test(o.name)) out=o;
     if(!inp||!out){
       inp=inp||acc.inputs.values().next().value;
       out=out||acc.outputs.values().next().value;
@@ -1149,15 +1150,24 @@ async function connect(){
       const p=ev.port;
       if(p===midiIn || p===midiOut){if(p.state==="disconnected"){actionCancelled=true;cancelDump();PEDAL_ID=null;fwWarned="";fwCheck();}updateActionState();}
       log("MIDI "+p.type+" \""+p.name+"\" -> "+p.state+"/"+p.connection);
-      if(p.state==="connected"&&/zoom ms/i.test(p.name)){
+      if(p.state==="connected"&&/zoom/i.test(p.name)){
         if(p.type==="input"){ midiIn=p; midiIn.onmidimessage=onMidi; log("re-bound IN to "+p.name); }
         else if(p.type==="output"){ midiOut=p; log("re-bound OUT to "+p.name); send([0xf0,0x7e,0x00,0x06,0x01,0xf7]); }   // ask again who it is
       }
     };
     $("devname").textContent=`${inp.name} ⇄ ${out.name}`;
+    PEDAL_ID=null;
     send([0xf0,0x7e,0x00,0x06,0x01,0xf7]);        // identity request (universal, safe)
+    // Wait for the answer: it sets the device ID the reads are addressed to, and
+    // a pedal ignores requests addressed to another model (a G1on is 0x63, #13).
+    for(const until=performance.now()+800;!PEDAL_ID&&performance.now()<until;) await sleep(20);
     await sleep(40);
-    await reread();                                // show the CURRENT patch immediately — silent
+    // Show the CURRENT patch immediately, silently. Some pedals send a program
+    // change of their own while the editor connects (a G1on stopped Connect with
+    // "Patch changed on the pedal", #13): until this read is done, onMidi takes
+    // one as the pedal saying which patch it's on, not as a change mid-operation.
+    connecting=true;
+    try{ await reread(); } finally{ connecting=false; }
     // Do NOT auto-read the whole bank: the only way to read a stored patch is to
     // program-change to it, which makes the pedal AUDIBLY load+play each of the
     // 50 patches (the "cracking on connect"). Leave the full read to an explicit
@@ -1171,6 +1181,7 @@ function requestPatch(){ return midiAction(reread)(); }
 async function reread(){                        // explicit: await the dump and report
   if(!midiOut){banner("Connect MIDI first.");return;}
   send(zx([0x50])); await sleep(20);            // edit-enable: the pedal only dumps patches in this mode
+  lastBadDump=0;
   const d=await awaitDump(1300);
   if(d){ dirty.clear(); rawPatch=d.slice(0,146); rawFromPedal=d.slice(0,146); patch=decodePatch(rawPatch); editModeActive=false; render();
     log("re-read OK: "+patch.name);
@@ -1183,6 +1194,7 @@ async function reread(){                        // explicit: await the dump and 
     lastMaterializedProg = curProg;
     replayParams([0,1,2], `on re-read of patch ${curProg+1}`);
     banner("Re-read \u201c"+patch.name+"\u201d from the pedal \u2014 PE now matches the hardware."); }
+  else if(lastBadDump) banner("The pedal sent its patch ("+lastBadDump+" bytes), but this editor reads only the MS-70CDR's 146-byte patches, so it can't show it yet. Click Copy diag (in Diagnostics) and post it in an issue: that dump is what's needed to map this pedal.");
   else log("re-read: NO dump. MIDI msgs received since connect = "+rxCount
            +(rxCount===0?" (0 = we're not receiving — wrong IN port, or Effect Manager has the port)"
                         :" (>0 = pedal talks but sent no patch dump — try power-cycling the pedal)"),"warn");
@@ -1225,6 +1237,7 @@ function onMidi(ev){
     for(const b of d){ if(b<=0x7f || b===0xf7) sxAccum.push(b); }  // drop interleaved status bytes
   }else if(b0===0xC0){                   // standalone program-change echo
     if(expectedProgram===d[1]){ expectedProgram=null; }
+    else if(connecting){ log("the pedal is on patch "+(d[1]+1)); }   // Connect's first read: not a change (#13)
     else {
       patchGeneration++; cancelDump(); actionCancelled=true;
       if(midiOut&&midiOut.clear) midiOut.clear();
@@ -1292,6 +1305,7 @@ function handleSysex(m){
       else render(); // effect identity changes the slot structure
     }
   }else if(m[1]===0x52 && m[3]===DEVID && m[4]===0x28){
+    lastBadDump=m.length;
     log("bad dump ("+m.length+"B, expected 146) — ignored","warn");   // reject misaligned
   }else if(m[1]===0x7e){
     log("identity: "+hex(m));

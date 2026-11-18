@@ -135,6 +135,16 @@ dated. Effects in [dist/](dist/) carry their own version in the file
   bank (`graphics/editor.webp`); both run the real page in headless Chrome.
 
 ### MultiStomp Editor (was Patch Editor)
+- **Connect on a G1on** ([#13](https://github.com/themanro/ZoomMultistompZDL/issues/13)):
+  Connect stopped with "Patch changed on the pedal during this operation"
+  when the pedal sent a program change of its own while connecting; until
+  Connect's first read is done, one now only says which patch the pedal is
+  on. Connect also waits for the pedal's identity reply (up to 0.8 s, was a
+  fixed 40 ms) before reading, since a pedal ignores reads addressed to
+  another model, and finds the pedal's port by "ZOOM" rather than "ZOOM MS".
+  When a pedal sends a patch in a layout the editor hasn't mapped (anything
+  but 146 bytes), it says so and asks for Copy diag, instead of suggesting a
+  power-cycle. Tested with a simulated G1on and MS-70CDR, not on a G1on.
 - **Check effect files before installing** (Effects): choose effect files,
   or the folder you install from with Zoom Effect Manager, and it lists the
   ones that can't go on one pedal together: two files with one group and
