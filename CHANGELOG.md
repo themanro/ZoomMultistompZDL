@@ -135,6 +135,15 @@ dated. Effects in [dist/](dist/) carry their own version in the file
   bank (`graphics/editor.webp`); both run the real page in headless Chrome.
 
 ### MultiStomp Editor (was Patch Editor)
+- **Check effect files before installing** (Effects): choose effect files,
+  or the folder you install from with Zoom Effect Manager, and it lists the
+  ones that can't go on one pedal together: two files with one group and
+  effect ID (which can freeze the pedal at boot), a file with the ID of one
+  of Zoom's own effects or of this project's, file names that match in the 8
+  characters the pedal keeps, two versions of one effect, and local IDs
+  (Delay 958–1023). Works without a pedal; after Read the pedal, the effects
+  on it are checked too. Read in the browser, nothing uploaded
+  ([#14](https://github.com/themanro/ZoomMultistompZDL/issues/14)).
 - **Renamed the MultiStomp Editor** in both editors, the launcher, the NAM
   loader, the issue forms and the docs. File names are unchanged
   (`tools/editor.html`, `tools/patch_editor.html`), so links keep working.

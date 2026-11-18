@@ -164,6 +164,12 @@
   #fxRows .acts,#fxStockRows .acts,#fxZoomRows .acts,#fxNamRows .acts{display:flex;gap:6px;justify-content:flex-end;border-bottom:1px solid var(--line)}
   #fxRows button,#fxStockRows button,#fxZoomRows button,#fxNamRows button{min-height:28px;padding:2px 10px;font-size:12px}
   #fxStatus,#fxStockStatus,#fxZoomStatus,#fxNamStatus{color:var(--muted)}
+  #fxCheckRows{display:grid;grid-template-columns:auto minmax(0,1.2fr) auto minmax(0,1.6fr);gap:0 12px;align-items:stretch;margin:8px 0}
+  #fxCheckRows .head{font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--faint)}
+  #fxCheckRows>div{padding:7px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+  #fxCheckRows .ck-bad,#fxCheckRows .ck-warn{font-size:11px;letter-spacing:1px;text-transform:uppercase;font-weight:700;padding-top:9px}
+  #fxCheckRows .ck-bad{color:var(--err)} #fxCheckRows .ck-warn{color:var(--warn)}
+  #fxCheckStatus{color:var(--muted)}
   .fx-progress{position:sticky;bottom:0;z-index:5;margin:14px -24px -96px;padding:12px 24px 16px;background:var(--surface);border-top:1px solid var(--line);display:grid;gap:8px;box-shadow:0 -8px 24px rgba(0,0,0,.35)}
   .fx-progress.floating{position:fixed;left:0;right:0;bottom:0;margin:0}
   .fx-progress-text{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--text-secondary)}

@@ -100,10 +100,6 @@ Open work, roughly in order. Done items move to [CHANGELOG.md](CHANGELOG.md).
 - **MIDISTOMP and a DSP limit of 300** (reported for an upcoming version):
   once released, measure the real limit on the MS-70CDR with the cost probes
   and update PE's meter (`DSP_BUDGET`, 228 now) and the README budget table.
-- **FXID collision:** Matujuice Sweep (496) has the same FXID as the stock
-  ANA234Cho (reported by `build/extract_effect_db.py`). Told Luca
-  (2026-10-23); he will fix the IDs when he redoes his effects in stereo.
-  Until then, check what the pedal does with both installed.
 - **Issue #6:** Patch Editor reads banks only up to E on a G1Xon (pedal has
   A-J).
 - **NAM Input default from capture metadata** (needs a level measurement, a

@@ -151,6 +151,11 @@ support yet:
    Folder** (without the second it shows "No data to display").
 3. Add the effects you want and write them to the pedal.
 
+Before writing effects from several projects, run your folder through the
+editor's **Effects → Check effect files before installing**: it lists the
+files that share an effect ID, which can freeze the pedal at boot. No pedal
+needed.
+
 Keep each `.png` beside its `.ZDL`: it's the thumbnail Effect Manager shows.
 Effect Manager won't replace an installed effect with the same ID: remove it
 first, then add the new one. `FS.bin size mismatch` means the pedal is full.

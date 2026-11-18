@@ -426,6 +426,9 @@
   .drawer-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}
   #fxRows,#fxStockRows,#fxZoomRows,#fxNamRows{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) auto;gap:6px 12px;align-items:center;margin:8px 0}
   #fxRows .head,#fxStockRows .head,#fxZoomRows .head,#fxNamRows .head{font-size:12px;opacity:.7;text-transform:uppercase;letter-spacing:1px}
+  #fxCheckRows{display:grid;grid-template-columns:auto minmax(0,1.2fr) auto minmax(0,1.6fr);gap:6px 12px;align-items:baseline;margin:8px 0}
+  #fxCheckRows .head{font-size:12px;opacity:.7;text-transform:uppercase;letter-spacing:1px}
+  #fxCheckRows .ck-bad{color:var(--err);font-weight:700} #fxCheckRows .ck-warn{color:var(--warn,var(--warnfg));font-weight:700}
   #fxRows .acts,#fxStockRows .acts,#fxZoomRows .acts,#fxNamRows .acts{display:flex;gap:6px;justify-content:flex-end} #fxRows button,#fxStockRows button,#fxZoomRows button,#fxNamRows button{min-height:32px}
   .nam-dsp{display:flex;gap:10px;align-items:center;margin:4px 0 8px} .nam-dsp .dspmeter{margin-left:0} .nam-dsp .dspmeter .bar{display:block;padding:0;margin:0;height:9px;flex:none}
   .t3k-pick{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:flex-end;margin:0 0 8px} .t3k-pick label{display:flex;flex-direction:column;gap:4px;font-size:13px}
@@ -614,6 +617,13 @@
   <details><summary>Install a file from your computer</summary>
     <p class="hint">For files made by the NAM and cab loaders (NAM… and C… files). Other files are refused.</p>
     <div class="bar"><input type="file" id="fxFile" accept=".ZDL,.zdl" aria-label="Choose a .ZDL file"><button id="fxInstallFile" type="button">Install it</button></div>
+  </details>
+  <details id="fxCheckBox"><summary>Check effect files before installing</summary>
+    <p class="hint">Before you install effects from other projects, here or with Zoom Effect Manager: choose the files, or the folder you install from, and this lists the ones that can't go on one pedal together. Two effects with the same effect ID can freeze the pedal at boot. No pedal needed; if you've read the pedal above, the effects on it are checked too. The files are read in this browser; nothing is uploaded.</p>
+    <div class="bar"><button id="fxCheckPickFiles" type="button">Choose files…</button><button id="fxCheckPickDir" type="button">Choose a folder…</button><button id="fxCheckPedal" type="button" hidden title="Reads every effect's ID from the pedal: about half a minute the first time">Include all the pedal's effects</button>
+      <input type="file" id="fxCheckFiles" accept=".ZDL,.zdl" multiple hidden><input type="file" id="fxCheckDir" webkitdirectory hidden></div>
+    <p id="fxCheckStatus" class="hint" role="status" aria-live="polite"></p>
+    <div id="fxCheckRows" role="table" aria-label="Effect files that clash"></div>
   </details>
   <details><summary>Restore from a backup</summary>
     <p class="hint">Puts back the effects and the effect list from a backup zip (Back up all files above, or Modwerk's pedal page), for example after Zoom's own updater, which resets the pedal to Zoom's effects. Effects already on the pedal at the same version are skipped and nothing is removed. Patches are not in the backup and stay as they are.</p>
@@ -3394,7 +3404,7 @@ async function fsScan_(){
   let free=null;
   if(usage){const d=usage.slice(1);if(d[3]===0x60&&d[4]===0x04)free=d[15]+d[16]*128+d[17]*16384+d[18]*2097152+d[19]*268435456;}
   fsFiles={files,free};
-  fsRender();fsRenderNam();
+  fsRender();fsRenderNam();fxCheckRender();
   if(fsStock){await fsStockHeads();fsRenderStock();}
   if(fsZoomShown)await fsZoomRead();
   {const r=fsRoom();
@@ -4310,6 +4320,118 @@ $("fxInstallFile").onclick=midiAction(async()=>{
   await fsInstall(f.name,Array.from(new Uint8Array(await f.arrayBuffer())));
 });
 fsLoadIndex().then(fsRender).catch(()=>{});
+
+// Check effect files before installing (issue #14). Reads each file's group and
+// effect ID from its header, and the effect's name from its descriptor table
+// (as build/extract_effect_db.py does), then lists what can't share a pedal:
+// two effects with one group and ID freeze it at boot, so do two whose file
+// names match in the 8 characters the pedal keeps. Checked against each other,
+// against Zoom's own effects and this project's (DB), and against the pedal's
+// files when it has been read. No MIDI unless asked to read the pedal's IDs.
+let fxCheckSet=null;
+function zdlEffectName(b){
+  const sig=[0x4f,0x6e,0x4f,0x66,0x66,0];             // "OnOff\0": the table's first entry
+  for(let i=0;i+0x60<=b.length;i++){
+    if(!sig.every((v,k)=>b[i+k]===v))continue;
+    const e=i+0x30,max=(b[e+12]|b[e+13]<<8|b[e+14]<<16|b[e+15]<<24)>>>0;
+    if(max!==0xffffffff)continue;                     // entry 1 is the effect's own
+    let n="";
+    for(let k=0;k<10&&b[e+k];k++){const c=b[e+k];if(c===0x1f)n+="Hz";else if(c<0x20||c>0x7e){n="";break;}else n+=String.fromCharCode(c);}
+    if(n)return n;
+  }
+  return null;
+}
+const zdlPedalName=file=>file.replace(/^.*\//,"").replace(/\.zdl$/i,"").toUpperCase().slice(0,8);
+async function fxCheckRead(list){
+  const files=[],skipped=[];
+  for(const f of list){
+    if(!/\.zdl$/i.test(f.name))continue;
+    const b=new Uint8Array(await f.arrayBuffer()),info=fsInfo(b);
+    const label=f.webkitRelativePath||f.name;
+    if(!info){skipped.push(label);continue;}
+    files.push({label,file:f.name,pedalName:zdlPedalName(f.name),long:f.name.replace(/\.zdl$/i,"").length>8,...info,effect:zdlEffectName(b)});
+  }
+  return {files,skipped};
+}
+function fxCheckFindings({files}){
+  const out=[],idKey=x=>x.gid+"/"+x.fxid,same=(a,b)=>a&&b&&a.trim().toLowerCase()===b.trim().toLowerCase();
+  const pedal=fsFiles?fsFiles.files.filter(f=>/\.ZDL$/i.test(f.name)&&f.info).map(f=>({label:f.name+" (on the pedal)",pedalName:zdlPedalName(f.name),onPedal:true,...f.info})):[];
+  const complete=fsFiles&&fsFiles.files.every(f=>!/\.ZDL$/i.test(f.name)||f.info);   // every ID on the pedal read
+  const all=files.concat(pedal),byId=new Map(),byName=new Map();
+  for(const x of all){
+    if(!byId.has(idKey(x)))byId.set(idKey(x),[]);byId.get(idKey(x)).push(x);
+    if(!byName.has(x.pedalName))byName.set(x.pedalName,[]);byName.get(x.pedalName).push(x);
+  }
+  // Zoom's effects and this project's, not the NAM and cab slots: the editor keeps their IDs free (docs/NAM-LOADER.md).
+  const known=new Map();
+  for(const e of DB.stock.map(e=>({...e,zoom:true})).concat(DB.custom.filter(e=>!/ — (capture|slot) \d/.test(e.name)))){const k=e.gid+"/"+e.fxid;if(!known.has(k))known.set(k,[]);known.get(k).push(e);}
+  // One group and ID, more than one file name: they freeze the pedal together.
+  for(const [id,xs] of byId){
+    const names=[...new Set(xs.map(x=>x.pedalName))];
+    if(names.length>1&&xs.some(x=>!x.onPedal)){
+      out.push({bad:true,id,files:names.map(n=>xs.filter(x=>x.pedalName===n).map(x=>x.label).join(", ")),
+        why:xs.some(x=>x.onPedal)?"One is already on the pedal. Installing another file with its effect ID beside it can freeze the pedal at boot."
+          :(new Set(xs.map(x=>(x.effect||"").toLowerCase())).size===1&&xs[0].effect?"The same effect under different file names. ":"Different effects with one effect ID. ")+"Install only one: both on the pedal can freeze it at boot."});
+      continue;
+    }
+    if(xs.some(x=>x.onPedal))continue;                // the pedal's own copy: this is an update
+    // Not on the pedal (or the pedal wasn't read): Zoom's and this project's effects with that ID.
+    const effect=xs.find(x=>x.effect)?.effect;
+    const others=(known.get(id)||[]).filter(e=>!same(e.name,effect));
+    const zoom=others.find(e=>e.zoom),ours=others.find(e=>!e.zoom);
+    if(zoom)out.push({bad:!complete,id,files:[xs.map(x=>x.label).join(", ")],
+      why:"Same effect ID as Zoom's "+zoom.name+(complete?", which isn't on your pedal now. Don't install both: Zoom's updater or Effect Manager can put "+zoom.name+" back.":", which most pedals have. Installing both can freeze the pedal at boot.")});
+    else if(ours)out.push({bad:false,id,files:[xs.map(x=>x.label).join(", ")],
+      why:"Same effect ID as "+ours.name+(ours.credit?" ("+ours.credit+")":" from this project")+". Install only one of them."});
+  }
+  // One file name on the pedal, different effects: the second replaces the first.
+  for(const [n,xs] of byName){
+    const ids=[...new Set(xs.map(idKey))];
+    if(ids.length>1&&xs.some(x=>!x.onPedal))
+      out.push({bad:false,id:ids.join(", "),files:[xs.map(x=>x.label).join(", ")],
+        why:"These go on the pedal as "+n+".ZDL, so one replaces the other"+(xs.some(x=>x.onPedal)?" on the pedal, and patches that used it lose it.":". Rename one (at most 8 letters and digits) or install only one.")});
+    else if(xs.filter(x=>!x.onPedal).length>1){
+      const vs=[...new Set(xs.map(x=>x.version))];
+      if(vs.length>1)out.push({bad:false,id:ids[0],files:xs.map(x=>x.label+" ("+x.version+")"),why:"Versions "+vs.join(", ")+" of one effect. Install the newest."});
+    }
+  }
+  for(const x of files){
+    if(x.gid===8&&x.fxid>=958)out.push({bad:false,id:idKey(x),files:[x.label],why:"A local effect ID (Delay 958–1023), which Modwerk gives effects that clash on a pedal. Fine on the pedal it was made for; elsewhere it can clash with an effect Modwerk moved there."});
+    if(x.long&&byName.get(x.pedalName).length===1)out.push({bad:false,id:idKey(x),files:[x.label],why:"The pedal keeps 8 characters of a file name, so this goes on as "+x.pedalName+".ZDL. Rename it to at most 8 letters and digits."});
+  }
+  return out.sort((a,b)=>b.bad-a.bad);
+}
+function fxCheckRender(){
+  const rows=$("fxCheckRows"),st=$("fxCheckStatus");rows.textContent="";
+  const pedalAll=fsFiles&&fsFiles.files.filter(f=>/\.ZDL$/i.test(f.name)),pedalRead=pedalAll&&pedalAll.filter(f=>f.info).length;
+  $("fxCheckPedal").hidden=!(fxCheckSet&&pedalAll&&pedalRead<pedalAll.length);
+  if(!fxCheckSet)return;
+  const {files,skipped}=fxCheckSet,found=fxCheckFindings(fxCheckSet),bad=found.filter(f=>f.bad).length;
+  const n=k=>k+" effect file"+(k===1?"":"s");
+  st.textContent="Checked "+n(files.length)+(pedalAll?" against "+pedalRead+(pedalRead<pedalAll.length?" of the "+pedalAll.length:"")+" effects on the pedal":"")+": "
+    +(found.length?(bad?bad+" can freeze the pedal"+(found.length>bad?", "+(found.length-bad)+" to check":""):found.length+" to check"):"no clashes")+"."
+    +(skipped.length?" "+skipped.length+" .ZDL file"+(skipped.length===1?" isn't an effect":"s aren't effects")+" and "+(skipped.length===1?"was":"were")+" skipped.":"")
+    +(pedalAll?"":" Read the pedal above to check against what's on it too.");
+  if(!found.length)return;
+  for(const h of ["","Files","Effect ID","Why"]){const c=document.createElement("div");c.className="head";c.textContent=h;rows.appendChild(c);}
+  for(const f of found){
+    const tag=document.createElement("div");tag.className=f.bad?"ck-bad":"ck-warn";tag.textContent=f.bad?"Freeze":"Check";rows.appendChild(tag);
+    const fl=document.createElement("div");for(const t of f.files){const d=document.createElement("div");d.textContent=t;fl.appendChild(d);}rows.appendChild(fl);
+    for(const t of [f.id,f.why]){const c=document.createElement("div");c.textContent=t;rows.appendChild(c);}
+  }
+}
+async function fxCheckPick(input){
+  if(!input.files.length)return;
+  $("fxCheckStatus").textContent="Reading "+input.files.length+" files…";
+  try{fxCheckSet=await fxCheckRead(Array.from(input.files));fxCheckRender();}
+  catch(e){$("fxCheckStatus").textContent="Couldn't read the files: "+e.message;}
+  input.value="";
+}
+$("fxCheckPickFiles").onclick=()=>$("fxCheckFiles").click();
+$("fxCheckPickDir").onclick=()=>$("fxCheckDir").click();
+$("fxCheckFiles").onchange=()=>fxCheckPick($("fxCheckFiles"));
+$("fxCheckDir").onchange=()=>fxCheckPick($("fxCheckDir"));
+$("fxCheckPedal").onclick=midiAction(async()=>{await fsAllIds(t=>{$("fxCheckStatus").textContent=t;});fxCheckRender();});
 
 function setupNavigation(){
   const move=(id,to,parent=false)=>$(to).appendChild(parent?$(id).closest("label"):$(id));
