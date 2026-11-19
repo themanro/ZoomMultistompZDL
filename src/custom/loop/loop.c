@@ -190,7 +190,9 @@ static inline int long_ok(uintptr_t base, uintptr_t end)
 #ifdef LOOP_TEST_LONG
     return 1;
 #endif
-    if (!zv_fw_ok()) return 0;
+    /* The regions are mapped on the MS-70CDR only; and as before the firmware
+     * table, only once its UI event pointer is valid too. */
+    if (zv_fw_ok() != ZV_FW_MS70 || !zv_event(&zv_fws[ZV_FW_MS70 - 1])) return 0;
     for (k = 2; k < 8u; ++k) {
         unsigned v = ZV_U32(0xC00F3000u + 4u * k);
         if (v == 0xC0102000u || v == 0xC0198000u || v == 0xC0636980u) return 0;

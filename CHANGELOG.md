@@ -7,6 +7,20 @@ dated. Effects in [dist/](dist/) carry their own version in the file
 ## Unreleased
 
 ### Effects
+- **Live screens on the G1on family** (contributed by Barsik-Barbosik,
+  [#12](https://github.com/themanro/ZoomMultistompZDL/issues/12)): the
+  firmware check and the on-screen test in `src/custom/common/zvis.h` are now
+  a table with one entry per firmware, the MS-70CDR 2.10 (same values as
+  before) and the G1on family (G1on and G1Xon 1.21, B1on and B1Xon 1.30, one
+  firmware). Skull, Ring, Scope, Spectrum and Loop load and animate on a
+  B1Xon. On the G1on, Loop's Long mode stays off (its regions are mapped on
+  the MS-70CDR only). The linker can leave out the unused 640-byte float
+  divide (`drop_unused_divf`, kept when the code calls it), which keeps
+  Skull and Chopdly under the size limit. Rebuilt, with new versions: Skull
+  0.06, Ring 0.03, Scope 0.04, Spectrum 0.03, Loop 0.04, Chimera 0.03,
+  Horizon 0.03, HorizonL 0.02, Carillon 0.04, Droplets 0.03, Chopdly 1.04,
+  Deform 0.04. Same sound (emulator output identical to the previous
+  builds); on the MS-70CDR the screens should behave as before.
 - **HorizonL** (new, Delay 420, version 0.01): Horizon with its reverb tank
   (diffusers, the eight lines, their damping) at half the sample rate, for
   chains where Horizon crackles: Carillon + Horizon crackled on the pedal

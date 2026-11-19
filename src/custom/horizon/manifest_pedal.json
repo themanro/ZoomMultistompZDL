@@ -6,7 +6,7 @@
   "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_.",
   "fxid": 419,
   "fxid_comment": "0x01A3. In this project's reserved 403-499 Delay block; free in every group's DB entry. Check repeat98's FXID registry before release.",
-  "fxid_version": "0.02",
+  "fxid_version": "0.03",
   "flags_byte": 1,
   "dsp_cost": 50.0,
   "params": [

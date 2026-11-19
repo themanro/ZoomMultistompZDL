@@ -101,7 +101,8 @@ def build(here: Path, cover_rle: bytes) -> Path:
                       params=params_from_manifest(m["params"]), obj_path=obj, output_path=out, screen_image=cover_rle,
                       fxid_version=m["fxid_version"].encode(), flags_byte=m["flags_byte"], materialize_init=True,
                       use_object_edit_handlers=False, synthesize_linesel_edit_handlers=True, synth_edit_start_index=2,
-                      knob3_blob_path=str(here / "unused"), dsp_cost=DSP_COST))
+                      knob3_blob_path=str(here / "unused"), dsp_cost=DSP_COST,
+                      drop_unused_divf=True))      # externals checked above: never called
     size_check(out)
     if not emu:
         em_thumbnail(out)                      # same-name PNG: Effect Manager's thumbnail

@@ -23,27 +23,27 @@
    "name": "Carillon",
    "gid": 8,
    "fxid": 497,
-   "version": "0.03",
-   "bytes": 25454,
-   "sha256": "0c2fbe951cd2dd65442ea56a03e522b7029a054e4e123fb38d6565ced34c5373"
+   "version": "0.04",
+   "bytes": 25846,
+   "sha256": "d64c9c5a934c7effa2bfb601ace3ce8e2f096f6a8a23fb68bd1e1e3ff78bd96e"
   },
   {
    "file": "Chimera.ZDL",
    "name": "Chimera",
    "gid": 8,
    "fxid": 418,
-   "version": "0.02",
-   "bytes": 27306,
-   "sha256": "dc086028f46a5600f1084ef2a1cf8a85aa164f8c8c6f4920cd7b2ecc2c5c90f3"
+   "version": "0.03",
+   "bytes": 27538,
+   "sha256": "d854178759e1ce6996f00a7e4d8f23791d1ea3d4deb3729249aef561e49e359e"
   },
   {
    "file": "Chopdly.ZDL",
    "name": "Chopdly",
    "gid": 8,
    "fxid": 947,
-   "version": "1.03",
-   "bytes": 31794,
-   "sha256": "487280354b1140b6375e5da2d3114ff78f47a8d21cfbfb4de120006d8acecc31"
+   "version": "1.04",
+   "bytes": 32090,
+   "sha256": "777af19567b91cdcf785cbcfe0320e1ace0a334b7c98c6bd8f5037aa4e29b038"
   },
   {
    "file": "Choral.ZDL",
@@ -68,9 +68,9 @@
    "name": "Deform",
    "gid": 8,
    "fxid": 417,
-   "version": "0.03",
-   "bytes": 21934,
-   "sha256": "3f3ec15914547e2540066e98de83ff32cf1abdb5f155adb211f74c54d2bc8a87"
+   "version": "0.04",
+   "bytes": 22294,
+   "sha256": "ea4ed998d3910c272788eb14d2af75127fc7c8bf9bc54e207cf320a1d0a2030b"
   },
   {
    "file": "DirtBox.ZDL",
@@ -95,9 +95,9 @@
    "name": "Droplets",
    "gid": 8,
    "fxid": 492,
-   "version": "0.02",
-   "bytes": 25406,
-   "sha256": "0395dc757aa9d8a2dcf838cc2f599074b427ffab9756b37d12fce148d754cb67"
+   "version": "0.03",
+   "bytes": 25962,
+   "sha256": "eea035217bb589db4d09b97a5374ac84c23623605a82c6644232be709a37f222"
   },
   {
    "file": "DualShft.ZDL",
@@ -185,18 +185,18 @@
    "name": "Horizon",
    "gid": 8,
    "fxid": 419,
-   "version": "0.02",
-   "bytes": 24342,
-   "sha256": "9e65688ae63f71ae6a852a833b7ce78b5e77bd33959d4ee2bcfa2f2659a98cd5"
+   "version": "0.03",
+   "bytes": 24398,
+   "sha256": "ae1299d2abec5ff68bc3ff4eff958bc3f02c6d4a667cddb2a357903ac5cdb330"
   },
   {
    "file": "HorizonL.ZDL",
    "name": "HorizonL",
    "gid": 8,
    "fxid": 420,
-   "version": "0.01",
-   "bytes": 24910,
-   "sha256": "16c67e7b84a15c480486a9523cb4de4598566e4afeebc06dc17550cf63728435"
+   "version": "0.02",
+   "bytes": 24966,
+   "sha256": "075dd434dff08fb075b68cbb5ba86eef33b7aa0c6cd2d93c6d48845a792d691c"
   },
   {
    "file": "Howl.ZDL",
@@ -230,9 +230,9 @@
    "name": "Loop",
    "gid": 8,
    "fxid": 467,
-   "version": "0.03",
-   "bytes": 30738,
-   "sha256": "cd76a2314591e83ecef2884cabd2444e0c4920c36fe12294661d7e55cddd25b0"
+   "version": "0.04",
+   "bytes": 30914,
+   "sha256": "3ddc6574ccfd4c122db7253717e73ec35fec663f35d15326e4d1c97b69056814"
   },
   {
    "file": "Mangle.ZDL",
@@ -275,9 +275,9 @@
    "name": "Ring",
    "gid": 8,
    "fxid": 415,
-   "version": "0.02",
-   "bytes": 12494,
-   "sha256": "e2493710c8cba43fe8d123926c235162e9c8715e4ed56f16d63b6553324f7627"
+   "version": "0.03",
+   "bytes": 12754,
+   "sha256": "9af7e6b202497a0af38f565f0bc99a8fe07f998449f6d95427d8cda7c0de0616"
   },
   {
    "file": "Rooms.ZDL",
@@ -293,9 +293,9 @@
    "name": "Scope",
    "gid": 8,
    "fxid": 414,
-   "version": "0.03",
-   "bytes": 11682,
-   "sha256": "38b0c6e3772bed2f17a4f916a883ff053eba63bc24557b59943863c73a721e68"
+   "version": "0.04",
+   "bytes": 11834,
+   "sha256": "2cd60bfc57d71b39524f9f30788a0d43f69570ea2421ef787b0f5329eeeed499"
   },
   {
    "file": "Scorch.ZDL",
@@ -338,18 +338,18 @@
    "name": "Skull",
    "gid": 8,
    "fxid": 416,
-   "version": "0.05",
-   "bytes": 31934,
-   "sha256": "e5079ddb5c1ec3fc391cbe7f537e5fadf92c8dbffaaf84cc4aaa9ee508554eb1"
+   "version": "0.06",
+   "bytes": 32086,
+   "sha256": "89c85cd216a44369d218549c693d77702ba4ebd30e916e967f6a67d25d12b0f6"
   },
   {
    "file": "Spectrum.ZDL",
    "name": "Spectrum",
    "gid": 8,
    "fxid": 468,
-   "version": "0.02",
-   "bytes": 18366,
-   "sha256": "0462a8447b5949743cf67d6e49b6c3aba3776fa5c00f03d52c944aa0bb8a8f76"
+   "version": "0.03",
+   "bytes": 18678,
+   "sha256": "8cfd84f5f2900595095e5d7a618ebf66a34e16ebce695100b94cadda1ef4087c"
   },
   {
    "file": "Spiral.ZDL",

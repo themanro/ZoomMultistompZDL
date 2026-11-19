@@ -4,7 +4,7 @@
   "audio_func_name": "Fx_DLY_Loop",
   "gid": 8,
   "fxid": 467,
-  "fxid_version": "0.03",
+  "fxid_version": "0.04",
   "flags_byte": 1,
   "params": [
     {

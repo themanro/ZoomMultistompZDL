@@ -6,7 +6,7 @@
   "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_.",
   "fxid": 420,
   "fxid_comment": "0x01A4. Project reserved Delay block, next to Horizon (419).",
-  "fxid_version": "0.01",
+  "fxid_version": "0.02",
   "flags_byte": 1,
   "dsp_cost": 35.0,
   "params": [

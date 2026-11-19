@@ -4,7 +4,7 @@
   "audio_func_name": "Fx_DLY_Ring",
   "gid": 8,
   "fxid": 415,
-  "fxid_version": "0.02",
+  "fxid_version": "0.03",
   "flags_byte": 1,
   "params": [
     {"name": "Time", "type": "knob", "max": 100, "default": 25, "comment": "How much signal goes around the ring: 1-64 samples per point."},

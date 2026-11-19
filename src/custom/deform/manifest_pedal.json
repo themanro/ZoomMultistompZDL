@@ -6,7 +6,7 @@
   "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_.",
   "fxid": 417,
   "fxid_comment": "0x01A1. In this project's reserved 403-499 Delay block; free in every group's DB entry (498, the obvious gap, is the old NAMLite's and still in patches). Check repeat98's FXID registry before release.",
-  "fxid_version": "0.03",
+  "fxid_version": "0.04",
   "flags_byte": 1,
   "dsp_cost": 45.0,
   "params": [

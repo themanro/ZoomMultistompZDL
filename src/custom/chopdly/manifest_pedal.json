@@ -6,7 +6,7 @@
   "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_.",
   "fxid": 947,
   "fxid_comment": "0x03B3. Free in every collection in repeat98's FXID registry (checked 2026-10-29 and 2026-11-09; 946 is TapeEcho4). Reserved in this README; add to the registry's themanro release row.",
-  "fxid_version": "1.03",
+  "fxid_version": "1.04",
   "flags_byte": 1,
   "dsp_cost": 40.0,
   "params": [

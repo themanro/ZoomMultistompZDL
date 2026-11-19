@@ -254,6 +254,8 @@ class LinkerConfig:
 
     # Path to extracted __c6xabi_divf RTS code (640 bytes).
     divf_rts_path: Optional[str | os.PathLike] = None
+    # Leave divf out when the .obj has no __c6xabi_divf reference.
+    drop_unused_divf: bool = False
 
     # Path to LineSel handler blob (480 bytes: onf + edit_a + edit_b + init
     # + __call_stub + RTS helpers, copied verbatim from LineSel's .text).
@@ -960,7 +962,10 @@ def link(cfg: LinkerConfig) -> None:
     object_symbol_names = {sym['name'] for sym in obj.symbols if sym['name']}
 
     # ----- Load divf RTS -----
-    divf_code = _local_stock_file(cfg.divf_rts_path).read_bytes()
+    if cfg.drop_unused_divf and '__c6xabi_divf' not in externals:
+        divf_code = b""
+    else:
+        divf_code = _local_stock_file(cfg.divf_rts_path).read_bytes()
 
     # ----- Load handler blob (or fall back to NOP_RETURN handlers) -----
     handler_blob = b""

@@ -4,7 +4,7 @@
   "audio_func_name": "Fx_DLY_Scope",
   "gid": 8,
   "fxid": 414,
-  "fxid_version": "0.03",
+  "fxid_version": "0.04",
   "flags_byte": 1,
   "params": [
     {"name": "Time", "type": "knob", "max": 100, "default": 30, "comment": "Time across the screen: 1-64 samples per column (2.9-186 ms)."},

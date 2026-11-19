@@ -4,7 +4,7 @@
   "audio_func_name": "Fx_DLY_Skull",
   "gid": 8,
   "fxid": 416,
-  "fxid_version": "0.05",
+  "fxid_version": "0.06",
   "flags_byte": 1,
   "params": [
     {

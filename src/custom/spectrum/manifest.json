@@ -4,7 +4,7 @@
   "audio_func_name": "Fx_DLY_Spectrum",
   "gid": 8,
   "fxid": 468,
-  "fxid_version": "0.02",
+  "fxid_version": "0.03",
   "flags_byte": 1,
   "params": [
     {"name": "Range", "type": "knob", "max": 100, "default": 50, "comment": "Shown range below 0 dBFS: 30 to 90 dB (default 60)."},
