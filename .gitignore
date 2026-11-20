@@ -84,3 +84,6 @@ ofd_zdl.txt
 docs/sprab89b.pdf
 docs/sprui03f.pdf
 docs/sprui04g.pdf
+
+# videos made by build/make_fx_sheet.py --video and make_editor_preview.py --video
+video/

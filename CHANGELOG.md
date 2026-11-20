@@ -129,6 +129,14 @@ dated. Effects in [dist/](dist/) carry their own version in the file
   write the new ID over it in place.
 
 ### README and docs
+- **All effects on one picture**: the README's eight sample pictures are
+  replaced by [graphics/fx-all.webp](graphics/fx-all.webp), all 47 editor
+  animations playing together, labelled, linking to EFFECTS.md
+  (`build/make_fx_sheet.py`). `--video` on it and on
+  `build/make_editor_preview.py` records the same sheet (3840x2160) and the
+  editor (1920x2000) as 15-second H.264 MP4s for social media, encoded by
+  macOS's own encoder (`build/encode_mp4.swift`); they go to `video/`, which
+  is not committed.
 - **README rewritten and shortened** (786 to 479 lines): a new title, a
   four-step Get started, an editor section with a moving preview, the
   effects in one table, NAM condensed, the Zoom Effect Manager steps without

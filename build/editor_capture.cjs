@@ -4,7 +4,7 @@
 // that sends nothing), and steps the frame clock by hand so the effect
 // pictures move a fixed step per frame.
 //
-//   node build/editor_capture.cjs <url> <out dir> <frames> <fps> <width> <height>
+//   node build/editor_capture.cjs <url> <out dir> <frames> <fps> <width> <height> [pixel scale]
 //
 // Needs Playwright (see fx_capture.cjs) and the repo served over http, e.g.
 // python3 -m http.server 8000 from the repo root.
@@ -13,7 +13,7 @@ const fs = require("fs");
 const path = require("path");
 const { chromium } = require("playwright");
 
-const [url, out, frames, fps, width, height] = process.argv.slice(2);
+const [url, out, frames, fps, width, height, scale = "1"] = process.argv.slice(2);
 const N = +frames, STEP = 1000 / +fps, WARM = 3;   // seconds run before recording
 
 // The bank on the left, and the patch in the editor (index CUR).
@@ -32,7 +32,7 @@ const CHAIN = ["Chopdly", "Deform", "Carillon", "Hydra", "Spool", "Horizon"];
 (async () => {
   let browser;                                   // Playwright's own Chromium, else the installed Chrome
   try { browser = await chromium.launch(); } catch (err) { browser = await chromium.launch({ channel: "chrome" }); }
-  const page = await browser.newPage({ viewport: { width: +width, height: +height }, deviceScaleFactor: 1, colorScheme: "dark" });
+  const page = await browser.newPage({ viewport: { width: +width, height: +height }, deviceScaleFactor: +scale, colorScheme: "dark" });
   await page.addInitScript(() => { try { localStorage.setItem("pe_fxview", "anim"); } catch (e) {} });
   await page.goto(url, { waitUntil: "load" });
   await page.waitForFunction(() => window.FxVis && document.getElementById("slots") && typeof render === "function");

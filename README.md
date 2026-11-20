@@ -77,20 +77,7 @@ moving picture from the editor, what it does and its knobs. In short:
 | **Filters, resonators and voices** | Flower, Klang, Howl, Carillon, Chimera |
 | **Live screens** | Scope, Spectrum, Ring, Skull: they draw your signal on the pedal's screen |
 
-<table>
-<tr>
-<td><img src="graphics/fx/spiral.webp" width="200" alt="Spiral in the editor"></td>
-<td><img src="graphics/fx/chopdly.webp" width="200" alt="Chopdly in the editor"></td>
-<td><img src="graphics/fx/horizon.webp" width="200" alt="Horizon in the editor"></td>
-<td><img src="graphics/fx/skull.webp" width="200" alt="Skull in the editor"></td>
-</tr>
-<tr>
-<td><img src="graphics/fx/hydra.webp" width="200" alt="Hydra in the editor"></td>
-<td><img src="graphics/fx/spool.webp" width="200" alt="Spool in the editor"></td>
-<td><img src="graphics/fx/carillon.webp" width="200" alt="Carillon in the editor"></td>
-<td><img src="graphics/fx/deform.webp" width="200" alt="Deform in the editor"></td>
-</tr>
-</table>
+<p align="center"><a href="EFFECTS.md"><img src="graphics/fx-all.webp" width="900" alt="All 47 effects as the MultiStomp Editor draws them, each picture moving"></a></p>
 
 All of them sit in the pedal's **Delay** category and end with a **Mix**
 knob (Dustbox ends with Power; the live screens pass the sound through). The
