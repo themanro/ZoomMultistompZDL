@@ -306,6 +306,8 @@ def main() -> None:
         "Mangle":   [462, 463, 464, 465, 467, 468, 469, 483],
         "Rooms":    [471],
         "Spool":    [409],
+        "Carillon": [497],   # 497 is Matujuice's Looper (GRDLOOP) too
+        "Droplets": [492],   # 492 is Matujuice's Washout too
     }
     current_ids = {e["id"] for e in db["custom"]} | {e["id"] for e in db["stock"]}
     db["legacy"] = []
@@ -348,6 +350,36 @@ def main() -> None:
             db["legacy"].append(alias)
     db["legacy"].sort(key=lambda x: x["name"].upper())
     print(f"legacy aliases: {len(db['legacy'])}")
+
+    # ---- other collections' effects ------------------------------------------
+    # Effects this project doesn't ship, by effect ID, so the editor's install
+    # check can warn when a file clashes with one (two effects with one group
+    # and ID can freeze a pedal at boot). Never used to name a patch's effect:
+    # an old patch with one of these IDs is more likely ours (see the legacy
+    # aliases). Sources: each project's own manifests or its row in
+    # repeat98/ZoomMultistompZDL docs/FXID-REGISTRY.md, checked 2026-11-20.
+    MATU = "Matujuice pack by Luca Matturro, not in this project's dist/"
+    db["others"] = [
+        {"name": n, "gid": g, "fxid": f, "credit": c} for n, g, f, c in [
+            ("LOUDER",          8, 481, MATU),
+            ("Washout",         8, 492, MATU),
+            ("Takeoff",         8, 494, MATU),
+            ("GRDLOOP (Looper)", 8, 497, MATU),
+            ("Gooey",           8, 501, MATU),
+            ("DJFilter",        8, 502, MATU),
+            ("TEcho4",          8, 946, "repeat98/ZoomMultistompZDL"),
+            ("SilverSt",        8, 505, "marcfuentes/silverst-zdl"),
+            ("DrumBox",         7, 520, "Barsik-Barbosik/Custom-Zoom-ZDL-Effects"),
+            ("SYNX2",           7, 915, "Leemuzhko/Zoom-ZDL-FX"),
+        ]
+    ]
+    ours = {(e["gid"], e["fxid"]): e for e in db["custom"]}
+    for o in db["others"]:
+        e = ours.get((o["gid"], o["fxid"]))
+        # Matujuice reuses an ID between its own releases (SyncEQ, then Takeoff, at 494): theirs to sort out.
+        if e and not (o["credit"] == MATU and "Matujuice" in (e.get("credit") or "")):
+            print(f"*** effect-ID COLLISION: {e['name']} {o['gid']}/{o['fxid']} == {o['name']} ({o['credit']}) "
+                  "— PICK A DIFFERENT fxid ***")
 
     # sanity: no patch-ID collisions
     ids = {}

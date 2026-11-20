@@ -25,6 +25,19 @@ newer and point it at that folder.
 
 ![Enable From Folder](images/from-folder.png)
 
+## Carillon's and Droplets' new effect IDs (20 November 2026)
+
+Carillon moved from effect ID 497 to 421 (version 0.05), and Droplets from
+492 to 422 (version 0.04). Matujuice's pack has its Looper (GRDLOOP.ZDL) at
+497 and Washout at 492, and two effects with one ID can freeze the pedal at
+boot. The sound is unchanged.
+
+If your pedal has the old Carillon or Droplets, swap it the same way as
+Spool below: remove it and write the pedal, power-cycle, then add the new
+file and write again. Patches that used the old one show an empty slot; pick
+the effect again there. The MultiStomp Editor's Effects does it in two steps:
+Remove, power-cycle, then Install.
+
 ## Spool's new effect ID (29 October 2026)
 
 Spool moved from effect ID 409 to 914 (version 1.02). TEcho4.ZDL in

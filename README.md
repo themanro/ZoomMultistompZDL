@@ -266,10 +266,12 @@ deep versions live in [docs/](docs/) and [build/ABI.md](build/ABI.md).
   (1=DYN, 2=FLT, 3=DRV, 6=CHO/MOD, 8=DLY, 9=REV); everything here is gid 8
   (`Fx_DLY_*`) so the pack lives together in the least crowded menu.
 - **Reserved effect IDs** (Delay group; FXIDs go up to 1023): this pack
-  403–499 (Deform: 417, Chimera: 418, Horizon: 419, HorizonL: 420, Droplets: 492, Carillon: 497), 914 (Spool) and 947 (Chopdly), NAM captures 900–907, 950–957 and 500–699, CabIR
+  403–499 (Deform: 417, Chimera: 418, Horizon: 419, HorizonL: 420, Carillon: 421, Droplets: 422), 914 (Spool) and 947 (Chopdly), NAM captures 900–907, 950–957 and 500–699, CabIR
   cabs 930–945 and 700–899. Other projects building effects for these pedals:
   please avoid them. 409 is retired: Spool and TEcho4 (another collection)
-  both used it, and swapping them froze a pedal at boot. An effect is
+  both used it, and swapping them froze a pedal at boot. 492 and 497 are
+  retired too: Droplets and Carillon first shipped there, but Matujuice's
+  Washout and Looper use them. An effect is
   identified by its group and ID together: Zoom's own effects reuse IDs across
   groups (DELAY, COMP, LINESEL, TREMOLO and HDHALL are all ID 8), and Skull
   (Delay 416) runs beside SpaceHole (Reverb 416). So a new Delay effect needs

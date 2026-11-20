@@ -4,9 +4,9 @@
   "audio_func_name": "Fx_DLY_Droplets",
   "gid": 8,
   "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_.",
-  "fxid": 492,
-  "fxid_comment": "0x01EC. In this project's reserved 403-499 Delay block; never used (gap between DirtBox 491 and Breather 493; 498 was the old NAMLite). Check repeat98's FXID registry before release.",
-  "fxid_version": "0.03",
+  "fxid": 422,
+  "fxid_comment": "0x01A6. In this project's reserved 403-499 Delay block, after Carillon 421. Was 492 until version 0.03: Matujuice's Washout has Delay 492, so 492 is retired. Free in every collection in repeat98's FXID registry and in Matujuice's pack (checked 2026-11-20).",
+  "fxid_version": "0.04",
   "flags_byte": 1,
   "dsp_cost": 50.0,
   "params": [

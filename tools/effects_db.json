@@ -80,10 +80,10 @@
   },
   {
    "name": "Carillon",
-   "fxid": 497,
+   "fxid": 421,
    "gid": 8,
    "category": "Delay",
-   "id": 1080165136,
+   "id": 4850448,
    "params": [
     {
      "name": "Cutoff",
@@ -1094,10 +1094,10 @@
   },
   {
    "name": "Droplets",
-   "fxid": 492,
+   "fxid": 422,
    "gid": 8,
    "category": "Delay",
-   "id": 1079509776,
+   "id": 4981520,
    "params": [
     {
      "name": "Pitch",
@@ -13877,6 +13877,199 @@
    "legacy": true
   },
   {
+   "name": "Carillon (old 497)",
+   "fxid": 497,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1080165136,
+   "params": [
+    {
+     "name": "Cutoff",
+     "max": 100,
+     "default": 70
+    },
+    {
+     "name": "Reso",
+     "max": 100,
+     "default": 30
+    },
+    {
+     "name": "Decay",
+     "max": 100,
+     "default": 55
+    },
+    {
+     "name": "Key",
+     "max": 11,
+     "default": 0,
+     "choices": [
+      {
+       "label": "C",
+       "from": 0,
+       "to": 0,
+       "value": 0
+      },
+      {
+       "label": "C#",
+       "from": 1,
+       "to": 1,
+       "value": 1
+      },
+      {
+       "label": "D",
+       "from": 2,
+       "to": 2,
+       "value": 2
+      },
+      {
+       "label": "D#",
+       "from": 3,
+       "to": 3,
+       "value": 3
+      },
+      {
+       "label": "E",
+       "from": 4,
+       "to": 4,
+       "value": 4
+      },
+      {
+       "label": "F",
+       "from": 5,
+       "to": 5,
+       "value": 5
+      },
+      {
+       "label": "F#",
+       "from": 6,
+       "to": 6,
+       "value": 6
+      },
+      {
+       "label": "G",
+       "from": 7,
+       "to": 7,
+       "value": 7
+      },
+      {
+       "label": "G#",
+       "from": 8,
+       "to": 8,
+       "value": 8
+      },
+      {
+       "label": "A",
+       "from": 9,
+       "to": 9,
+       "value": 9
+      },
+      {
+       "label": "A#",
+       "from": 10,
+       "to": 10,
+       "value": 10
+      },
+      {
+       "label": "B",
+       "from": 11,
+       "to": 11,
+       "value": 11
+      }
+     ]
+    },
+    {
+     "name": "Scale",
+     "max": 9,
+     "default": 2,
+     "choices": [
+      {
+       "label": "Free",
+       "from": 0,
+       "to": 0,
+       "value": 0
+      },
+      {
+       "label": "Chrom",
+       "from": 1,
+       "to": 1,
+       "value": 1
+      },
+      {
+       "label": "Major",
+       "from": 2,
+       "to": 2,
+       "value": 2
+      },
+      {
+       "label": "Minor",
+       "from": 3,
+       "to": 3,
+       "value": 3
+      },
+      {
+       "label": "Dor",
+       "from": 4,
+       "to": 4,
+       "value": 4
+      },
+      {
+       "label": "Pent",
+       "from": 5,
+       "to": 5,
+       "value": 5
+      },
+      {
+       "label": "MinPt",
+       "from": 6,
+       "to": 6,
+       "value": 6
+      },
+      {
+       "label": "Whole",
+       "from": 7,
+       "to": 7,
+       "value": 7
+      },
+      {
+       "label": "Fifth",
+       "from": 8,
+       "to": 8,
+       "value": 8
+      },
+      {
+       "label": "Oct",
+       "from": 9,
+       "to": 9,
+       "value": 9
+      }
+     ]
+    },
+    {
+     "name": "Slope",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "Waves",
+     "max": 100,
+     "default": 20
+    },
+    {
+     "name": "Noise",
+     "max": 100,
+     "default": 0
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 60
+    }
+   ],
+   "cost": 40.0,
+   "cover": "MmdEJQAAAAAAAAAAAAAAAEVSRFcAAAAAAAAAAAAAAABHYkRXAAAAAAAAAAAAAAAARVJEVQAAAAAAAAAAAAAAADVXdyUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAV1AwADMkcFISYAAAAAAAAFQgQABEVEB1FVAAAAAAAABmIEAAJHRgdxVgAAAAAAAAVCBAABRUQFVVUAAAAAAAAFcgMABjV3BVIlAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOAAAAAAAAAAAAAAAAAAAAAOAAAAAAAAAAAAAAAAAAAADgAAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAAAAAA4OAAAAAAAAAAAAAAAAAAAADuAAAAAAAAAAAAAAAAAA7g4AAAAAAAAAAAAAAAAAAA4OAAAAAAAAAAAAAAAAAO4ODgAAAADu7u7u7u7u7u4ADg4AAAAADgAAAAAA4OAADg7uDgAAAA4OAADg4ODg4O7u7g4AAAAODg7g4ODg4ODu7u4OAAAADg4O7uDg4ODu7u7uDgAAAA4O7u7g4ODg7u7u7g7gAAAODu7u7uDg7u7u7u7uAAAADu7u7u7u7u7u7u7u7gAAAO7u7u7u7u7u7u7u7u4OAADu7u7u7u7u7u7u7u7u7uAA7u7u7u7u7u7u7u7u7u4O7u7u7u7u7u7u7u7u7u7u7uAAAAAAAAAAAAAAAAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAAA1cAAAAM5kAAABnMlAAAAARSAAAACoigAAAVEUgAAAAEUgAAAAzEoAAAFZHIAAAABFIAAAAKgqAAABURSAAAAAMyAAAACuxAAAAZzUgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4AAAAAHwAAAAAPgAAAAAH/wAAAAP/gAAAAf/AAAAADyeAAAAHk8AAAAPJ4AAAAAwhgAAABhDAAAADCGAAAAAYIMAAAAwQYAAABggwAAAAGCDAAAAMEGAAAAYIMAAAABgAwAAADABgAAAGADAAAAAMAYAAAAYAwAAAAwBgAAAADweAAAAHg8AAAAPB4AAAAAf/AAAAA/+AAAAB/8AAAAAA+AAAAAB8AAAAAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+   "legacy": true
+  },
+  {
    "name": "Corrupt (old 477)",
    "fxid": 477,
    "gid": 8,
@@ -13938,6 +14131,199 @@
    ],
    "cost": 20.0,
    "cover": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB+H/D8Pw4cBw17AAAAAAAAfh/w/D8OHAcd/wAAAAAAAH4f8Pw/DgwDHPcAAAAAAABxw4cBwHHcBx3AAAAAAAAAccOHAcBx3AcdwAAAAAAAAHHDhwHAcdwHGcAAAAAAAABxw4DgOHHcBxW4AAAAAAAAccOA4Dhx3Acd+AAAAAAAAHHDgOA4cdQFDXgAAAAAAABxw4AcB3HcAMDAAAAAAAAAccOAHAdx3ADhwAAAAAAAAHHDgBwHcdwAocAAAAAAAAB+H/fh+A4f8OHeAAAAAAAAfh/34fgOH/Dh/wAAAAAAAH4f9+H4DhvQ4b0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAHDAAEgDgBgAAAAAAAAAAACoIACEBEAmA+AOAAAAAAAA+GAAQgigQQQacf//CAAQAKgAKQAQEaD4R4CAAQACAABwQRID4A4ACAAQACAAQAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADUlNwAABq5MAAANHc1AAABFV0QAAAjoqgAAEQiRQAAAR3dGAAAE7OwAABUIkcAAAEVVRAAAAqiqAAAVCJFAAAA1VTcAAAyuqgAADdyNQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4AAAAAHwAAAAAPgAAAAAH/wAAAAP/gAAAAf/AAAAADyeAAAAHk8AAAAPJ4AAAAAwhgAAABhDAAAADCGAAAAAYIMAAAAwQYAAABggwAAAAGCDAAAAMEGAAAAYIMAAAABgAwAAADABgAAAGADAAAAAMAYAAAAYAwAAAAwBgAAAADweAAAAHg8AAAAPB4AAAAAf/AAAAA/+AAAAB/8AAAAAA+AAAAAB8AAAAAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH///////////////////+A==",
+   "legacy": true
+  },
+  {
+   "name": "Droplets (old 492)",
+   "fxid": 492,
+   "gid": 8,
+   "category": "Delay",
+   "id": 1079509776,
+   "params": [
+    {
+     "name": "Pitch",
+     "max": 10,
+     "default": 5,
+     "choices": [
+      {
+       "label": "-24",
+       "from": 0,
+       "to": 0,
+       "value": 0
+      },
+      {
+       "label": "-12",
+       "from": 1,
+       "to": 1,
+       "value": 1
+      },
+      {
+       "label": "-7",
+       "from": 2,
+       "to": 2,
+       "value": 2
+      },
+      {
+       "label": "-5",
+       "from": 3,
+       "to": 3,
+       "value": 3
+      },
+      {
+       "label": "-3",
+       "from": 4,
+       "to": 4,
+       "value": 4
+      },
+      {
+       "label": "Unity",
+       "from": 5,
+       "to": 5,
+       "value": 5
+      },
+      {
+       "label": "+3",
+       "from": 6,
+       "to": 6,
+       "value": 6
+      },
+      {
+       "label": "+5",
+       "from": 7,
+       "to": 7,
+       "value": 7
+      },
+      {
+       "label": "+7",
+       "from": 8,
+       "to": 8,
+       "value": 8
+      },
+      {
+       "label": "+12",
+       "from": 9,
+       "to": 9,
+       "value": 9
+      },
+      {
+       "label": "+24",
+       "from": 10,
+       "to": 10,
+       "value": 10
+      }
+     ]
+    },
+    {
+     "name": "Rate",
+     "max": 100,
+     "default": 45
+    },
+    {
+     "name": "Size",
+     "max": 100,
+     "default": 40
+    },
+    {
+     "name": "Contour",
+     "max": 100,
+     "default": 50
+    },
+    {
+     "name": "Scan",
+     "max": 100,
+     "default": 25
+    },
+    {
+     "name": "Pattern",
+     "max": 10,
+     "default": 0,
+     "choices": [
+      {
+       "label": "Off",
+       "from": 0,
+       "to": 0,
+       "value": 0
+      },
+      {
+       "label": "Oct",
+       "from": 1,
+       "to": 1,
+       "value": 1
+      },
+      {
+       "label": "Oct-",
+       "from": 2,
+       "to": 2,
+       "value": 2
+      },
+      {
+       "label": "Fifth",
+       "from": 3,
+       "to": 3,
+       "value": 3
+      },
+      {
+       "label": "Pwr",
+       "from": 4,
+       "to": 4,
+       "value": 4
+      },
+      {
+       "label": "Maj",
+       "from": 5,
+       "to": 5,
+       "value": 5
+      },
+      {
+       "label": "Min",
+       "from": 6,
+       "to": 6,
+       "value": 6
+      },
+      {
+       "label": "Down",
+       "from": 7,
+       "to": 7,
+       "value": 7
+      },
+      {
+       "label": "Sus",
+       "from": 8,
+       "to": 8,
+       "value": 8
+      },
+      {
+       "label": "Pent",
+       "from": 9,
+       "to": 9,
+       "value": 9
+      },
+      {
+       "label": "Wide",
+       "from": 10,
+       "to": 10,
+       "value": 10
+      }
+     ]
+    },
+    {
+     "name": "Random",
+     "max": 100,
+     "default": 20
+    },
+    {
+     "name": "Feedbk",
+     "max": 100,
+     "default": 30
+    },
+    {
+     "name": "Mix",
+     "max": 100,
+     "default": 50
+    }
+   ],
+   "cost": 50.0,
+   "cover": "ZiZHcwAAAAAAAAAAAAAAAFVVRCQAAAAAAAAAAAAAAABWVkYiAAAAAAAAAAAAAAAAVVREIQAAAAAAAAAAAAAAAGUkdyYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZ3NQBwAABicFIQAAAAAAAFIkUCEAAAVSB1EAAAAAAABiJHByAAAGcgdxAAAAAAAAQiRQJAAABFIFVQAAAAAAAEcjUAQAAARSBVIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAABAAAAAADAAAAAACgAAAgAA4AAAAABwgAAAAQ5gAAIAAOMEAAAAecIAAAEOcIACAAHjjjAAAHnnDCABDvDGGgAB99544wx55555xgz6zz5hhffffeeef+++8+68+u++88////////////f+/f7//f/////////////3/v3+//3/////////////9/79/v/9//33333nnn/vvvPuvPrvvvPN99544wx55555xgz6zz5hheOOMAAAeecMIAEO8MYaAADjBAAAAHnCAAABDnCAAgAA4AAAAABwgAAAAQ5gAAIAAEAAAAAAMAAAAAAKAAACAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAACAAAAAAA/////////////////////wAAAAAAAAAAAAAAAAAAAAAAAZ3NQAAAMTuAAAAN3cAAAAFIkUAAACqSAAAAEIUAAAABiJHAAAAzkwAAAAiJgAAAAQiRQAAAKpIAAAAEkQAAAAEcjUAAACqTgAAAGd3AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4AAAAAHwAAAAAPgAAAAAH/wAAAAP/gAAAAf/AAAAADyeAAAAHk8AAAAPJ4AAAAAwhgAAABhDAAAADCGAAAAAYIMAAAAwQYAAABggwAAAAGCDAAAAMEGAAAAYIMAAAABgAwAAADABgAAAGADAAAAAMAYAAAAYAwAAAAwBgAAAADweAAAAHg8AAAAPB4AAAAAf/AAAAA/+AAAAB/8AAAAAA+AAAAAB8AAAAAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
    "legacy": true
   },
   {
@@ -14476,6 +14862,68 @@
    "cost": 20.0,
    "cover": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAAAYALgAAAAAAAAAAAAAAAAA6ACGAAAAAAAAAAAAAAAAAwgAgcD/////////////+BwIAIAwgAAAAAAAAAAAAAhgCACADoAAAAAAAAAAAAALgAgAgAGAAAAAAAAAAAAADAAIAIAAgAAAAAAAAAAAAAgACACAAIH/4PB/+//eHgAIAAgAgACB/+Dwf/v/3h4ACAAIAIAAgf/g8H/7/94eAAgACACJAIAeDw94A8AB4AAIGAgAiQCAHg8PeAPAAeAACAQIAIsAgB4PD3gDwAHgAAgICACNAIAeD/9/g/wB4AAIAAgAiQCAHg//f4P8AeAACAgIAIAAgB4P/3+D/AHgAAgACACAAIAeDw94A8AB4AAIAAgAgACAHg8PeAPAAeAACAAIAIAAgB4PD3gDwAHgAAgACACAAIAeDw94A8AB4AAIAAgAgACAHg8PeAPAAeAACAAIAIABgB4PD3gDwAHgAAwACACADoAAAAAAAAAAAAALgAgAgDCAAAAAAAAAAAAACGAIAIHAgAAAAAAAAAAAAAgcCACGAP/////////////4AwgAuAAAAAAAAAAAAAAAAADoAMAAAAAIAIAIAIAAAAAAGAAAAAAACIiIiIiIgAAAAAAAAAAAAA///////4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA2d2AAAGpKbgAAGdnUAAAARURQAACKrogAABUUlAAAACZmUAAAju6MAAAVmJwAAAAURFAAAIqqiAAAFRCUAAAAZHdgAABqqm4AABnQlAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4AAAAAHwAAAAAPgAAAAAH/wAAAAP/gAAAAf/AAAAADyeAAAAHk8AAAAPJ4AAAAAwhgAAABhDAAAADCGAAAAAYIMAAAAwQYAAABggwAAAAGCDAAAAMEGAAAAYIMAAAABgAwAAADABgAAAGADAAAAAMAYAAAAYAwAAAAwBgAAAADweAAAAHg8AAAAPB4AAAAAf/AAAAA/+AAAAB/8AAAAAA+AAAAAB8AAAAAD4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH///////////////////+A==",
    "legacy": true
+  }
+ ],
+ "others": [
+  {
+   "name": "LOUDER",
+   "gid": 8,
+   "fxid": 481,
+   "credit": "Matujuice pack by Luca Matturro, not in this project's dist/"
+  },
+  {
+   "name": "Washout",
+   "gid": 8,
+   "fxid": 492,
+   "credit": "Matujuice pack by Luca Matturro, not in this project's dist/"
+  },
+  {
+   "name": "Takeoff",
+   "gid": 8,
+   "fxid": 494,
+   "credit": "Matujuice pack by Luca Matturro, not in this project's dist/"
+  },
+  {
+   "name": "GRDLOOP (Looper)",
+   "gid": 8,
+   "fxid": 497,
+   "credit": "Matujuice pack by Luca Matturro, not in this project's dist/"
+  },
+  {
+   "name": "Gooey",
+   "gid": 8,
+   "fxid": 501,
+   "credit": "Matujuice pack by Luca Matturro, not in this project's dist/"
+  },
+  {
+   "name": "DJFilter",
+   "gid": 8,
+   "fxid": 502,
+   "credit": "Matujuice pack by Luca Matturro, not in this project's dist/"
+  },
+  {
+   "name": "TEcho4",
+   "gid": 8,
+   "fxid": 946,
+   "credit": "repeat98/ZoomMultistompZDL"
+  },
+  {
+   "name": "SilverSt",
+   "gid": 8,
+   "fxid": 505,
+   "credit": "marcfuentes/silverst-zdl"
+  },
+  {
+   "name": "DrumBox",
+   "gid": 7,
+   "fxid": 520,
+   "credit": "Barsik-Barbosik/Custom-Zoom-ZDL-Effects"
+  },
+  {
+   "name": "SYNX2",
+   "gid": 7,
+   "fxid": 915,
+   "credit": "Leemuzhko/Zoom-ZDL-FX"
   }
  ]
 }

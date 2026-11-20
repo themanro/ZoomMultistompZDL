@@ -4,9 +4,9 @@
   "audio_func_name": "Fx_DLY_Carillon",
   "gid": 8,
   "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_.",
-  "fxid": 497,
-  "fxid_comment": "0x01F1. In this project's reserved 403-499 Delay block; never used in the Delay group (497 is the NAMTest probe's ID in the Filter group, gid 2; 498 the old NAMLite). Check repeat98's FXID registry before release.",
-  "fxid_version": "0.04",
+  "fxid": 421,
+  "fxid_comment": "0x01A5. In this project's reserved 403-499 Delay block, after HorizonL 420. Was 497 until version 0.04: Matujuice's Looper (GRDLOOP) has Delay 497, so 497 is retired. Free in every collection in repeat98's FXID registry and in Matujuice's pack (checked 2026-11-20).",
+  "fxid_version": "0.05",
   "flags_byte": 1,
   "dsp_cost": 40.0,
   "params": [

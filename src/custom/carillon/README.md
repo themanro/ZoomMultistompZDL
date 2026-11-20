@@ -6,7 +6,7 @@ low Decay they work together as one filter you shape with Cutoff, Reso and
 Slope. Turn Decay up and every band starts to ring on its own, until whatever
 you play sets off a bank of tuned bells.
 
-MS-70CDR, Delay group, effect ID 497. File: [dist/Carillon.ZDL](../../../dist/Carillon.ZDL).
+MS-70CDR, Delay group, effect ID 421 (497 until version 0.04). File: [dist/Carillon.ZDL](../../../dist/Carillon.ZDL).
 
 ![Carillon's screen](../../../graphics/carillon.png)
 

@@ -6,7 +6,7 @@ point, pitch, length, envelope, level, direction and place in the stereo
 field. Feedback writes the grains back in, and Lock freezes the buffer so the
 grains keep playing from one moment while you play over it.
 
-MS-70CDR, Delay group, effect ID 492. File: [dist/Droplets.ZDL](../../../dist/Droplets.ZDL).
+MS-70CDR, Delay group, effect ID 422 (492 until version 0.03). File: [dist/Droplets.ZDL](../../../dist/Droplets.ZDL).
 
 ![Droplets' screen](../../../graphics/droplets.png)
 

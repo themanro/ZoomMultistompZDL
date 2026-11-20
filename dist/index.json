@@ -22,10 +22,10 @@
    "file": "Carillon.ZDL",
    "name": "Carillon",
    "gid": 8,
-   "fxid": 497,
-   "version": "0.04",
+   "fxid": 421,
+   "version": "0.05",
    "bytes": 25846,
-   "sha256": "d64c9c5a934c7effa2bfb601ace3ce8e2f096f6a8a23fb68bd1e1e3ff78bd96e"
+   "sha256": "07e7aabca98a37a776b941899c2938fd14ca9ba8071f17bf8f35e4dac8b57e80"
   },
   {
    "file": "Chimera.ZDL",
@@ -94,10 +94,10 @@
    "file": "Droplets.ZDL",
    "name": "Droplets",
    "gid": 8,
-   "fxid": 492,
-   "version": "0.03",
+   "fxid": 422,
+   "version": "0.04",
    "bytes": 25962,
-   "sha256": "eea035217bb589db4d09b97a5374ac84c23623605a82c6644232be709a37f222"
+   "sha256": "29f0944a6aa2c26f21c30384ad1e1df0fa92c84c734cd00f1cb3ab8828f8c669"
   },
   {
    "file": "DualShft.ZDL",
@@ -231,8 +231,8 @@
    "gid": 8,
    "fxid": 467,
    "version": "0.04",
-   "bytes": 30914,
-   "sha256": "3ddc6574ccfd4c122db7253717e73ec35fec663f35d15326e4d1c97b69056814"
+   "bytes": 31010,
+   "sha256": "2eecfb231b67a593edc784f1c75b25edbf4f4de415b391e9c4b69368670e2063"
   },
   {
    "file": "Mangle.ZDL",

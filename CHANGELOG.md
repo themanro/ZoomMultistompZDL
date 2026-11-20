@@ -7,6 +7,18 @@ dated. Effects in [dist/](dist/) carry their own version in the file
 ## Unreleased
 
 ### Effects
+- **Carillon and Droplets have new effect IDs**: Carillon Delay 421 (was
+  497) as version 0.05, Droplets Delay 422 (was 492) as version 0.04. 497 is
+  also Matujuice's Looper (GRDLOOP) and 492 Matujuice's Washout, and two effects with
+  one ID can freeze a pedal at boot. Only the ID and version bytes changed;
+  the old IDs stay as legacy names so old patches still show them. To swap:
+  remove the old one, power-cycle, then install
+  ([docs/INSTALLING-ZDLS.md](docs/INSTALLING-ZDLS.md)). The editor's install
+  check now also knows other collections' effects (`others` in the effect
+  DB: Matujuice's releases not in `dist/`, TEcho4, SilverSt, DrumBox,
+  SYNX2), so it warns about clashes like these. `dist/index.json` also had
+  Loop's previous size and checksum, so the editor wouldn't install Loop
+  0.04; fixed.
 - **Live screens on the G1on family** (contributed by Barsik-Barbosik,
   [#12](https://github.com/themanro/ZoomMultistompZDL/issues/12)): the
   firmware check and the on-screen test in `src/custom/common/zvis.h` are now
