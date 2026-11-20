@@ -931,6 +931,9 @@ const $=id=>document.getElementById(id);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 // One user transaction owns MIDI until its reads and scheduled writes finish.
 let busySince=0, midiActionActive=false, actionCancelled=false, patchGeneration=0, connecting=false, lastBadDump=0;
+// Patch dumps of another length (a G1on-family pedal sends 134 bytes): kept whole
+// for Copy diag, since they are what's needed to map that pedal's format.
+let lastBadBytes=null, badDumpSeq=0, badBank=[], badLogged=new Set();
 let expectedProgram=null, dumpCooldownUntil=0;
 let transientBypassSlot=-1; // hide only the slot bounce owned by Apply
 let quietApply=false;       // the automatic Apply after a knob move: no greyed UI, knobs stay live
@@ -1305,8 +1308,12 @@ function handleSysex(m){
       else render(); // effect identity changes the slot structure
     }
   }else if(m[1]===0x52 && m[3]===DEVID && m[4]===0x28){
-    lastBadDump=m.length;
-    log("bad dump ("+m.length+"B, expected 146) — ignored","warn");   // reject misaligned
+    lastBadDump=m.length; lastBadBytes=m.slice(); badDumpSeq++;
+    if(!badLogged.has(m.length)){ badLogged.add(m.length);   // once per length, not 50 times
+      log("unreadable dump ("+m.length+"B, expected 146) — kept for Copy diag","warn"); }
+    if(pendingDump){                           // it WAS the answer: stop waiting for a 146-byte one
+      const req=pendingDump; pendingDump=null; clearTimeout(req.t); req.res(null);
+    }
   }else if(m[1]===0x7e){
     log("identity: "+hex(m));
     if(m.length>=7&&m[5]===0x52){
@@ -1720,7 +1727,9 @@ async function readCurrent(settle,timeout){
 async function readOnce(i,settle,timeout){   // PC to slot i, request, await one dump
   send([0xc0,i]); await sleep(settle);
   send(zx([0x50]));                            // re-assert edit-enable (a PC can drop it) so the dump comes
+  const seq=badDumpSeq;
   const d=await awaitDump(timeout);
+  if(!d && badDumpSeq!==seq) badBank[i]=lastBadBytes;   // answered, in a format we can't read
   return (d&&d.length>=146) ? d.slice(0,146) : null;
 }
 async function readAll(){
@@ -1729,6 +1738,7 @@ async function readAll(){
   busy=true; busySince=performance.now();
   const cur=curProg;
   const miss=[];
+  badBank=[]; badLogged.clear();
   const t0=performance.now();
   // A dump resolves the instant it arrives, so the timeout only bounds MISSES
   // (keep it generous so a slightly-slow-but-valid reply isn't dropped). Speed
@@ -1744,13 +1754,19 @@ async function readAll(){
   // just walks the whole bank a second time. An MS-60B+ owner reported exactly
   // that: "it gets to 50 and then starts over". One futile pass is a result; two
   // is a bug.
-  if(miss.length >= 50){
-    log("no patch dumps at all -- this pedal never answered the dump request (0x29) "
-       +"with a 146-byte patch, so there is nothing to retry. On a model other than "
+  const nBad=miss.filter(i=>badBank[i]).length;
+  if(miss.length >= 50 && nBad){
+    log("the pedal answered "+nBad+" of 50 slots, but with "+lastBadDump+"-byte patches; this "
+       +"editor reads only the MS-70CDR's 146-byte patches, so it can't show them yet. "
+       +"Copy diag (in Diagnostics) includes all of them in full -- please post it "
+       +"in an issue: that is what's needed to map this pedal.","warn");
+  } else if(miss.length >= 50){
+    log("no patch dumps at all -- this pedal never answered the dump request (0x29), "
+       +"so there is nothing to retry. On a model other than "
        +"the MS-70CDR that is expected: the dump command differs. The MIDI trace is "
        +"the useful part here -- please report it.","warn");
   } else {
-    for(const i of miss){                      // patient retry for no-shows
+    for(const i of miss.filter(i=>!badBank[i])){   // patient retry for no-shows
       const d=await readOnce(i,90,1400);
       if(d){ libraryRaw[i]=d; library[i]=decodePatch(d); noteSeenIds(d); renderLibrary(); }
     }
@@ -1759,10 +1775,13 @@ async function readAll(){
   busy=false;
   await reread();
   renderLibrary();
-  const stillMiss=miss.filter(i=>!library[i]).map(i=>i+1);
+  const unread=miss.filter(i=>!library[i]&&badBank[i]).map(i=>i+1);
+  const stillMiss=miss.filter(i=>!library[i]&&!badBank[i]).map(i=>i+1);
+  const span=a=>a.length===50?"all 50":a.join(",");
   log(`bank read in ${((performance.now()-t0)/1000).toFixed(1)}s`
-      + (stillMiss.length?` — no reply from slot(s) ${stillMiss.join(",")} (Reload bank to retry)`:""),
-      stillMiss.length?"warn":undefined);
+      + (unread.length?` — slot(s) ${span(unread)} answered in a format this editor can't read yet`:"")
+      + (stillMiss.length?` — no reply from slot(s) ${span(stillMiss)} (Reload bank to retry)`:""),
+      (stillMiss.length||unread.length)?"warn":undefined);
 }
 async function writeSlot(i,p){               // write buffer then store to slot i
   send(encodePatch(p)); await sleep(90);
@@ -2782,6 +2801,11 @@ function diagText(){
     "agent  : "+navigator.userAgent,
     "","=== last dump FROM pedal (146B) ===", bytesHex(rawFromPedal),
     "","=== last patch PE SENT (146B) ===", bytesHex(lastTxPatch),
+    ...(()=>{                                 // unreadable dumps, in full (the MIDI list cuts at 32 bytes)
+      const rows=badBank.map((b,i)=>b?"slot "+String(i+1).padStart(2,"0")+" ("+b.length+"B): "+hex(Array.from(b)):null).filter(Boolean);
+      if(!rows.length && lastBadBytes) rows.push("current ("+lastBadBytes.length+"B): "+hex(Array.from(lastBadBytes)));
+      return rows.length?["","=== dumps this editor can't read yet (full) ===",...rows]:[];
+    })(),
     "","=== diff: pedal dump vs PE's write ===", ...patchDiffLines(),
     "","=== recent MIDI (oldest → newest) ===",
     ...MIDIBUF.slice(-160),

@@ -149,6 +149,14 @@ dated. Effects in [dist/](dist/) carry their own version in the file
   bank (`graphics/editor.webp`); both run the real page in headless Chrome.
 
 ### MultiStomp Editor (was Patch Editor)
+- **Patches the editor can't read yet** ([#15](https://github.com/themanro/ZoomMultistompZDL/issues/15)):
+  on a G1on-family pedal (134-byte patches) Reload bank said "no reply from
+  slot(s) 1–50" although the pedal answered every slot, and it waited out
+  the timeout on each, about a minute in all. It now says the pedal answered
+  in a format the editor can't read yet, moves on as soon as the answer
+  arrives (a few seconds), and Copy diag adds every such patch in full (the
+  MIDI list cuts each message at 32 bytes): the data needed to map those
+  pedals. The warning about the patch length is shown once, not once per slot.
 - **Connect on a G1on** ([#13](https://github.com/themanro/ZoomMultistompZDL/issues/13)):
   Connect stopped with "Patch changed on the pedal during this operation"
   when the pedal sent a program change of its own while connecting; until
