@@ -6,7 +6,44 @@ dated. Effects in [dist/](dist/) carry their own version in the file
 
 ## Unreleased
 
+### Editor
+- **MIDISTOMP support** ([docs/MIDISTOMP-COMPAT.md](docs/MIDISTOMP-COMPAT.md), from
+  reading MIDISTOMP 2.0.1's patches and sources; not yet tried on a pedal running it).
+  The editor reads MIDISTOMP's tag in the identity reply (`M201`) as "MIDISTOMP 2.0.1"
+  instead of warning that the live screens need firmware 2.10, and its log notes that
+  renaming a patch or changing its effects resets that patch's MIDISTOMP mixer and
+  PERFORM settings. A slot swap now moves MIDISTOMP's bus bits (byte 17, bits 0-1) with
+  the effect and leaves the slot position's mixer bits (2-6) in place. The live screens
+  need no change: MIDISTOMP leaves the firmware words they check alone, and its own
+  screens set the UI mode they already test. Asked of Luca
+  ([matujuice/zoom-ms-midistomp#72](https://github.com/matujuice/zoom-ms-midistomp/issues/72)):
+  live `0x31` edits for slots 4-6.
+
+### Probes
+- **Ceiling** (`src/hardware_probes/ceiling`, FXID 918, never in `dist/`): burns
+  kCyc x 1,000 emulated cycles per callback, in registers, through L2 or
+  through DDR, until the pedal crackles, to measure the processing left to one
+  effect and the cost of a memory access (sizing a bigger NAM model).
+  Calibrated in the emulator (1,000.0 cycles per kCyc in all three modes); not
+  yet run on a pedal.
+
 ### Effects
+- **Loop 0.05**: spots MIDISTOMP by the magic numbers of its looper services
+  and transport blocks before using the Long regions, instead of by one of
+  MIDISTOMP's region addresses (one of which has moved since). Long was
+  already off under MIDISTOMP 2.0.1; this keeps it off whatever MIDISTOMP's
+  memory layout. Sound unchanged (emulator output identical to 0.04).
+- **New effect: Cloud** (Delay 423, version 0.01, not yet tried on the
+  pedal), a dense, diffuse ambient reverb. HorizonL's half-rate tank with an
+  allpass inside each of its eight lines and five long input diffusers, so
+  notes bloom into a wash (the reverb peaks about 300 ms after a note,
+  Horizon's at about 115 ms) and the tail turns to fog instead of echoes.
+  Knobs: Size, Decay (1 s to 90 s, 100 holds), Pre, Diff (the smear), Mod,
+  Tone and Lo (how long the highs and the lows last, set from each line's
+  gain so they don't shorten the tail as Horizon's cuts do), Swell, Mix.
+  About 6,100 emulated cycles per callback (Horizon 7,400, HorizonL 5,250),
+  8,900 at the screen's heaviest step; declared cost 45; 215 KB of the
+  effect's memory. Live screen: the eight lines as eight puffs of a cloud.
 - **Carillon and Droplets have new effect IDs**: Carillon Delay 421 (was
   497) as version 0.05, Droplets Delay 422 (was 492) as version 0.04. 497 is
   also Matujuice's Looper (GRDLOOP) and 492 Matujuice's Washout, and two effects with

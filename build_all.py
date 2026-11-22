@@ -55,6 +55,7 @@ RELEASE_PLUGINS = [
     ("chimera",     CUSTOM_DIR / "chimera"     / "build.py"),
     ("horizon",     CUSTOM_DIR / "horizon"     / "build.py"),
     ("horizonl",    CUSTOM_DIR / "horizonl"    / "build.py"),
+    ("cloud",       CUSTOM_DIR / "cloud"       / "build.py"),
 ]
 
 # Dropped from the release set 2026-06-29 after hardware listening (user
@@ -67,6 +68,7 @@ DIAGNOSTIC_PLUGINS = [
     ("initprobe",   PROBE_DIR / "initprobe"   / "build.py"),
     ("ctxwatch",    PROBE_DIR / "ctxwatch"    / "build.py"),
     ("matprobe",    PROBE_DIR / "matprobe"    / "build.py"),
+    ("ceiling",     PROBE_DIR / "ceiling"     / "build.py"),
 ]
 
 # Explicit builds only until hardware listening confirms these effects.

@@ -75,6 +75,7 @@ each escaped that way.
 | `namtest`, `namlite`, `nam_memory`, `nam_profile` | The NAM capture runtime ([NAM-A2-LITE-PROTOTYPE](../../docs/NAM-A2-LITE-PROTOTYPE.md), [NAM-RUNTIME-INVESTIGATION](../../docs/NAM-RUNTIME-INVESTIGATION.md)); `namlite` also feeds the loader templates. |
 | `cab_ir` | The cab IR loader ([NAM-LOADER](../../docs/NAM-LOADER.md)). |
 | `slo_ir` | The withdrawn SloIR prototype ([SLO-IR-PROTOTYPE](../../docs/SLO-IR-PROTOTYPE.md)). |
+| `ceiling` (fxid 918) | How many cycles the firmware leaves to one effect, and what an L2 or DDR access costs: burn kCyc x 1,000 cycles until the pedal crackles ([README](ceiling/README.md)). |
 
 Removed on 2026-11-09, because nothing linked to them any more: the `ctx[]` map
 probes (`ctxmap`, `ctxnib`, `ctxgate`, `paramtap`), the state block probes

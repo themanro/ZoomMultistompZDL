@@ -71,13 +71,13 @@ moving picture from the editor, what it does and its knobs. In short:
 | | |
 |---|---|
 | **Delays and loopers** | Spiral, Hydra, Mangle, Spool, Dissolve, Chopdly, Droplets, Gyre, Stasis, Loop |
-| **Reverbs** | Galactic, Rooms, Horizon, HorizonL |
+| **Reverbs** | Galactic, Rooms, Horizon, HorizonL, Cloud |
 | **Pitch, modulation and texture** | Microloom, Arrakis, Taffy, GenLoss, Shatter |
 | **Drive and lo-fi** | Scorch, Dustbox, Corrupt, Oxide, Deform, Rewire, Tonic |
 | **Filters, resonators and voices** | Flower, Klang, Howl, Carillon, Chimera |
 | **Live screens** | Scope, Spectrum, Ring, Skull: they draw your signal on the pedal's screen |
 
-<p align="center"><a href="EFFECTS.md"><img src="graphics/fx-all.webp" width="900" alt="All 47 effects as the MultiStomp Editor draws them, each picture moving"></a></p>
+<p align="center"><a href="EFFECTS.md"><img src="graphics/fx-all.webp" width="900" alt="All 48 effects as the MultiStomp Editor draws them, each picture moving"></a></p>
 
 All of them sit in the pedal's **Delay** category and end with a **Mix**
 knob (Dustbox ends with Power; the live screens pass the sound through). The
@@ -266,7 +266,7 @@ deep versions live in [docs/](docs/) and [build/ABI.md](build/ABI.md).
   (1=DYN, 2=FLT, 3=DRV, 6=CHO/MOD, 8=DLY, 9=REV); everything here is gid 8
   (`Fx_DLY_*`) so the pack lives together in the least crowded menu.
 - **Reserved effect IDs** (Delay group; FXIDs go up to 1023): this pack
-  403–499 (Deform: 417, Chimera: 418, Horizon: 419, HorizonL: 420, Carillon: 421, Droplets: 422), 914 (Spool) and 947 (Chopdly), NAM captures 900–907, 950–957 and 500–699, CabIR
+  403–499 (Deform: 417, Chimera: 418, Horizon: 419, HorizonL: 420, Carillon: 421, Droplets: 422, Cloud: 423), 914 (Spool) and 947 (Chopdly), NAM captures 900–907, 950–957 and 500–699, CabIR
   cabs 930–945 and 700–899. Other projects building effects for these pedals:
   please avoid them. 409 is retired: Spool and TEcho4 (another collection)
   both used it, and swapping them froze a pedal at boot. 492 and 497 are
@@ -422,7 +422,7 @@ them beside the repo, treat them as read-only references.
 | Project | What it is |
 |---|---|
 | [MS StompCtrl](https://github.com/1njected/ms-stompctrl) | Browser-only patch editor and backup tool for the **MS-100BT**, over Bluetooth in Chrome ([open it](https://1njected.github.io/ms-stompctrl/)). Reads, edits and writes patches, backs up the bank, and installs `.ZDL` files. A user has run four of this repo's effects on the MS-100BT ([#4](https://github.com/themanro/ZoomMultistompZDL/issues/4)); back up first and report what you find. MIT. |
-| [MIDISTOMP](https://github.com/matujuice/zoom-ms-midistomp) | Custom firmware for the original MultiStomps: MIDI Program Change, CC control of every knob, MIDI clock with Start/Stop, a tap-tempo screen and footswitch-hold options. Installed by flashing a modified Zoom updater (riskier than an Effect Manager install). Tested on an MS-60B running MS-50G 3.10; MS-50G and MS-70CDR untested. MIT. |
+| [MIDISTOMP](https://github.com/matujuice/zoom-ms-midistomp) | Custom firmware for the original MultiStomps (MS-50G, MS-60B, MS-70CDR on 2.10): MIDI Program Change, CC control of every knob, MIDI clock with Start/Stop, effect chain routing, a tempo-synced looper (GRDLOOP), Perform mode, meters, DSP limit 300. Installed by flashing a modified Zoom updater (riskier than an Effect Manager install). Our effects, their live screens and the MultiStomp Editor are expected to work on it ([MIDISTOMP-COMPAT](docs/MIDISTOMP-COMPAT.md), not yet tried on a pedal); Loop's Long mode is off there. MIT. |
 | [Matujuice ZDL effects pack](https://github.com/matujuice/zoom-ms-zdl-effects-pack) | Luca Matturro's custom effects, built on this toolchain, made for synths and drum machines. v1.5 is [included here](EFFECTS.md#matujuice-pack); v1.6 and later follow MIDISTOMP's tempo (120 BPM on stock firmware). MIT. |
 | [repeat98/ZoomMultistompZDL](https://github.com/repeat98/ZoomMultistompZDL) | The upstream ZDL toolchain this fork started from. |
 | [Gungun-blip/ZoomMultistomp45Newzdl](https://github.com/Gungun-blip/ZoomMultistomp45Newzdl) | 45 effects (reverbs, delays, loopers, modulation, fuzz, lo-fi) as ready-made `.ZDL` files, each listed in [effects.csv](https://github.com/Gungun-blip/ZoomMultistomp45Newzdl/blob/main/45BetaZDL/effects.csv) with its inspiration, knobs, IDs and checksum. Posted 2026-11-16 as a draft: its own RIGHTS.md says the binaries are not yet cleared for distribution, and its README targets the MS-70CDR while the repo says only tested on the MS-50G. No source. Before installing any of them next to this pack: its **Spool.ZDL** is a different effect with the same file name as ours (install only one); most of its IDs are above 1023, and a patch keeps only 10 bits of an ID, so Oil Can Delay (Delay 1474) saves as Delay 450 = our Microloom, Patchwork (Delay 1508) as 484 = our Gyre, and Harmonic Tremolo (Mod 1160) as 136 = Zoom's Ba Detune. Its Manipulation Looper credits our Loop. |

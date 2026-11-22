@@ -1,0 +1,16 @@
+{
+  "effect_name": "Ceiling",
+  "comment": "PROBE (never in dist/): burns a set number of cycles per callback so the point where the pedal starts to crackle gives the real DSP capacity left to one effect. Mode 0 = arithmetic only (emulated = real cycles), 1 = a 64 KB walk (cached), 2 = a walk over the whole arena (memory misses).",
+  "audio_func_name": "Fx_DLY_Ceiling",
+  "gid": 8,
+  "fxid": 918,
+  "fxid_comment": "Probe ID, unused elsewhere (908-913 were retired test effects).",
+  "fxid_version": "0.01",
+  "flags_byte": 1,
+  "dsp_cost": 5.0,
+  "params": [
+    {"name": "kCyc", "max": 120, "default": 0, "comment": "params[5]. Thousands of emulated cycles burnt per callback. Defaults to 0: installing it costs nothing."},
+    {"name": "Mode", "max": 2, "default": 0, "comment": "params[6]. 0 arithmetic (no memory), 1 cached walk (64 KB), 2 uncached walk (the whole arena)."},
+    {"name": "Tone", "max": 1, "default": 1, "comment": "params[7]. 1 replaces the input with a 1 kHz sine at -12 dB (dropouts are easy to hear), 0 passes the input through."}
+  ]
+}

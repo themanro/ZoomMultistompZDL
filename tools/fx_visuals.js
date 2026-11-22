@@ -1107,6 +1107,74 @@
       g.fillStyle = col(0.85, T.hi); g.font = "bold 9px ui-monospace, monospace";
       g.fillText(hold ? "HOLD" : (rt < 10 ? rt.toFixed(1) : Math.round(rt)) + " s", 6, 12);
     },
+
+    // Cloud: its eight delay lines as eight puffs of one cloud (as on the
+    // pedal), spread wider with Size, drifting with Mod. A note arrives after
+    // the pre-delay as a spray of drops that diffuse into the puffs: with
+    // little Diff a few big drops you can follow (the echoes), with a lot a
+    // fine mist and soft-edged puffs. The glow dies away as Decay says (or
+    // stays, held, at 100), blooming in with Swell; Tone lights the tops,
+    // Lo the shadow under the cloud.
+    cloud(g, q, v, t, C, dt) {
+      const s = v.s, T = tones(C), col = (a, c) => css(lerp3(T.bg, c, clamp(a)));
+      const size = q(/^size$/i, 0.65), decay = q(R.decay, 0.6), pre = q(/^pre$/i, 0.1), diff = q(/^diff$/i, 0.75);
+      const mod = q(/^mod$/i, 0.4), tone = q(/^tone$/i, 0.5), lo = q(/^lo$/i, 0.2), swell = q(/^swell$/i, 0), mix = q(R.mix, 0.45);
+      const hold = q.raw(R.decay, 60) >= 100;
+      if (!s.init) { s.init = 1; s.e = Array(8).fill(0.15); s.next = 0; s.pend = []; s.drops = []; s.bl = 1; s.r = rng(v.e.id || 31); }
+      const spread = 13 + 11 * size, cy = LH / 2 + 6, base = cy + 12;
+      const px = k => LW / 2 + (k - 3.5) * spread + mod * 3 * Math.sin(t * (0.25 + 0.5 * mod) + k * 1.7);
+      const py = k => base - 4 - 14 * Math.sin(Math.PI * (k + 0.5) / 8) + (k & 1 ? 3 : -2) + mod * 2.5 * Math.sin(t * (0.2 + 0.4 * mod) + k);
+      if (v.live && t >= s.next && !hold) { s.pend.push(t + pre * 0.37); s.next = t + 0.9 + s.r() * 1.6; }
+      while (s.pend.length && s.pend[0] <= t) {        // a note: a spray of drops, fewer and bigger with less Diff
+        s.pend.shift(); s.bl = swell > 0.02 ? 0 : 1;
+        const n = Math.round(5 + 30 * diff), life = 0.25 + 0.45 * diff;
+        for (let i = 0; i < n; i++) s.drops.push({ k: (s.r() * 8) | 0, t0: t + s.r() * 0.15 * diff, life: life * (0.6 + 0.8 * s.r()),
+          x: 4 + s.r() * 14, y: base - 6 - s.r() * 22, sz: 3 - 2.2 * diff + s.r() * 0.6 });
+      }
+      const rt = Math.pow(2, decay * 6.4919);
+      for (let k = 0; k < 8; k++) {
+        if (!hold) s.e[k] *= Math.exp(-dt * 6.9 / rt); else s.e[k] = Math.max(s.e[k], 0.7);
+      }
+      s.bl += (1 - s.bl) * Math.min(1, dt / (0.05 + swell * 2));
+      const amb = 0.35 + 0.65 * mix, rgba = (c, a) => `rgba(${c.join(",")},${clamp(a).toFixed(3)})`;
+      // the shadow under the cloud: the lows, longer the lower Lo
+      const sh = clamp(s.e.reduce((a, b) => a + b, 0) / 8) * (1 - 0.75 * lo);
+      g.fillStyle = col(0.1 + 0.3 * sh * amb, T.lo);
+      g.beginPath(); g.ellipse(LW / 2, base + 12, 4 * spread + 14, 3 + 3 * sh, 0, 0, TAU); g.fill();
+      // the puffs, one cloud with a flat base: soft-edged with Diff, as big and bright as their line's sound
+      g.save(); g.beginPath(); g.rect(0, 0, LW, base); g.clip();
+      for (let pass = 0; pass < 2; pass++) for (let k = 0; k < 8; k++) {
+        const lit = clamp(s.e[k] * s.bl), x = px(k), y = py(k), r = (13 + 9 * size) * (0.75 + 0.4 * lit);
+        const hard = 0.75 - 0.55 * diff;               // where the edge starts to fade
+        const gr = g.createRadialGradient(x, y, 0, x, y, r);
+        if (!pass) {                                   // the body
+          gr.addColorStop(0, rgba(lerp3(T.lo, T.hi, 0.35 + 0.5 * lit), (0.4 + 0.55 * lit) * amb));
+          gr.addColorStop(hard, rgba(T.lo, (0.3 + 0.45 * lit) * amb));
+          gr.addColorStop(1, rgba(T.lo, 0));
+        } else {                                       // Tone: light on the tops
+          const hy = y - r * 0.35, hg = g.createRadialGradient(x, hy, 0, x, hy, r * 0.7);
+          hg.addColorStop(0, rgba(T.hi, (0.1 + 0.55 * tone) * (0.3 + 0.7 * lit) * amb));
+          hg.addColorStop(1, rgba(T.hi, 0));
+          g.fillStyle = hg; g.beginPath(); g.arc(x, hy, r * 0.7, 0, TAU); g.fill();
+          continue;
+        }
+        g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill();
+      }
+      g.restore();
+      // the drops: from the left into their puff, landing as glow
+      s.drops = s.drops.filter(d => {
+        const u = (t - d.t0) / d.life;
+        if (u < 0) return true;
+        if (u >= 1) { s.e[d.k] = Math.min(1.3, s.e[d.k] + 5.4 / (5 + 30 * diff)); return false; }
+        const x1 = px(d.k), e = u * u * (3 - 2 * u);
+        const x = d.x + (x1 - d.x) * e, y = d.y + (py(d.k) - d.y) * e;
+        g.fillStyle = col((1 - u * 0.7) * amb, T.hi);
+        g.beginPath(); g.arc(x, y, d.sz * (1 - 0.5 * u), 0, TAU); g.fill();
+        return true;
+      });
+      g.fillStyle = col(0.85, T.hi); g.font = "bold 9px ui-monospace, monospace";
+      g.fillText(hold ? "HOLD" : (rt < 10 ? rt.toFixed(1) : Math.round(rt)) + " s", 6, 12);
+    },
     // twinkling, or soft and dim.
     galaxy(g, q, v, t, C, dt) {
       const s = v.s, cv = v.canvas;
@@ -2663,7 +2731,7 @@
     Droplets: ["grains"], Chopdly: ["chopdly"], Loop: ["loop"], Scrub: ["scrub"], Stasis: ["stasis"],
     GridDly: ["griddly"], Mangle: ["mangle"], Spiral: ["spiral"], Hydra: ["hydra"],
     Spool: ["spool"], Ring: ["ring"], DubSiren: ["dubsiren"], Gyre: ["gyre"],
-    Rooms: ["rooms"], Horizon: ["horizon"], HorizonL: ["horizon"], Galactic: ["galaxy"], Breather: ["breather"],
+    Rooms: ["rooms"], Horizon: ["horizon"], HorizonL: ["horizon"], Cloud: ["cloud"], Galactic: ["galaxy"], Breather: ["breather"],
     Flower: ["flower"], Taffy: ["taffy"], GenLoss: ["genloss"], Scope: ["scope"], Sweep: ["sweep"],
     Arrakis: ["arrakis"], DualShft: ["dualshft"], Microlm: ["microlm"], Choral: ["choral"],
     EuGate: ["eugate"], Dissolve: ["dissolve"], Shatter: ["shatter"], "S.GN_L": ["sgnl"],

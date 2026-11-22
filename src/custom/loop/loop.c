@@ -180,9 +180,12 @@ static inline void layout(LoopState *st, uintptr_t end)
     st->colk_rec = colk_of(st->cap);
 }
 
-/* May the Long regions be used? MS-70CDR 2.10 only, MIDISTOMP absent (its
- * services block at 0xC00F3000 holds the region bases), no overlap with our
- * own arena. Pure reads. */
+/* May the Long regions be used? MS-70CDR 2.10 only, MIDISTOMP absent, no
+ * overlap with our own arena. Pure reads. MIDISTOMP is spotted by the magic
+ * of its looper services block (0xC00F3000, 0x5A4C5301) or of its transport
+ * block (0x1181FF00, 0x5A4D5401), so a change in its memory layout can't
+ * make Loop write over it; the old test (one of its region bases in the
+ * services block) stays as a third check. */
 ZV_INLINE(long_ok)
 static inline int long_ok(uintptr_t base, uintptr_t end)
 {
@@ -193,6 +196,7 @@ static inline int long_ok(uintptr_t base, uintptr_t end)
     /* The regions are mapped on the MS-70CDR only; and as before the firmware
      * table, only once its UI event pointer is valid too. */
     if (zv_fw_ok() != ZV_FW_MS70 || !zv_event(&zv_fws[ZV_FW_MS70 - 1])) return 0;
+    if (ZV_U32(0xC00F3000u) == 0x5A4C5301u || ZV_U32(0x1181FF00u) == 0x5A4D5401u) return 0;
     for (k = 2; k < 8u; ++k) {
         unsigned v = ZV_U32(0xC00F3000u + 4u * k);
         if (v == 0xC0102000u || v == 0xC0198000u || v == 0xC0636980u) return 0;

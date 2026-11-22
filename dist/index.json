@@ -55,6 +55,15 @@
    "sha256": "5e3ca6a1c25359bc40b068c64df1c649ae26071c5b87673b50593df0d1db98d2"
   },
   {
+   "file": "Cloud.ZDL",
+   "name": "Cloud",
+   "gid": 8,
+   "fxid": 423,
+   "version": "0.01",
+   "bytes": 21558,
+   "sha256": "cece59315769adb88a5cf90ca1367c7aaf4bd5b0019d35b94a75301a5ae82a1e"
+  },
+  {
    "file": "Corrupt.ZDL",
    "name": "Corrupt",
    "gid": 8,
@@ -230,9 +239,9 @@
    "name": "Loop",
    "gid": 8,
    "fxid": 467,
-   "version": "0.04",
-   "bytes": 31010,
-   "sha256": "2eecfb231b67a593edc784f1c75b25edbf4f4de415b391e9c4b69368670e2063"
+   "version": "0.05",
+   "bytes": 31138,
+   "sha256": "6a45324b86c156056a4468642ce71858fbaba13ee409a6bef7c849e7a3b4c581"
   },
   {
    "file": "Mangle.ZDL",

@@ -327,7 +327,7 @@ function arrange(){
   const model=$("mwModel");
   // The pedal's own answer (patch_editor.html's PEDAL_ID): model and firmware once it has said who it is.
   const syncModel=()=>{try{const on=!!midiOut&&midiOut.state!=="disconnected";
-    model.textContent=PEDAL_ID?PEDAL_ID.model+(PEDAL_ID.fw?" · "+PEDAL_ID.fw:"")+(READ_ONLY?" · read-only":""):on?"Connecting…":"Not connected";}catch(e){}};
+    model.textContent=PEDAL_ID?PEDAL_ID.model+(PEDAL_ID.fw?" · "+(typeof fwLabel==="function"?fwLabel(PEDAL_ID):PEDAL_ID.fw):"")+(READ_ONLY?" · read-only":""):on?"Connecting…":"Not connected";}catch(e){}};
   syncModel();setInterval(syncModel,2000);
 }
 </script>

@@ -37,7 +37,7 @@ LIVE = {
     "Ring": ["--signal", "@guitar", "--seconds", "6"],
     "Skull": ["--signal", "@guitar", "--seconds", "6"],
 }
-EXPERIMENTAL = ["Loop", "Chopdly", "Droplets", "Carillon", "Deform", "Chimera", "Horizon", "HorizonL", "Scope", "Spectrum", "Ring", "Skull", "Tonic"]
+EXPERIMENTAL = ["Loop", "Chopdly", "Droplets", "Carillon", "Deform", "Chimera", "Horizon", "HorizonL", "Cloud", "Scope", "Spectrum", "Ring", "Skull", "Tonic"]
 
 # Loader examples: (gallery file stem, kind, name, icon)
 EXAMPLES = [("nam-example", "NAM", "smokey", "amp"), ("cab-example", "IR", "4x12", "cabinet")]

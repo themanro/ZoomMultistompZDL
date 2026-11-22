@@ -324,12 +324,12 @@ test('new capture and cab slots skip IDs another effect on the pedal already has
  assert(logged.some(t=>/GOOEY\.ZDL already has its ID 8\/501/.test(t)));
 });
 
-test('a slot swap leaves MIDISTOMP routing (byte 17 of each slot block) with the slot position',()=>{
- // Byte 17 of each 18-byte slot block in the decoded patch: bits 0-1 the slot's bus, bits 2-6 mixer settings of
- // that position, bit 7 zero. Raw bytes below hold its low 7 bits; the editor models none of them, so encodePatch
- // keeps them from the pedal's dump while the effects move.
+test("a slot swap moves MIDISTOMP's bus bits with the effect and leaves the rest of byte 17 with the slot",()=>{
+ // Byte 17 of each 18-byte slot block in the decoded patch: bits 0-1 the slot's bus (they travel with the effect),
+ // bits 2-6 mixer settings of that position (they stay), bit 7 zero (MIDISTOMP docs/dev/modwerk-research.md).
+ // Raw bytes below hold its low 7 bits; encodePatch keeps them from the pedal's dump.
  const c=context();
- vm.runInContext(['const BITS=','const NAMIDX=','const NZBITS=','for(const slot of BITS)','  if(bf[2]===','const EMPTY146='].map(k=>{const at=src.indexOf('\n'+k)+1;return src.slice(at,k==='const BITS='||k==='const EMPTY146='?src.indexOf('];',at)+2:src.indexOf('\n',at));}).join('\n')
+ vm.runInContext(['const BITS=','const NAMIDX=','const NZBITS=','for(const slot of BITS)','  if(bf[2]===','const EMPTY146=','const MS_ROUTE='].map(k=>{const at=src.indexOf('\n'+k)+1;return src.slice(at,k==='const BITS='||k==='const EMPTY146='?src.indexOf('];',at)+2:src.indexOf('\n',at));}).join('\n')
   +'\n'+['getBits','setBits','decodePatch','encodePatch','swapNZBits'].map(fn).join('\n')+'\nthis.api={decodePatch,encodePatch,swapNZBits};',c);
  const {decodePatch,encodePatch,swapNZBits}=c.api;
  const base=Array.from({length:146},(_,i)=>i<5||i===145?[0xf0,0x52,0,0x61,0x28][i]??0xf7:(i*37+11)&0x7f);
@@ -337,9 +337,24 @@ test('a slot swap leaves MIDISTOMP routing (byte 17 of each slot block) with the
  for(const [a,b] of [[0,1],[2,5],[3,4]]){
   const p=decodePatch(base),t=p.fx[a];p.fx[a]=p.fx[b];p.fx[b]=t;
   const out=encodePatch(p,swapNZBits(base,a,b));
-  assert.deepEqual(routing.map(i=>out[i]),routing.map(i=>base[i]),'swap '+(a+1)+'/'+(b+1));
+  assert.equal(out[routing[a]]&3,base[routing[b]]&3,'bus of slot '+(b+1)+' moved to '+(a+1));
+  assert.equal(out[routing[b]]&3,base[routing[a]]&3,'bus of slot '+(a+1)+' moved to '+(b+1));
+  assert.equal(out[routing[a]]&0x7c,base[routing[a]]&0x7c,'mixer bits stay at slot '+(a+1));
+  assert.equal(out[routing[b]]&0x7c,base[routing[b]]&0x7c,'mixer bits stay at slot '+(b+1));
+  for(const s of [0,1,2,3,4,5]) if(s!==a&&s!==b) assert.equal(out[routing[s]],base[routing[s]],'slot '+(s+1)+' untouched');
   assert.deepEqual(decodePatch(out).fx[a],decodePatch(base).fx[b],'the effect itself moved');
  }
+});
+
+test("MIDISTOMP's tag in the identity reply reads as MIDISTOMP, not as firmware other than 2.10",()=>{
+ const c=context();
+ vm.runInContext(['const msTag=','const fwLabel='].map(k=>{const at=src.indexOf('\n'+k)+1;return src.slice(at,src.indexOf('\n',at));}).join('\n')+'\nthis.api={msTag,fwLabel};',c);
+ const {msTag,fwLabel}=c.api;
+ assert.equal(msTag('M201'),'2.0.1');
+ assert.equal(msTag('2.10'),null);
+ assert.equal(msTag('1.10'),null);
+ assert.equal(fwLabel({fw:'M201',midistomp:'2.0.1'}),'MIDISTOMP 2.0.1');
+ assert.equal(fwLabel({fw:'2.10',midistomp:null}),'2.10');
 });
 
 test('the whole editor script compiles (no duplicate top-level names)',()=>{

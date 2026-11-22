@@ -1,0 +1,68 @@
+{
+  "effect_name": "Cloud",
+  "comment": "PEDAL BUILD manifest for Cloud (9-knob): a dense, diffuse ambient reverb. HorizonL's half-rate tank with an allpass inside every line of the loop and five input diffusers, so the tail turns to fog instead of echoes.",
+  "audio_func_name": "Fx_DLY_Cloud",
+  "gid": 8,
+  "gid_comment": "0x08 = Delay category -> SONAME prefix ZDL_DLY_.",
+  "fxid": 423,
+  "fxid_comment": "0x01A7. Project reserved Delay block, next to Droplets (422).",
+  "fxid_version": "0.01",
+  "flags_byte": 1,
+  "dsp_cost": 45.0,
+  "params": [
+    {
+      "name": "Size",
+      "max": 100,
+      "default": 65,
+      "comment": "params[5]. The space (the delay lines x0.4 .. x2.0); turning it bends the pitch of the tail."
+    },
+    {
+      "name": "Decay",
+      "max": 100,
+      "default": 60,
+      "comment": "params[6]. Reverb time, about 1 s to a minute and a half; 100 holds the tail forever and stops taking new sound."
+    },
+    {
+      "name": "Pre",
+      "max": 100,
+      "default": 10,
+      "comment": "params[7]. Pre-delay, 0 .. 370 ms."
+    },
+    {
+      "name": "Diff",
+      "max": 100,
+      "default": 75,
+      "comment": "params[8]. Smear: at 0 the echoes of the lines can still be heard, at 100 no attack is left."
+    },
+    {
+      "name": "Mod",
+      "max": 100,
+      "default": 40,
+      "comment": "params[9]. Slow movement of the delay lines: chorus in the tail, detune at the top."
+    },
+    {
+      "name": "Tone",
+      "max": 100,
+      "default": 50,
+      "comment": "params[10]. High cut inside the tail, 1.2 .. 10 kHz: dark to bright."
+    },
+    {
+      "name": "Lo",
+      "max": 100,
+      "default": 20,
+      "comment": "params[11]. Low cut inside the tail, 20 .. 600 Hz."
+    },
+    {
+      "name": "Swell",
+      "max": 100,
+      "default": 0,
+      "comment": "params[12]. Each note blooms into the reverb, over up to 2 s; 0 off."
+    },
+    {
+      "name": "Mix",
+      "max": 100,
+      "default": 45,
+      "comment": "params[13]. Dry/wet."
+    }
+  ]
+}

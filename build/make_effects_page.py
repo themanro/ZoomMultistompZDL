@@ -38,6 +38,7 @@ OURS = {
     "Rooms": ("A multi-mode reverb after the DBA Rooms: Room, Digit, Peak, Gate, Wave and Gong, with Freq and Depth reused per mode.", None, None),
     "Horizon": ("A huge, spacey reverb: eight long, slowly moving lines, from a room to a cathedral, a minute-long tail and a hold, a swell that blooms each note in.", "src/custom/horizon/README.md", None),
     "HorizonL": ("Horizon at half the sample rate inside: the same space for about half the DSP, for chains where Horizon crackles. Hi tops out at 10 kHz.", "src/custom/horizonl/README.md", "Not yet tried on the pedal."),
+    "Cloud": ("A dense, diffuse ambient reverb: notes bloom into a wash with no attack left, the tail turns to fog instead of echoes. Diff sets the smear; Tone and Lo shape how long the highs and lows last without shortening the tail.", "src/custom/cloud/README.md", "Not yet tried on the pedal."),
     # Pitch, modulation and texture
     "Microlm": ("Microloom: a granular shimmer cloud. Grains are pitched and fed back, so it builds rather than repeats.", None, None),
     "Arrakis": ("A Dune-style detuned sub-octave drone: two subs beating against each other.", None, None),
@@ -66,7 +67,7 @@ OURS = {
 }
 GROUPS = [
     ("Delays and loopers", ["Spiral", "Hydra", "Mangle", "Spool", "Dissolve", "Chopdly", "Droplets", "Gyre", "Stasis", "Loop"]),
-    ("Reverbs", ["Galactic", "Rooms", "Horizon", "HorizonL"]),
+    ("Reverbs", ["Galactic", "Rooms", "Horizon", "HorizonL", "Cloud"]),
     ("Pitch, modulation and texture", ["Microlm", "Arrakis", "Taffy", "GenLoss", "Shatter"]),
     ("Drive and lo-fi", ["Scorch", "Dustbox", "Corrupt", "Oxide", "Deform", "Rewire", "Tonic"]),
     ("Filters, resonators and voices", ["Flower", "Klang", "Howl", "Carillon", "Chimera"]),
