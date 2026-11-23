@@ -7,6 +7,18 @@ dated. Effects in [dist/](dist/) carry their own version in the file
 ## Unreleased
 
 ### Editor
+- **Remove several of Zoom's effects at once** (Effects → Zoom's effects on the
+  pedal): tick them (Shift-click ticks a range) and click Remove selected. One
+  confirm, the effect list written once (nothing is deleted if that write
+  fails), then the files deleted. It won't remove the last effect. For making
+  room on a full pedal, for example after a factory reset puts all of Zoom's
+  effects back.
+- **Installing on the MS-50G** (experimental): installing, updating and removing
+  effects over USB, unlocked once "Enable writes (experimental)" passes its
+  write test, with one extra confirm per session. Until now the MS-50G could
+  only read and back up. Its storage size isn't known yet, so free blocks come
+  from the free space the pedal reports, with 8 blocks kept spare instead of 3.
+  Not yet tried on an MS-50G.
 - **MIDISTOMP support** ([docs/MIDISTOMP-COMPAT.md](docs/MIDISTOMP-COMPAT.md), from
   reading MIDISTOMP 2.0.1's patches and sources; not yet tried on a pedal running it).
   The editor reads MIDISTOMP's tag in the identity reply (`M201`) as "MIDISTOMP 2.0.1"

@@ -429,6 +429,7 @@
   #fxCheckRows{display:grid;grid-template-columns:auto minmax(0,1.2fr) auto minmax(0,1.6fr);gap:6px 12px;align-items:baseline;margin:8px 0}
   #fxCheckRows .head{font-size:12px;opacity:.7;text-transform:uppercase;letter-spacing:1px}
   #fxCheckRows .ck-bad{color:var(--err);font-weight:700} #fxCheckRows .ck-warn{color:var(--warn,var(--warnfg));font-weight:700}
+  #fxZoomRows .zsel{display:flex;gap:8px;align-items:center;cursor:pointer} #fxZoomRows .zsel input{width:18px;height:18px;margin:0;flex:none;accent-color:var(--ink)}
   #fxRows .acts,#fxStockRows .acts,#fxZoomRows .acts,#fxNamRows .acts{display:flex;gap:6px;justify-content:flex-end} #fxRows button,#fxStockRows button,#fxZoomRows button,#fxNamRows button{min-height:32px}
   .nam-dsp{display:flex;gap:10px;align-items:center;margin:4px 0 8px} .nam-dsp .dspmeter{margin-left:0} .nam-dsp .dspmeter .bar{display:block;padding:0;margin:0;height:9px;flex:none}
   .t3k-pick{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:flex-end;margin:0 0 8px} .t3k-pick label{display:flex;flex-direction:column;gap:4px;font-size:13px}
@@ -589,7 +590,7 @@
 </dialog>
 <dialog id="effectsDrawer" class="drawer" aria-labelledby="effectsTitle">
   <div class="drawer-head"><h2 id="effectsTitle">Effects on the pedal</h2><button type="button" data-close="effectsDrawer" aria-label="Close effects">✕</button></div>
-  <p class="hint">Install, update and remove this project's effects over USB, without Zoom Effect Manager. Tested on the MS-70CDR with firmware 2.10. Zoom's own effects are listed separately below: remove ones you don't use to make room, and put them back from Zoom's updater. After a change, power-cycle the pedal to load it. Don't touch the pedal or the cable while a write runs.</p>
+  <p class="hint">Install, update and remove this project's effects over USB, without Zoom Effect Manager. Tested on the MS-70CDR with firmware 2.10; on the MS-50G it's experimental and unlocks after “Enable writes (experimental)”. Zoom's own effects are listed separately below: remove ones you don't use to make room, and put them back from Zoom's updater. After a change, power-cycle the pedal to load it. Don't touch the pedal or the cable while a write runs.</p>
   <p class="hint" id="fwNote" hidden></p>
   <div class="bar">
     <button id="fxScan" type="button">Read the pedal</button>
@@ -604,7 +605,8 @@
   </div>
   <details id="fxZoomBox"><summary>Zoom's effects on the pedal</summary>
     <p class="hint">Zoom's own effects fill most of the pedal (about 683 of its 700 blocks): removing ones you never use is how to make room. Patches that use a removed effect show an empty slot. Put one back from Zoom's updater (below) or a backup, so back up all files first. Only effects in the pedal's effect list are offered; files the pedal keeps for itself are not.</p>
-    <div class="bar"><button id="fxZoomList" type="button" title="Reads every effect's ID from the pedal: about half a minute the first time">List them</button></div>
+    <div class="bar"><button id="fxZoomList" type="button" title="Reads every effect's ID from the pedal: about half a minute the first time">List them</button><button id="fxZoomRemoveSel" type="button" hidden disabled title="Removes every ticked effect in one go: the effect list is written once, then the files are deleted">Remove selected</button><button id="fxZoomClearSel" type="button" hidden>Clear ticks</button></div>
+    <p class="hint" id="fxZoomTickHint" hidden>Tick the effects to remove (Shift-click ticks a range), then click Remove selected.</p>
     <p id="fxZoomStatus" class="hint" role="status" aria-live="polite"></p>
     <div id="fxZoomRows" class="fx-rows" role="table" aria-label="Zoom's effects on the pedal"></div>
   </details>
@@ -3427,8 +3429,22 @@ function fsRemove(name,...a){return fsJobRun(name,()=>fsRemove_(name,...a));}
 function fsBackup(...a){return fsJobRun(null,()=>fsBackup_(...a));}
 function fsRestore(...a){return fsJobRun(null,()=>fsRestore_(...a));}
 function fsSay(text,warn){$("fxStatus").textContent=text;if(warn)banner(text);log("effects: "+text,warn?"warn":undefined);}
+/* Installing on the MS-50G (experimental): same file transfer, effect list and
+   effect format as the MS-70CDR. Unlocked once its patch write test passed
+   (WRITE_TRIAL), and asked once per session. Every file is still read back. */
+const FS_TRIAL_MODELS={0x58:"MS-50G"};
+let fsTrialOk=false;
 function fsCanWrite(){
-  if(DEVID!==0x61||READ_ONLY)throw new Error("Installing is only enabled on the MS-70CDR (the tested pedal). Reading and backing up work on any pedal.");
+  if(DEVID===0x61&&!READ_ONLY)return;
+  const model=FS_TRIAL_MODELS[DEVID];
+  if(model&&WRITE_TRIAL&&!READ_ONLY){
+    if(!fsTrialOk&&!confirm(`Install and remove effects on this ${model}? (experimental)\n\n`
+       +`It uses the same file transfer as the MS-70CDR and reads every file back to check it, but it hasn't been tried on an ${model} yet.\n\n`
+       +`Click “Back up all files” first, so you can put everything back.`))throw new Error("Nothing was changed.");
+    fsTrialOk=true;return;
+  }
+  if(model)throw new Error(`On the ${model}, click “Enable writes (experimental)” in the bottom bar first: installing unlocks once its write test passes.`);
+  throw new Error("Installing is only enabled on the MS-70CDR and, experimentally, the MS-50G. Reading and backing up work on any pedal.");
 }
 async function fsLoadIndex(){
   if(fsIndex)return fsIndex;
@@ -3460,7 +3476,7 @@ async function fsScan_(){
   if(fsZoomShown)await fsZoomRead();
   {const r=fsRoom();
    fsSay(files.length+" files on the pedal"+(free!=null?", "+Math.round(free/1024)+" KB free":"")+
-     (r?" · storage "+r.used+" of "+r.blocks+" blocks, "+r.files+" of "+r.maxFiles+" file slots":"")+".");
+     (r?" · storage "+(r.estimated?"about ":"")+r.used+" of "+r.blocks+" blocks, "+r.files+" of "+r.maxFiles+" file slots":"")+".");
    if(r)log("effects: storage "+r.used+"/"+r.blocks+" blocks, "+r.files+"/"+r.maxFiles+" files");}
 }
 function fsRender(){
@@ -3506,21 +3522,30 @@ async function fsKeepList(){
    pedal reports doesn't show the rounding; overfilling the store is the
    prime suspect for the freeze of 2026-11-13. Keep FS_SPARE blocks free for
    the effect list's own rewrite. */
-const FS_BLOCK_DATA=4090, FS_SPARE=3;
+const FS_BLOCK_DATA=4090, FS_SPARE=3, FS_SPARE_EST=8;
 const FS_LIMITS={0x61:{blocks:700,files:200}};
 const fsBlocks=n=>Math.max(1,Math.ceil(n/FS_BLOCK_DATA));
 function fsRoom(){
+  if(!fsFiles)return null;
   const lim=FS_LIMITS[DEVID];
-  if(!lim||!fsFiles)return null;
   const used=fsFiles.files.reduce((t,f)=>t+fsBlocks(f.size),0);
-  return {used,blocks:lim.blocks,files:fsFiles.files.length,maxFiles:lim.files,free:lim.blocks-used};
+  if(lim)return {used,blocks:lim.blocks,files:fsFiles.files.length,maxFiles:lim.files,free:lim.blocks-used};
+  /* Other pedals (MS-50G): no limits from their updater yet. The free count
+     the pedal reports moves in whole 4 KB blocks (MS-70CDR: 60 KB free at 685
+     of 700 blocks), so free blocks come from it, with more kept spare, and the
+     MS-70CDR's 200 file slots are assumed. */
+  if(fsFiles.free==null)return null;
+  const free=Math.floor(fsFiles.free/4096);
+  return {used,blocks:used+free,files:fsFiles.files.length,maxFiles:200,free,estimated:true};
 }
 // Throws unless writing `bytes` (replacing a file of `oldBytes`, or a new file) leaves room.
 function fsRoomCheck(name,bytes,oldBytes){
-  const r=fsRoom(); if(!r)return;
+  const r=fsRoom();
+  if(!r){if(DEVID!==0x61)throw new Error("The pedal didn't report its free space, so nothing is written. Read the pedal again.");return;}
   const need=fsBlocks(bytes)-(oldBytes!=null?fsBlocks(oldBytes):0);
+  const spare=r.estimated?FS_SPARE_EST:FS_SPARE;
   if(oldBytes==null&&r.files+1>r.maxFiles)throw new Error("The pedal has no free file slot ("+r.files+" of "+r.maxFiles+" used). Remove an effect first.");
-  if(r.used+need>r.blocks-FS_SPARE)throw new Error("Not enough room on the pedal for "+name+": it needs "+fsBlocks(bytes)+" block(s), and "+r.used+" of "+r.blocks+" are used ("+Math.max(0,r.free)+" free, "+FS_SPARE+" kept spare). Remove an effect first.");
+  if(r.used+need>r.blocks-spare)throw new Error("Not enough room on the pedal for "+name+": it needs "+fsBlocks(bytes)+" block(s), and "+r.used+" of "+r.blocks+" are used ("+Math.max(0,r.free)+" free, "+spare+" kept spare). Remove an effect first.");
 }
 async function fsInstall_(name,data,{stock=false,confirmed=false,rescan=true}={}){
   fsCanWrite();
@@ -3598,6 +3623,47 @@ async function fsRemove_(name,{confirmed=false,zoom=false}={}){
   await fsScan();
   return true;
 }
+// Several of Zoom's effects in one go: the same checks as fsRemove_ for each,
+// one confirm, the effect list written once (nothing is deleted if that fails),
+// then the files deleted, then one rescan.
+async function fsRemoveMany_(names){
+  fsCanWrite();
+  if(!fsFiles)await fsScan_();
+  const picked=[];
+  for(const name of names){
+    const f=fsFiles.files.find(x=>x.name.toUpperCase()===name.toUpperCase());
+    if(!f)continue;
+    if(f.info===undefined)f.info=await fsHead(f);
+    const e=fsZoomOf(f.name,f.info);
+    if(!e)throw new Error(f.name+" is not one of Zoom's effects; nothing was removed.");
+    picked.push({f,e});
+  }
+  if(!picked.length)throw new Error("None of the ticked effects is on the pedal any more.");
+  const blocks=picked.reduce((t,x)=>t+fsBlocks(x.f.size),0);
+  const shown=picked.slice(0,12).map(x=>x.e.name).join(", ")+(picked.length>12?" and "+(picked.length-12)+" more":"");
+  if(!confirm("Remove "+picked.length+" of Zoom's effects from the pedal, freeing "+blocks+" blocks?\n\n"+shown
+     +"\n\nPatches that use them will show an empty slot. You can put them back from Zoom's updater or a backup (Back up all files)."))return false;
+  const list=await fsKeepList();
+  let updated=list;
+  for(const {f} of picked){
+    const r=fsRecords(updated).find(x=>x.name.toUpperCase()===f.name.toUpperCase());
+    if(!r)throw new Error(f.name+" is not in the pedal's effect list (the pedal may need it itself); nothing was removed.");
+    updated=[...updated.slice(0,r.at),...updated.slice(r.at+13),...Array(13).fill(0)];
+  }
+  if(!fsRecords(updated).some(r=>r.name))throw new Error("That would leave the pedal with no effects at all; nothing was removed. Keep at least one.");
+  fsSay("Updating the effect list…");
+  await fsWrite(FS_LIST,updated);
+  fsProg("Removing "+picked.length+" effects",picked.length);
+  for(const [i,{f}] of picked.entries()){
+    fsSay("Removing "+f.name+" ("+(i+1)+" of "+picked.length+")…");
+    await fsDelete(f.name);fsZoomSel.delete(f.name.toUpperCase());fsProgAdd(1);
+  }
+  log("effects: removed "+picked.length+" of Zoom's effects: "+picked.map(x=>x.f.name).join(", "));
+  await fsScan_();
+  fsSay(picked.length+" of Zoom's effects removed ("+blocks+" blocks freed). Power-cycle the pedal.");
+  return true;
+}
+const fsRemoveMany=(...a)=>fsJobRun(null,()=>fsRemoveMany_(...a));
 async function fsInstallIndexed(e){
   const r=await fetch("../dist/"+encodeURIComponent(e.file),{cache:"no-store"});
   if(!r.ok)throw new Error("Could not download "+e.file+".");
@@ -4171,18 +4237,42 @@ async function fsZoomList_(){
   await fsZoomRead();
 }
 const fsZoomList=(...a)=>fsJobRun(null,()=>fsZoomList_(...a));
+// Ticked effects (file names, upper case), kept while they're still listed.
+const fsZoomSel=new Set();let fsZoomLastTick=-1;
+function fsZoomSelUpdate(zoom){
+  const sel=zoom.filter(x=>fsZoomSel.has(x.f.name.toUpperCase()));
+  const blocks=sel.reduce((t,x)=>t+fsBlocks(x.f.size),0);
+  const rm=$("fxZoomRemoveSel"),clr=$("fxZoomClearSel");
+  rm.hidden=clr.hidden=$("fxZoomTickHint").hidden=!zoom.length;
+  rm.disabled=!sel.length;clr.disabled=!sel.length;
+  rm.textContent=sel.length?"Remove selected ("+sel.length+", frees "+blocks+" blocks)":"Remove selected";
+}
 function fsRenderZoom(){
   const rows=$("fxZoomRows");rows.textContent="";
-  if(!fsZoomShown||!fsFiles)return;
+  if(!fsZoomShown||!fsFiles){for(const id of ["fxZoomRemoveSel","fxZoomClearSel","fxZoomTickHint"])$(id).hidden=true;return;}
   const zoom=fsFiles.files.map(f=>({f,e:fsZoomOf(f.name,f.info)}))
     .filter(x=>x.e&&(!fsZoomFlst||fsListHas(fsZoomFlst,x.f.name)))
     .sort((a,b)=>a.e.category.localeCompare(b.e.category)||a.e.name.localeCompare(b.e.name));
   const blocks=zoom.reduce((t,x)=>t+fsBlocks(x.f.size),0);
   $("fxZoomStatus").textContent=zoom.length+" of Zoom's effects on the pedal, using "+blocks+" blocks.";
+  const listed=new Set(zoom.map(x=>x.f.name.toUpperCase()));
+  for(const n of [...fsZoomSel])if(!listed.has(n))fsZoomSel.delete(n);
+  fsZoomLastTick=-1;fsZoomSelUpdate(zoom);
   if(!zoom.length)return;
   for(const h of ["Effect","Group","Blocks",""]){const c=document.createElement("div");c.className="head";c.textContent=h;rows.appendChild(c);}
-  for(const {f,e} of zoom){
-    for(const t of [e.name+" ("+f.name+")",e.category,String(fsBlocks(f.size))]){const c=document.createElement("div");c.textContent=t;rows.appendChild(c);}
+  const boxes=[];
+  for(const [i,{f,e}] of zoom.entries()){
+    const key=f.name.toUpperCase();
+    const lab=document.createElement("label");lab.className="zsel";
+    const cb=document.createElement("input");cb.type="checkbox";cb.checked=fsZoomSel.has(key);boxes.push(cb);
+    cb.onclick=ev=>{
+      const on=cb.checked;
+      const [a,b]=ev.shiftKey&&fsZoomLastTick>=0?[Math.min(fsZoomLastTick,i),Math.max(fsZoomLastTick,i)]:[i,i];
+      for(let k=a;k<=b;k++){boxes[k].checked=on;const n=zoom[k].f.name.toUpperCase();if(on)fsZoomSel.add(n);else fsZoomSel.delete(n);}
+      fsZoomLastTick=i;fsZoomSelUpdate(zoom);
+    };
+    lab.append(cb,document.createTextNode(e.name+" ("+f.name+")"));rows.appendChild(lab);
+    for(const t of [e.category,String(fsBlocks(f.size))]){const c=document.createElement("div");c.textContent=t;rows.appendChild(c);}
     const acts=document.createElement("div");acts.className="acts";acts.dataset.file=f.name.toUpperCase();
     const b=document.createElement("button");b.type="button";b.textContent="Remove";b.onclick=midiAction(()=>fsRemove(f.name,{zoom:true}));acts.appendChild(b);
     rows.appendChild(acts);
@@ -4339,6 +4429,8 @@ $("fxBackup").onclick=midiAction(fsBackup);
 $("fxRestore").onclick=midiAction(fsRestore);
 $("fxReadUpdater").onclick=midiAction(fsReadUpdater);
 $("fxZoomList").onclick=midiAction(fsZoomList);
+$("fxZoomRemoveSel").onclick=midiAction(()=>fsRemoveMany([...fsZoomSel]));
+$("fxZoomClearSel").onclick=()=>{fsZoomSel.clear();fsRenderZoom();};
 $("fxNamFile").onchange=fsNamPick;
 $("fxNamName").onchange=()=>{fsNamSlots();fsNamDsp();};
 $("fxNamName").oninput=()=>fsPreview("nam");

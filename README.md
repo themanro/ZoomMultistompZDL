@@ -163,7 +163,7 @@ your backup) but keeps the installed effects; then remove the bad one.
 | Pedal | Status |
 |---|---|
 | **MS-70CDR**, firmware 2.10 | The pedal everything here is built and tested on. |
-| **MS-50G**, firmware 3.10 | NAM (full rate and Eco) and CabIR confirmed by a user ([#5](https://github.com/themanro/ZoomMultistompZDL/issues/5)); editor writes passed the opt-in write test. Still experimental. |
+| **MS-50G**, firmware 3.10 | NAM (full rate and Eco) and CabIR confirmed by a user ([#5](https://github.com/themanro/ZoomMultistompZDL/issues/5)); editor writes passed the opt-in write test, which also unlocks installing effects from the editor (not yet tried on an MS-50G). Still experimental. |
 | **MS-60B, G1on, G1Xon, B1on, B1Xon** | Same effect format. The live screens (Skull, Ring, Scope, Spectrum, Loop) load and animate on a B1Xon, on its own firmware 1.30 and on G1Xon 1.21 ([#12](https://github.com/themanro/ZoomMultistompZDL/issues/12)); no editor support yet ([#13](https://github.com/themanro/ZoomMultistompZDL/issues/13)). MS-60B: awaiting reports. |
 | **MS-100BT** | Effects confirmed by a user, installed over Bluetooth with [lopezchau's tools](https://github.com/lopezchau/zoom-ms100bt-bluetooth) or [MS StompCtrl](https://github.com/1njected/ms-stompctrl) ([#4](https://github.com/themanro/ZoomMultistompZDL/issues/4)). No USB MIDI, so no editor. |
 | **Plus models** (MS-50G+, MS-60B+, MS-70CDR+) and the **Four series** | Not supported: they use Zoom's newer ZD2 format. For NAM on a Plus pedal, use [nam2zoom](https://github.com/freelender/nam-to-zoom) by Aleksandar Vukasinovic. |
