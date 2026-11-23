@@ -49,7 +49,9 @@ Expected to work unchanged.
   and on/off don't affect the hash.
 - **Records 50 and 51** must never be written or deleted. The editor's file commands only
   touch effect files and `FLST_SEQ.ZDT`, and its patch commands only patches 1-50.
-- **Live knob edits in slots 4-6** go through a buffer write as on stock firmware: the
-  stock OS's SysEx `0x31` handler only edits slots 1-3. MIDISTOMP's CC handler reaches all
-  six slots through `fx_set_param`; doing the same for `0x31` would make the editor's
-  slot 4-6 edits live and gapless (asked of Luca).
+- **Live knob edits in slots 4-6**: on MIDISTOMP 2.0.4 and later (identity `M204` and
+  up) SysEx `0x31` edits knobs and on/off live in all six slots, through the same
+  `fx_set_param` path as its CC handler (matujuice/zoom-ms-midistomp#77, asked in #72),
+  and the editor sends them live there. In exchange `0x31` no longer renames a patch; the
+  editor never did (it renames in the `0x28` patch write). On stock firmware and earlier
+  MIDISTOMP the stock handler only edits slots 1-3, so slots 4-6 go through a buffer write.

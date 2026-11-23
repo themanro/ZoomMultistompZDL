@@ -13,6 +13,10 @@ dated. Effects in [dist/](dist/) carry their own version in the file
   fails), then the files deleted. It won't remove the last effect. For making
   room on a full pedal, for example after a factory reset puts all of Zoom's
   effects back.
+- **Live edits in slots 4-6 on MIDISTOMP 2.0.4 and later.** Its SysEx knob
+  message now reaches all six slots (identity `M204` and up), so the editor turns
+  knobs in slots 4-6 live instead of rewriting the whole patch. Earlier firmware
+  is unchanged. Not yet tried on a pedal (2.0.4 isn't released yet).
 - **Installing on the MS-50G** (experimental): installing, updating and removing
   effects over USB, unlocked once "Enable writes (experimental)" passes its
   write test, with one extra confirm per session. Until now the MS-50G could

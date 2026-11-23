@@ -1558,7 +1558,7 @@ function onCtrlMidi(ev){
   if (!el || !el._setNorm) return;                // that slot has fewer knobs
   if (!liveEditable(s) && !ccWarned4to6){
     ccWarned4to6 = true;
-    log(`CC is driving slot ${s+1}: slots ${LIVE_EDIT_SLOTS+1}-6 don't sound a live edit, `
+    log(`CC is driving slot ${s+1}: slots ${liveSlots()+1}-6 don't sound a live edit, `
       + `so this lands only when auto-apply commits`, "warn");
   }
   el._setNorm(val / 127);
@@ -1666,7 +1666,13 @@ let AUTOAPPLY=false;
 // original "slots 4-6: 0x31 may be ignored" note meant — it was correct.
 const LIVE_EDIT_SLOTS=3;                 // slots 1..3 (index 0..2) accept live 0x31
 let directEditTrial=false;
-const liveEditable=s=>s<LIVE_EDIT_SLOTS||directEditTrial;
+// MIDISTOMP 2.0.4 (identity "M204") routes 0x31 through fx_set_param for all six
+// slots (matujuice/zoom-ms-midistomp#77, asked in #72); 0x31 no longer renames there,
+// and the editor never renamed through it (renames go in the 0x28 patch write).
+const MS_LIVE_ALL=204;
+const msLiveAll=()=>{const m=PEDAL_ID&&/^M(\d{3})$/.exec(String(PEDAL_ID.fw||"").trim());return !!m&&+m[1]>=MS_LIVE_ALL;};
+const liveSlots=()=>msLiveAll()?6:LIVE_EDIT_SLOTS;
+const liveEditable=s=>s<liveSlots()||directEditTrial;
 // ON by default. ToneLib drives slots 4-6 by forcing a full patch RELOAD on every
 // knob step -- a capture of one knob drag showed 16x (bank select + program change)
 // and 32 patch dumps, and zero live 0x31 messages. There is no special command; it
@@ -2124,7 +2130,7 @@ function replayParams(slots, why){
       nextSend += 9;                              // 3 ms from send() + 9 = 12 ms
     }
   }
-  if(sent) log(`replayed ${sent} param(s) as live edits ${why} — slots 1-${LIVE_EDIT_SLOTS} only`);
+  if(sent) log(`replayed ${sent} param(s) as live edits ${why}`+(liveSlots()<6?` — slots 1-${liveSlots()} only`:""));
   if(skipped) log(`slot(s) 4-6 not replayed ${why}: the pedal ignores live 0x31 there, `
                 + `so those keep their old sound until a knob is moved ON THE PEDAL`, "warn");
 }
