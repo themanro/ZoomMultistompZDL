@@ -1,4 +1,4 @@
-# New effects for old Zoom pedals
+# New effects, NAM A2 & Cab loader, editor for Zoom Multistomp pedals
 
 <p align="center"><img src="graphics/15-console-phosphor.jpg" width="900" alt="A Zoom MS-70CDR mounted in a vintage lab console, in the pale-blue phosphor of the pedal-screen artwork"></p>
 
