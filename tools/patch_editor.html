@@ -3314,7 +3314,11 @@ async function fsDelete(name){
   await fsAsk([0x60,0x24,...fsName(name)]);await fsClose();
 }
 function fsInfo(b){
-  if(!b||b.length<0x50||String.fromCharCode(...b.slice(4,8))!=="SIZE"||b[0x4c]!==0x7f||String.fromCharCode(...b.slice(0x4d,0x50))!=="ELF")return null;
+  if(!b||b.length<0x50||String.fromCharCode(...b.slice(4,8))!=="SIZE")return null;
+  // The ELF follows the header, whose length is the word at 0x0C plus 0x14: 0x4C,
+  // or longer with more chunks (the MS-50G's amps carry a 'CABI' chunk: 0x14C).
+  const e=0x14+(b[12]|b[13]<<8|b[14]<<16|b[15]<<24);
+  if(e<0x4c||e+4>b.length||b[e]!==0x7f||String.fromCharCode(...b.slice(e+1,e+4))!=="ELF")return null;
   return {gid:b[0x3c],fxid:b[0x40]|b[0x41]<<8,version:String.fromCharCode(...b.slice(0x44,0x48))};
 }
 // FLST_SEQ.ZDT sections: '>>>' 00 <group> 8 x 00, 13-byte records (name padded to 12, then 00), '<<<' 00 ...
@@ -3523,14 +3527,16 @@ async function fsKeepList(){
    prime suspect for the freeze of 2026-11-13. Keep FS_SPARE blocks free for
    the effect list's own rewrite. */
 const FS_BLOCK_DATA=4090, FS_SPARE=3, FS_SPARE_EST=8;
-const FS_LIMITS={0x61:{blocks:700,files:200}};
+// MS-50G 3.10: its updater's FS.bin has the same header (200 file slots, 711
+// blocks) and size as the MS-70CDR's; Zoom's own effects fill 400 blocks.
+const FS_LIMITS={0x61:{blocks:700,files:200},0x58:{blocks:700,files:200}};
 const fsBlocks=n=>Math.max(1,Math.ceil(n/FS_BLOCK_DATA));
 function fsRoom(){
   if(!fsFiles)return null;
   const lim=FS_LIMITS[DEVID];
   const used=fsFiles.files.reduce((t,f)=>t+fsBlocks(f.size),0);
   if(lim)return {used,blocks:lim.blocks,files:fsFiles.files.length,maxFiles:lim.files,free:lim.blocks-used};
-  /* Other pedals (MS-50G): no limits from their updater yet. The free count
+  /* Other pedals: no limits from their updater yet. The free count
      the pedal reports moves in whole 4 KB blocks (MS-70CDR: 60 KB free at 685
      of 700 blocks), so free blocks come from it, with more kept spare, and the
      MS-70CDR's 200 file slots are assumed. */

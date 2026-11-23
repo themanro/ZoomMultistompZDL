@@ -11,6 +11,13 @@
 (function(root){
 'use strict';
 const ZDL_HEADER=0x4C;   // bytes before the ELF; the size field at 0x10 is the ELF's length
+// The header's own length is the word at 0x0C plus 0x14: 0x4C for most effects,
+// longer when it carries more chunks (the MS-50G's amps add a 'CABI' chunk: 0x14C).
+function zdlHeaderLen(z){
+  if(z.length<0x14||z[4]!==0x53||z[5]!==0x49||z[6]!==0x5A||z[7]!==0x45)return ZDL_HEADER;
+  const n=0x14+(z[12]|z[13]<<8|z[14]<<16|z[15]<<24);
+  return n>=ZDL_HEADER&&n+4<=z.length?n:ZDL_HEADER;
+}
 const SHT_SYMTAB=2,SHT_STRTAB=3,SHT_HASH=5,SHT_DYNAMIC=6,SHT_NOBITS=8,SHT_DYNSYM=11;
 const SHN_LORESERVE=0xff00,STT_SECTION=3,SHF_ALLOC=2;
 // .dynamic entries that hold a file offset, and the section type each points at:
@@ -39,7 +46,8 @@ function packStrings(tab,used){
 
 function strip(zdl){
   zdl=new Uint8Array(zdl);   // a plain copy: slices below are copies, even from a Node Buffer
-  const elf=zdl.subarray(ZDL_HEADER);
+  const hdr=zdlHeaderLen(zdl);
+  const elf=zdl.subarray(hdr);
   if(elf[0]!==0x7f||elf[1]!==0x45||elf[2]!==0x4c||elf[3]!==0x46)throw new Error("not a ZDL");
   const v=view(elf);
   const u16=o=>v.getUint16(o,true),u32=o=>v.getUint32(o,true);
@@ -135,7 +143,7 @@ function strip(zdl){
     const info=(s.type===4||s.type===9)&&s.info?remap(s.info):s.info;   // REL/RELA name the section they apply to
     [s.name,s.type,s.flags,s.addr,s.offset,s.size,link,info,s.align,s.entsize].forEach((x,j)=>ov.setUint32(o+j*4,x,true));});
   ov.setUint32(0x1C,newPhoff,true);ov.setUint32(0x20,newShoff,true);ov.setUint16(0x30,kept.length,true);ov.setUint16(0x32,idx[shstrndx],true);
-  const res=new Uint8Array(ZDL_HEADER+out.length);res.set(zdl.subarray(0,ZDL_HEADER));res.set(out,ZDL_HEADER);
+  const res=new Uint8Array(hdr+out.length);res.set(zdl.subarray(0,hdr));res.set(out,hdr);
   view(res).setUint32(0x10,out.length,true);
   return res;
 }
@@ -209,6 +217,6 @@ async function updaterEffects(bytes){
   return out.sort((a,b)=>a.file<b.file?-1:a.file>b.file?1:0);
 }
 
-const api={strip,updaterEffects,fsBinFiles,unzipOne,unzipAll};
+const api={strip,updaterEffects,fsBinFiles,unzipOne,unzipAll,zdlHeaderLen};
 if(typeof module!=='undefined')module.exports=api;else root.ZdlStrip=api;
 })(globalThis);

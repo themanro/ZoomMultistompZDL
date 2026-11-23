@@ -16,9 +16,14 @@ dated. Effects in [dist/](dist/) carry their own version in the file
 - **Installing on the MS-50G** (experimental): installing, updating and removing
   effects over USB, unlocked once "Enable writes (experimental)" passes its
   write test, with one extra confirm per session. Until now the MS-50G could
-  only read and back up. Its storage size isn't known yet, so free blocks come
-  from the free space the pedal reports, with 8 blocks kept spare instead of 3.
-  Not yet tried on an MS-50G.
+  only read and back up. Its storage is the MS-70CDR's (the 3.10 updater's file
+  system has the same header: 700 data blocks, 200 file slots; Zoom's effects
+  fill 400 of them). Not yet tried on an MS-50G.
+- **The MS-50G's amps are read as effects.** Their files carry a cabinet chunk
+  ('CABI') that moves the code from byte 0x4C to 0x14C. The editor and the
+  updater reader assumed 0x4C, so the MS-50G updater wouldn't open ("not a
+  ZDL") and its 8 amps were missing from the Zoom's effects list and the effect
+  ID check. Both now take the header length from the header.
 - **MIDISTOMP support** ([docs/MIDISTOMP-COMPAT.md](docs/MIDISTOMP-COMPAT.md), from
   reading MIDISTOMP 2.0.1's patches and sources; not yet tried on a pedal running it).
   The editor reads MIDISTOMP's tag in the identity reply (`M201`) as "MIDISTOMP 2.0.1"

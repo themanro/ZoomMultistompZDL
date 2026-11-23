@@ -276,7 +276,7 @@ test('an older build under a retired effect ID can be removed, but is never repl
 });
 
 test('a restore writes what the backup has and the pedal lacks, and keeps what was installed since',()=>{
- const zdl=(gid,fxid,version,size=0x60)=>{const b=Array(size).fill(0);b.splice(4,4,...Buffer.from('SIZE'));b[0x4c]=0x7f;b.splice(0x4d,3,...Buffer.from('ELF'));
+ const zdl=(gid,fxid,version,size=0x60)=>{const b=Array(size).fill(0);b.splice(4,4,...Buffer.from('SIZE'));b[0x0c]=0x38;b[0x4c]=0x7f;b.splice(0x4d,3,...Buffer.from('ELF'));
   b[0x3c]=gid;b[0x40]=fxid&255;b[0x41]=fxid>>8;b.splice(0x44,4,...Buffer.from(version));return b;};
  // FLST_SEQ.ZDT: per group '>>>' 00 <gid> 8 x 00, 13-byte records, '<<<' 00 + 9 x 00; zero-padded to 4108.
  const list=sections=>{const out=[];for(const [gid,names] of sections){out.push(0x3e,0x3e,0x3e,0,gid,...Array(8).fill(0));

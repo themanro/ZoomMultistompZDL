@@ -32,3 +32,20 @@ test('byte-identical to strip6x on dist/ (when TI\'s toolchain is installed)',{s
   }
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
+
+// The MS-50G's amps carry a 'CABI' chunk after INFO, so their ELF starts at 0x14C:
+// the header's own length is the word at 0x0C plus 0x14.
+test('a longer header (an extra chunk before the ELF) is kept and the ELF stripped the same',()=>{
+ const {zdlHeaderLen}=require('../zdl_strip.js');
+ const [f,b]=zdls[0], extra=256, hdr=0x4C+extra;
+ const cabi=Buffer.alloc(extra);cabi.write('CABI',0,'latin1');cabi.writeUInt32LE(extra-8,4);
+ const amp=Buffer.concat([b.subarray(0,0x4C),cabi,b.subarray(0x4C)]);
+ amp.writeUInt32LE(b.readUInt32LE(0x0C)+extra,0x0C);
+ assert.equal(zdlHeaderLen(b),0x4C,f);
+ assert.equal(zdlHeaderLen(amp),hdr,f+' with CABI');
+ const s=Buffer.from(strip(amp)),plain=Buffer.from(strip(b));
+ assert.deepEqual(s.subarray(0,0x0C),amp.subarray(0,0x0C));
+ assert.deepEqual(s.subarray(0x14,hdr),amp.subarray(0x14,hdr),'INFO and CABI kept');
+ assert.deepEqual(s.subarray(hdr),plain.subarray(0x4C),'same ELF as without the chunk');
+ assert.equal(s.readUInt32LE(0x10),s.length-hdr,'ZDL size field');
+});
