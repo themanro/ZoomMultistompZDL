@@ -1,6 +1,6 @@
 # New effects, NAM A2 & Cab loader, editor for Zoom Multistomp pedals
 
-<p align="center"><img src="graphics/15-console-phosphor.jpg" width="900" alt="A Zoom MS-70CDR mounted in a vintage lab console, in the pale-blue phosphor of the pedal-screen artwork"></p>
+<p align="center"><img src="graphics/hero.webp" width="900" alt="A Zoom MS-70CDR mounted in a vintage lab console, in pale-blue phosphor: its screen plays the effects' animations in turn while the meter needles swing, the scope traces and the LEDs blink"></p>
 
 **35 custom effects for the Zoom MultiStomp pedals, and the MultiStomp Editor:
 a free browser app that installs them over USB and edits your patches.** No

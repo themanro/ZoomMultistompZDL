@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Painted console</title>
+<!--
+  The moving parts of the README's main picture, over the edited painting
+  (paint-base.png, from build/make_paint_hero.py): the pedal's screen plays the
+  editor's effect pictures (tools/fx_visuals.js), the two meters' needles ride a
+  120 bpm pulse, the scope draws a turning trace and the LEDs blink. Open it from
+  a local server to watch it live; build/hero_capture.cjs records one loop.
+  Coordinates are the painting's pixels (1536 x 1024).
+-->
+<style>
+  :root{--screen-bg:#0a0d11;--screen-fg:#cfe4f3}
+  html,body{margin:0;background:#0c0d10}
+  #stage{display:block;width:1536px;height:1024px}
+  #fx{position:absolute;left:0;top:0;z-index:-1}
+  #fx div{width:348px}
+</style>
+</head>
+<body>
+<canvas id="stage" width="1536" height="1024"></canvas>
+<div id="fx"></div>
+<script src="../../tools/fx_visuals.js"></script>
+<script>
+"use strict";
+const LOOP = 16, TAU = Math.PI * 2, TOTAL = 48;
+const SHOW = ["Spiral", "Cloud", "Skull", "Chopdly", "Carillon", "Gyre", "Rooms", "Deform"];
+const SEG = LOOP / SHOW.length;
+const INK = "#cfe4f3", INK_DIM = "rgba(207,228,243,.55)", NEEDLE = "#15181d";
+const cv = document.getElementById("stage"), g = cv.getContext("2d");
+let BASE = null, FX = [];
+
+const wrap = t => ((t % LOOP) + LOOP) % LOOP;
+const ease = x => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
+const per = (n, t, p = 0) => Math.sin(TAU * (n * t / LOOP + p));
+const segOf = t => Math.floor(wrap(t) / SEG) % SHOW.length;
+const since = t => wrap(t) - segOf(t) * SEG;
+
+// A meter's level: fast up, slow down, from a 120 bpm pluck pattern, simulated
+// over two loops so the recording joins up.
+const BEAT = 0.5;
+function envelope(pat, shift) {
+  const R = 240, n = LOOP * R, raw = t => {
+    const b = Math.floor(t / BEAT), ph = t - b * BEAT;
+    return 0.16 + 0.66 * pat[b % pat.length] * Math.exp(-ph / 0.17) + 0.1 * Math.pow(per(1, t, shift), 2);
+  };
+  const out = new Float32Array(n); let y = 0;
+  for (let pass = 0; pass < 2; pass++) for (let i = 0; i < n; i++) {
+    const x = raw(i / R); y += (x - y) * (x > y ? 0.22 : 0.016); if (pass) out[i] = y;
+  }
+  return t => out[Math.floor(wrap(t) * R) % n];
+}
+const envA = envelope([1, .35, .7, .3, .9, .4, .62, .5], 0), envB = envelope([.8, .5, .95, .3, .7, .6, 1, .4], .31);
+
+function text(s, x, y, size, color, align = "left", font = "LCD") {
+  g.font = `${size}px ${font}, ui-monospace, monospace`; g.fillStyle = color; g.textAlign = align; g.textBaseline = "alphabetic";
+  g.fillText(s, x, y);
+}
+
+/* the pedal's screen: effect number and name, its picture, its first knobs */
+const LCD = { x: 677, y: 251, w: 182, h: 143 };
+function screen(t) {
+  const s = segOf(t), ts = since(t), f = FX[s], { x, y, w, h } = LCD;
+  g.save();
+  g.beginPath(); g.roundRect(x, y, w, h, 4); g.clip();
+  g.fillStyle = "#0a0d11"; g.fillRect(x, y, w, h);
+  const px = x + 5, py = y + 22, pw = w - 10, ph = pw / 2;
+  if (f && f.canvas.width) g.drawImage(f.canvas, px, py, pw, ph);
+  // header and knob names, in the pedal's pixel font
+  text(String(s + 1).padStart(2, "0"), x + 6, y + 15, 11, INK_DIM);
+  const name = f ? f.e.name.toUpperCase() : "", shown = name.slice(0, Math.ceil(name.length * ease(ts / 0.3)));
+  text(shown, x + 26, y + 15, 11, INK);
+  text(`${s + 1}/${TOTAL}`, x + w - 6, y + 15, 9, INK_DIM, "right");
+  g.fillStyle = "rgba(207,228,243,.25)"; g.fillRect(x + 5, y + 19, w - 10, 1);
+  if (f) f.e.params.slice(0, 3).forEach((p, i) => {
+    const cx = x + 6 + (w - 12) * (i + .5) / 3;
+    g.fillStyle = "rgba(207,228,243,.14)"; g.fillRect(cx - 27, y + h - 19, 54, 14);
+    text(p.name.toUpperCase().slice(0, 7), cx, y + h - 8, 9, INK, "center");
+  });
+  // the switch: a band of static rolling down
+  if (ts < 0.22) {
+    const k = ts / 0.22, band = y + h * k;
+    g.fillStyle = `rgba(10,13,17,${(1 - k) * .85})`; g.fillRect(x, band, w, h);
+    g.fillStyle = `rgba(207,228,243,${.45 * (1 - k)})`; g.fillRect(x, band - 2, w, 2);
+  }
+  // scanlines and a little glass
+  g.fillStyle = "rgba(0,0,0,.16)"; for (let yy = y; yy < y + h; yy += 2) g.fillRect(x, yy, w, 1);
+  const gl = g.createLinearGradient(x, y, x + w * .6, y + h);
+  gl.addColorStop(0, "rgba(255,255,255,.07)"); gl.addColorStop(.45, "rgba(255,255,255,0)");
+  g.fillStyle = gl; g.fillRect(x, y, w, h);
+  g.restore();
+  g.save(); g.globalCompositeOperation = "screen"; g.filter = "blur(10px)"; g.globalAlpha = .25;
+  if (f && f.canvas.width) g.drawImage(f.canvas, px, py, pw, ph);
+  g.restore();
+}
+
+/* the meters' needles */
+const METERS = [
+  { px: 152, py: 300, a0: 227, a1: 321, len: 92, clip: [42, 180, 228, 108], env: envA },
+  { px: 477, py: 298, a0: 221, a1: 323, len: 92, clip: [376, 180, 206, 107], env: envB }];
+function needle(m, t) {
+  const v = Math.min(1.03, m.env(t) * 0.95), a = (m.a0 + (m.a1 - m.a0) * v) * Math.PI / 180;
+  const [cx, cy, cw, ch] = m.clip;
+  g.save(); g.beginPath(); g.rect(cx, cy, cw, ch); g.clip();
+  const line = (dx, dy, col, wd) => {
+    g.strokeStyle = col; g.lineWidth = wd; g.lineCap = "round"; g.beginPath();
+    g.moveTo(m.px + dx + Math.cos(a) * 20, m.py + dy + Math.sin(a) * 20);
+    g.lineTo(m.px + dx + Math.cos(a) * m.len, m.py + dy + Math.sin(a) * m.len); g.stroke();
+  };
+  line(3, 3, "rgba(0,0,0,.18)", 2.6);
+  line(0, 0, NEEDLE, 2.2);
+  g.restore();
+}
+
+/* the scope: a turning 3:2 figure with afterglow */
+const SC = { x: 1097, y: 273, rx: 86, ry: 64 };
+function scope(t) {
+  g.save();
+  g.beginPath(); g.ellipse(SC.x, SC.y, 103, 84, 0, 0, TAU); g.clip();
+  const amp = 0.72 + 0.28 * envA(t);
+  for (let k = 5; k >= 0; k--) {
+    const ph = TAU * 2 * wrap(t - k * 0.05) / LOOP;
+    g.globalAlpha = k ? 0.12 * (1 - k / 6) : 1;
+    g.strokeStyle = "#dff2ff"; g.lineWidth = k ? 1.2 : 1.7;
+    if (!k) { g.shadowColor = "rgba(150,210,255,.9)"; g.shadowBlur = 10; }
+    g.beginPath();
+    for (let i = 0; i <= 400; i++) { const th = i / 400 * TAU; g.lineTo(SC.x + Math.sin(3 * th + ph) * SC.rx * amp, SC.y + Math.sin(2 * th) * SC.ry * amp); }
+    g.stroke();
+  }
+  g.restore();
+}
+
+/* LEDs: drawn dark when off, with a halo when on */
+function led(x, y, on) {
+  if (on < 1) { g.fillStyle = `rgba(48,16,16,${(1 - on) * .92})`; g.beginPath(); g.arc(x, y, 6.5, 0, TAU); g.fill(); }
+  if (on > 0) {
+    const r = g.createRadialGradient(x, y, 1, x, y, 22);
+    r.addColorStop(0, `rgba(255,90,70,${.35 * on})`); r.addColorStop(1, "rgba(255,90,70,0)");
+    g.fillStyle = r; g.beginPath(); g.arc(x, y, 22, 0, TAU); g.fill();
+  }
+}
+
+function frameAt(t) {
+  t = wrap(t);
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  if (BASE) g.drawImage(BASE, 0, 0);
+  screen(t);
+  METERS.forEach(m => needle(m, t));
+  scope(t);
+  const beat = Math.floor(t / BEAT);
+  led(320, 221, 0.9 + 0.1 * per(23, t));                       // PWR
+  led(1418, 197, envA(t) > 0.66 ? 1 : 0);                      // LIMIT: on the peaks
+  led(41, 527, beat % 2 === 0 ? 1 : 0);                         // ZERO: the beat
+  led(701, 582, 1);                                             // the pedal's effect LED
+}
+
+async function loadLcd() {
+  try {
+    const src = await (await fetch("../../tools/patch_editor.html")).text();
+    const m = /font-family:'LCD';[^}]*?src:url\((data:font\/woff2;base64,[^)]+)\)/.exec(src);
+    if (m) { const f = new FontFace("LCD", `url(${m[1]})`); await f.load(); document.fonts.add(f); }
+  } catch (e) { /* the mono face stands in */ }
+}
+window.heroReady = (async () => {
+  BASE = new Image(); BASE.src = "paint-base.png"; await BASE.decode();
+  const db = await (await fetch("../../tools/effects_db.json")).json();
+  await loadLcd();
+  FxVis.setMotion(true);
+  const box = document.getElementById("fx");
+  FX = SHOW.map(name => {
+    const e = db.custom.find(x => x.name === name);
+    const d = document.createElement("div"), c = document.createElement("canvas"); d.appendChild(c); box.appendChild(d);
+    const vals = [1, e.id, ...(e.params || []).map(p => p.default ?? 0)];
+    FxVis.attach(c, e, () => vals);
+    return { e, canvas: c };
+  });
+  window.frameAt = frameAt;
+  if (!window.__CAPTURE) { const loop = now => { frameAt(now / 1000); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+  return { LOOP };
+})();
+</script>
+</body>
+</html>

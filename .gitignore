@@ -87,3 +87,4 @@ docs/sprui04g.pdf
 
 # videos made by build/make_fx_sheet.py --video and make_editor_preview.py --video
 video/
+build/hero/paint-base.png
